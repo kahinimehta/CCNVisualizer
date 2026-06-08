@@ -52,6 +52,23 @@ The site is deployed from the `docs/` folder via GitHub Actions (`.github/workfl
 
 To enable Pages manually: **Settings → Pages → Build and deployment → GitHub Actions**.
 
+## Vercel
+
+This project is a **static site** in `docs/` (not Angular/React). The repo includes `vercel.json` so Vercel serves that folder directly with no build step.
+
+1. Import the GitHub repo in [Vercel](https://vercel.com)
+2. Confirm **Framework Preset** is **Other** (or let `vercel.json` override it)
+3. Deploy
+
+If a deploy fails with `ng build` exit 127, Vercel guessed the wrong framework. Either merge the `vercel.json` from this repo, or set these in the Vercel project **Settings → Build & Development**:
+
+| Setting | Value |
+|---------|--------|
+| Framework Preset | Other |
+| Build Command | *(empty)* |
+| Output Directory | `docs` |
+| Install Command | *(empty)* |
+
 ## Repository layout
 
 ```
