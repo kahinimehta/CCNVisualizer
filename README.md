@@ -2,7 +2,9 @@
 
 Interactive keyword and topic visualizations for poster and paper submissions across the [Cognitive Computational Neuroscience (CCN)](https://ccneuro.org) conference archives.
 
-**Live site:** [https://kahinimehta.github.io/ccnvisualizer/](https://kahinimehta.github.io/ccnvisualizer/)
+**Live site:** [https://kahinimehta.github.io/CCNVisualizer/](https://kahinimehta.github.io/CCNVisualizer/) · [Vercel](https://vercel.com) compatible
+
+Dashboard UI uses a card-based layout inspired by modern analytics dashboards, styled with CCN brand colors (navy, pink, blue, green).
 
 ## What it does
 
@@ -81,6 +83,9 @@ docs/                   # GitHub Pages site
 data/submissions.json   # Copy of dataset for local use
 ```
 
-## License
+## Licenses
 
-Data is sourced from publicly available CCN conference archives. Code in this repository is provided for academic exploration and visualization.
+- **Project code:** [MIT License](LICENSE)
+- **Dependencies:** [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md)
+- **In-app attributions:** [docs/licenses.html](docs/licenses.html)
+- **Data:** CCN archive metadata from publicly available conference sites; submission content belongs to respective authors.

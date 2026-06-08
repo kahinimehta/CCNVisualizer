@@ -1,3 +1,15 @@
+const CCN_COLORS = {
+  navy: "#1a3b5d",
+  pink: "#f4c7c3",
+  blue: "#c5e0f3",
+  green: "#c8e6c9",
+  white: "#f7fafc",
+  muted: "#8fa8c4",
+  card: "#162d47",
+};
+
+const CHART_PALETTE = [CCN_COLORS.pink, CCN_COLORS.blue, CCN_COLORS.green, "#9ecae1", "#fdae9f", "#a8ddb5"];
+
 const state = {
   data: null,
   selectedYear: "all",
@@ -30,8 +42,7 @@ function filteredSubmissions() {
       item.authors.toLowerCase().includes(search) ||
       item.keywords.some((kw) => kw.includes(search)) ||
       (item.topic_area || "").toLowerCase().includes(search);
-    const keywordOk =
-      !state.selectedKeyword || item.keywords.includes(state.selectedKeyword);
+    const keywordOk = !state.selectedKeyword || item.keywords.includes(state.selectedKeyword);
     return yearOk && searchOk && keywordOk;
   });
 }
@@ -39,8 +50,7 @@ function filteredSubmissions() {
 function keywordCounts(submissions) {
   const counts = new Map();
   submissions.forEach((item) => {
-    const unique = [...new Set(item.keywords)];
-    unique.forEach((kw) => counts.set(kw, (counts.get(kw) || 0) + 1));
+    [...new Set(item.keywords)].forEach((kw) => counts.set(kw, (counts.get(kw) || 0) + 1));
   });
   return [...counts.entries()]
     .map(([text, count]) => ({ text, count }))
@@ -57,7 +67,7 @@ function topicCounts(submissions) {
   return [...counts.entries()]
     .map(([text, count]) => ({ text, count }))
     .sort((a, b) => b.count - a.count)
-    .slice(0, 12);
+    .slice(0, 8);
 }
 
 function cooccurrenceForSelection(submissions) {
@@ -89,24 +99,28 @@ function cooccurrenceForSelection(submissions) {
     nodeSet.add(l.target);
   });
 
-  const nodes = [...nodeSet].map((id) => ({ id }));
-  return { nodes, links };
+  return { nodes: [...nodeSet].map((id) => ({ id })), links };
 }
 
-function renderStatsBar() {
+function renderKpis(filtered) {
   const { metadata, stats } = state.data;
-  const container = d3.select("#stats-bar");
   const cards = [
-    { label: "Total submissions", value: metadata.total_count },
-    { label: "Years covered", value: metadata.years.length },
-    { label: "Unique keywords", value: stats.overall_top.length },
-    { label: "Last updated", value: new Date(metadata.scraped_at).toLocaleDateString() },
+    { label: "Total submissions", value: metadata.total_count.toLocaleString(), icon: "📊", tone: "blue" },
+    { label: "Matching filter", value: filtered.length.toLocaleString(), icon: "🔍", tone: "pink" },
+    { label: "Unique keywords", value: stats.overall_top.length.toLocaleString(), icon: "🏷", tone: "green" },
+    { label: "Years covered", value: String(metadata.years.length), icon: "📅", tone: "navy" },
   ];
 
-  const card = container.selectAll(".stat-card").data(cards).join("div").attr("class", "stat-card");
+  const row = d3.select("#kpi-row");
+  const card = row.selectAll(".kpi-card").data(cards).join("div").attr("class", "kpi-card");
   card.selectAll("*").remove();
-  card.append("div").attr("class", "label").text((d) => d.label);
-  card.append("div").attr("class", "value").text((d) => d.value);
+  card
+    .append("div")
+    .attr("class", (d) => `kpi-icon ${d.tone}`)
+    .text((d) => d.icon);
+  const body = card.append("div");
+  body.append("div").attr("class", "label").text((d) => d.label);
+  body.append("div").attr("class", "value").text((d) => d.value);
 }
 
 function renderYearControls() {
@@ -128,7 +142,7 @@ function renderYearControls() {
     .data(chipData)
     .join("button")
     .attr("class", (d) => `year-chip${d === state.selectedYear ? " active" : ""}`)
-    .text((d) => (d === "all" ? "All" : d))
+    .text((d) => (d === "all" ? "All years" : d))
     .on("click", (_, d) => {
       state.selectedYear = d;
       d3.select("#year-select").property("value", d);
@@ -154,25 +168,26 @@ function renderWordCloud(counts) {
   container.selectAll("*").remove();
 
   const width = container.node().clientWidth || 800;
-  const height = 360;
-
+  const height = 300;
   const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`);
-  const top = counts.slice(0, 80);
+  const top = counts.slice(0, 70);
+
   if (!top.length) {
-    svg.append("text").attr("x", 20).attr("y", 40).attr("fill", "#9aa8c7").text("No keywords for current filter.");
+    svg.append("text").attr("x", 20).attr("y", 40).attr("fill", CCN_COLORS.muted).text("No keywords for current filter.");
     return;
   }
 
   const max = d3.max(top, (d) => d.count) || 1;
-  const fontSize = (d) => 12 + (d.count / max) * 34;
+  const fontSize = (d) => 12 + (d.count / max) * 32;
+  const colorScale = d3.scaleOrdinal(CHART_PALETTE);
 
-  const layout = d3.layout
+  d3.layout
     .cloud()
     .size([width, height])
     .words(top.map((d) => ({ text: d.text, size: fontSize(d), count: d.count })))
-    .padding(4)
+    .padding(5)
     .rotate(() => (~~(Math.random() * 2) * 90))
-    .font("Inter")
+    .font("Open Sans")
     .fontSize((d) => d.size)
     .on("end", (words) => {
       const g = svg.append("g").attr("transform", `translate(${width / 2},${height / 2})`);
@@ -180,9 +195,9 @@ function renderWordCloud(counts) {
         .data(words)
         .join("text")
         .style("font-size", (d) => `${d.size}px`)
-        .style("font-family", "Inter")
+        .style("font-family", "Open Sans")
         .style("fill", (d) =>
-          d.text === state.selectedKeyword ? "#7c5cff" : d3.interpolateTurbo(d.count / max)
+          d.text === state.selectedKeyword ? CCN_COLORS.pink : colorScale(d.text)
         )
         .style("cursor", "pointer")
         .attr("text-anchor", "middle")
@@ -195,9 +210,8 @@ function renderWordCloud(counts) {
         })
         .on("mousemove", (event, d) => showTooltip(`<strong>${d.text}</strong><br/>${d.count} submissions`, event))
         .on("mouseleave", hideTooltip);
-    });
-
-  layout.start();
+    })
+    .start();
 }
 
 function renderKeywordBars(counts) {
@@ -205,23 +219,19 @@ function renderKeywordBars(counts) {
   container.selectAll("*").remove();
 
   const width = container.node().clientWidth || 360;
-  const height = 420;
-  const margin = { top: 10, right: 20, bottom: 10, left: 130 };
-  const data = counts.slice(0, 20);
+  const height = 340;
+  const margin = { top: 8, right: 52, bottom: 8, left: 120 };
+  const data = counts.slice(0, 12);
 
-  const svg = container
-    .append("svg")
-    .attr("viewBox", `0 0 ${width} ${height}`);
+  const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`);
+  const innerW = width - margin.left - margin.right;
 
-  const x = d3
-    .scaleLinear()
-    .domain([0, d3.max(data, (d) => d.count) || 1])
-    .range([0, width - margin.left - margin.right]);
+  const x = d3.scaleLinear().domain([0, d3.max(data, (d) => d.count) || 1]).range([0, innerW]);
   const y = d3
     .scaleBand()
     .domain(data.map((d) => d.text))
     .range([0, height - margin.top - margin.bottom])
-    .padding(0.15);
+    .padding(0.18);
 
   const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -232,7 +242,10 @@ function renderKeywordBars(counts) {
     .attr("y", (d) => y(d.text))
     .attr("height", y.bandwidth())
     .attr("width", (d) => x(d.count))
-    .attr("fill", (d) => (d.text === state.selectedKeyword ? "#7c5cff" : "#5b8def"))
+    .attr("fill", (d, i) =>
+      d.text === state.selectedKeyword ? CCN_COLORS.pink : CHART_PALETTE[i % CHART_PALETTE.length]
+    )
+    .attr("rx", 4)
     .style("cursor", "pointer")
     .on("click", (_, d) => {
       state.selectedKeyword = state.selectedKeyword === d.text ? "" : d.text;
@@ -250,9 +263,20 @@ function renderKeywordBars(counts) {
     .attr("y", (d) => y(d.text) + y.bandwidth() / 2)
     .attr("dy", "0.35em")
     .attr("text-anchor", "end")
-    .attr("fill", "#c7d2ea")
-    .style("font-size", "11px")
-    .text((d) => (d.text.length > 18 ? `${d.text.slice(0, 18)}…` : d.text));
+    .attr("fill", CCN_COLORS.muted)
+    .style("font-size", "10px")
+    .text((d) => (d.text.length > 16 ? `${d.text.slice(0, 16)}…` : d.text));
+
+  g.selectAll("text.value")
+    .data(data)
+    .join("text")
+    .attr("class", "value")
+    .attr("x", (d) => x(d.count) + 6)
+    .attr("y", (d) => y(d.text) + y.bandwidth() / 2)
+    .attr("dy", "0.35em")
+    .attr("fill", CCN_COLORS.white)
+    .style("font-size", "10px")
+    .text((d) => d.count);
 }
 
 function renderYearChart() {
@@ -260,35 +284,48 @@ function renderYearChart() {
   container.selectAll("*").remove();
 
   const counts = Object.entries(state.data.stats.counts_by_year)
-    .map(([year, count]) => ({ year, count }))
-    .sort((a, b) => +a.year - +b.year);
+    .map(([year, count]) => ({ year: +year, count }))
+    .sort((a, b) => a.year - b.year);
 
-  const width = container.node().clientWidth || 500;
+  const width = container.node().clientWidth || 640;
   const height = 300;
-  const margin = { top: 20, right: 20, bottom: 40, left: 40 };
+  const margin = { top: 24, right: 24, bottom: 36, left: 44 };
   const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`);
 
   const x = d3
-    .scaleBand()
+    .scalePoint()
     .domain(counts.map((d) => d.year))
-    .range([margin.left, width - margin.right])
-    .padding(0.2);
+    .range([margin.left, width - margin.right]);
   const y = d3
     .scaleLinear()
     .domain([0, d3.max(counts, (d) => d.count) || 1])
     .nice()
     .range([height - margin.bottom, margin.top]);
 
+  const line = d3
+    .line()
+    .x((d) => x(d.year))
+    .y((d) => y(d.count))
+    .curve(d3.curveMonotoneX);
+
   const g = svg.append("g");
 
-  g.selectAll("rect")
+  g.append("path")
+    .datum(counts)
+    .attr("fill", "none")
+    .attr("stroke", CCN_COLORS.blue)
+    .attr("stroke-width", 3)
+    .attr("d", line);
+
+  g.selectAll("circle")
     .data(counts)
-    .join("rect")
-    .attr("x", (d) => x(d.year))
-    .attr("y", (d) => y(d.count))
-    .attr("width", x.bandwidth())
-    .attr("height", (d) => y(0) - y(d.count))
-    .attr("fill", (d) => (String(d.year) === state.selectedYear ? "#7c5cff" : "#5b8def"))
+    .join("circle")
+    .attr("cx", (d) => x(d.year))
+    .attr("cy", (d) => y(d.count))
+    .attr("r", (d) => (String(d.year) === state.selectedYear ? 7 : 5))
+    .attr("fill", (d) => (String(d.year) === state.selectedYear ? CCN_COLORS.pink : CCN_COLORS.green))
+    .attr("stroke", CCN_COLORS.navy)
+    .attr("stroke-width", 2)
     .style("cursor", "pointer")
     .on("click", (_, d) => {
       state.selectedYear = String(d.year);
@@ -300,15 +337,15 @@ function renderYearChart() {
 
   g.append("g")
     .attr("transform", `translate(0,${height - margin.bottom})`)
-    .call(d3.axisBottom(x))
-    .selectAll("text")
-    .attr("fill", "#9aa8c7");
+    .call(d3.axisBottom(x).tickFormat(d3.format("d")))
+    .call((sel) => sel.selectAll("text").attr("fill", CCN_COLORS.muted))
+    .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
 
   g.append("g")
     .attr("transform", `translate(${margin.left},0)`)
     .call(d3.axisLeft(y).ticks(5))
-    .selectAll("text")
-    .attr("fill", "#9aa8c7");
+    .call((sel) => sel.selectAll("text").attr("fill", CCN_COLORS.muted))
+    .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
 }
 
 function renderTopicChart(submissions) {
@@ -316,24 +353,26 @@ function renderTopicChart(submissions) {
   container.selectAll("*").remove();
 
   const data = topicCounts(submissions);
-  const width = container.node().clientWidth || 500;
-  const height = 300;
-  const radius = Math.min(width, height) / 2 - 10;
+  const width = container.node().clientWidth || 320;
+  const height = 280;
+  const radius = Math.min(width, height) / 2 - 16;
 
   if (!data.length) {
-    container.append("p").style("color", "#9aa8c7").text("No topic areas in current filter.");
+    container.append("p").style("color", CCN_COLORS.muted).style("font-size", "0.85rem").text("No topic areas in filter.");
     return;
   }
 
+  const total = d3.sum(data, (d) => d.count);
   const svg = container
     .append("svg")
     .attr("viewBox", `0 0 ${width} ${height}`)
     .append("g")
     .attr("transform", `translate(${width / 2},${height / 2})`);
 
-  const color = d3.scaleOrdinal(d3.schemeTableau10);
-  const pie = d3.pie().value((d) => d.count);
-  const arc = d3.arc().innerRadius(radius * 0.45).outerRadius(radius);
+  const color = d3.scaleOrdinal(CHART_PALETTE);
+  const pie = d3.pie().value((d) => d.count).sort(null);
+  const arc = d3.arc().innerRadius(radius * 0.52).outerRadius(radius);
+  const labelArc = d3.arc().innerRadius(radius * 0.72).outerRadius(radius * 0.72);
 
   svg
     .selectAll("path")
@@ -341,22 +380,81 @@ function renderTopicChart(submissions) {
     .join("path")
     .attr("d", arc)
     .attr("fill", (_, i) => color(i))
-    .attr("stroke", "#141b2f")
+    .attr("stroke", CCN_COLORS.card)
+    .attr("stroke-width", 2)
     .style("cursor", "pointer")
-    .on("mousemove", (event, d) =>
-      showTooltip(`<strong>${d.data.text}</strong><br/>${d.data.count} submissions`, event)
-    )
+    .on("mousemove", (event, d) => {
+      const pct = ((d.data.count / total) * 100).toFixed(1);
+      showTooltip(`<strong>${d.data.text}</strong><br/>${d.data.count} (${pct}%)`, event);
+    })
     .on("mouseleave", hideTooltip);
 
   svg
-    .selectAll("text")
+    .selectAll("text.slice-label")
     .data(pie(data))
     .join("text")
-    .attr("transform", (d) => `translate(${arc.centroid(d)})`)
+    .attr("class", "slice-label")
+    .attr("transform", (d) => `translate(${labelArc.centroid(d)})`)
     .attr("text-anchor", "middle")
-    .attr("fill", "#fff")
-    .style("font-size", "10px")
-    .text((d) => (d.data.count > 8 ? d.data.text.split(" ")[0] : ""));
+    .attr("fill", CCN_COLORS.navy)
+    .style("font-size", "9px")
+    .style("font-weight", "600")
+    .text((d) => (d.data.count / total > 0.08 ? `${Math.round((d.data.count / total) * 100)}%` : ""));
+}
+
+function renderGauge(filtered) {
+  const container = d3.select("#gauge-chart");
+  container.selectAll("*").remove();
+
+  const total = state.data.metadata.total_count;
+  const value = filtered.length;
+  const pct = total ? value / total : 0;
+
+  const width = container.node().clientWidth || 320;
+  const height = 260;
+  const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`);
+
+  const cx = width / 2;
+  const cy = height * 0.62;
+  const radius = Math.min(width, height) * 0.34;
+
+  const arc = d3
+    .arc()
+    .innerRadius(radius * 0.68)
+    .outerRadius(radius)
+    .startAngle(-Math.PI / 2)
+    .cornerRadius(6);
+
+  svg
+    .append("path")
+    .attr("transform", `translate(${cx},${cy})`)
+    .attr("d", arc({ endAngle: Math.PI / 2 }))
+    .attr("fill", "rgba(197,224,243,0.12)");
+
+  svg
+    .append("path")
+    .attr("transform", `translate(${cx},${cy})`)
+    .attr("d", arc({ endAngle: -Math.PI / 2 + Math.PI * pct }))
+    .attr("fill", CCN_COLORS.pink);
+
+  svg
+    .append("text")
+    .attr("x", cx)
+    .attr("y", cy - 4)
+    .attr("text-anchor", "middle")
+    .attr("fill", CCN_COLORS.white)
+    .style("font-size", "28px")
+    .style("font-weight", "700")
+    .text(`${Math.round(pct * 100)}%`);
+
+  svg
+    .append("text")
+    .attr("x", cx)
+    .attr("y", cy + 20)
+    .attr("text-anchor", "middle")
+    .attr("fill", CCN_COLORS.muted)
+    .style("font-size", "12px")
+    .text(`${value.toLocaleString()} of ${total.toLocaleString()}`);
 }
 
 function renderNetwork(submissions) {
@@ -365,24 +463,19 @@ function renderNetwork(submissions) {
 
   const { nodes, links } = cooccurrenceForSelection(submissions);
   const width = container.node().clientWidth || 1100;
-  const height = 420;
+  const height = 360;
 
   if (!nodes.length) {
-    container.append("p").style("color", "#9aa8c7").text("Not enough co-occurrence data for current filter.");
+    container.append("p").style("color", CCN_COLORS.muted).text("Not enough co-occurrence data for current filter.");
     return;
   }
 
   const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`);
+  const color = d3.scaleOrdinal(CHART_PALETTE);
 
   const simulation = d3
     .forceSimulation(nodes)
-    .force(
-      "link",
-      d3
-        .forceLink(links)
-        .id((d) => d.id)
-        .distance(90)
-    )
+    .force("link", d3.forceLink(links).id((d) => d.id).distance(90))
     .force("charge", d3.forceManyBody().strength(-180))
     .force("center", d3.forceCenter(width / 2, height / 2))
     .force("collision", d3.forceCollide(28));
@@ -392,8 +485,7 @@ function renderNetwork(submissions) {
     .selectAll("line")
     .data(links)
     .join("line")
-    .attr("stroke", "#4d5f90")
-    .attr("stroke-opacity", 0.7)
+    .attr("stroke", "rgba(197,224,243,0.35)")
     .attr("stroke-width", (d) => Math.sqrt(d.count));
 
   const node = svg
@@ -429,14 +521,14 @@ function renderNetwork(submissions) {
   node
     .append("circle")
     .attr("r", 12)
-    .attr("fill", (d) => (d.id === state.selectedKeyword ? "#7c5cff" : "#5b8def"));
+    .attr("fill", (d) => (d.id === state.selectedKeyword ? CCN_COLORS.pink : color(d.id)));
 
   node
     .append("text")
     .text((d) => (d.id.length > 14 ? `${d.id.slice(0, 14)}…` : d.id))
     .attr("x", 14)
     .attr("y", 4)
-    .attr("fill", "#d7e0f5")
+    .attr("fill", CCN_COLORS.white)
     .style("font-size", "10px");
 
   simulation.on("tick", () => {
@@ -454,7 +546,6 @@ function renderPaperList(submissions) {
   d3.select("#results-count").text(`${submissions.length} matching submissions`);
 
   const items = list.selectAll(".paper-item").data(submissions.slice(0, 80)).join("div").attr("class", "paper-item");
-
   items.selectAll("*").remove();
 
   items
@@ -468,7 +559,9 @@ function renderPaperList(submissions) {
   items
     .append("div")
     .attr("class", "meta")
-    .text((d) => `${d.year}${d.poster_number ? ` · Poster ${d.poster_number}` : ""}${d.authors ? ` · ${d.authors}` : ""}${d.topic_area ? ` · ${d.topic_area}` : ""}`);
+    .text((d) =>
+      `${d.year}${d.poster_number ? ` · Poster ${d.poster_number}` : ""}${d.authors ? ` · ${d.authors}` : ""}${d.topic_area ? ` · ${d.topic_area}` : ""}`
+    );
 
   items.each(function renderTags(d) {
     const tags = d3.select(this).append("div").attr("class", "keyword-tags");
@@ -489,11 +582,14 @@ function renderPaperList(submissions) {
 function renderAll() {
   const submissions = filteredSubmissions();
   const counts = keywordCounts(submissions);
+
+  renderKpis(submissions);
   renderKeywordSelect(counts);
-  renderWordCloud(counts);
-  renderKeywordBars(counts);
   renderYearChart();
+  renderKeywordBars(counts);
   renderTopicChart(submissions);
+  renderGauge(submissions);
+  renderWordCloud(counts);
   renderNetwork(submissions);
   renderPaperList(submissions);
 
@@ -506,7 +602,6 @@ async function init() {
   const response = await fetch("data/submissions.json");
   state.data = await response.json();
 
-  renderStatsBar();
   renderYearControls();
 
   d3.select("#year-select").on("change", (event) => {
@@ -529,5 +624,5 @@ async function init() {
 
 init().catch((error) => {
   console.error(error);
-  d3.select("main").append("p").style("color", "#ff8f8f").text(`Failed to load data: ${error.message}`);
+  d3.select(".dashboard-grid").append("p").style("color", "#f4c7c3").text(`Failed to load data: ${error.message}`);
 });
