@@ -27,7 +27,9 @@ jobs:
       - name: Scrape CCN archives
         run: |
           if [ -n "${{ inputs.years }}" ]; then
-            python scripts/scrape_ccn.py --years ${{ inputs.years }}
+            YEAR_ARGS="${{ inputs.years }}"
+            YEAR_ARGS="${YEAR_ARGS//,/ }"
+            python scripts/scrape_ccn.py --years $YEAR_ARGS
           else
             python scripts/scrape_ccn.py
           fi

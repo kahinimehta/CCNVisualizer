@@ -133,10 +133,10 @@ function cooccurrenceForSelection(submissions) {
 function renderKpis(filtered) {
   const { metadata, stats } = state.data;
   const cards = [
-    { label: "Total submissions", value: metadata.total_count.toLocaleString(), icon: "📊", tone: "blue" },
-    { label: "Matching filter", value: filtered.length.toLocaleString(), icon: "🔍", tone: "pink" },
-    { label: "Unique keywords", value: stats.overall_top.length.toLocaleString(), icon: "🏷", tone: "green" },
-    { label: "Years covered", value: String(metadata.years.length), icon: "📅", tone: "navy" },
+    { label: "Total submissions", value: metadata.total_count.toLocaleString(), icon: "submissions", tone: "blue" },
+    { label: "Matching filter", value: filtered.length.toLocaleString(), icon: "filter", tone: "pink" },
+    { label: "Unique keywords", value: stats.overall_top.length.toLocaleString(), icon: "keywords", tone: "green" },
+    { label: "Years covered", value: String(metadata.years.length), icon: "years", tone: "navy" },
   ];
 
   const row = d3.select("#kpi-row");
@@ -145,7 +145,7 @@ function renderKpis(filtered) {
   card
     .append("div")
     .attr("class", (d) => `kpi-icon ${d.tone}`)
-    .text((d) => d.icon);
+    .html((d) => KPI_ICONS[d.icon]);
   const body = card.append("div");
   body.append("div").attr("class", "label").text((d) => d.label);
   body.append("div").attr("class", "value").text((d) => d.value);
