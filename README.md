@@ -46,13 +46,16 @@ Open [http://localhost:8080](http://localhost:8080).
 
 ## GitHub Pages
 
-The site is deployed from the `docs/` folder via GitHub Actions (`.github/workflows/scrape-and-deploy.yml`). The workflow:
+Pushes to `main` deploy the committed `docs/` folder as-is (no scraping). To enable Pages: **Settings → Pages → Build and deployment → GitHub Actions**.
 
-1. Scrapes the latest CCN archive data
-2. Writes `docs/data/submissions.json`
-3. Deploys to GitHub Pages
+### Refresh data (manual only)
 
-To enable Pages manually: **Settings → Pages → Build and deployment → GitHub Actions**.
+Scraping does **not** run on every push. To update submission data:
+
+1. **Locally:** `python scripts/scrape_ccn.py` then commit `data/submissions.json` and `docs/data/submissions.json`
+2. **GitHub Actions:** Run the **Scrape CCN Data** workflow (`Actions → Scrape CCN Data → Run workflow`). This commits updated JSON to `main`, which triggers a redeploy.
+
+To deploy without scraping, run **Deploy GitHub Pages** with the scrape option unchecked, or just push UI-only changes to `main`.
 
 ## Vercel
 

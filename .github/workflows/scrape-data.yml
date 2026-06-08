@@ -1,0 +1,45 @@
+name: Scrape CCN Data
+
+on:
+  workflow_dispatch:
+    inputs:
+      years:
+        description: "Years to scrape (comma-separated, e.g. 2024,2025). Leave empty for all."
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Scrape CCN archives
+        run: |
+          if [ -n "${{ inputs.years }}" ]; then
+            python scripts/scrape_ccn.py --years ${{ inputs.years }}
+          else
+            python scripts/scrape_ccn.py
+          fi
+
+      - name: Commit updated data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/submissions.json docs/data/submissions.json
+          if git diff --staged --quiet; then
+            echo "No data changes to commit."
+          else
+            git commit -m "Update CCN submission data [manual scrape]"
+            git push
+          fi
