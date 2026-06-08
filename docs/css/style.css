@@ -235,6 +235,21 @@ a {
 .card-wide { grid-column: span 8; }
 .card-full { grid-column: span 12; }
 
+#dashboard-top,
+#word-cloud-section,
+#submissions-panel {
+  scroll-margin-top: 1.5rem;
+}
+
+#year-chart,
+#keyword-bars,
+#topic-chart,
+#gauge-chart,
+#word-cloud,
+#network-chart {
+  min-height: 280px;
+}
+
 .card-header {
   margin-bottom: 0.75rem;
 }

@@ -17,9 +17,19 @@ const state = {
   selectedKeyword: "",
 };
 
-const tooltip = d3.select("#tooltip");
+let tooltip = null;
+
+function ensureD3() {
+  if (typeof d3 === "undefined") {
+    throw new Error("D3.js failed to load. Check your network connection or ad blocker.");
+  }
+  if (!tooltip) {
+    tooltip = d3.select("#tooltip");
+  }
+}
 
 function showTooltip(html, event) {
+  if (!tooltip) return;
   tooltip
     .style("opacity", 1)
     .html(html)
@@ -28,7 +38,14 @@ function showTooltip(html, event) {
 }
 
 function hideTooltip() {
+  if (!tooltip) return;
   tooltip.style("opacity", 0);
+}
+
+function showError(message) {
+  const grid = document.querySelector(".dashboard-grid");
+  if (!grid) return;
+  grid.innerHTML = `<section class="card card-full"><p style="color:#f4c7c3;margin:0;">${message}</p></section>`;
 }
 
 function filteredSubmissions() {
@@ -174,6 +191,16 @@ function renderWordCloud(counts) {
 
   if (!top.length) {
     svg.append("text").attr("x", 20).attr("y", 40).attr("fill", CCN_COLORS.muted).text("No keywords for current filter.");
+    return;
+  }
+
+  if (typeof d3.layout === "undefined" || typeof d3.layout.cloud !== "function") {
+    svg
+      .append("text")
+      .attr("x", 20)
+      .attr("y", 40)
+      .attr("fill", CCN_COLORS.muted)
+      .text("Keyword cloud unavailable (d3-cloud failed to load).");
     return;
   }
 
@@ -598,8 +625,24 @@ function renderAll() {
     .classed("active", (d) => d === state.selectedYear);
 }
 
+function setupSidebarNav() {
+  const links = document.querySelectorAll(".sidebar-nav .nav-btn[href^='#']");
+  links.forEach((link) => {
+    link.addEventListener("click", () => {
+      links.forEach((item) => item.classList.remove("active"));
+      link.classList.add("active");
+    });
+  });
+}
+
 async function init() {
+  ensureD3();
+  setupSidebarNav();
+
   const response = await fetch("data/submissions.json");
+  if (!response.ok) {
+    throw new Error(`Could not load data/submissions.json (${response.status})`);
+  }
   state.data = await response.json();
 
   renderYearControls();
@@ -622,7 +665,13 @@ async function init() {
   renderAll();
 }
 
-init().catch((error) => {
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => init().catch(handleInitError));
+} else {
+  init().catch(handleInitError);
+}
+
+function handleInitError(error) {
   console.error(error);
-  d3.select(".dashboard-grid").append("p").style("color", "#f4c7c3").text(`Failed to load data: ${error.message}`);
-});
+  showError(`Failed to load dashboard: ${error.message}`);
+}

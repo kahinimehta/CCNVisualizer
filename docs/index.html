@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js" integrity="sha256-AjqXJ7CCSr6oneuxgyi37SyWWepi1Ecu5tEcWC8wQ7U=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/d3-cloud@1.2.7/build/d3.layout.cloud.min.js"></script>
 </head>
 <body>
@@ -22,16 +22,16 @@
         </svg>
       </div>
       <nav class="sidebar-nav">
-        <button class="nav-btn active" title="Dashboard" aria-label="Dashboard">▦</button>
-        <button class="nav-btn" title="Keywords" aria-label="Keywords" onclick="document.getElementById('word-cloud').scrollIntoView({behavior:'smooth'})">☁</button>
-        <button class="nav-btn" title="Submissions" aria-label="Submissions" onclick="document.getElementById('paper-list').scrollIntoView({behavior:'smooth'})">📄</button>
-        <a class="nav-btn" href="https://ccneuro.org" target="_blank" rel="noopener" title="CCN Archive" aria-label="CCN Archive">↗</a>
+        <a class="nav-btn active" href="#dashboard-top" title="Dashboard" aria-label="Dashboard">▦</a>
+        <a class="nav-btn" href="#word-cloud-section" title="Keywords" aria-label="Keywords">☁</a>
+        <a class="nav-btn" href="#submissions-panel" title="Submissions" aria-label="Submissions">📄</a>
+        <a class="nav-btn" href="https://ccneuro.org" target="_blank" rel="noopener noreferrer" title="CCN Archive" aria-label="CCN Archive">↗</a>
         <a class="nav-btn" href="licenses.html" title="Licenses" aria-label="Licenses">ⓘ</a>
       </nav>
     </aside>
 
     <div class="main-area">
-      <header class="topbar">
+      <header class="topbar" id="dashboard-top">
         <div class="brand">
           <svg class="brand-mark" viewBox="0 0 48 48" width="40" height="40" aria-hidden="true">
             <circle cx="20" cy="24" r="14" fill="#f4c7c3" opacity="0.95"/>
@@ -100,7 +100,7 @@
           <div id="gauge-chart"></div>
         </section>
 
-        <section class="card card-wide">
+        <section class="card card-wide" id="word-cloud-section">
           <div class="card-header">
             <h2>Keyword cloud</h2>
             <p class="card-sub">Click a keyword to filter · size = frequency</p>
