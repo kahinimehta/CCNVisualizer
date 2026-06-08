@@ -10,6 +10,17 @@ const CCN_COLORS = {
 
 const CHART_PALETTE = [CCN_COLORS.pink, CCN_COLORS.blue, CCN_COLORS.green, "#9ecae1", "#fdae9f", "#a8ddb5"];
 
+const KPI_ICONS = {
+  submissions:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 17V9"/><path d="M12 17V7"/><path d="M16 17v-5"/></svg>',
+  filter:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4-4"/><path d="M8 11h6"/></svg>',
+  keywords:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l-5 5v4l4 4h4l5-5"/><path d="M14 7l3 3"/><circle cx="9.5" cy="9.5" r="1.5"/></svg>',
+  years:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M4 10h16"/><path d="M8 14h3"/><path d="M13 14h3"/></svg>',
+};
+
 const state = {
   data: null,
   selectedYear: "all",

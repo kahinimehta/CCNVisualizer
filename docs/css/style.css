@@ -164,6 +164,7 @@ a {
 }
 
 .brand-logo {
+  width: 7.5rem;
   flex-shrink: 0;
 }
 
@@ -238,8 +239,17 @@ a {
   border-radius: 12px;
   display: grid;
   place-items: center;
-  font-size: 1.35rem;
   flex-shrink: 0;
+}
+
+.kpi-icon svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .kpi-icon.pink { background: rgba(244, 199, 195, 0.2); color: var(--ccn-pink); }
