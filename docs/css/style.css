@@ -235,6 +235,33 @@ a {
 .card-wide { grid-column: span 8; }
 .card-full { grid-column: span 12; }
 
+.dashboard-center {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(280px, 400px));
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.dashboard-center .card {
+  grid-column: auto;
+}
+
+.dashboard-center .card-center-wide {
+  grid-column: 1 / -1;
+}
+
+#topic-chart,
+#gauge-chart,
+#word-cloud {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 #dashboard-top,
 #word-cloud-section,
 #submissions-panel {
@@ -360,6 +387,11 @@ svg {
   .card-wide,
   .card-full {
     grid-column: span 12;
+  }
+
+  .dashboard-center {
+    grid-template-columns: 1fr;
+    max-width: 640px;
   }
 }
 
