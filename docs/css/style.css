@@ -90,10 +90,16 @@ a {
   transition: opacity 0.2s ease;
 }
 
-.sidebar-logo svg {
-  width: 40px;
-  height: 40px;
+.ccn-logo {
+  display: block;
+  height: auto;
+  max-width: 100%;
 }
+
+.sidebar-logo .ccn-logo {
+  width: 8.25rem;
+}
+
 
 .sidebar.collapsed .sidebar-logo {
   opacity: 0;
@@ -157,9 +163,7 @@ a {
   gap: 1.1rem;
 }
 
-.brand-mark {
-  width: 88px;
-  height: 88px;
+.brand-logo {
   flex-shrink: 0;
 }
 
