@@ -95,7 +95,13 @@ a {
 .brand {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
+  gap: 1.1rem;
+}
+
+.brand-mark {
+  width: 88px;
+  height: 88px;
+  flex-shrink: 0;
 }
 
 .brand h1 {
