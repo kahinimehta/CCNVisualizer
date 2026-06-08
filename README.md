@@ -1,4 +1,4 @@
-# CCN Visualizer
+# Submission Visualizer
 
 Interactive keyword and topic visualizations for poster and paper submissions across the [Cognitive Computational Neuroscience (CCN)](https://ccneuro.org) conference archives.
 
