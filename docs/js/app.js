@@ -625,19 +625,8 @@ function renderAll() {
     .classed("active", (d) => d === state.selectedYear);
 }
 
-function setupSidebarNav() {
-  const links = document.querySelectorAll(".sidebar-nav .nav-btn[href^='#']");
-  links.forEach((link) => {
-    link.addEventListener("click", () => {
-      links.forEach((item) => item.classList.remove("active"));
-      link.classList.add("active");
-    });
-  });
-}
-
 async function init() {
   ensureD3();
-  setupSidebarNav();
 
   const response = await fetch("data/submissions.json");
   if (!response.ok) {

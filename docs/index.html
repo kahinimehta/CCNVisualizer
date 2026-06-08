@@ -13,20 +13,21 @@
 </head>
 <body>
   <div class="app-shell">
-    <aside class="sidebar" aria-label="Navigation">
+    <aside class="sidebar" id="sidebar" aria-label="Navigation">
+      <button type="button" class="sidebar-toggle" id="sidebar-toggle" aria-expanded="true" aria-controls="sidebar" aria-label="Toggle menu">
+        <span class="toggle-icon" aria-hidden="true">‹</span>
+      </button>
       <div class="sidebar-logo" aria-hidden="true">
-        <svg viewBox="0 0 48 48" width="36" height="36">
+        <svg viewBox="0 0 48 48">
           <circle cx="20" cy="24" r="14" fill="#f4c7c3" opacity="0.9"/>
           <circle cx="28" cy="24" r="14" fill="#c5e0f3" opacity="0.9"/>
           <circle cx="24" cy="18" r="14" fill="#c8e6c9" opacity="0.9"/>
         </svg>
       </div>
       <nav class="sidebar-nav">
-        <a class="nav-btn active" href="#dashboard-top" title="Dashboard" aria-label="Dashboard">▦</a>
-        <a class="nav-btn" href="#word-cloud-section" title="Keywords" aria-label="Keywords">☁</a>
-        <a class="nav-btn" href="#submissions-panel" title="Submissions" aria-label="Submissions">📄</a>
-        <a class="nav-btn" href="https://ccneuro.org" target="_blank" rel="noopener noreferrer" title="CCN Archive" aria-label="CCN Archive">↗</a>
-        <a class="nav-btn" href="licenses.html" title="Licenses" aria-label="Licenses">ⓘ</a>
+        <a class="nav-link active" href="index.html"><span class="nav-label">Visualizer</span></a>
+        <a class="nav-link" href="https://ccneuro.org" target="_blank" rel="noopener noreferrer"><span class="nav-label">CCN page</span></a>
+        <a class="nav-link" href="licenses.html"><span class="nav-label">Licenses</span></a>
       </nav>
     </aside>
 
@@ -138,6 +139,7 @@
   </div>
 
   <div class="tooltip" id="tooltip"></div>
+  <script src="js/sidebar.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

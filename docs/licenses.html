@@ -7,66 +7,88 @@
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
   <style>
-    .license-page { max-width: 760px; margin: 2rem auto; padding: 0 1.5rem 3rem; }
+    .license-page { max-width: 760px; margin: 0 auto; }
     .license-page h1 { color: var(--ccn-white); margin-bottom: 0.5rem; }
     .license-page h2 { color: var(--ccn-blue); font-size: 1rem; margin-top: 1.5rem; }
     .license-page p, .license-page li { color: var(--muted); line-height: 1.6; font-size: 0.9rem; }
     .license-page a { color: var(--ccn-blue); }
     .license-card { background: var(--ccn-navy-card); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; margin-top: 1rem; }
-    .back-link { display: inline-block; margin-bottom: 1rem; color: var(--ccn-pink); text-decoration: none; }
   </style>
 </head>
 <body>
-  <div class="license-page">
-    <a class="back-link" href="index.html">← Back to dashboard</a>
-    <h1>Licenses &amp; Attributions</h1>
-    <p>CCN Explorer is open source. Below are the licenses for this project and its dependencies.</p>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar" aria-label="Navigation">
+      <button type="button" class="sidebar-toggle" id="sidebar-toggle" aria-expanded="true" aria-controls="sidebar" aria-label="Toggle menu">
+        <span class="toggle-icon" aria-hidden="true">‹</span>
+      </button>
+      <div class="sidebar-logo" aria-hidden="true">
+        <svg viewBox="0 0 48 48">
+          <circle cx="20" cy="24" r="14" fill="#f4c7c3" opacity="0.9"/>
+          <circle cx="28" cy="24" r="14" fill="#c5e0f3" opacity="0.9"/>
+          <circle cx="24" cy="18" r="14" fill="#c8e6c9" opacity="0.9"/>
+        </svg>
+      </div>
+      <nav class="sidebar-nav">
+        <a class="nav-link" href="index.html"><span class="nav-label">Visualizer</span></a>
+        <a class="nav-link" href="https://ccneuro.org" target="_blank" rel="noopener noreferrer"><span class="nav-label">CCN page</span></a>
+        <a class="nav-link active" href="licenses.html"><span class="nav-label">Licenses</span></a>
+      </nav>
+    </aside>
 
-    <div class="license-card">
-      <h2>Project code</h2>
-      <p>
-        <strong>CCNVisualizer</strong> is released under the
-        <a href="https://github.com/kahinimehta/CCNVisualizer/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
-        (Copyright 2026 Kahini Mehta).
-      </p>
-    </div>
+    <div class="main-area">
+      <div class="license-page">
+        <h1>Licenses &amp; Attributions</h1>
+        <p>CCN Explorer is open source. Below are the licenses for this project and its dependencies.</p>
 
-    <div class="license-card">
-      <h2>D3.js v7.9.0</h2>
-      <p>ISC License · <a href="https://github.com/d3/d3" target="_blank" rel="noopener">github.com/d3/d3</a></p>
-      <p>Used for charts, line graphs, donut chart, force-directed network, and interactions.</p>
-    </div>
+        <div class="license-card">
+          <h2>Project code</h2>
+          <p>
+            <strong>CCNVisualizer</strong> is released under the
+            <a href="https://github.com/kahinimehta/CCNVisualizer/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+            (Copyright 2026 Kahini Mehta).
+          </p>
+        </div>
 
-    <div class="license-card">
-      <h2>d3-cloud v1.2.7</h2>
-      <p>BSD 3-Clause License · <a href="https://github.com/jasondavies/d3-cloud" target="_blank" rel="noopener">github.com/jasondavies/d3-cloud</a></p>
-      <p>Used for keyword cloud layout.</p>
-    </div>
+        <div class="license-card">
+          <h2>D3.js v7.9.0</h2>
+          <p>ISC License · <a href="https://github.com/d3/d3" target="_blank" rel="noopener">github.com/d3/d3</a></p>
+          <p>Used for charts, line graphs, donut chart, force-directed network, and interactions.</p>
+        </div>
 
-    <div class="license-card">
-      <h2>Open Sans (Google Fonts)</h2>
-      <p>SIL Open Font License 1.1 · <a href="https://fonts.google.com/specimen/Open+Sans" target="_blank" rel="noopener">fonts.google.com/specimen/Open+Sans</a></p>
-    </div>
+        <div class="license-card">
+          <h2>d3-cloud v1.2.7</h2>
+          <p>BSD 3-Clause License · <a href="https://github.com/jasondavies/d3-cloud" target="_blank" rel="noopener">github.com/jasondavies/d3-cloud</a></p>
+          <p>Used for keyword cloud layout.</p>
+        </div>
 
-    <div class="license-card">
-      <h2>Python scraper dependencies</h2>
-      <ul>
-        <li><strong>requests</strong> — Apache License 2.0</li>
-        <li><strong>Beautiful Soup 4</strong> — MIT License</li>
-        <li><strong>lxml</strong> — BSD 3-Clause License</li>
-      </ul>
-      <p>See <a href="https://github.com/kahinimehta/CCNVisualizer/blob/main/THIRD_PARTY_LICENSES.md" target="_blank" rel="noopener">THIRD_PARTY_LICENSES.md</a> in the repository.</p>
-    </div>
+        <div class="license-card">
+          <h2>Open Sans (Google Fonts)</h2>
+          <p>SIL Open Font License 1.1 · <a href="https://fonts.google.com/specimen/Open+Sans" target="_blank" rel="noopener">fonts.google.com/specimen/Open+Sans</a></p>
+        </div>
 
-    <div class="license-card">
-      <h2>CCN archive data</h2>
-      <p>
-        Submission metadata is sourced from publicly available CCN conference archives at
-        <a href="https://ccneuro.org" target="_blank" rel="noopener">ccneuro.org</a> and year-specific conference sites.
-        Paper and poster content remains the property of the respective authors.
-        This dashboard aggregates publicly listed metadata for academic exploration and is not an official CCN product.
-      </p>
+        <div class="license-card">
+          <h2>Python scraper dependencies</h2>
+          <ul>
+            <li><strong>requests</strong> — Apache License 2.0</li>
+            <li><strong>Beautiful Soup 4</strong> — MIT License</li>
+            <li><strong>lxml</strong> — BSD 3-Clause License</li>
+          </ul>
+          <p>See <a href="https://github.com/kahinimehta/CCNVisualizer/blob/main/THIRD_PARTY_LICENSES.md" target="_blank" rel="noopener">THIRD_PARTY_LICENSES.md</a> in the repository.</p>
+        </div>
+
+        <div class="license-card">
+          <h2>CCN archive data</h2>
+          <p>
+            Submission metadata is sourced from publicly available CCN conference archives at
+            <a href="https://ccneuro.org" target="_blank" rel="noopener">ccneuro.org</a> and year-specific conference sites.
+            Paper and poster content remains the property of the respective authors.
+            This dashboard aggregates publicly listed metadata for academic exploration and is not an official CCN product.
+          </p>
+        </div>
+      </div>
     </div>
   </div>
+
+  <script src="js/sidebar.js"></script>
 </body>
 </html>
