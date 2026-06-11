@@ -2,8 +2,7 @@
 
 Interactive keyword and topic visualizations for poster and paper submissions across the [Cognitive Computational Neuroscience (CCN)](https://ccneuro.org) conference archives.
 
-**Live site:** [https://kahinimehta.github.io/CCNVisualizer/](https://kahinimehta.github.io/CCNVisualizer/) · [Vercel](https://vercel.com) compatible
-
+**Live site:** [https://https://ccn-visualizer.vercel.app/](https://ccn-visualizer.vercel.app/)
 Dashboard UI uses a card-based layout inspired by modern analytics dashboards, styled with CCN brand colors (navy, pink, blue, green).
 
 ## What it does
