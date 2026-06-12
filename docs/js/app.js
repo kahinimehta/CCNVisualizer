@@ -128,58 +128,161 @@ function submissionTopic(submission) {
   return tokenTopic || "uncategorized";
 }
 
-function topicCountsByYear(submissions) {
+const THEME_STOPWORDS = new Set([
+  "the", "and", "for", "with", "from", "that", "this", "using", "based", "study", "results",
+  "show", "human", "brain", "neural", "model", "models", "data", "analysis", "abstract",
+]);
+
+function tokenize(text) {
+  return (text || "")
+    .toLowerCase()
+    .match(/[a-z][a-z0-9\-]{2,}/g)
+    ?.filter((t) => !THEME_STOPWORDS.has(t)) || [];
+}
+
+function researchThemeNames() {
+  if (state.embeddings?.clusters?.length) {
+    return state.embeddings.clusters.map((c) => c.name);
+  }
+  if (state.googleTopics?.enabled && state.googleTopics.topics?.length) {
+    return state.googleTopics.topics;
+  }
+  return [];
+}
+
+function buildThemeClassifier() {
+  const profiles = new Map();
+  researchThemeNames().forEach((name) => profiles.set(name, new Map()));
+
+  state.embeddings?.points?.forEach((point) => {
+    const weights = profiles.get(point.cluster_name);
+    if (!weights) return;
+    tokenize(point.primary_area).forEach((term) => weights.set(term, (weights.get(term) || 0) + 3));
+    tokenize(point.secondary_area).forEach((term) => weights.set(term, (weights.get(term) || 0) + 2));
+    tokenize(point.title).forEach((term) => weights.set(term, (weights.get(term) || 0) + 1));
+  });
+
+  state.themeProfiles = profiles;
+}
+
+function embeddingPointForSubmission(submission) {
+  if (!state.embeddings?.points) return null;
+  return state.embeddings.points.find(
+    (p) =>
+      p.id === submission.id ||
+      (submission.year === 2026 && String(p.poster_number) === String(submission.poster_number))
+  );
+}
+
+function submissionResearchTheme(submission) {
+  if (state.googleTopics?.enabled) {
+    const assigned = state.googleTopics.assignments?.[submission.id];
+    if (assigned) return assigned;
+  }
+
+  const point = embeddingPointForSubmission(submission);
+  if (point?.cluster_name) return point.cluster_name;
+
+  const profiles = state.themeProfiles;
+  if (!profiles?.size) return null;
+
+  const tokens = tokenize(
+    [submission.title, submission.abstract, submission.topic_area, ...submission.keywords].join(" ")
+  );
+  if (!tokens.length) return null;
+
+  let bestTheme = null;
+  let bestScore = 0;
+  profiles.forEach((weights, theme) => {
+    let score = 0;
+    tokens.forEach((term) => {
+      if (weights.has(term)) score += weights.get(term);
+    });
+    if (score > bestScore) {
+      bestScore = score;
+      bestTheme = theme;
+    }
+  });
+
+  return bestScore > 0 ? bestTheme : null;
+}
+
+function themeCountsByYear(submissions) {
   const counts = new Map();
   submissions.forEach((item) => {
+    const theme = submissionResearchTheme(item);
+    if (!theme) return;
     const year = String(item.year);
-    const topic = submissionTopic(item);
-    if (BLOCKED_TOPICS.has(topic)) return;
     if (!counts.has(year)) counts.set(year, new Map());
     const yearMap = counts.get(year);
-    yearMap.set(topic, (yearMap.get(topic) || 0) + 1);
+    yearMap.set(theme, (yearMap.get(theme) || 0) + 1);
   });
   return counts;
 }
 
-function topTopicsOverTime(submissions, limit = 8) {
+function themeTotals(submissions) {
   const totals = new Map();
   submissions.forEach((item) => {
-    const topic = submissionTopic(item);
-    if (BLOCKED_TOPICS.has(topic)) return;
-    totals.set(topic, (totals.get(topic) || 0) + 1);
+    const theme = submissionResearchTheme(item);
+    if (!theme) return;
+    totals.set(theme, (totals.get(theme) || 0) + 1);
   });
-  return [...totals.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, limit)
-    .map(([topic]) => topic);
+  return totals;
 }
 
-function topicYearDeltas(submissions, limit = 10) {
-  const byYear = topicCountsByYear(submissions);
-  const years = [...state.data.metadata.years].sort((a, b) => a - b).map(String);
-  const deltas = [];
+function themeCumulativeByYear(years, byYear, themes) {
+  const cumulative = new Map();
+  const running = new Map(themes.map((theme) => [theme, 0]));
 
-  for (let i = 1; i < years.length; i += 1) {
-    const prevYear = years[i - 1];
-    const currYear = years[i];
-    const prev = byYear.get(prevYear) || new Map();
-    const curr = byYear.get(currYear) || new Map();
-    const topics = new Set([...prev.keys(), ...curr.keys()]);
-
-    topics.forEach((topic) => {
-      if (BLOCKED_TOPICS.has(topic)) return;
-      const delta = (curr.get(topic) || 0) - (prev.get(topic) || 0);
-      deltas.push({
-        topic,
-        fromYear: prevYear,
-        toYear: currYear,
-        delta,
-        absDelta: Math.abs(delta),
-      });
+  years.forEach((year) => {
+    const yearKey = String(year);
+    const yearCounts = byYear.get(yearKey) || new Map();
+    themes.forEach((theme) => {
+      running.set(theme, running.get(theme) + (yearCounts.get(theme) || 0));
     });
-  }
+    cumulative.set(yearKey, new Map(running));
+  });
 
-  return deltas.sort((a, b) => b.absDelta - a.absDelta).slice(0, limit);
+  return cumulative;
+}
+
+function latestComparableYearPair(years, byYear, themes) {
+  const sorted = [...years].sort((a, b) => a - b);
+  for (let i = sorted.length - 1; i > 0; i -= 1) {
+    const toYear = String(sorted[i]);
+    const fromYear = String(sorted[i - 1]);
+    const hasFrom = themes.some((theme) => (byYear.get(fromYear)?.get(theme) || 0) > 0);
+    const hasTo = themes.some((theme) => (byYear.get(toYear)?.get(theme) || 0) > 0);
+    if (hasFrom || hasTo) return { fromYear, toYear };
+  }
+  return null;
+}
+
+function researchThemeDeltas(submissions) {
+  const themes = researchThemeNames();
+  if (!themes.length) return { pair: null, rows: [] };
+
+  const years = [...state.data.metadata.years].sort((a, b) => a - b);
+  const byYear = themeCountsByYear(submissions);
+  const pair = latestComparableYearPair(years, byYear, themes);
+  if (!pair) return { pair: null, rows: [] };
+
+  const rows = themes
+    .map((theme) => {
+      const fromCount = byYear.get(pair.fromYear)?.get(theme) || 0;
+      const toCount = byYear.get(pair.toYear)?.get(theme) || 0;
+      return {
+        theme,
+        fromYear: pair.fromYear,
+        toYear: pair.toYear,
+        fromCount,
+        toCount,
+        delta: toCount - fromCount,
+      };
+    })
+    .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
+
+  return { pair, rows };
 }
 
 function truncateLabel(text, max = 28) {
@@ -566,78 +669,97 @@ function renderTopicChart(submissions) {
     .text((d) => (d.data.count / total > 0.08 ? `${Math.round((d.data.count / total) * 100)}%` : ""));
 }
 
-function renderTopicsOverTime(submissions) {
-  const container = d3.select("#topics-over-time-chart");
+function renderResearchThemesOverTime(submissions) {
+  const container = d3.select("#themes-over-time-chart");
   container.selectAll("*").remove();
 
-  const sub = d3.select("#topics-over-time-sub");
-  if (state.googleTopics?.enabled) {
-    sub.text("Topic counts by year · Google Form responses");
-  } else if (state.googleTopics?.topics?.length) {
-    sub.text("Topic counts by year · Google topics configured (assignments pending)");
-  } else {
-    sub.text("Topic counts by year · token method (Google Form topics when uploaded)");
-  }
-
-  const years = [...state.data.metadata.years].sort((a, b) => a - b);
-  const topics = topTopicsOverTime(submissions, 8);
-  const byYear = topicCountsByYear(submissions);
-
-  const width = container.node().clientWidth || 760;
-  const height = 300;
-  const margin = { top: 16, right: 16, bottom: 36, left: 44 };
-
-  if (!topics.length) {
-    container.append("p").style("color", CCN_COLORS.muted).text("No topic data for current filter.");
+  const themes = researchThemeNames();
+  if (!themes.length) {
+    container.append("p").style("color", CCN_COLORS.muted).text("Research theme data not loaded.");
     return;
   }
 
+  const years = [...state.data.metadata.years].sort((a, b) => a - b);
+  const byYear = themeCountsByYear(submissions);
+  const cumulative = themeCumulativeByYear(years, byYear, themes);
+
+  const width = container.node().clientWidth || 1000;
+  const height = 360;
+  const margin = { top: 20, right: 240, bottom: 44, left: 48 };
   const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`);
   const innerW = width - margin.left - margin.right;
   const innerH = height - margin.top - margin.bottom;
   const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
-  const x = d3.scalePoint().domain(years).range([0, innerW]).padding(0.5);
-  const y = d3
-    .scaleLinear()
-    .domain([0, d3.max(topics, (topic) => d3.max(years, (year) => byYear.get(String(year))?.get(topic) || 0)) || 1])
-    .nice()
-    .range([innerH, 0]);
-  const color = d3.scaleOrdinal(CHART_PALETTE).domain(topics);
+  const annualMax = d3.max(themes, (theme) =>
+    d3.max(years, (year) => byYear.get(String(year))?.get(theme) || 0)
+  ) || 1;
+  const cumulativeMax = d3.max(themes, (theme) =>
+    d3.max(years, (year) => cumulative.get(String(year))?.get(theme) || 0)
+  ) || 1;
 
-  const line = d3
+  const x = d3.scalePoint().domain(years).range([0, innerW]).padding(0.45);
+  const yAnnual = d3.scaleLinear().domain([0, annualMax]).nice().range([innerH, 0]);
+  const yCumulative = d3.scaleLinear().domain([0, cumulativeMax]).nice().range([innerH, 0]);
+  const color = d3.scaleOrdinal(CHART_PALETTE).domain(themes);
+
+  const annualLine = d3
     .line()
     .x((d) => x(d.year))
-    .y((d) => y(d.count))
+    .y((d) => yAnnual(d.count))
     .curve(d3.curveMonotoneX);
 
-  topics.forEach((topic) => {
-    const series = years.map((year) => ({
+  const cumulativeLine = d3
+    .line()
+    .x((d) => x(d.year))
+    .y((d) => yCumulative(d.count))
+    .curve(d3.curveMonotoneX);
+
+  themes.forEach((theme) => {
+    const annualSeries = years.map((year) => ({
       year,
-      count: byYear.get(String(year))?.get(topic) || 0,
-      topic,
+      count: byYear.get(String(year))?.get(theme) || 0,
+      theme,
+    }));
+    const cumulativeSeries = years.map((year) => ({
+      year,
+      count: cumulative.get(String(year))?.get(theme) || 0,
+      theme,
     }));
 
     g.append("path")
-      .datum(series)
+      .datum(cumulativeSeries)
       .attr("fill", "none")
-      .attr("stroke", color(topic))
-      .attr("stroke-width", 2.5)
-      .attr("opacity", 0.9)
-      .attr("d", line);
+      .attr("stroke", color(theme))
+      .attr("stroke-width", 1.5)
+      .attr("stroke-dasharray", "5 4")
+      .attr("opacity", 0.45)
+      .attr("d", cumulativeLine);
 
-    g.selectAll(`.dot-${topic.replace(/[^a-z0-9]/gi, "")}`)
-      .data(series.filter((d) => d.count > 0))
+    g.append("path")
+      .datum(annualSeries)
+      .attr("fill", "none")
+      .attr("stroke", color(theme))
+      .attr("stroke-width", 2.5)
+      .attr("opacity", 0.95)
+      .attr("d", annualLine);
+
+    g.selectAll(`.annual-dot-${theme.replace(/[^a-z0-9]/gi, "")}`)
+      .data(annualSeries)
       .join("circle")
       .attr("cx", (d) => x(d.year))
-      .attr("cy", (d) => y(d.count))
-      .attr("r", 4)
-      .attr("fill", color(topic))
+      .attr("cy", (d) => yAnnual(d.count))
+      .attr("r", (d) => (d.count > 0 ? 4 : 0))
+      .attr("fill", color(theme))
       .attr("stroke", CCN_COLORS.navy)
       .attr("stroke-width", 1.5)
-      .on("mousemove", (event, d) =>
-        showTooltip(`<strong>${truncateLabel(d.topic, 40)}</strong><br/>${d.year}: ${d.count}`, event)
-      )
+      .on("mousemove", (event, d) => {
+        const cum = cumulative.get(String(d.year))?.get(theme) || 0;
+        showTooltip(
+          `<strong>${d.theme}</strong><br/>${d.year}: ${d.count} submissions<br/>Cumulative: ${cum}`,
+          event
+        );
+      })
       .on("mouseleave", hideTooltip);
   });
 
@@ -648,90 +770,191 @@ function renderTopicsOverTime(submissions) {
     .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
 
   g.append("g")
-    .call(d3.axisLeft(y).ticks(5))
+    .call(d3.axisLeft(yAnnual).ticks(5))
     .call((sel) => sel.selectAll("text").attr("fill", CCN_COLORS.muted))
     .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
 
-  const legend = svg
-    .append("g")
-    .attr("transform", `translate(${margin.left}, ${height - 8})`);
+  g.append("text")
+    .attr("x", -innerH / 2)
+    .attr("y", -34)
+    .attr("transform", "rotate(-90)")
+    .attr("text-anchor", "middle")
+    .attr("fill", CCN_COLORS.muted)
+    .style("font-size", "10px")
+    .text("Submissions per year");
+
+  const legend = svg.append("g").attr("transform", `translate(${width - margin.right + 16}, ${margin.top})`);
   const legendItems = legend
     .selectAll("g")
-    .data(topics)
+    .data(themes)
     .join("g")
-    .attr("transform", (_, i) => `translate(${i * 118}, 0)`);
-  legendItems.append("rect").attr("width", 10).attr("height", 10).attr("rx", 2).attr("fill", (d) => color(d));
+    .attr("transform", (_, i) => `translate(0, ${i * 24})`);
+
+  legendItems
+    .append("line")
+    .attr("x1", 0)
+    .attr("x2", 18)
+    .attr("y1", 6)
+    .attr("y2", 6)
+    .attr("stroke", (d) => color(d))
+    .attr("stroke-width", 2.5);
+
+  legendItems
+    .append("line")
+    .attr("x1", 0)
+    .attr("x2", 18)
+    .attr("y1", 12)
+    .attr("y2", 12)
+    .attr("stroke", (d) => color(d))
+    .attr("stroke-width", 1.5)
+    .attr("stroke-dasharray", "4 3")
+    .attr("opacity", 0.55);
+
   legendItems
     .append("text")
-    .attr("x", 14)
-    .attr("y", 9)
+    .attr("x", 24)
+    .attr("y", 10)
+    .attr("fill", CCN_COLORS.muted)
+    .style("font-size", "10px")
+    .text((d) => d);
+
+  svg
+    .append("text")
+    .attr("x", width - margin.right + 16)
+    .attr("y", height - 10)
     .attr("fill", CCN_COLORS.muted)
     .style("font-size", "9px")
-    .text((d) => truncateLabel(d, 16));
+    .text("Solid = annual count · dashed = cumulative total");
 }
 
-function renderTopicDelta(submissions) {
-  const container = d3.select("#topic-delta-chart");
+function renderResearchThemeTotals(submissions) {
+  const container = d3.select("#theme-totals-chart");
   container.selectAll("*").remove();
 
-  const data = topicYearDeltas(submissions, 10);
-  const width = container.node().clientWidth || 360;
-  const height = 340;
-  const margin = { top: 8, right: 52, bottom: 8, left: 150 };
+  const themes = researchThemeNames();
+  const totals = themeTotals(submissions);
+  const data = themes
+    .map((theme) => ({ theme, count: totals.get(theme) || 0 }))
+    .sort((a, b) => b.count - a.count);
 
   if (!data.length) {
-    container.append("p").style("color", CCN_COLORS.muted).text("Not enough topic history for deltas.");
+    container.append("p").style("color", CCN_COLORS.muted).text("No theme totals available.");
     return;
   }
 
+  const width = container.node().clientWidth || 480;
+  const rowHeight = 30;
+  const margin = { top: 8, right: 48, bottom: 8, left: 210 };
+  const height = margin.top + margin.bottom + data.length * rowHeight;
   const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`);
   const innerW = width - margin.left - margin.right;
-  const maxAbs = d3.max(data, (d) => d.absDelta) || 1;
-
-  const x = d3.scaleLinear().domain([-maxAbs, maxAbs]).range([0, innerW]);
-  const y = d3
-    .scaleBand()
-    .domain(data.map((d) => d.topic))
-    .range([0, height - margin.top - margin.bottom])
-    .padding(0.2);
-
   const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
-
-  g.append("line")
-    .attr("x1", x(0))
-    .attr("x2", x(0))
-    .attr("y1", 0)
-    .attr("y2", height - margin.top - margin.bottom)
-    .attr("stroke", "rgba(197,224,243,0.25)");
+  const x = d3.scaleLinear().domain([0, d3.max(data, (d) => d.count) || 1]).range([0, innerW]);
+  const y = d3.scaleBand().domain(data.map((d) => d.theme)).range([0, data.length * rowHeight]).padding(0.22);
+  const color = d3.scaleOrdinal(CHART_PALETTE).domain(themes);
 
   g.selectAll("rect")
     .data(data)
     .join("rect")
-    .attr("x", (d) => (d.delta < 0 ? x(d.delta) : x(0)))
-    .attr("y", (d) => y(d.topic))
-    .attr("width", (d) => Math.abs(x(d.delta) - x(0)))
+    .attr("x", 0)
+    .attr("y", (d) => y(d.theme))
     .attr("height", y.bandwidth())
-    .attr("fill", (d) => (d.delta >= 0 ? CCN_COLORS.green : CCN_COLORS.pink))
+    .attr("width", (d) => x(d.count))
+    .attr("fill", (d) => color(d.theme))
     .attr("rx", 4)
-    .on("mousemove", (event, d) =>
-      showTooltip(
-        `<strong>${truncateLabel(d.topic, 42)}</strong><br/>${d.fromYear}→${d.toYear}: ${d.delta >= 0 ? "+" : ""}${d.delta}`,
-        event
-      )
-    )
+    .on("mousemove", (event, d) => showTooltip(`<strong>${d.theme}</strong><br/>${d.count} total submissions`, event))
     .on("mouseleave", hideTooltip);
 
   g.selectAll("text.label")
     .data(data)
     .join("text")
     .attr("class", "label")
-    .attr("x", -8)
-    .attr("y", (d) => y(d.topic) + y.bandwidth() / 2)
+    .attr("x", -10)
+    .attr("y", (d) => y(d.theme) + y.bandwidth() / 2)
     .attr("dy", "0.35em")
     .attr("text-anchor", "end")
     .attr("fill", CCN_COLORS.muted)
-    .style("font-size", "9px")
-    .text((d) => truncateLabel(d.topic, 22));
+    .style("font-size", "10px")
+    .text((d) => d.theme);
+
+  g.selectAll("text.value")
+    .data(data)
+    .join("text")
+    .attr("class", "value")
+    .attr("x", (d) => x(d.count) + 6)
+    .attr("y", (d) => y(d.theme) + y.bandwidth() / 2)
+    .attr("dy", "0.35em")
+    .attr("fill", CCN_COLORS.white)
+    .style("font-size", "10px")
+    .text((d) => d.count);
+}
+
+function renderResearchThemeDeltas(submissions) {
+  const container = d3.select("#theme-delta-chart");
+  container.selectAll("*").remove();
+
+  const { pair, rows } = researchThemeDeltas(submissions);
+  const sub = d3.select("#theme-delta-sub");
+
+  if (!pair || !rows.length) {
+    sub.text("Not enough theme history for year-over-year comparison.");
+    container.append("p").style("color", CCN_COLORS.muted).text("No comparable years with theme data.");
+    return;
+  }
+
+  sub.text(`${pair.fromYear} → ${pair.toYear} · one bar per research theme`);
+
+  const width = container.node().clientWidth || 480;
+  const rowHeight = 30;
+  const margin = { top: 8, right: 56, bottom: 8, left: 210 };
+  const height = margin.top + margin.bottom + rows.length * rowHeight;
+  const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`);
+  const innerW = width - margin.left - margin.right;
+  const maxAbs = d3.max(rows, (d) => Math.abs(d.delta)) || 1;
+  const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+  const x = d3.scaleLinear().domain([0, maxAbs]).range([0, innerW]);
+  const y = d3.scaleBand().domain(rows.map((d) => d.theme)).range([0, rows.length * rowHeight]).padding(0.22);
+  const color = d3.scaleOrdinal(CHART_PALETTE).domain(rows.map((d) => d.theme));
+
+  g.selectAll("rect")
+    .data(rows)
+    .join("rect")
+    .attr("x", 0)
+    .attr("y", (d) => y(d.theme))
+    .attr("height", y.bandwidth())
+    .attr("width", (d) => x(Math.abs(d.delta)))
+    .attr("fill", (d) => (d.delta >= 0 ? CCN_COLORS.green : CCN_COLORS.pink))
+    .attr("rx", 4)
+    .on("mousemove", (event, d) =>
+      showTooltip(
+        `<strong>${d.theme}</strong><br/>${d.fromYear}: ${d.fromCount}<br/>${d.toYear}: ${d.toCount}<br/>Change: ${d.delta >= 0 ? "+" : ""}${d.delta}`,
+        event
+      )
+    )
+    .on("mouseleave", hideTooltip);
+
+  g.selectAll("text.label")
+    .data(rows)
+    .join("text")
+    .attr("class", "label")
+    .attr("x", -10)
+    .attr("y", (d) => y(d.theme) + y.bandwidth() / 2)
+    .attr("dy", "0.35em")
+    .attr("text-anchor", "end")
+    .attr("fill", CCN_COLORS.muted)
+    .style("font-size", "10px")
+    .text((d) => d.theme);
+
+  g.selectAll("text.value")
+    .data(rows)
+    .join("text")
+    .attr("class", "value")
+    .attr("x", (d) => x(Math.abs(d.delta)) + 6)
+    .attr("y", (d) => y(d.theme) + y.bandwidth() / 2)
+    .attr("dy", "0.35em")
+    .attr("fill", CCN_COLORS.white)
+    .style("font-size", "10px")
+    .text((d) => `${d.delta >= 0 ? "+" : ""}${d.delta}`);
 }
 
 function renderClusterBars() {
@@ -969,8 +1192,9 @@ function renderAll() {
   renderKeywordBars(counts);
   renderTopicChart(submissions);
   renderWordCloud(counts);
-  renderTopicsOverTime(submissions);
-  renderTopicDelta(submissions);
+  renderResearchThemesOverTime(submissions);
+  renderResearchThemeTotals(submissions);
+  renderResearchThemeDeltas(submissions);
   renderClusterBars();
   renderEmbeddingCluster();
   renderPaperList();
@@ -1006,6 +1230,7 @@ async function init() {
   state.data = await submissionsRes.json();
   state.embeddings = embeddings;
   state.googleTopics = googleTopics;
+  buildThemeClassifier();
 
   renderYearControls();
 

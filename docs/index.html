@@ -80,20 +80,25 @@
           <div id="keyword-bars"></div>
         </section>
 
-        <section class="card card-wide">
+        <section class="card card-full theme-analytics">
           <div class="card-header">
-            <h2>Topics over time</h2>
-            <p class="card-sub" id="topics-over-time-sub">Topic counts by year · token method (Google Form topics when uploaded)</p>
+            <h2>Research themes over time</h2>
+            <p class="card-sub" id="themes-over-time-sub">Annual counts per embedding research theme · 2026 uses cluster labels · earlier years inferred from text</p>
           </div>
-          <div id="topics-over-time-chart"></div>
-        </section>
+          <div id="themes-over-time-chart"></div>
 
-        <section class="card">
-          <div class="card-header">
-            <h2>Largest topic shifts</h2>
-            <p class="card-sub">Greatest absolute year-over-year change</p>
+          <div class="theme-analytics-row">
+            <div class="theme-panel">
+              <h3 class="theme-panel-title">Total by research theme</h3>
+              <p class="theme-panel-sub">All years combined in current filter</p>
+              <div id="theme-totals-chart"></div>
+            </div>
+            <div class="theme-panel">
+              <h3 class="theme-panel-title">Year-over-year change</h3>
+              <p class="theme-panel-sub" id="theme-delta-sub">Largest shifts between consecutive years</p>
+              <div id="theme-delta-chart"></div>
+            </div>
           </div>
-          <div id="topic-delta-chart"></div>
         </section>
 
         <div class="embedding-layout">
