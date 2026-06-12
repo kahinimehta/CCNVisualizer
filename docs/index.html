@@ -46,14 +46,14 @@
             </select>
           </label>
           <label class="filter-field">
-            <span>Keyword</span>
-            <select id="keyword-select">
-              <option value="">All keywords</option>
+            <span>Research theme</span>
+            <select id="theme-select">
+              <option value="">All research themes</option>
             </select>
           </label>
           <label class="filter-field search-field">
             <span>Search</span>
-            <input id="search-input" type="search" placeholder="Title, author, topic..." />
+            <input id="search-input" type="search" placeholder="Title, author, research theme..." />
           </label>
         </div>
       </header>
@@ -74,10 +74,10 @@
 
         <section class="card">
           <div class="card-header">
-            <h2>Keyword ranking</h2>
-            <p class="card-sub">Top keywords in current filter</p>
+            <h2>Research theme ranking</h2>
+            <p class="card-sub">Primary theme counts in current filter</p>
           </div>
-          <div id="keyword-bars"></div>
+          <div id="theme-bars"></div>
         </section>
 
         <section class="card card-full theme-analytics">
@@ -124,24 +124,24 @@
           <aside class="viz-sidebar">
             <section class="card">
               <div class="card-header">
-                <h2>Topic areas</h2>
-                <p class="card-sub">Share of submissions by topic area</p>
+                <h2>Primary research themes</h2>
+                <p class="card-sub">Share of submissions by primary theme</p>
               </div>
               <div id="topic-chart"></div>
             </section>
 
             <section class="card" id="word-cloud-section">
               <div class="card-header">
-                <h2>Keyword cloud</h2>
-                <p class="card-sub">Click a keyword to filter · size = frequency</p>
+                <h2>Secondary topics</h2>
+                <p class="card-sub">Additional theme tags assigned to submissions</p>
               </div>
               <div id="word-cloud"></div>
             </section>
 
             <section class="card">
               <div class="card-header">
-                <h2>2026 research themes</h2>
-                <p class="card-sub">Embedding clusters · click to filter map &amp; submissions</p>
+                <h2>Research theme breakdown</h2>
+                <p class="card-sub">Click a theme to filter map &amp; submissions</p>
               </div>
               <div id="cluster-bars-chart"></div>
             </section>

@@ -513,8 +513,28 @@ def merge_2026_csv(payload: dict) -> dict:
         return payload
 
 
+def assign_research_themes(payload: dict) -> dict:
+    """Assign primary_theme and secondary_topics on every submission."""
+    try:
+        from assign_research_themes import apply_assignments
+        import json
+        from pathlib import Path
+
+        embeddings_path = ROOT / "docs" / "data" / "embeddings_2026.json"
+        if not embeddings_path.exists():
+            print("Warning: embeddings_2026.json missing; theme assignment skipped.")
+            return payload
+        with embeddings_path.open(encoding="utf-8") as fh:
+            embeddings = json.load(fh)
+        return apply_assignments(payload, embeddings)
+    except Exception as exc:  # noqa: BLE001
+        print(f"Warning: research theme assignment skipped: {exc}")
+        return payload
+
+
 def write_outputs(payload: dict) -> None:
     payload = merge_2026_csv(payload)
+    payload = assign_research_themes(payload)
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     DOCS_DATA_DIR.mkdir(parents=True, exist_ok=True)
 

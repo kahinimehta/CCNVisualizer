@@ -40,8 +40,7 @@ const state = {
   googleTopics: null,
   selectedYear: "all",
   search: "",
-  selectedKeyword: "",
-  selectedCluster: "",
+  selectedTheme: "",
 };
 
 let tooltip = null;
@@ -75,57 +74,60 @@ function showError(message) {
   grid.innerHTML = `<section class="card card-full"><p style="color:#f4c7c3;margin:0;">${message}</p></section>`;
 }
 
+function primaryTheme(submission) {
+  if (submission.primary_theme) return submission.primary_theme;
+  return submissionResearchTheme(submission);
+}
+
+function secondaryTopics(submission) {
+  return submission.secondary_topics || [];
+}
+
 function filteredSubmissions() {
   const { submissions } = state.data;
   return submissions.filter((item) => {
     const yearOk = state.selectedYear === "all" || String(item.year) === state.selectedYear;
     const search = state.search.trim().toLowerCase();
+    const theme = primaryTheme(item);
+    const secondaries = secondaryTopics(item);
     const searchOk =
       !search ||
       item.title.toLowerCase().includes(search) ||
       item.authors.toLowerCase().includes(search) ||
-      item.keywords.some((kw) => kw.includes(search)) ||
+      (theme || "").toLowerCase().includes(search) ||
+      secondaries.some((topic) => topic.toLowerCase().includes(search)) ||
       (item.topic_area || "").toLowerCase().includes(search);
-    const keywordOk = !state.selectedKeyword || item.keywords.includes(state.selectedKeyword);
-    return yearOk && searchOk && keywordOk;
+    const themeOk = !state.selectedTheme || theme === state.selectedTheme;
+    return yearOk && searchOk && themeOk;
   });
 }
 
-function keywordCounts(submissions) {
+function primaryThemeCounts(submissions) {
   const counts = new Map();
   submissions.forEach((item) => {
-    [...new Set(item.keywords)].forEach((kw) => counts.set(kw, (counts.get(kw) || 0) + 1));
+    const theme = primaryTheme(item);
+    if (!theme) return;
+    counts.set(theme, (counts.get(theme) || 0) + 1);
   });
   return [...counts.entries()]
     .map(([text, count]) => ({ text, count }))
     .sort((a, b) => b.count - a.count);
 }
 
-function topicCounts(submissions) {
+function secondaryTopicCounts(submissions) {
   const counts = new Map();
   submissions.forEach((item) => {
-    if (!item.topic_area) return;
-    const topic = item.topic_area.toLowerCase();
-    counts.set(topic, (counts.get(topic) || 0) + 1);
+    secondaryTopics(item).forEach((topic) => {
+      counts.set(topic, (counts.get(topic) || 0) + 1);
+    });
   });
   return [...counts.entries()]
     .map(([text, count]) => ({ text, count }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 8);
+    .sort((a, b) => b.count - a.count);
 }
 
-function submissionTopic(submission) {
-  if (state.googleTopics?.enabled) {
-    const assigned = state.googleTopics.assignments?.[submission.id];
-    if (assigned) return assigned.toLowerCase();
-    const topics = state.googleTopics.topics || [];
-    if (topics.length) return "unassigned";
-  }
-  if (submission.topic_area && !BLOCKED_TOPICS.has(submission.topic_area.toLowerCase())) {
-    return submission.topic_area.toLowerCase();
-  }
-  const tokenTopic = submission.keywords.find((kw) => kw && !BLOCKED_TOPICS.has(kw));
-  return tokenTopic || "uncategorized";
+function primaryThemeDistribution(submissions) {
+  return primaryThemeCounts(submissions);
 }
 
 const THEME_STOPWORDS = new Set([
@@ -179,6 +181,7 @@ function submissionResearchTheme(submission) {
     const assigned = state.googleTopics.assignments?.[submission.id];
     if (assigned) return assigned;
   }
+  if (submission.primary_theme) return submission.primary_theme;
 
   const point = embeddingPointForSubmission(submission);
   if (point?.cluster_name) return point.cluster_name;
@@ -210,7 +213,7 @@ function submissionResearchTheme(submission) {
 function themeCountsByYear(submissions) {
   const counts = new Map();
   submissions.forEach((item) => {
-    const theme = submissionResearchTheme(item);
+    const theme = primaryTheme(item);
     if (!theme) return;
     const year = String(item.year);
     if (!counts.has(year)) counts.set(year, new Map());
@@ -223,7 +226,7 @@ function themeCountsByYear(submissions) {
 function themeTotals(submissions) {
   const totals = new Map();
   submissions.forEach((item) => {
-    const theme = submissionResearchTheme(item);
+    const theme = primaryTheme(item);
     if (!theme) return;
     totals.set(theme, (totals.get(theme) || 0) + 1);
   });
@@ -300,26 +303,13 @@ function clusterMeta(clusterName) {
   };
 }
 
-function submissionInCluster(submission, clusterName) {
-  if (!clusterName || !state.embeddings?.points) return true;
-  const point = state.embeddings.points.find(
-    (p) =>
-      p.id === submission.id ||
-      (submission.year === 2026 && String(p.poster_number) === String(submission.poster_number))
-  );
-  return point?.cluster_name === clusterName;
-}
-
 function displaySubmissions() {
-  let submissions = filteredSubmissions();
-  if (state.selectedCluster) {
-    submissions = submissions.filter((item) => submissionInCluster(item, state.selectedCluster));
-  }
-  return submissions;
+  return filteredSubmissions();
 }
 
-function setClusterFilter(clusterName) {
-  state.selectedCluster = state.selectedCluster === clusterName ? "" : clusterName;
+function setThemeFilter(themeName) {
+  state.selectedTheme = state.selectedTheme === themeName ? "" : themeName;
+  d3.select("#theme-select").property("value", state.selectedTheme);
   renderAll();
 }
 
@@ -333,7 +323,7 @@ function embeddingPointTooltip(point) {
   ];
   if (point.primary_area) parts.push(`<strong>Primary area:</strong> ${truncateLabel(point.primary_area, 48)}`);
   if (point.secondary_area) parts.push(`<strong>Secondary:</strong> ${truncateLabel(point.secondary_area, 48)}`);
-  parts.push("<em>Click to list all papers in this cluster</em>");
+  parts.push("<em>Click to filter by this primary theme</em>");
   return parts.join("<br/>");
 }
 
@@ -364,7 +354,7 @@ function renderKpis(filtered) {
   const cards = [
     { label: "Total submissions", value: metadata.total_count.toLocaleString(), icon: "submissions", tone: "blue" },
     { label: "Matching filter", value: filtered.length.toLocaleString(), icon: "filter", tone: "pink" },
-    { label: "Unique keywords", value: stats.overall_top.length.toLocaleString(), icon: "keywords", tone: "green" },
+    { label: "Research themes", value: String(researchThemeNames().length), icon: "keywords", tone: "green" },
     { label: "Years covered", value: String(metadata.years.length), icon: "years", tone: "navy" },
   ];
 
@@ -407,17 +397,17 @@ function renderYearControls() {
     });
 }
 
-function renderKeywordSelect(counts) {
-  const select = d3.select("#keyword-select");
+function renderThemeSelect(counts) {
+  const select = d3.select("#theme-select");
   select.selectAll("option:not(:first-child)").remove();
   select
-    .selectAll("option.kw")
-    .data(counts.slice(0, 100))
+    .selectAll("option.theme")
+    .data(counts)
     .join("option")
-    .attr("class", "kw")
+    .attr("class", "theme")
     .attr("value", (d) => d.text)
     .text((d) => `${d.text} (${d.count})`);
-  select.property("value", state.selectedKeyword);
+  select.property("value", state.selectedTheme);
 }
 
 function renderWordCloud(counts) {
@@ -427,10 +417,10 @@ function renderWordCloud(counts) {
   const width = container.node().clientWidth || 800;
   const height = 300;
   const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`);
-  const top = counts.slice(0, 70);
+  const top = counts.slice(0, 40);
 
   if (!top.length) {
-    svg.append("text").attr("x", 20).attr("y", 40).attr("fill", CCN_COLORS.muted).text("No keywords for current filter.");
+    svg.append("text").attr("x", 20).attr("y", 40).attr("fill", CCN_COLORS.muted).text("No secondary topics for current filter.");
     return;
   }
 
@@ -464,40 +454,36 @@ function renderWordCloud(counts) {
         .style("font-size", (d) => `${d.size}px`)
         .style("font-family", "Open Sans")
         .style("fill", (d) =>
-          d.text === state.selectedKeyword ? CCN_COLORS.pink : colorScale(d.text)
+          d.text === state.selectedTheme ? CCN_COLORS.pink : colorScale(d.text)
         )
-        .style("cursor", "pointer")
+        .style("cursor", "default")
         .attr("text-anchor", "middle")
         .attr("transform", (d) => `translate(${d.x},${d.y})rotate(${d.rotate})`)
         .text((d) => d.text)
-        .on("click", (_, d) => {
-          state.selectedKeyword = state.selectedKeyword === d.text ? "" : d.text;
-          d3.select("#keyword-select").property("value", state.selectedKeyword);
-          renderAll();
-        })
-        .on("mousemove", (event, d) => showTooltip(`<strong>${d.text}</strong><br/>${d.count} submissions`, event))
+        .on("mousemove", (event, d) => showTooltip(`<strong>${d.text}</strong><br/>${d.count} secondary tags`, event))
         .on("mouseleave", hideTooltip);
     })
     .start();
 }
 
-function renderKeywordBars(counts) {
-  const container = d3.select("#keyword-bars");
+function renderThemeBars(counts) {
+  const container = d3.select("#theme-bars");
   container.selectAll("*").remove();
 
   const width = container.node().clientWidth || 360;
   const height = 340;
-  const margin = { top: 8, right: 52, bottom: 8, left: 120 };
-  const data = counts.slice(0, 12);
+  const margin = { top: 8, right: 52, bottom: 8, left: 210 };
+  const data = counts;
 
   const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`);
   const innerW = width - margin.left - margin.right;
+  const rowHeight = Math.max(28, (height - margin.top - margin.bottom) / Math.max(data.length, 1));
 
   const x = d3.scaleLinear().domain([0, d3.max(data, (d) => d.count) || 1]).range([0, innerW]);
   const y = d3
     .scaleBand()
     .domain(data.map((d) => d.text))
-    .range([0, height - margin.top - margin.bottom])
+    .range([0, data.length * rowHeight])
     .padding(0.18);
 
   const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
@@ -510,16 +496,12 @@ function renderKeywordBars(counts) {
     .attr("height", y.bandwidth())
     .attr("width", (d) => x(d.count))
     .attr("fill", (d, i) =>
-      d.text === state.selectedKeyword ? CCN_COLORS.pink : CHART_PALETTE[i % CHART_PALETTE.length]
+      d.text === state.selectedTheme ? CCN_COLORS.pink : CHART_PALETTE[i % CHART_PALETTE.length]
     )
     .attr("rx", 4)
     .style("cursor", "pointer")
-    .on("click", (_, d) => {
-      state.selectedKeyword = state.selectedKeyword === d.text ? "" : d.text;
-      d3.select("#keyword-select").property("value", state.selectedKeyword);
-      renderAll();
-    })
-    .on("mousemove", (event, d) => showTooltip(`<strong>${d.text}</strong><br/>${d.count}`, event))
+    .on("click", (_, d) => setThemeFilter(d.text))
+    .on("mousemove", (event, d) => showTooltip(`<strong>${d.text}</strong><br/>${d.count} submissions`, event))
     .on("mouseleave", hideTooltip);
 
   g.selectAll("text.label")
@@ -532,7 +514,7 @@ function renderKeywordBars(counts) {
     .attr("text-anchor", "end")
     .attr("fill", CCN_COLORS.muted)
     .style("font-size", "10px")
-    .text((d) => (d.text.length > 16 ? `${d.text.slice(0, 16)}…` : d.text));
+    .text((d) => d.text);
 
   g.selectAll("text.value")
     .data(data)
@@ -544,6 +526,10 @@ function renderKeywordBars(counts) {
     .attr("fill", CCN_COLORS.white)
     .style("font-size", "10px")
     .text((d) => d.count);
+}
+
+function renderKeywordBars(counts) {
+  renderThemeBars(counts);
 }
 
 function renderYearChart() {
@@ -619,13 +605,13 @@ function renderTopicChart(submissions) {
   const container = d3.select("#topic-chart");
   container.selectAll("*").remove();
 
-  const data = topicCounts(submissions);
+  const data = primaryThemeDistribution(submissions);
   const width = container.node().clientWidth || 320;
   const height = 280;
   const radius = Math.min(width, height) / 2 - 16;
 
   if (!data.length) {
-    container.append("p").style("color", CCN_COLORS.muted).style("font-size", "0.85rem").text("No topic areas in filter.");
+    container.append("p").style("color", CCN_COLORS.muted).style("font-size", "0.85rem").text("No primary themes in filter.");
     return;
   }
 
@@ -650,6 +636,7 @@ function renderTopicChart(submissions) {
     .attr("stroke", CCN_COLORS.card)
     .attr("stroke-width", 2)
     .style("cursor", "pointer")
+    .on("click", (_, d) => setThemeFilter(d.data.text))
     .on("mousemove", (event, d) => {
       const pct = ((d.data.count / total) * 100).toFixed(1);
       showTooltip(`<strong>${d.data.text}</strong><br/>${d.data.count} (${pct}%)`, event);
@@ -697,22 +684,22 @@ function renderResearchThemesOverTime(submissions) {
   const cumulativeMax = d3.max(themes, (theme) =>
     d3.max(years, (year) => cumulative.get(String(year))?.get(theme) || 0)
   ) || 1;
+  const yMax = Math.max(annualMax, cumulativeMax);
 
   const x = d3.scalePoint().domain(years).range([0, innerW]).padding(0.45);
-  const yAnnual = d3.scaleLinear().domain([0, annualMax]).nice().range([innerH, 0]);
-  const yCumulative = d3.scaleLinear().domain([0, cumulativeMax]).nice().range([innerH, 0]);
+  const y = d3.scaleLinear().domain([0, yMax]).nice().range([innerH, 0]);
   const color = d3.scaleOrdinal(CHART_PALETTE).domain(themes);
 
   const annualLine = d3
     .line()
     .x((d) => x(d.year))
-    .y((d) => yAnnual(d.count))
+    .y((d) => y(d.count))
     .curve(d3.curveMonotoneX);
 
   const cumulativeLine = d3
     .line()
     .x((d) => x(d.year))
-    .y((d) => yCumulative(d.count))
+    .y((d) => y(d.count))
     .curve(d3.curveMonotoneX);
 
   themes.forEach((theme) => {
@@ -748,7 +735,7 @@ function renderResearchThemesOverTime(submissions) {
       .data(annualSeries)
       .join("circle")
       .attr("cx", (d) => x(d.year))
-      .attr("cy", (d) => yAnnual(d.count))
+      .attr("cy", (d) => y(d.count))
       .attr("r", (d) => (d.count > 0 ? 4 : 0))
       .attr("fill", color(theme))
       .attr("stroke", CCN_COLORS.navy)
@@ -770,7 +757,7 @@ function renderResearchThemesOverTime(submissions) {
     .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
 
   g.append("g")
-    .call(d3.axisLeft(yAnnual).ticks(5))
+    .call(d3.axisLeft(y).ticks(5))
     .call((sel) => sel.selectAll("text").attr("fill", CCN_COLORS.muted))
     .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
 
@@ -961,12 +948,17 @@ function renderClusterBars() {
   const container = d3.select("#cluster-bars-chart");
   container.selectAll("*").remove();
 
-  if (!state.embeddings?.clusters?.length) {
-    container.append("p").style("color", CCN_COLORS.muted).text("2026 embedding clusters not loaded.");
+  const themes = researchThemeNames();
+  if (!themes.length) {
+    container.append("p").style("color", CCN_COLORS.muted).text("Research themes not loaded.");
     return;
   }
 
-  const data = [...state.embeddings.clusters].sort((a, b) => b.count - a.count);
+  const counts = primaryThemeCounts(filteredSubmissions());
+  const countMap = new Map(counts.map((item) => [item.text, item.count]));
+  const data = themes
+    .map((name) => ({ name, count: countMap.get(name) || 0 }))
+    .sort((a, b) => b.count - a.count);
   const width = container.node().clientWidth || 360;
   const height = 380;
   const margin = { top: 8, right: 36, bottom: 8, left: 132 };
@@ -989,11 +981,11 @@ function renderClusterBars() {
     .attr("y", (d) => y(d.name))
     .attr("height", y.bandwidth())
     .attr("width", (d) => x(d.count))
-    .attr("fill", (d) => (d.name === state.selectedCluster ? CCN_COLORS.pink : color(d.name)))
+    .attr("fill", (d) => (d.name === state.selectedTheme ? CCN_COLORS.pink : color(d.name)))
     .attr("rx", 4)
     .style("cursor", "pointer")
-    .on("click", (_, d) => setClusterFilter(d.name))
-    .on("mousemove", (event, d) => showTooltip(clusterLegendTooltip(d.name), event))
+    .on("click", (_, d) => setThemeFilter(d.name))
+    .on("mousemove", (event, d) => showTooltip(`<strong>${d.name}</strong><br/>${d.count} primary assignments`, event))
     .on("mouseleave", hideTooltip);
 
   g.selectAll("text.label")
@@ -1004,10 +996,10 @@ function renderClusterBars() {
     .attr("y", (d) => y(d.name) + y.bandwidth() / 2)
     .attr("dy", "0.35em")
     .attr("text-anchor", "end")
-    .attr("fill", (d) => (d.name === state.selectedCluster ? CCN_COLORS.white : CCN_COLORS.muted))
+    .attr("fill", (d) => (d.name === state.selectedTheme ? CCN_COLORS.white : CCN_COLORS.muted))
     .style("font-size", "9px")
     .style("pointer-events", "none")
-    .text((d) => truncateLabel(d.name, 20));
+    .text((d) => truncateLabel(d.name, 22));
 
   g.selectAll("text.value")
     .data(data)
@@ -1069,22 +1061,22 @@ function renderEmbeddingCluster() {
     .attr("cx", (d) => x(d.x))
     .attr("cy", (d) => y(d.y))
     .attr("r", (d) =>
-      state.selectedCluster && d.cluster_name === state.selectedCluster ? 7 : 5.5
+      state.selectedTheme && d.cluster_name === state.selectedTheme ? 7 : 5.5
     )
     .attr("fill", (d) => color(d.cluster_name))
     .attr("stroke", (d) =>
-      state.selectedCluster && d.cluster_name === state.selectedCluster ? CCN_COLORS.pink : CCN_COLORS.navy
+      state.selectedTheme && d.cluster_name === state.selectedTheme ? CCN_COLORS.pink : CCN_COLORS.navy
     )
     .attr("stroke-width", (d) =>
-      state.selectedCluster && d.cluster_name === state.selectedCluster ? 2 : 1
+      state.selectedTheme && d.cluster_name === state.selectedTheme ? 2 : 1
     )
     .attr("opacity", (d) =>
-      !state.selectedCluster || d.cluster_name === state.selectedCluster ? 0.9 : 0.18
+      !state.selectedTheme || d.cluster_name === state.selectedTheme ? 0.9 : 0.18
     )
     .style("cursor", "pointer")
     .on("mousemove", (event, d) => showTooltip(embeddingPointTooltip(d), event))
     .on("mouseleave", hideTooltip)
-    .on("click", (_, d) => setClusterFilter(d.cluster_name));
+    .on("click", (_, d) => setThemeFilter(d.cluster_name));
 
   const legend = svg
     .append("g")
@@ -1095,7 +1087,7 @@ function renderEmbeddingCluster() {
     .join("g")
     .attr("transform", (_, i) => `translate(0, ${i * 22})`)
     .style("cursor", "pointer")
-    .on("click", (_, theme) => setClusterFilter(theme))
+    .on("click", (_, theme) => setThemeFilter(theme))
     .on("mousemove", (event, theme) => showTooltip(clusterLegendTooltip(theme), event))
     .on("mouseleave", hideTooltip);
 
@@ -1105,21 +1097,21 @@ function renderEmbeddingCluster() {
     .attr("height", 12)
     .attr("rx", 3)
     .attr("fill", (d) => color(d))
-    .attr("stroke", (d) => (d === state.selectedCluster ? CCN_COLORS.pink : "transparent"))
+    .attr("stroke", (d) => (d === state.selectedTheme ? CCN_COLORS.pink : "transparent"))
     .attr("stroke-width", 2);
 
   legendItems
     .append("text")
     .attr("x", 18)
     .attr("y", 10)
-    .attr("fill", (d) => (d === state.selectedCluster ? CCN_COLORS.white : CCN_COLORS.muted))
+    .attr("fill", (d) => (d === state.selectedTheme ? CCN_COLORS.white : CCN_COLORS.muted))
     .style("font-size", "10px")
     .text((d) => truncateLabel(d, 24));
 
   note.text(
-    state.selectedCluster
-      ? `Showing submissions in “${state.selectedCluster}” (${clusterMeta(state.selectedCluster).count} abstracts) · click again to clear`
-      : "Hover for cluster details · click a point or legend to filter matching submissions below."
+    state.selectedTheme
+      ? `Showing submissions with primary theme “${state.selectedTheme}” · click again to clear`
+      : "Hover for cluster details · click a point or legend to filter by primary research theme."
   );
 }
 
@@ -1129,17 +1121,17 @@ function renderPaperList() {
   const countEl = d3.select("#results-count");
   countEl.selectAll("*").remove();
 
-  const countLabel = state.selectedCluster
-    ? `${submissions.length} submissions in “${state.selectedCluster}”`
+  const countLabel = state.selectedTheme
+    ? `${submissions.length} submissions with primary theme “${state.selectedTheme}”`
     : `${submissions.length} matching submissions`;
   countEl.append("span").text(countLabel);
 
-  if (state.selectedCluster) {
+  if (state.selectedTheme) {
     countEl
       .append("span")
       .attr("class", "cluster-filter-pill")
-      .text("Clear cluster filter ×")
-      .on("click", () => setClusterFilter(state.selectedCluster));
+      .text("Clear theme filter ×")
+      .on("click", () => setThemeFilter(state.selectedTheme));
   }
 
   const items = list.selectAll(".paper-item").data(submissions).join("div").attr("class", "paper-item");
@@ -1157,41 +1149,36 @@ function renderPaperList() {
     .append("div")
     .attr("class", "meta")
     .text((d) => {
-      const point = state.embeddings?.points?.find(
-        (p) =>
-          p.id === d.id ||
-          (d.year === 2026 && String(p.poster_number) === String(d.poster_number))
-      );
-      const cluster = point?.cluster_name ? ` · ${point.cluster_name}` : "";
-      return `${d.year}${d.poster_number ? ` · Poster ${d.poster_number}` : ""}${d.authors ? ` · ${d.authors}` : ""}${d.topic_area ? ` · ${d.topic_area}` : ""}${cluster}`;
+      const primary = primaryTheme(d);
+      const secondaries = secondaryTopics(d);
+      const secondaryText = secondaries.length ? ` · also: ${secondaries.join(", ")}` : "";
+      return `${d.year}${d.poster_number ? ` · Poster ${d.poster_number}` : ""}${d.authors ? ` · ${d.authors}` : ""}${primary ? ` · ${primary}` : ""}${secondaryText}`;
     });
 
   items.each(function renderTags(d) {
+    const tagData = [primaryTheme(d), ...secondaryTopics(d)].filter(Boolean);
     const tags = d3.select(this).append("div").attr("class", "keyword-tags");
     tags
       .selectAll(".keyword-tag")
-      .data(d.keywords.slice(0, 10))
+      .data(tagData)
       .join("span")
-      .attr("class", (kw) => `keyword-tag${kw === state.selectedKeyword ? " active" : ""}`)
-      .text((kw) => kw)
-      .on("click", (_, kw) => {
-        state.selectedKeyword = state.selectedKeyword === kw ? "" : kw;
-        d3.select("#keyword-select").property("value", state.selectedKeyword);
-        renderAll();
-      });
+      .attr("class", (theme) => `keyword-tag${theme === state.selectedTheme ? " active" : ""}`)
+      .text((theme) => theme)
+      .on("click", (_, theme) => setThemeFilter(theme));
   });
 }
 
 function renderAll() {
   const submissions = filteredSubmissions();
-  const counts = keywordCounts(submissions);
+  const primaryCounts = primaryThemeCounts(submissions);
+  const secondaryCounts = secondaryTopicCounts(submissions);
 
   renderKpis(submissions);
-  renderKeywordSelect(counts);
+  renderThemeSelect(primaryCounts);
   renderYearChart();
-  renderKeywordBars(counts);
+  renderThemeBars(primaryCounts);
   renderTopicChart(submissions);
-  renderWordCloud(counts);
+  renderWordCloud(secondaryCounts);
   renderResearchThemesOverTime(submissions);
   renderResearchThemeTotals(submissions);
   renderResearchThemeDeltas(submissions);
@@ -1244,8 +1231,8 @@ async function init() {
     renderAll();
   });
 
-  d3.select("#keyword-select").on("change", (event) => {
-    state.selectedKeyword = event.target.value;
+  d3.select("#theme-select").on("change", (event) => {
+    state.selectedTheme = event.target.value;
     renderAll();
   });
 

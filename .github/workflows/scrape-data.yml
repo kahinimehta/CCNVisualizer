@@ -37,6 +37,9 @@ jobs:
       - name: Build 2026 embedding visualization
         run: python scripts/build_cluster_viz.py
 
+      - name: Assign research themes to all submissions
+        run: python scripts/assign_research_themes.py
+
       - name: Commit updated data
         run: |
           git config user.name "github-actions[bot]"
