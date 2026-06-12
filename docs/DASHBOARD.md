@@ -6,6 +6,8 @@ Interactive dashboard for CCN poster and paper archives (2018–2026), styled wi
 
 **Research themes source:** [CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform) (Google Form question 1)
 
+**Implementation reference:** [IMPLEMENTATION.md](IMPLEMENTATION.md) — data sources, preprocessing, and how each chart is built.
+
 ## What gets updated
 
 | Input | Role | When it changes |

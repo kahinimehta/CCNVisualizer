@@ -4,7 +4,7 @@ Interactive dashboard for poster and paper submissions across the [Cognitive Com
 
 **Live site:** https://ccn-visualizer.vercel.app/
 
-**Dashboard guide:** [docs/DASHBOARD.md](docs/DASHBOARD.md)
+**Dashboard guide:** [docs/DASHBOARD.md](docs/DASHBOARD.md) · **Implementation:** [docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md)
 
 **Research themes source:** [CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform) (Google Form question 1)
 
@@ -119,6 +119,7 @@ data/
 docs/
   index.html
   DASHBOARD.md
+  IMPLEMENTATION.md             # Data sources, algorithms, per-chart reference
   js/app.js
   css/style.css
   data/submissions.json
