@@ -21,8 +21,6 @@ const CHART_PALETTE = [
   "#ffed6f",
 ];
 
-const BLOCKED_TOPICS = new Set(["view pdf", "view paper pdf", "uncategorized", ""]);
-
 const KPI_ICONS = {
   submissions:
     '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 17V9"/><path d="M12 17V7"/><path d="M16 17v-5"/></svg>',
