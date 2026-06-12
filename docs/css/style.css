@@ -369,8 +369,21 @@ a {
 #topic-chart,
 #gauge-chart,
 #word-cloud,
-#network-chart {
+#topics-over-time-chart,
+#topic-delta-chart,
+#cluster-bars-chart {
   min-height: 280px;
+}
+
+#embedding-chart {
+  min-height: 480px;
+}
+
+.chart-note {
+  margin: 0.65rem 0 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-style: italic;
 }
 
 .card-header {

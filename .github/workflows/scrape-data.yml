@@ -34,11 +34,14 @@ jobs:
             python scripts/scrape_ccn.py
           fi
 
+      - name: Build 2026 embedding visualization
+        run: python scripts/build_cluster_viz.py
+
       - name: Commit updated data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/submissions.json docs/data/submissions.json
+          git add data/submissions.json docs/data/submissions.json data/embeddings_2026.json docs/data/embeddings_2026.json docs/data/google_topics.json
           if git diff --staged --quiet; then
             echo "No data changes to commit."
           else

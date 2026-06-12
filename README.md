@@ -8,13 +8,16 @@ Dashboard UI uses a card-based layout inspired by modern analytics dashboards, s
 ## What it does
 
 - Scrapes CCN archives from `2018.ccneuro.org` through `2025.ccneuro.org`
+- Merges provisional **2026** pending posters from `data/ccn-2026-pending-posters.csv`
 - Collects poster/paper titles, authors, abstracts, keywords, and topic areas
 - Builds an interactive dashboard with:
   - Keyword cloud (click to filter)
   - Top keyword bar chart
   - Submissions by year
   - Topic area distribution
-  - Keyword co-occurrence network (draggable)
+  - Topics over time (token method; Google Form topics when configured)
+  - Largest year-over-year topic shifts
+  - 2026 abstract embedding map (UMAP + cluster themes from collaborator pipeline)
   - Searchable submission list
 
 ## Data sources
@@ -25,15 +28,33 @@ Dashboard UI uses a card-based layout inspired by modern analytics dashboards, s
 | 2022–2023 | `accepted_papers.html` |
 | 2024–2025 | MeetingTrakr poster sessions (`poster-sessions/?view=all`) |
 
-2026 submissions are not yet available on the CCN site. The scraper can be re-run after they are published.
+| 2026 (provisional) | `data/ccn-2026-pending-posters.csv` — merged after scrape; replace file and re-run when updated |
+
+2026 is not yet published on the CCN archive site. Drop in an updated CSV and re-run the merge script (see below).
 
 ## Local development
 
 ```bash
 pip install -r scripts/requirements.txt
-python scripts/scrape_ccn.py          # full scrape (all years)
+python scripts/scrape_ccn.py          # full scrape (all years) + 2026 CSV merge
 python scripts/scrape_ccn.py --quick  # 2024–2025 only
+python scripts/merge_2026_csv.py      # merge/replace 2026 CSV only
+python scripts/build_cluster_viz.py   # rebuild 2026 UMAP embedding JSON
 ```
+
+### Google Form topics (optional)
+
+When form responses are ready, edit `data/google_topics.json` and copy to `docs/data/google_topics.json`:
+
+```json
+{
+  "enabled": true,
+  "topics": ["Vision", "Memory", "..."],
+  "assignments": { "submission-id": "Vision" }
+}
+```
+
+Set `enabled: true` once assignments are populated. Until then the dashboard uses the token/topic-area method.
 
 Serve the dashboard locally:
 
@@ -76,13 +97,19 @@ If a deploy fails with `ng build` exit 127, Vercel guessed the wrong framework. 
 ## Repository layout
 
 ```
-scripts/scrape_ccn.py   # Archive scraper
-docs/                   # GitHub Pages site
+scripts/scrape_ccn.py              # Archive scraper
+scripts/merge_2026_csv.py          # Merge provisional 2026 CSV
+scripts/build_cluster_viz.py       # 2026 embedding UMAP export
+scripts/ccn_abstract_clustering.ipynb  # Collaborator clustering notebook
+data/ccn-2026-pending-posters.csv  # Provisional 2026 data (replaceable)
+data/google_topics.json            # Google Form topic config (pending)
+docs/                              # GitHub Pages site
   index.html
   js/app.js
   css/style.css
-  data/submissions.json # Generated dataset
-data/submissions.json   # Copy of dataset for local use
+  data/submissions.json            # Generated dataset
+  data/embeddings_2026.json        # 2026 UMAP cluster points
+data/submissions.json              # Copy of dataset for local use
 ```
 
 ## Licenses

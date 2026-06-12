@@ -502,7 +502,19 @@ def scrape_all(years: Iterable[int] | None = None) -> dict:
     return payload
 
 
+def merge_2026_csv(payload: dict) -> dict:
+    """Merge provisional 2026 CSV if present (replaces any prior 2026 rows)."""
+    try:
+        from merge_2026_csv import merge_into_payload
+
+        return merge_into_payload(payload)
+    except Exception as exc:  # noqa: BLE001
+        print(f"Warning: 2026 CSV merge skipped: {exc}")
+        return payload
+
+
 def write_outputs(payload: dict) -> None:
+    payload = merge_2026_csv(payload)
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     DOCS_DATA_DIR.mkdir(parents=True, exist_ok=True)
 

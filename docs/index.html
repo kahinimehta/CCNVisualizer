@@ -33,7 +33,7 @@
           <img class="ccn-logo brand-logo" src="assets/ccn-logo.svg" alt="CCN" width="160" height="44" />
           <div>
             <h1>Submission Visualizer</h1>
-            <p>Cognitive Computational Neuroscience · Submission Archives 2018–2025</p>
+            <p>Cognitive Computational Neuroscience · Submission Archives 2018–2026</p>
             <!-- <div class="header-divider" aria-hidden="true"></div> -->
           </div>
           <div class="header-divider" aria-hidden="true"></div>
@@ -84,7 +84,7 @@
           <section class="card">
             <div class="card-header">
               <h2>Topic areas</h2>
-              <p class="card-sub">Share of submissions by topic (2024–2025)</p>
+              <p class="card-sub">Share of submissions by topic area</p>
             </div>
             <div id="topic-chart"></div>
           </section>
@@ -106,12 +106,37 @@
           </section>
         </div>
 
+        <section class="card card-wide">
+          <div class="card-header">
+            <h2>Topics over time</h2>
+            <p class="card-sub" id="topics-over-time-sub">Topic counts by year · token method (Google Form topics when uploaded)</p>
+          </div>
+          <div id="topics-over-time-chart"></div>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <h2>Largest topic shifts</h2>
+            <p class="card-sub">Greatest absolute year-over-year change</p>
+          </div>
+          <div id="topic-delta-chart"></div>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <h2>2026 research themes</h2>
+            <p class="card-sub">Embedding clusters from pending 2026 abstracts</p>
+          </div>
+          <div id="cluster-bars-chart"></div>
+        </section>
+
         <section class="card card-full">
           <div class="card-header">
-            <h2>Keyword network</h2>
-            <p class="card-sub">Co-occurring keywords · drag nodes to explore</p>
+            <h2>Abstract embedding map</h2>
+            <p class="card-sub">UMAP projection of 2026 abstracts · colored by research theme · hover for details</p>
           </div>
-          <div id="network-chart"></div>
+          <div id="embedding-chart"></div>
+          <p class="chart-note" id="embedding-note"></p>
         </section>
 
         <section class="card card-full" id="submissions-panel">

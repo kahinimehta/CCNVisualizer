@@ -8,7 +8,20 @@ const CCN_COLORS = {
   card: "#162d47",
 };
 
-const CHART_PALETTE = [CCN_COLORS.pink, CCN_COLORS.blue, CCN_COLORS.green, "#9ecae1", "#fdae9f", "#a8ddb5"];
+const CHART_PALETTE = [
+  CCN_COLORS.pink,
+  CCN_COLORS.blue,
+  CCN_COLORS.green,
+  "#9ecae1",
+  "#fdae9f",
+  "#a8ddb5",
+  "#c7e9c0",
+  "#fdd0a2",
+  "#bcbddc",
+  "#ffed6f",
+];
+
+const BLOCKED_TOPICS = new Set(["view pdf", "view paper pdf", "uncategorized", ""]);
 
 const KPI_ICONS = {
   submissions:
@@ -23,9 +36,12 @@ const KPI_ICONS = {
 
 const state = {
   data: null,
+  embeddings: null,
+  googleTopics: null,
   selectedYear: "all",
   search: "",
   selectedKeyword: "",
+  selectedCluster: "",
 };
 
 let tooltip = null;
@@ -98,36 +114,77 @@ function topicCounts(submissions) {
     .slice(0, 8);
 }
 
-function cooccurrenceForSelection(submissions) {
-  const pairCounts = new Map();
+function submissionTopic(submission) {
+  if (state.googleTopics?.enabled) {
+    const assigned = state.googleTopics.assignments?.[submission.id];
+    if (assigned) return assigned.toLowerCase();
+    const topics = state.googleTopics.topics || [];
+    if (topics.length) return "unassigned";
+  }
+  if (submission.topic_area && !BLOCKED_TOPICS.has(submission.topic_area.toLowerCase())) {
+    return submission.topic_area.toLowerCase();
+  }
+  const tokenTopic = submission.keywords.find((kw) => kw && !BLOCKED_TOPICS.has(kw));
+  return tokenTopic || "uncategorized";
+}
+
+function topicCountsByYear(submissions) {
+  const counts = new Map();
   submissions.forEach((item) => {
-    const kws = [...new Set(item.keywords)].slice(0, 8);
-    for (let i = 0; i < kws.length; i += 1) {
-      for (let j = i + 1; j < kws.length; j += 1) {
-        const a = kws[i];
-        const b = kws[j];
-        const key = a < b ? `${a}|||${b}` : `${b}|||${a}`;
-        pairCounts.set(key, (pairCounts.get(key) || 0) + 1);
-      }
-    }
+    const year = String(item.year);
+    const topic = submissionTopic(item);
+    if (BLOCKED_TOPICS.has(topic)) return;
+    if (!counts.has(year)) counts.set(year, new Map());
+    const yearMap = counts.get(year);
+    yearMap.set(topic, (yearMap.get(topic) || 0) + 1);
   });
+  return counts;
+}
 
-  const links = [...pairCounts.entries()]
-    .map(([key, count]) => {
-      const [source, target] = key.split("|||");
-      return { source, target, count };
-    })
-    .filter((d) => d.count >= 2)
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 80);
-
-  const nodeSet = new Set();
-  links.forEach((l) => {
-    nodeSet.add(l.source);
-    nodeSet.add(l.target);
+function topTopicsOverTime(submissions, limit = 8) {
+  const totals = new Map();
+  submissions.forEach((item) => {
+    const topic = submissionTopic(item);
+    if (BLOCKED_TOPICS.has(topic)) return;
+    totals.set(topic, (totals.get(topic) || 0) + 1);
   });
+  return [...totals.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([topic]) => topic);
+}
 
-  return { nodes: [...nodeSet].map((id) => ({ id })), links };
+function topicYearDeltas(submissions, limit = 10) {
+  const byYear = topicCountsByYear(submissions);
+  const years = [...state.data.metadata.years].sort((a, b) => a - b).map(String);
+  const deltas = [];
+
+  for (let i = 1; i < years.length; i += 1) {
+    const prevYear = years[i - 1];
+    const currYear = years[i];
+    const prev = byYear.get(prevYear) || new Map();
+    const curr = byYear.get(currYear) || new Map();
+    const topics = new Set([...prev.keys(), ...curr.keys()]);
+
+    topics.forEach((topic) => {
+      if (BLOCKED_TOPICS.has(topic)) return;
+      const delta = (curr.get(topic) || 0) - (prev.get(topic) || 0);
+      deltas.push({
+        topic,
+        fromYear: prevYear,
+        toYear: currYear,
+        delta,
+        absDelta: Math.abs(delta),
+      });
+    });
+  }
+
+  return deltas.sort((a, b) => b.absDelta - a.absDelta).slice(0, limit);
+}
+
+function truncateLabel(text, max = 28) {
+  if (!text) return "";
+  return text.length > max ? `${text.slice(0, max)}…` : text;
 }
 
 function renderKpis(filtered) {
@@ -495,88 +552,332 @@ function renderGauge(filtered) {
     .text(`${value.toLocaleString()} of ${total.toLocaleString()}`);
 }
 
-function renderNetwork(submissions) {
-  const container = d3.select("#network-chart");
+function renderTopicsOverTime(submissions) {
+  const container = d3.select("#topics-over-time-chart");
   container.selectAll("*").remove();
 
-  const { nodes, links } = cooccurrenceForSelection(submissions);
-  const width = container.node().clientWidth || 1100;
-  const height = 360;
+  const sub = d3.select("#topics-over-time-sub");
+  if (state.googleTopics?.enabled) {
+    sub.text("Topic counts by year · Google Form responses");
+  } else if (state.googleTopics?.topics?.length) {
+    sub.text("Topic counts by year · Google topics configured (assignments pending)");
+  } else {
+    sub.text("Topic counts by year · token method (Google Form topics when uploaded)");
+  }
 
-  if (!nodes.length) {
-    container.append("p").style("color", CCN_COLORS.muted).text("Not enough co-occurrence data for current filter.");
+  const years = [...state.data.metadata.years].sort((a, b) => a - b);
+  const topics = topTopicsOverTime(submissions, 8);
+  const byYear = topicCountsByYear(submissions);
+
+  const width = container.node().clientWidth || 760;
+  const height = 300;
+  const margin = { top: 16, right: 16, bottom: 36, left: 44 };
+
+  if (!topics.length) {
+    container.append("p").style("color", CCN_COLORS.muted).text("No topic data for current filter.");
     return;
   }
 
   const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`);
-  const color = d3.scaleOrdinal(CHART_PALETTE);
+  const innerW = width - margin.left - margin.right;
+  const innerH = height - margin.top - margin.bottom;
+  const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
-  const simulation = d3
-    .forceSimulation(nodes)
-    .force("link", d3.forceLink(links).id((d) => d.id).distance(90))
-    .force("charge", d3.forceManyBody().strength(-180))
-    .force("center", d3.forceCenter(width / 2, height / 2))
-    .force("collision", d3.forceCollide(28));
+  const x = d3.scalePoint().domain(years).range([0, innerW]).padding(0.5);
+  const y = d3
+    .scaleLinear()
+    .domain([0, d3.max(topics, (topic) => d3.max(years, (year) => byYear.get(String(year))?.get(topic) || 0)) || 1])
+    .nice()
+    .range([innerH, 0]);
+  const color = d3.scaleOrdinal(CHART_PALETTE).domain(topics);
 
-  const link = svg
+  const line = d3
+    .line()
+    .x((d) => x(d.year))
+    .y((d) => y(d.count))
+    .curve(d3.curveMonotoneX);
+
+  topics.forEach((topic) => {
+    const series = years.map((year) => ({
+      year,
+      count: byYear.get(String(year))?.get(topic) || 0,
+      topic,
+    }));
+
+    g.append("path")
+      .datum(series)
+      .attr("fill", "none")
+      .attr("stroke", color(topic))
+      .attr("stroke-width", 2.5)
+      .attr("opacity", 0.9)
+      .attr("d", line);
+
+    g.selectAll(`.dot-${topic.replace(/[^a-z0-9]/gi, "")}`)
+      .data(series.filter((d) => d.count > 0))
+      .join("circle")
+      .attr("cx", (d) => x(d.year))
+      .attr("cy", (d) => y(d.count))
+      .attr("r", 4)
+      .attr("fill", color(topic))
+      .attr("stroke", CCN_COLORS.navy)
+      .attr("stroke-width", 1.5)
+      .on("mousemove", (event, d) =>
+        showTooltip(`<strong>${truncateLabel(d.topic, 40)}</strong><br/>${d.year}: ${d.count}`, event)
+      )
+      .on("mouseleave", hideTooltip);
+  });
+
+  g.append("g")
+    .attr("transform", `translate(0,${innerH})`)
+    .call(d3.axisBottom(x).tickFormat(d3.format("d")))
+    .call((sel) => sel.selectAll("text").attr("fill", CCN_COLORS.muted))
+    .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
+
+  g.append("g")
+    .call(d3.axisLeft(y).ticks(5))
+    .call((sel) => sel.selectAll("text").attr("fill", CCN_COLORS.muted))
+    .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
+
+  const legend = svg
     .append("g")
-    .selectAll("line")
-    .data(links)
-    .join("line")
-    .attr("stroke", "rgba(197,224,243,0.35)")
-    .attr("stroke-width", (d) => Math.sqrt(d.count));
-
-  const node = svg
-    .append("g")
+    .attr("transform", `translate(${margin.left}, ${height - 8})`);
+  const legendItems = legend
     .selectAll("g")
-    .data(nodes)
+    .data(topics)
     .join("g")
-    .style("cursor", "pointer")
-    .call(
-      d3
-        .drag()
-        .on("start", (event, d) => {
-          if (!event.active) simulation.alphaTarget(0.3).restart();
-          d.fx = d.x;
-          d.fy = d.y;
-        })
-        .on("drag", (event, d) => {
-          d.fx = event.x;
-          d.fy = event.y;
-        })
-        .on("end", (event, d) => {
-          if (!event.active) simulation.alphaTarget(0);
-          d.fx = null;
-          d.fy = null;
-        })
+    .attr("transform", (_, i) => `translate(${i * 118}, 0)`);
+  legendItems.append("rect").attr("width", 10).attr("height", 10).attr("rx", 2).attr("fill", (d) => color(d));
+  legendItems
+    .append("text")
+    .attr("x", 14)
+    .attr("y", 9)
+    .attr("fill", CCN_COLORS.muted)
+    .style("font-size", "9px")
+    .text((d) => truncateLabel(d, 16));
+}
+
+function renderTopicDelta(submissions) {
+  const container = d3.select("#topic-delta-chart");
+  container.selectAll("*").remove();
+
+  const data = topicYearDeltas(submissions, 10);
+  const width = container.node().clientWidth || 360;
+  const height = 340;
+  const margin = { top: 8, right: 52, bottom: 8, left: 150 };
+
+  if (!data.length) {
+    container.append("p").style("color", CCN_COLORS.muted).text("Not enough topic history for deltas.");
+    return;
+  }
+
+  const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`);
+  const innerW = width - margin.left - margin.right;
+  const maxAbs = d3.max(data, (d) => d.absDelta) || 1;
+
+  const x = d3.scaleLinear().domain([-maxAbs, maxAbs]).range([0, innerW]);
+  const y = d3
+    .scaleBand()
+    .domain(data.map((d) => d.topic))
+    .range([0, height - margin.top - margin.bottom])
+    .padding(0.2);
+
+  const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+  g.append("line")
+    .attr("x1", x(0))
+    .attr("x2", x(0))
+    .attr("y1", 0)
+    .attr("y2", height - margin.top - margin.bottom)
+    .attr("stroke", "rgba(197,224,243,0.25)");
+
+  g.selectAll("rect")
+    .data(data)
+    .join("rect")
+    .attr("x", (d) => (d.delta < 0 ? x(d.delta) : x(0)))
+    .attr("y", (d) => y(d.topic))
+    .attr("width", (d) => Math.abs(x(d.delta) - x(0)))
+    .attr("height", y.bandwidth())
+    .attr("fill", (d) => (d.delta >= 0 ? CCN_COLORS.green : CCN_COLORS.pink))
+    .attr("rx", 4)
+    .on("mousemove", (event, d) =>
+      showTooltip(
+        `<strong>${truncateLabel(d.topic, 42)}</strong><br/>${d.fromYear}→${d.toYear}: ${d.delta >= 0 ? "+" : ""}${d.delta}`,
+        event
+      )
     )
+    .on("mouseleave", hideTooltip);
+
+  g.selectAll("text.label")
+    .data(data)
+    .join("text")
+    .attr("class", "label")
+    .attr("x", -8)
+    .attr("y", (d) => y(d.topic) + y.bandwidth() / 2)
+    .attr("dy", "0.35em")
+    .attr("text-anchor", "end")
+    .attr("fill", CCN_COLORS.muted)
+    .style("font-size", "9px")
+    .text((d) => truncateLabel(d.topic, 22));
+}
+
+function renderClusterBars() {
+  const container = d3.select("#cluster-bars-chart");
+  container.selectAll("*").remove();
+
+  if (!state.embeddings?.clusters?.length) {
+    container.append("p").style("color", CCN_COLORS.muted).text("2026 embedding clusters not loaded.");
+    return;
+  }
+
+  const data = [...state.embeddings.clusters].sort((a, b) => b.count - a.count);
+  const width = container.node().clientWidth || 360;
+  const height = 340;
+  const margin = { top: 8, right: 40, bottom: 8, left: 150 };
+  const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`);
+  const innerW = width - margin.left - margin.right;
+
+  const x = d3.scaleLinear().domain([0, d3.max(data, (d) => d.count) || 1]).range([0, innerW]);
+  const y = d3
+    .scaleBand()
+    .domain(data.map((d) => d.name))
+    .range([0, height - margin.top - margin.bottom])
+    .padding(0.18);
+  const color = d3.scaleOrdinal(CHART_PALETTE).domain(data.map((d) => d.name));
+  const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+  g.selectAll("rect")
+    .data(data)
+    .join("rect")
+    .attr("x", 0)
+    .attr("y", (d) => y(d.name))
+    .attr("height", y.bandwidth())
+    .attr("width", (d) => x(d.count))
+    .attr("fill", (d) => (d.name === state.selectedCluster ? CCN_COLORS.pink : color(d.name)))
+    .attr("rx", 4)
+    .style("cursor", "pointer")
     .on("click", (_, d) => {
-      state.selectedKeyword = state.selectedKeyword === d.id ? "" : d.id;
-      d3.select("#keyword-select").property("value", state.selectedKeyword);
-      renderAll();
+      state.selectedCluster = state.selectedCluster === d.name ? "" : d.name;
+      renderEmbeddingCluster();
+      renderClusterBars();
+    })
+    .on("mousemove", (event, d) => showTooltip(`<strong>${d.name}</strong><br/>${d.count} abstracts`, event))
+    .on("mouseleave", hideTooltip);
+
+  g.selectAll("text.label")
+    .data(data)
+    .join("text")
+    .attr("class", "label")
+    .attr("x", -8)
+    .attr("y", (d) => y(d.name) + y.bandwidth() / 2)
+    .attr("dy", "0.35em")
+    .attr("text-anchor", "end")
+    .attr("fill", CCN_COLORS.muted)
+    .style("font-size", "9px")
+    .text((d) => truncateLabel(d.name, 22));
+}
+
+function renderEmbeddingCluster() {
+  const container = d3.select("#embedding-chart");
+  container.selectAll("*").remove();
+
+  const note = d3.select("#embedding-note");
+  if (!state.embeddings?.points?.length) {
+    container.append("p").style("color", CCN_COLORS.muted).text("2026 embedding map unavailable.");
+    note.text("");
+    return;
+  }
+
+  const points = state.embeddings.points.filter(
+    (p) => !state.selectedCluster || p.cluster_name === state.selectedCluster
+  );
+  const width = container.node().clientWidth || 1100;
+  const height = 480;
+  const margin = { top: 20, right: 200, bottom: 20, left: 20 };
+  const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`);
+
+  const x = d3
+    .scaleLinear()
+    .domain(d3.extent(state.embeddings.points, (d) => d.x))
+    .nice()
+    .range([margin.left, width - margin.right]);
+  const y = d3
+    .scaleLinear()
+    .domain(d3.extent(state.embeddings.points, (d) => d.y))
+    .nice()
+    .range([height - margin.bottom, margin.top]);
+
+  const themes = [...new Set(state.embeddings.points.map((d) => d.cluster_name))];
+  const color = d3.scaleOrdinal(CHART_PALETTE).domain(themes);
+
+  svg
+    .append("rect")
+    .attr("x", margin.left)
+    .attr("y", margin.top)
+    .attr("width", width - margin.left - margin.right)
+    .attr("height", height - margin.top - margin.bottom)
+    .attr("fill", "rgba(197,224,243,0.04)")
+    .attr("rx", 12);
+
+  svg
+    .selectAll("circle")
+    .data(points)
+    .join("circle")
+    .attr("cx", (d) => x(d.x))
+    .attr("cy", (d) => y(d.y))
+    .attr("r", 5.5)
+    .attr("fill", (d) => color(d.cluster_name))
+    .attr("stroke", CCN_COLORS.navy)
+    .attr("stroke-width", 1)
+    .attr("opacity", 0.88)
+    .style("cursor", "pointer")
+    .on("mousemove", (event, d) => {
+      const area = d.primary_area ? `<br/>${truncateLabel(d.primary_area, 50)}` : "";
+      showTooltip(`<strong>${truncateLabel(d.title, 60)}</strong>${area}<br/><em>${d.cluster_name}</em>`, event);
+    })
+    .on("mouseleave", hideTooltip)
+    .on("click", (_, d) => {
+      state.selectedCluster = state.selectedCluster === d.cluster_name ? "" : d.cluster_name;
+      renderEmbeddingCluster();
+      renderClusterBars();
     });
 
-  node
-    .append("circle")
-    .attr("r", 12)
-    .attr("fill", (d) => (d.id === state.selectedKeyword ? CCN_COLORS.pink : color(d.id)));
+  const legend = svg
+    .append("g")
+    .attr("transform", `translate(${width - margin.right + 12}, ${margin.top})`);
+  const legendItems = legend
+    .selectAll("g")
+    .data(themes)
+    .join("g")
+    .attr("transform", (_, i) => `translate(0, ${i * 22})`)
+    .style("cursor", "pointer")
+    .on("click", (_, theme) => {
+      state.selectedCluster = state.selectedCluster === theme ? "" : theme;
+      renderEmbeddingCluster();
+      renderClusterBars();
+    });
 
-  node
+  legendItems
+    .append("rect")
+    .attr("width", 12)
+    .attr("height", 12)
+    .attr("rx", 3)
+    .attr("fill", (d) => color(d))
+    .attr("stroke", (d) => (d === state.selectedCluster ? CCN_COLORS.pink : "transparent"))
+    .attr("stroke-width", 2);
+
+  legendItems
     .append("text")
-    .text((d) => (d.id.length > 14 ? `${d.id.slice(0, 14)}…` : d.id))
-    .attr("x", 14)
-    .attr("y", 4)
-    .attr("fill", CCN_COLORS.white)
-    .style("font-size", "10px");
+    .attr("x", 18)
+    .attr("y", 10)
+    .attr("fill", (d) => (d === state.selectedCluster ? CCN_COLORS.white : CCN_COLORS.muted))
+    .style("font-size", "10px")
+    .text((d) => truncateLabel(d, 24));
 
-  simulation.on("tick", () => {
-    link
-      .attr("x1", (d) => d.source.x)
-      .attr("y1", (d) => d.source.y)
-      .attr("x2", (d) => d.target.x)
-      .attr("y2", (d) => d.target.y);
-    node.attr("transform", (d) => `translate(${d.x},${d.y})`);
-  });
+  note.text(
+    state.selectedCluster
+      ? `Filtered to “${state.selectedCluster}” · click legend or points to reset`
+      : "Provisional 2026 data — replace data/ccn-2026-pending-posters.csv and re-run scripts when updated."
+  );
 }
 
 function renderPaperList(submissions) {
@@ -628,7 +929,10 @@ function renderAll() {
   renderTopicChart(submissions);
   renderGauge(submissions);
   renderWordCloud(counts);
-  renderNetwork(submissions);
+  renderTopicsOverTime(submissions);
+  renderTopicDelta(submissions);
+  renderClusterBars();
+  renderEmbeddingCluster();
   renderPaperList(submissions);
 
   d3.select("#year-chips")
@@ -636,14 +940,32 @@ function renderAll() {
     .classed("active", (d) => d === state.selectedYear);
 }
 
+async function loadOptionalJson(path) {
+  try {
+    const response = await fetch(path);
+    if (!response.ok) return null;
+    return response.json();
+  } catch {
+    return null;
+  }
+}
+
 async function init() {
   ensureD3();
 
-  const response = await fetch("data/submissions.json");
-  if (!response.ok) {
-    throw new Error(`Could not load data/submissions.json (${response.status})`);
+  const [submissionsRes, embeddings, googleTopics] = await Promise.all([
+    fetch("data/submissions.json"),
+    loadOptionalJson("data/embeddings_2026.json"),
+    loadOptionalJson("data/google_topics.json"),
+  ]);
+
+  if (!submissionsRes.ok) {
+    throw new Error(`Could not load data/submissions.json (${submissionsRes.status})`);
   }
-  state.data = await response.json();
+
+  state.data = await submissionsRes.json();
+  state.embeddings = embeddings;
+  state.googleTopics = googleTopics;
 
   renderYearControls();
 
