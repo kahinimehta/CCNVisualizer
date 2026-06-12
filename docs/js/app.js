@@ -687,11 +687,15 @@ function renderResearchThemesOverTime(submissions) {
   const cumulative = themeCumulativeByYear(years, byYear, themes);
 
   const width = container.node().clientWidth || 1000;
-  const height = 400;
-  const margin = { top: 20, right: 20, bottom: 44, left: 48 };
+  const legendCols = width > 700 ? 3 : 2;
+  const legendRows = Math.ceil(themes.length / legendCols);
+  const legendBlock = legendRows * 20 + 28;
+  const chartHeight = 300;
+  const height = chartHeight + legendBlock;
+  const margin = { top: 20, right: 20, bottom: 16, left: 48 };
   const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`);
   const innerW = width - margin.left - margin.right;
-  const innerH = height - margin.top - margin.bottom;
+  const innerH = chartHeight - margin.top - margin.bottom;
   const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
   const annualMax = d3.max(themes, (theme) =>
@@ -786,10 +790,7 @@ function renderResearchThemesOverTime(submissions) {
     .style("font-size", "10px")
     .text("Submissions per year");
 
-  const legend = svg
-    .append("g")
-    .attr("transform", `translate(${margin.left}, ${height - 6})`);
-  const legendCols = width > 700 ? 3 : 2;
+  const legend = svg.append("g").attr("transform", `translate(${margin.left}, ${chartHeight + 8})`);
   const colWidth = (width - margin.left - margin.right) / legendCols;
   const legendItems = legend
     .selectAll("g")
@@ -818,11 +819,10 @@ function renderResearchThemesOverTime(submissions) {
     .style("font-size", "9px")
     .text((d) => truncateLabel(d, 34));
 
-  const legendRows = Math.ceil(themes.length / legendCols);
   svg
     .append("text")
     .attr("x", margin.left)
-    .attr("y", height - 6 - legendRows * 18)
+    .attr("y", chartHeight + 4)
     .attr("fill", CCN_COLORS.muted)
     .style("font-size", "9px")
     .text("Solid = annual count · dashed = cumulative total");

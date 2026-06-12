@@ -1,6 +1,6 @@
 # Submission Visualizer — Dashboard Guide
 
-Interactive dashboard for CCN poster and paper archives (2018–2026), styled with CCN brand colors (navy, pink, blue, green) in a card-based layout.
+Interactive dashboard for CCN poster and paper archives (2018–2026), styled with CCN brand colors (navy, pink, blue, green).
 
 **Live site:** https://ccn-visualizer.vercel.app/
 
@@ -10,97 +10,192 @@ Every submission is assigned:
 
 | Field | Role |
 |-------|------|
-| `primary_theme` | One of 10 embedding research themes — drives **all** charts, filters, and counts |
-| `secondary_topics` | Up to 3 additional theme tags — shown in the secondary-topics cloud and paper metadata only |
+| `primary_theme` | One of **12 Google Form topics** — drives all charts, filters, dropdown, and counts |
+| `secondary_topics` | Up to 3 additional tags — embedding cluster names or runner-up themes; shown in the secondary-topics cloud and paper metadata only |
 
-### The 12 research themes (Google Form Q1)
+Nothing in the dashboard filters on raw keywords or legacy topic areas. Those fields are kept in the data for search and provenance only.
 
-From [CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform) — meetup topic affiliation:
+### The 12 primary themes (Google Form Q1)
 
-1. RL, motor control & planning
-2. Naturalistic encoding/decoding
-3. Neural population geometry & dynamics
-4. Decision-making and metacognition
-5. Vision
-6. Language/auditory neuroscience
-7. LLMs, reasoning, interpretability
-8. Memory
-9. Social cognition & theory of mind
-10. Attention & cognitive control / executive function
-11. Clinical / computational psychiatry
-12. Methods, theory & everything else
+Source: [CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform), question 1 — *"Which topic would you best affiliate yourself with for lower Manhattan meetups?"*
 
-**2026** submissions map embedding clusters → Google topics. **Earlier years** are inferred by text match. Embedding cluster names may appear as **secondary topics**.
+Analytics: [viewanalytics](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewanalytics)
 
-## Layout
+| # | Primary theme |
+|---|---------------|
+| 1 | RL, motor control & planning |
+| 2 | Naturalistic encoding/decoding |
+| 3 | Neural population geometry & dynamics |
+| 4 | Decision-making and metacognition |
+| 5 | Vision |
+| 6 | Language/auditory neuroscience |
+| 7 | LLMs, reasoning, interpretability |
+| 8 | Memory |
+| 9 | Social cognition & theory of mind |
+| 10 | Attention & cognitive control / executive function |
+| 11 | Clinical / computational psychiatry |
+| 12 | Methods, theory & everything else |
 
-Single-column stack, max-width **1080px**, centered — fills a laptop screen without stretching ultra-wide on large monitors. On mobile, filters and KPI cards reflow to 1–2 columns.
+### How themes are assigned
+
+| Years | Method |
+|-------|--------|
+| **2026** | UMAP embedding cluster → mapped to Google topic via `embedding_cluster_map` |
+| **2018–2025** | Text match (title, abstract, topic area, keywords) against keyword profiles built from 2026 data |
+| **Override** | If `google_topics.json` → `assignments[submission-id]` is set, that value wins |
+
+Embedding cluster names (e.g. `Reinforcement Learning`, `Visual Cortex Models`) from the collaborator notebook may appear as **secondary topics** when they differ from the mapped Google primary.
+
+### Embedding cluster → Google topic map
+
+| Embedding cluster (2026) | Google primary theme |
+|--------------------------|----------------------|
+| Reinforcement Learning | RL, motor control & planning |
+| Naturalistic Brain Encoding | Naturalistic encoding/decoding |
+| Neural Population Dynamics | Neural population geometry & dynamics |
+| Decision and Metacognition | Decision-making and metacognition |
+| Visual Cortex Models | Vision |
+| Computer Vision Models | Vision |
+| Language Neuroscience | Language/auditory neuroscience |
+| LLMs and Reasoning | LLMs, reasoning, interpretability |
+| Cognition and Memory Systems | Memory |
+| Neural Network Theory | Methods, theory & everything else |
+
+Clusters without a direct meetup topic (e.g. social cognition, clinical psychiatry) are reached via text scoring for pre-2026 papers.
+
+---
+
+## Layout & responsive design
+
+The dashboard uses a **single-column stack** inside a centered container (`max-width: 1080px`). Cards are full-width so content reads top-to-bottom on any screen — no side-by-side chart pairs on desktop.
 
 ```
 ┌──────────────────────────────────────┐
 │ Header · filters · KPIs · year chips │
 ├──────────────────────────────────────┤
 │ Submissions over time                │
-│ Research theme ranking             │
-│ Research themes over time          │
-│   └ totals · year-over-year        │
-│ Abstract embedding map             │
-│ Matching submissions               │
-│ Primary themes · Secondary · Bars  │
+│ Research theme ranking               │
+│ Research themes over time            │
+│   ├─ Total by research theme         │
+│   └─ Year-over-year change           │
+│ Embedding block (stacked)            │
+│   ├─ Abstract embedding map (UMAP)   │
+│   ├─ Matching submissions            │
+│   ├─ Primary themes (donut)          │
+│   ├─ Secondary topics (cloud)        │
+│   └─ Research theme breakdown (bars) │
 └──────────────────────────────────────┘
 ```
 
+The **Total by research theme** and **Year-over-year change** panels sit side by side inside the “Research themes over time” card on wider viewports; they stack on narrow screens.
+
+| Breakpoint | Behavior |
+|------------|----------|
+| **Desktop (≥900px)** | 1080px centered column; 4 KPI cards in a row; filters in a grid |
+| **Tablet (720–899px)** | 2×2 KPI grid; filters wrap |
+| **Mobile (<700px)** | Single-column filters; 2-column KPIs; collapsible sidebar overlay |
+
+Sidebar navigation (Visualizer · CCN page · Licenses) collapses to icons on narrow viewports.
+
+---
+
 ## Filters
 
-All visualizations respect the active filter state:
+All visualizations respect the same filter state:
 
-- **Year** — single year or all years
-- **Research theme** — dropdown lists primary themes with counts; filters to submissions where `primary_theme` matches
+- **Year** — single year or all years (dropdown + chip buttons)
+- **Research theme** — dropdown lists all 12 primary themes with counts in the current filter
 - **Search** — title, authors, primary theme, secondary topics, topic area
 
-Clicking a theme on any chart (ranking bars, donut, UMAP legend, embedding points, sidebar bars) applies the same research-theme filter.
+Clicking a theme on any chart (ranking bars, donut, UMAP points/legend, theme breakdown bars) applies the same filter. A **Clear theme filter** pill appears in the submissions header.
+
+---
 
 ## Components
 
-| Component | Data source | Notes |
-|-----------|-------------|-------|
-| Submissions over time | All filtered submissions | Count by year |
-| Research theme ranking | `primary_theme` | Horizontal bars, full theme names |
-| Research themes over time | `primary_theme` × year | Solid = annual count; dashed = cumulative |
-| Total by research theme | `primary_theme` | All-time totals in filter |
-| Year-over-year change | `primary_theme` | Single bar per theme for latest year pair |
-| Abstract embedding map | 2026 UMAP coordinates | Click to filter by primary theme |
+| Component | Data source | Filterable? |
+|-----------|-------------|-------------|
+| Submissions over time | Count by `year` | Indirectly (year filter) |
+| Research theme ranking | `primary_theme` counts | Click bar → theme filter |
+| Research themes over time | `primary_theme` × year | Respects filters; solid = annual, dashed = cumulative |
+| Total by research theme | `primary_theme` all-time totals | Respects filters |
+| Year-over-year change | `primary_theme` delta (latest year pair) | Respects filters |
+| Abstract embedding map | 2026 UMAP coords, colored by mapped Google topic | Click point/legend → theme filter |
 | Matching submissions | Filtered list | Shows primary + secondary tags |
-| Primary research themes | `primary_theme` | Donut chart |
-| Secondary topics | `secondary_topics` | Word cloud (informational, not a filter) |
-| Theme breakdown | `primary_theme` | Sidebar bar chart |
+| Primary research themes | `primary_theme` share (donut) | Click slice → theme filter |
+| Secondary topics | `secondary_topics` frequency | Informational only |
+| Research theme breakdown | `primary_theme` bars | Click bar → theme filter |
+
+---
+
+## `google_topics.json` schema
+
+Config file at `data/google_topics.json` and `docs/data/google_topics.json`:
+
+```json
+{
+  "schema_version": 2,
+  "enabled": true,
+  "source": "CCN 2026 Activity Preferences — Google Form question 1",
+  "form_url": "https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform",
+  "analytics_url": "https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewanalytics",
+  "topics": [ "...12 topic strings..." ],
+  "embedding_cluster_map": { "Embedding Cluster Name": "Google topic" },
+  "assignments": { "submission-id": "Vision" },
+  "response_counts": { "Vision": 42, "...": 0 }
+}
+```
+
+| Field | Purpose |
+|-------|---------|
+| `enabled` | When `true`, dashboard uses `topics` for dropdown and charts |
+| `topics` | Canonical list of 12 primary theme names |
+| `embedding_cluster_map` | Maps 2026 embedding cluster labels → Google topics |
+| `assignments` | Per-submission overrides (optional; empty until form CSV is linked) |
+| `response_counts` | Optional attendee preference counts from form analytics (display TBD) |
+
+Keep `data/google_topics.json` and `docs/data/google_topics.json` in sync (the dashboard reads `docs/data/`). After editing either copy, re-run `python scripts/assign_research_themes.py`.
+
+---
 
 ## Data pipeline
 
 ```bash
-python scripts/scrape_ccn.py           # scrape archives + merge 2026 CSV
-python scripts/build_cluster_viz.py    # 2026 UMAP JSON
-python scripts/assign_research_themes.py  # primary_theme + secondary_topics on every row
+pip install -r scripts/requirements.txt
+
+python scripts/scrape_ccn.py           # scrape 2018–2025 + merge 2026 CSV + assign themes
+python scripts/build_cluster_viz.py    # rebuild docs/data/embeddings_2026.json
+python scripts/assign_research_themes.py  # re-assign primary_theme / secondary_topics only
 ```
 
-Or run the **Scrape CCN Data** GitHub Action (runs all three steps).
+The **Scrape CCN Data** GitHub Action runs scrape → build cluster viz → assign themes → commit.
 
-### Updating 2026
+### Updating 2026 provisional data
 
 1. Replace `data/ccn-2026-pending-posters.csv`
-2. Re-run merge + cluster build + theme assignment
+2. `python scripts/merge_2026_csv.py`
+3. `python scripts/build_cluster_viz.py` (if embeddings change)
+4. `python scripts/assign_research_themes.py`
 
-### Google Form topics (future)
+### Adding form response data later
 
-When form data is ready, set `docs/data/google_topics.json` with `enabled: true`. Form assignments can override `primary_theme` at runtime.
+1. Download responses from [form analytics](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewanalytics) as CSV
+2. Populate `response_counts` and/or `assignments` in `google_topics.json`
+3. Copy to `docs/data/google_topics.json`
+4. Re-run `assign_research_themes.py`
 
-## Files
+---
+
+## Key files
 
 | Path | Purpose |
 |------|---------|
 | `docs/index.html` | Dashboard markup |
 | `docs/js/app.js` | Charts, filters, theme logic |
-| `docs/css/style.css` | CCN styling |
-| `docs/data/submissions.json` | Submissions with `primary_theme` / `secondary_topics` |
-| `docs/data/embeddings_2026.json` | 2026 UMAP points and cluster names |
-| `docs/data/google_topics.json` | Optional form-based overrides |
+| `docs/js/sidebar.js` | Sidebar collapse |
+| `docs/css/style.css` | CCN styling + responsive layout |
+| `docs/data/submissions.json` | All submissions with `primary_theme`, `secondary_topics` |
+| `docs/data/embeddings_2026.json` | 2026 UMAP coordinates + embedding cluster labels |
+| `docs/data/google_topics.json` | Google Form topic list and cluster map |
+| `scripts/assign_research_themes.py` | Theme assignment for entire archive |
+| `scripts/ccn_abstract_clustering.ipynb` | Collaborator embedding/clustering notebook |
