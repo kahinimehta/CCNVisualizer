@@ -4,6 +4,8 @@ Interactive dashboard for CCN poster and paper archives (2018–2026), styled wi
 
 **Live site:** https://ccn-visualizer.vercel.app/
 
+**Research themes source:** [CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform) (Google Form) · [analytics](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewanalytics)
+
 ## Core concept: research themes
 
 Every submission is assigned:

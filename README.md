@@ -6,6 +6,8 @@ Interactive dashboard for poster and paper submissions across the [Cognitive Com
 
 **Dashboard guide:** [docs/DASHBOARD.md](docs/DASHBOARD.md) — layout, filters, research themes, data pipeline, and `google_topics.json` schema.
 
+**Research themes source:** [CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform) (Google Form) · [analytics](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewanalytics)
+
 ## Overview
 
 - Scrapes CCN archives (`2018`–`2025`) and merges provisional **2026** posters from CSV
@@ -28,7 +30,7 @@ Interactive dashboard for poster and paper submissions across the [Cognitive Com
 
 ## Research themes
 
-12 primary topics from **CCN 2026 Activity Preferences**, question 1 (meetup affiliation). Configured in `docs/data/google_topics.json`.
+12 primary topics from [**CCN 2026 Activity Preferences**](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform), question 1 (meetup affiliation). Configured in `docs/data/google_topics.json`.
 
 | Assignment | Method |
 |------------|--------|
