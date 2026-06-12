@@ -192,10 +192,6 @@ function embeddingPointForSubmission(submission) {
 }
 
 function submissionResearchTheme(submission) {
-  if (state.googleTopics?.enabled) {
-    const assigned = state.googleTopics.assignments?.[submission.id];
-    if (assigned) return assigned;
-  }
   if (submission.primary_theme) return submission.primary_theme;
 
   const point = embeddingPointForSubmission(submission);

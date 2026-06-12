@@ -4,7 +4,19 @@ Interactive dashboard for CCN poster and paper archives (2018–2026), styled wi
 
 **Live site:** https://ccn-visualizer.vercel.app/
 
-**Research themes source:** [CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform) (Google Form) · [analytics](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewanalytics)
+**Research themes source:** [CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform) (Google Form question 1)
+
+## What gets updated
+
+| Input | Role | When it changes |
+|-------|------|-----------------|
+| [Google Form](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform) | Defines the 12 primary research theme names | Only if CCN changes question 1 options — edit `google_topics.json` manually |
+| `data/ccn-2026-pending-posters.csv` | 2026 poster titles, abstracts, topic areas | Whenever CCN releases an updated 2026 list |
+| Archive scrape (`2018`–`2025`) | Historical submissions | Static — already captured in `submissions.json` |
+
+No form response data, analytics exports, or per-respondent assignments are used.
+
+---
 
 ## Core concept: research themes
 
@@ -19,9 +31,7 @@ Nothing in the dashboard filters on raw keywords or legacy topic areas. Those fi
 
 ### The 12 primary themes (Google Form Q1)
 
-Source: [CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform), question 1 — *"Which topic would you best affiliate yourself with for lower Manhattan meetups?"*
-
-Analytics: [viewanalytics](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewanalytics)
+From [CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform), question 1 — *"Which topic would you best affiliate yourself with for lower Manhattan meetups?"*
 
 | # | Primary theme |
 |---|---------------|
@@ -44,7 +54,6 @@ Analytics: [viewanalytics](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2n
 |-------|--------|
 | **2026** | UMAP embedding cluster → mapped to Google topic via `embedding_cluster_map` |
 | **2018–2025** | Text match (title, abstract, topic area, keywords) against keyword profiles built from 2026 data |
-| **Override** | If `google_topics.json` → `assignments[submission-id]` is set, that value wins |
 
 Embedding cluster names (e.g. `Reinforcement Learning`, `Visual Cortex Models`) from the collaborator notebook may appear as **secondary topics** when they differ from the mapped Google primary.
 
@@ -69,7 +78,7 @@ Clusters without a direct meetup topic (e.g. social cognition, clinical psychiat
 
 ## Layout & responsive design
 
-The dashboard uses a **single-column stack** inside a centered container (`max-width: 1080px`). Cards are full-width so content reads top-to-bottom on any screen — no side-by-side chart pairs on desktop.
+The dashboard uses a **single-column stack** inside a centered container (`max-width: 1080px`). Cards are full-width so content reads top-to-bottom on any screen.
 
 ```
 ┌──────────────────────────────────────┐
@@ -132,59 +141,53 @@ Clicking a theme on any chart (ranking bars, donut, UMAP points/legend, theme br
 
 ## `google_topics.json` schema
 
-Config file at `data/google_topics.json` and `docs/data/google_topics.json`:
+Config at `data/google_topics.json` and `docs/data/google_topics.json` (dashboard reads `docs/data/`):
 
 ```json
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "enabled": true,
   "source": "CCN 2026 Activity Preferences — Google Form question 1",
   "form_url": "https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform",
-  "analytics_url": "https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewanalytics",
-  "topics": [ "...12 topic strings..." ],
-  "embedding_cluster_map": { "Embedding Cluster Name": "Google topic" },
-  "assignments": { "submission-id": "Vision" },
-  "response_counts": { "Vision": 42, "...": 0 }
+  "question": "Which topic would you best affiliate yourself with for lower Manhattan meetups?",
+  "topics": [ "...12 topic strings from the form..." ],
+  "embedding_cluster_map": { "Embedding Cluster Name": "Google topic" }
 }
 ```
 
 | Field | Purpose |
 |-------|---------|
-| `enabled` | When `true`, dashboard uses `topics` for dropdown and charts |
-| `topics` | Canonical list of 12 primary theme names |
+| `form_url` | Link to the Google Form — canonical source for theme names |
+| `topics` | The 12 primary theme names (copied from form question 1) |
 | `embedding_cluster_map` | Maps 2026 embedding cluster labels → Google topics |
-| `assignments` | Per-submission overrides (optional; empty until form CSV is linked) |
-| `response_counts` | Optional attendee preference counts from form analytics (display TBD) |
 
-Keep `data/google_topics.json` and `docs/data/google_topics.json` in sync (the dashboard reads `docs/data/`). After editing either copy, re-run `python scripts/assign_research_themes.py`.
+Keep both copies in sync. After editing topics, re-run `python scripts/assign_research_themes.py`.
 
 ---
 
 ## Data pipeline
 
+### Routine update (2026 CSV only)
+
 ```bash
 pip install -r scripts/requirements.txt
 
-python scripts/scrape_ccn.py           # scrape 2018–2025 + merge 2026 CSV + assign themes
-python scripts/build_cluster_viz.py    # rebuild docs/data/embeddings_2026.json
-python scripts/assign_research_themes.py  # re-assign primary_theme / secondary_topics only
+python scripts/merge_2026_csv.py          # replace 2026 rows from CSV
+python scripts/build_cluster_viz.py       # rebuild docs/data/embeddings_2026.json
+python scripts/assign_research_themes.py  # re-assign primary_theme / secondary_topics
 ```
 
-The **Scrape CCN Data** GitHub Action runs scrape → build cluster viz → assign themes → commit.
+Or run the **Update 2026 Data** GitHub Action.
 
-### Updating 2026 provisional data
+### Full rebuild (rare)
 
-1. Replace `data/ccn-2026-pending-posters.csv`
-2. `python scripts/merge_2026_csv.py`
-3. `python scripts/build_cluster_viz.py` (if embeddings change)
-4. `python scripts/assign_research_themes.py`
+```bash
+python scripts/scrape_ccn.py           # re-scrape 2018–2025 + merge 2026 CSV + assign themes
+python scripts/build_cluster_viz.py
+python scripts/assign_research_themes.py
+```
 
-### Adding form response data later
-
-1. Download responses from [form analytics](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewanalytics) as CSV
-2. Populate `response_counts` and/or `assignments` in `google_topics.json`
-3. Copy to `docs/data/google_topics.json`
-4. Re-run `assign_research_themes.py`
+The **Scrape CCN Data** GitHub Action runs the full rebuild path.
 
 ---
 
@@ -192,6 +195,8 @@ The **Scrape CCN Data** GitHub Action runs scrape → build cluster viz → assi
 
 | Path | Purpose |
 |------|---------|
+| `data/ccn-2026-pending-posters.csv` | **Primary input for updates** — replace when CCN publishes new 2026 data |
+| `data/google_topics.json` | 12 themes from [Google Form Q1](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform) |
 | `docs/index.html` | Dashboard markup |
 | `docs/js/app.js` | Charts, filters, theme logic |
 | `docs/js/sidebar.js` | Sidebar collapse |

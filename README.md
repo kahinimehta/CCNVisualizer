@@ -4,15 +4,16 @@ Interactive dashboard for poster and paper submissions across the [Cognitive Com
 
 **Live site:** https://ccn-visualizer.vercel.app/
 
-**Dashboard guide:** [docs/DASHBOARD.md](docs/DASHBOARD.md) — layout, filters, research themes, data pipeline, and `google_topics.json` schema.
+**Dashboard guide:** [docs/DASHBOARD.md](docs/DASHBOARD.md)
 
-**Research themes source:** [CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform) (Google Form) · [analytics](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewanalytics)
+**Research themes source:** [CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform) (Google Form question 1)
 
 ## Overview
 
-- Scrapes CCN archives (`2018`–`2025`) and merges provisional **2026** posters from CSV
-- Classifies every submission with a **primary research theme** (12 [Google Form](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform) meetup topics) plus optional **secondary topics**
-- Serves a responsive single-column dashboard (max-width 1080px) where **all charts and filters use primary themes**
+- Archive data (`2018`–`2025`) was scraped once from ccneuro.org and is treated as static
+- **2026** posters are merged from `data/ccn-2026-pending-posters.csv` — this is the only data that gets updated going forward
+- Research themes are the 12 meetup topics from the [Google Form](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform); every submission is classified with a **primary theme** plus optional **secondary topics**
+- Responsive single-column dashboard (max-width 1080px) where all charts and filters use primary themes
 
 ## Dashboard features
 
@@ -30,64 +31,70 @@ Interactive dashboard for poster and paper submissions across the [Cognitive Com
 
 ## Research themes
 
-12 primary topics from [**CCN 2026 Activity Preferences**](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform), question 1 (meetup affiliation). Configured in `docs/data/google_topics.json`.
+The 12 primary topics come from [**CCN 2026 Activity Preferences**](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform), question 1. They are stored in `data/google_topics.json` and `docs/data/google_topics.json`.
 
-| Assignment | Method |
-|------------|--------|
-| 2026 submissions | Embedding cluster → Google topic (`embedding_cluster_map`) |
-| 2018–2025 | Text match against profiles from 2026 cluster data |
-| Manual override | `assignments` in `google_topics.json` |
+| Years | Assignment method |
+|-------|-------------------|
+| 2026 | Embedding cluster → Google topic (`embedding_cluster_map`) |
+| 2018–2025 | Text match against profiles built from 2026 data |
 
-See [docs/DASHBOARD.md](docs/DASHBOARD.md) for the full topic list and cluster mapping table.
+See [docs/DASHBOARD.md](docs/DASHBOARD.md) for the full topic list and cluster mapping.
 
 ## Data sources
 
-| Years | Source |
-|-------|--------|
-| 2018–2019 | `Papers/AcceptedPapers.html` |
-| 2022–2023 | `accepted_papers.html` |
-| 2024–2025 | MeetingTrakr poster sessions |
-| 2026 (provisional) | `data/ccn-2026-pending-posters.csv` |
+| Years | Source | Updates? |
+|-------|--------|----------|
+| 2018–2019 | `Papers/AcceptedPapers.html` | Static |
+| 2022–2023 | `accepted_papers.html` | Static |
+| 2024–2025 | MeetingTrakr poster sessions | Static |
+| 2026 | `data/ccn-2026-pending-posters.csv` | **Replace CSV when new data arrives** |
 
-2026 CSV is provisional — replace the file and re-run the merge/theme scripts when updated.
+## Updating 2026 data
+
+When an updated 2026 poster list is available:
+
+1. Replace `data/ccn-2026-pending-posters.csv`
+2. Run the update pipeline:
+
+```bash
+pip install -r scripts/requirements.txt
+python scripts/merge_2026_csv.py
+python scripts/build_cluster_viz.py
+python scripts/assign_research_themes.py
+```
+
+Or trigger the **Update 2026 Data** GitHub Action (Actions → Update 2026 Data → Run workflow).
+
+This refreshes `submissions.json`, `embeddings_2026.json`, and theme assignments. Commit and push to deploy.
+
+## Initial / full rebuild
+
+To re-scrape the full archive (rarely needed):
+
+```bash
+python scripts/scrape_ccn.py              # scrape 2018–2025 + merge 2026 CSV + assign themes
+python scripts/build_cluster_viz.py       # 2026 UMAP JSON
+python scripts/assign_research_themes.py  # re-assign themes only
+```
 
 ## Local development
 
 ```bash
 pip install -r scripts/requirements.txt
-
-# Full pipeline
-python scripts/scrape_ccn.py
-
-# Individual steps
-python scripts/scrape_ccn.py --quick      # 2024–2025 only
-python scripts/merge_2026_csv.py          # merge/replace 2026 CSV
-python scripts/build_cluster_viz.py       # 2026 UMAP JSON
-python scripts/assign_research_themes.py  # primary + secondary themes
-```
-
-Serve locally:
-
-```bash
 python -m http.server 8080 --directory docs
 ```
 
 Open http://localhost:8080
 
-## Google Form configuration
+## Google Form topics
 
-Topics are already loaded in `data/google_topics.json`. To add per-respondent data or analytics counts later:
+The form link is the canonical source for theme names. If question 1 options change on the form, update the `topics` array in `data/google_topics.json`, copy to `docs/data/google_topics.json`, and re-run `python scripts/assign_research_themes.py`.
 
-1. Download CSV from [form analytics](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewanalytics)
-2. Update `assignments` and/or `response_counts` in `data/google_topics.json`
-3. Copy to `docs/data/google_topics.json`
-4. Run `python scripts/assign_research_themes.py`
+No form response data or analytics are used — only the published topic list from the form.
 
 ## Deployment
 
-Pushes to `main` deploy the static `docs/` folder (GitHub Pages / Vercel). Scraping does **not** run on every push.
-
-**Refresh data:** run the **Scrape CCN Data** GitHub Action, or scrape locally and commit `data/submissions.json` + `docs/data/*`.
+Pushes to `main` deploy the static `docs/` folder (GitHub Pages / Vercel).
 
 ### Vercel settings
 
@@ -101,17 +108,17 @@ Pushes to `main` deploy the static `docs/` folder (GitHub Pages / Vercel). Scrap
 
 ```
 scripts/
-  scrape_ccn.py                 # Archive scraper
-  merge_2026_csv.py             # 2026 CSV merge
+  scrape_ccn.py                 # One-time archive scraper
+  merge_2026_csv.py             # Merge/replace 2026 CSV (primary update path)
   build_cluster_viz.py          # UMAP export for dashboard
-  assign_research_themes.py       # Google topic assignment
+  assign_research_themes.py     # Google topic assignment
   ccn_abstract_clustering.ipynb # Collaborator embedding notebook
 data/
-  ccn-2026-pending-posters.csv
-  google_topics.json
+  ccn-2026-pending-posters.csv  # Updated when new 2026 data arrives
+  google_topics.json            # 12 themes from Google Form Q1
 docs/
   index.html
-  DASHBOARD.md                  # Dashboard & theme documentation
+  DASHBOARD.md
   js/app.js
   css/style.css
   data/submissions.json

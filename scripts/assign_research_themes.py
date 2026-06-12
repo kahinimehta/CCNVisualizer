@@ -157,19 +157,8 @@ def assign_themes(
     topics: list[str],
     embedding_lookup: dict[str, str],
     cluster_map: dict[str, str],
-    form_assignments: dict[str, str],
 ) -> tuple[str, list[str]]:
     sub_id = submission.get("id", "")
-    if form_assignments.get(sub_id):
-        primary = form_assignments[sub_id]
-        scores = score_submission(submission, profiles, topics)
-        secondary = [
-            theme
-            for theme, score in sorted(scores.items(), key=lambda item: -item[1])
-            if theme != primary and score > 0
-        ][:3]
-        return primary, secondary
-
     poster = str(submission.get("poster_number") or "")
     cluster = embedding_lookup.get(sub_id) or embedding_lookup.get(f"2026-{poster}")
     scores = score_submission(submission, profiles, topics)
@@ -223,7 +212,6 @@ def apply_assignments(payload: dict, embeddings: dict) -> dict:
     config = load_google_config()
     topics = active_topics(config)
     cluster_map = embedding_map(config)
-    form_assignments = config.get("assignments") or {}
 
     points = embeddings.get("points", [])
     profiles = build_profiles(points, topics, cluster_map)
@@ -235,7 +223,7 @@ def apply_assignments(payload: dict, embeddings: dict) -> dict:
 
     for submission in payload["submissions"]:
         primary, secondary = assign_themes(
-            submission, profiles, topics, embedding_lookup, cluster_map, form_assignments
+            submission, profiles, topics, embedding_lookup, cluster_map
         )
         submission["primary_theme"] = primary
         submission["secondary_topics"] = secondary

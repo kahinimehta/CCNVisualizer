@@ -44,8 +44,8 @@ This project uses the following open-source libraries and services.
 
 ### CCN 2026 Activity Preferences (Google Form)
 - **Source:** https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform
-- **Usage:** Canonical list of 12 primary research themes (`data/google_topics.json`)
-- **Note:** Form responses are optional; attendee preference counts may be added to `response_counts` when available.
+- **Usage:** Canonical list of 12 primary research theme names (`data/google_topics.json`)
+- **Note:** Only the published form question 1 topic options are used — no response or analytics data.
 
 ## Trademarks
 
