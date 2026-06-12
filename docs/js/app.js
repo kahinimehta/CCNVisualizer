@@ -187,6 +187,75 @@ function truncateLabel(text, max = 28) {
   return text.length > max ? `${text.slice(0, max)}…` : text;
 }
 
+function clusterMeta(clusterName) {
+  const points = state.embeddings?.points?.filter((p) => p.cluster_name === clusterName) || [];
+  const summary = state.embeddings?.clusters?.find((c) => c.name === clusterName);
+  return {
+    name: clusterName,
+    count: summary?.count || points.length,
+    points,
+  };
+}
+
+function submissionInCluster(submission, clusterName) {
+  if (!clusterName || !state.embeddings?.points) return true;
+  const point = state.embeddings.points.find(
+    (p) =>
+      p.id === submission.id ||
+      (submission.year === 2026 && String(p.poster_number) === String(submission.poster_number))
+  );
+  return point?.cluster_name === clusterName;
+}
+
+function displaySubmissions() {
+  let submissions = filteredSubmissions();
+  if (state.selectedCluster) {
+    submissions = submissions.filter((item) => submissionInCluster(item, state.selectedCluster));
+  }
+  return submissions;
+}
+
+function setClusterFilter(clusterName) {
+  state.selectedCluster = state.selectedCluster === clusterName ? "" : clusterName;
+  renderAll();
+}
+
+function embeddingPointTooltip(point) {
+  const cluster = clusterMeta(point.cluster_name);
+  const parts = [
+    `<strong>${truncateLabel(point.title, 72)}</strong>`,
+    point.poster_number ? `Poster #${point.poster_number} · 2026 pending` : "2026 pending",
+    `<strong>Cluster:</strong> ${point.cluster_name}`,
+    `${cluster.count} abstracts in this theme`,
+  ];
+  if (point.primary_area) parts.push(`<strong>Primary area:</strong> ${truncateLabel(point.primary_area, 48)}`);
+  if (point.secondary_area) parts.push(`<strong>Secondary:</strong> ${truncateLabel(point.secondary_area, 48)}`);
+  parts.push("<em>Click to list all papers in this cluster</em>");
+  return parts.join("<br/>");
+}
+
+function clusterLegendTooltip(clusterName) {
+  const cluster = clusterMeta(clusterName);
+  const areas = new Map();
+  cluster.points.forEach((p) => {
+    if (!p.primary_area) return;
+    areas.set(p.primary_area, (areas.get(p.primary_area) || 0) + 1);
+  });
+  const topAreas = [...areas.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([area, count]) => `${truncateLabel(area, 36)} (${count})`)
+    .join("<br/>");
+
+  const parts = [
+    `<strong>${clusterName}</strong>`,
+    `${cluster.count} abstracts in cluster`,
+  ];
+  if (topAreas) parts.push(`<strong>Top areas:</strong><br/>${topAreas}`);
+  parts.push("<em>Click to filter submissions</em>");
+  return parts.join("<br/>");
+}
+
 function renderKpis(filtered) {
   const { metadata, stats } = state.data;
   const cards = [
@@ -497,61 +566,6 @@ function renderTopicChart(submissions) {
     .text((d) => (d.data.count / total > 0.08 ? `${Math.round((d.data.count / total) * 100)}%` : ""));
 }
 
-function renderGauge(filtered) {
-  const container = d3.select("#gauge-chart");
-  container.selectAll("*").remove();
-
-  const total = state.data.metadata.total_count;
-  const value = filtered.length;
-  const pct = total ? value / total : 0;
-
-  const width = container.node().clientWidth || 320;
-  const height = 260;
-  const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`);
-
-  const cx = width / 2;
-  const cy = height * 0.62;
-  const radius = Math.min(width, height) * 0.34;
-
-  const arc = d3
-    .arc()
-    .innerRadius(radius * 0.68)
-    .outerRadius(radius)
-    .startAngle(-Math.PI / 2)
-    .cornerRadius(6);
-
-  svg
-    .append("path")
-    .attr("transform", `translate(${cx},${cy})`)
-    .attr("d", arc({ endAngle: Math.PI / 2 }))
-    .attr("fill", "rgba(197,224,243,0.12)");
-
-  svg
-    .append("path")
-    .attr("transform", `translate(${cx},${cy})`)
-    .attr("d", arc({ endAngle: -Math.PI / 2 + Math.PI * pct }))
-    .attr("fill", CCN_COLORS.pink);
-
-  svg
-    .append("text")
-    .attr("x", cx)
-    .attr("y", cy - 4)
-    .attr("text-anchor", "middle")
-    .attr("fill", CCN_COLORS.white)
-    .style("font-size", "28px")
-    .style("font-weight", "700")
-    .text(`${Math.round(pct * 100)}%`);
-
-  svg
-    .append("text")
-    .attr("x", cx)
-    .attr("y", cy + 20)
-    .attr("text-anchor", "middle")
-    .attr("fill", CCN_COLORS.muted)
-    .style("font-size", "12px")
-    .text(`${value.toLocaleString()} of ${total.toLocaleString()}`);
-}
-
 function renderTopicsOverTime(submissions) {
   const container = d3.select("#topics-over-time-chart");
   container.selectAll("*").remove();
@@ -731,8 +745,8 @@ function renderClusterBars() {
 
   const data = [...state.embeddings.clusters].sort((a, b) => b.count - a.count);
   const width = container.node().clientWidth || 360;
-  const height = 340;
-  const margin = { top: 8, right: 40, bottom: 8, left: 150 };
+  const height = 380;
+  const margin = { top: 8, right: 36, bottom: 8, left: 132 };
   const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`);
   const innerW = width - margin.left - margin.right;
 
@@ -755,12 +769,8 @@ function renderClusterBars() {
     .attr("fill", (d) => (d.name === state.selectedCluster ? CCN_COLORS.pink : color(d.name)))
     .attr("rx", 4)
     .style("cursor", "pointer")
-    .on("click", (_, d) => {
-      state.selectedCluster = state.selectedCluster === d.name ? "" : d.name;
-      renderEmbeddingCluster();
-      renderClusterBars();
-    })
-    .on("mousemove", (event, d) => showTooltip(`<strong>${d.name}</strong><br/>${d.count} abstracts`, event))
+    .on("click", (_, d) => setClusterFilter(d.name))
+    .on("mousemove", (event, d) => showTooltip(clusterLegendTooltip(d.name), event))
     .on("mouseleave", hideTooltip);
 
   g.selectAll("text.label")
@@ -771,9 +781,22 @@ function renderClusterBars() {
     .attr("y", (d) => y(d.name) + y.bandwidth() / 2)
     .attr("dy", "0.35em")
     .attr("text-anchor", "end")
-    .attr("fill", CCN_COLORS.muted)
+    .attr("fill", (d) => (d.name === state.selectedCluster ? CCN_COLORS.white : CCN_COLORS.muted))
     .style("font-size", "9px")
-    .text((d) => truncateLabel(d.name, 22));
+    .style("pointer-events", "none")
+    .text((d) => truncateLabel(d.name, 20));
+
+  g.selectAll("text.value")
+    .data(data)
+    .join("text")
+    .attr("class", "value")
+    .attr("x", (d) => x(d.count) + 6)
+    .attr("y", (d) => y(d.name) + y.bandwidth() / 2)
+    .attr("dy", "0.35em")
+    .attr("fill", CCN_COLORS.white)
+    .style("font-size", "9px")
+    .style("pointer-events", "none")
+    .text((d) => d.count);
 }
 
 function renderEmbeddingCluster() {
@@ -787,11 +810,9 @@ function renderEmbeddingCluster() {
     return;
   }
 
-  const points = state.embeddings.points.filter(
-    (p) => !state.selectedCluster || p.cluster_name === state.selectedCluster
-  );
+  const points = state.embeddings.points;
   const width = container.node().clientWidth || 1100;
-  const height = 480;
+  const height = 520;
   const margin = { top: 20, right: 200, bottom: 20, left: 20 };
   const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`);
 
@@ -824,22 +845,23 @@ function renderEmbeddingCluster() {
     .join("circle")
     .attr("cx", (d) => x(d.x))
     .attr("cy", (d) => y(d.y))
-    .attr("r", 5.5)
+    .attr("r", (d) =>
+      state.selectedCluster && d.cluster_name === state.selectedCluster ? 7 : 5.5
+    )
     .attr("fill", (d) => color(d.cluster_name))
-    .attr("stroke", CCN_COLORS.navy)
-    .attr("stroke-width", 1)
-    .attr("opacity", 0.88)
+    .attr("stroke", (d) =>
+      state.selectedCluster && d.cluster_name === state.selectedCluster ? CCN_COLORS.pink : CCN_COLORS.navy
+    )
+    .attr("stroke-width", (d) =>
+      state.selectedCluster && d.cluster_name === state.selectedCluster ? 2 : 1
+    )
+    .attr("opacity", (d) =>
+      !state.selectedCluster || d.cluster_name === state.selectedCluster ? 0.9 : 0.18
+    )
     .style("cursor", "pointer")
-    .on("mousemove", (event, d) => {
-      const area = d.primary_area ? `<br/>${truncateLabel(d.primary_area, 50)}` : "";
-      showTooltip(`<strong>${truncateLabel(d.title, 60)}</strong>${area}<br/><em>${d.cluster_name}</em>`, event);
-    })
+    .on("mousemove", (event, d) => showTooltip(embeddingPointTooltip(d), event))
     .on("mouseleave", hideTooltip)
-    .on("click", (_, d) => {
-      state.selectedCluster = state.selectedCluster === d.cluster_name ? "" : d.cluster_name;
-      renderEmbeddingCluster();
-      renderClusterBars();
-    });
+    .on("click", (_, d) => setClusterFilter(d.cluster_name));
 
   const legend = svg
     .append("g")
@@ -850,11 +872,9 @@ function renderEmbeddingCluster() {
     .join("g")
     .attr("transform", (_, i) => `translate(0, ${i * 22})`)
     .style("cursor", "pointer")
-    .on("click", (_, theme) => {
-      state.selectedCluster = state.selectedCluster === theme ? "" : theme;
-      renderEmbeddingCluster();
-      renderClusterBars();
-    });
+    .on("click", (_, theme) => setClusterFilter(theme))
+    .on("mousemove", (event, theme) => showTooltip(clusterLegendTooltip(theme), event))
+    .on("mouseleave", hideTooltip);
 
   legendItems
     .append("rect")
@@ -875,16 +895,31 @@ function renderEmbeddingCluster() {
 
   note.text(
     state.selectedCluster
-      ? `Filtered to “${state.selectedCluster}” · click legend or points to reset`
-      : "Provisional 2026 data — replace data/ccn-2026-pending-posters.csv and re-run scripts when updated."
+      ? `Showing submissions in “${state.selectedCluster}” (${clusterMeta(state.selectedCluster).count} abstracts) · click again to clear`
+      : "Hover for cluster details · click a point or legend to filter matching submissions below."
   );
 }
 
-function renderPaperList(submissions) {
+function renderPaperList() {
+  const submissions = displaySubmissions();
   const list = d3.select("#paper-list");
-  d3.select("#results-count").text(`${submissions.length} matching submissions`);
+  const countEl = d3.select("#results-count");
+  countEl.selectAll("*").remove();
 
-  const items = list.selectAll(".paper-item").data(submissions.slice(0, 80)).join("div").attr("class", "paper-item");
+  const countLabel = state.selectedCluster
+    ? `${submissions.length} submissions in “${state.selectedCluster}”`
+    : `${submissions.length} matching submissions`;
+  countEl.append("span").text(countLabel);
+
+  if (state.selectedCluster) {
+    countEl
+      .append("span")
+      .attr("class", "cluster-filter-pill")
+      .text("Clear cluster filter ×")
+      .on("click", () => setClusterFilter(state.selectedCluster));
+  }
+
+  const items = list.selectAll(".paper-item").data(submissions).join("div").attr("class", "paper-item");
   items.selectAll("*").remove();
 
   items
@@ -898,9 +933,15 @@ function renderPaperList(submissions) {
   items
     .append("div")
     .attr("class", "meta")
-    .text((d) =>
-      `${d.year}${d.poster_number ? ` · Poster ${d.poster_number}` : ""}${d.authors ? ` · ${d.authors}` : ""}${d.topic_area ? ` · ${d.topic_area}` : ""}`
-    );
+    .text((d) => {
+      const point = state.embeddings?.points?.find(
+        (p) =>
+          p.id === d.id ||
+          (d.year === 2026 && String(p.poster_number) === String(d.poster_number))
+      );
+      const cluster = point?.cluster_name ? ` · ${point.cluster_name}` : "";
+      return `${d.year}${d.poster_number ? ` · Poster ${d.poster_number}` : ""}${d.authors ? ` · ${d.authors}` : ""}${d.topic_area ? ` · ${d.topic_area}` : ""}${cluster}`;
+    });
 
   items.each(function renderTags(d) {
     const tags = d3.select(this).append("div").attr("class", "keyword-tags");
@@ -927,13 +968,12 @@ function renderAll() {
   renderYearChart();
   renderKeywordBars(counts);
   renderTopicChart(submissions);
-  renderGauge(submissions);
   renderWordCloud(counts);
   renderTopicsOverTime(submissions);
   renderTopicDelta(submissions);
   renderClusterBars();
   renderEmbeddingCluster();
-  renderPaperList(submissions);
+  renderPaperList();
 
   d3.select("#year-chips")
     .selectAll(".year-chip")

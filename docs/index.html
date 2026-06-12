@@ -80,32 +80,6 @@
           <div id="keyword-bars"></div>
         </section>
 
-        <div class="dashboard-center">
-          <section class="card">
-            <div class="card-header">
-              <h2>Topic areas</h2>
-              <p class="card-sub">Share of submissions by topic area</p>
-            </div>
-            <div id="topic-chart"></div>
-          </section>
-
-          <section class="card">
-            <div class="card-header">
-              <h2>Filter coverage</h2>
-              <p class="card-sub">Matching submissions vs archive total</p>
-            </div>
-            <div id="gauge-chart"></div>
-          </section>
-
-          <section class="card card-center-wide" id="word-cloud-section">
-            <div class="card-header">
-              <h2>Keyword cloud</h2>
-              <p class="card-sub">Click a keyword to filter · size = frequency</p>
-            </div>
-            <div id="word-cloud"></div>
-          </section>
-        </div>
-
         <section class="card card-wide">
           <div class="card-header">
             <h2>Topics over time</h2>
@@ -122,30 +96,52 @@
           <div id="topic-delta-chart"></div>
         </section>
 
-        <section class="card">
-          <div class="card-header">
-            <h2>2026 research themes</h2>
-            <p class="card-sub">Embedding clusters from pending 2026 abstracts</p>
-          </div>
-          <div id="cluster-bars-chart"></div>
-        </section>
+        <div class="embedding-layout">
+          <div class="embedding-main">
+            <section class="card" id="embedding-panel">
+              <div class="card-header">
+                <h2>Abstract embedding map</h2>
+                <p class="card-sub">UMAP projection of 2026 abstracts · click a cluster to filter submissions</p>
+              </div>
+              <div id="embedding-chart"></div>
+              <p class="chart-note" id="embedding-note"></p>
+            </section>
 
-        <section class="card card-full">
-          <div class="card-header">
-            <h2>Abstract embedding map</h2>
-            <p class="card-sub">UMAP projection of 2026 abstracts · colored by research theme · hover for details</p>
+            <section class="card" id="submissions-panel">
+              <div class="card-header">
+                <h2>Matching submissions</h2>
+                <p class="card-sub" id="results-count">Loading...</p>
+              </div>
+              <div class="paper-list" id="paper-list"></div>
+            </section>
           </div>
-          <div id="embedding-chart"></div>
-          <p class="chart-note" id="embedding-note"></p>
-        </section>
 
-        <section class="card card-full" id="submissions-panel">
-          <div class="card-header">
-            <h2>Matching submissions</h2>
-            <p class="card-sub" id="results-count">Loading...</p>
-          </div>
-          <div class="paper-list" id="paper-list"></div>
-        </section>
+          <aside class="viz-sidebar">
+            <section class="card">
+              <div class="card-header">
+                <h2>Topic areas</h2>
+                <p class="card-sub">Share of submissions by topic area</p>
+              </div>
+              <div id="topic-chart"></div>
+            </section>
+
+            <section class="card" id="word-cloud-section">
+              <div class="card-header">
+                <h2>Keyword cloud</h2>
+                <p class="card-sub">Click a keyword to filter · size = frequency</p>
+              </div>
+              <div id="word-cloud"></div>
+            </section>
+
+            <section class="card">
+              <div class="card-header">
+                <h2>2026 research themes</h2>
+                <p class="card-sub">Embedding clusters · click to filter map &amp; submissions</p>
+              </div>
+              <div id="cluster-bars-chart"></div>
+            </section>
+          </aside>
+        </div>
       </main>
 
       <footer class="site-footer">
