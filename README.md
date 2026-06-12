@@ -10,7 +10,7 @@ Dashboard UI uses a card-based layout styled with CCN brand colors (navy, pink, 
 
 - Scrapes CCN archives from `2018.ccneuro.org` through `2025.ccneuro.org`
 - Merges provisional **2026** pending posters from `data/ccn-2026-pending-posters.csv`
-- Assigns every submission a **primary research theme** (1 of 10 embedding clusters) plus optional **secondary topics**
+- Assigns every submission a **primary research theme** from the [CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform) Google Form (12 meetup topics), plus optional **secondary topics**
 - Builds an interactive dashboard where **all charts and filters use primary research themes**:
   - Research theme dropdown filter
   - Submissions over time

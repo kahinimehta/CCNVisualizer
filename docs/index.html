@@ -28,6 +28,7 @@
     </aside>
 
     <div class="main-area">
+      <div class="dashboard-container">
       <header class="topbar" id="dashboard-top">
         <div class="brand">
           <img class="ccn-logo brand-logo" src="assets/ccn-logo.svg" alt="CCN" width="160" height="44" />
@@ -64,7 +65,7 @@
       <section class="year-chips-row" id="year-chips" aria-label="Year filters"></section>
 
       <main class="dashboard-grid">
-        <section class="card card-wide">
+        <section class="card card-full">
           <div class="card-header">
             <h2>Submissions over time</h2>
             <p class="card-sub">Poster &amp; paper counts by conference year</p>
@@ -72,7 +73,7 @@
           <div id="year-chart"></div>
         </section>
 
-        <section class="card">
+        <section class="card card-full">
           <div class="card-header">
             <h2>Research theme ranking</h2>
             <p class="card-sub">Primary theme counts in current filter</p>
@@ -83,7 +84,7 @@
         <section class="card card-full theme-analytics">
           <div class="card-header">
             <h2>Research themes over time</h2>
-            <p class="card-sub" id="themes-over-time-sub">Annual counts per embedding research theme · 2026 uses cluster labels · earlier years inferred from text</p>
+            <p class="card-sub" id="themes-over-time-sub">Annual counts per Google Form research theme</p>
           </div>
           <div id="themes-over-time-chart"></div>
 
@@ -156,6 +157,7 @@
           <a href="licenses.html">Licenses &amp; attributions</a>
         </p>
       </footer>
+      </div>
     </div>
   </div>
 

@@ -141,24 +141,41 @@ function tokenize(text) {
 }
 
 function researchThemeNames() {
-  if (state.embeddings?.clusters?.length) {
-    return state.embeddings.clusters.map((c) => c.name);
-  }
   if (state.googleTopics?.enabled && state.googleTopics.topics?.length) {
     return state.googleTopics.topics;
   }
+  if (state.embeddings?.clusters?.length) {
+    return state.embeddings.clusters.map((c) => c.name);
+  }
   return [];
+}
+
+function embeddingClusterMap() {
+  return state.googleTopics?.embedding_cluster_map || {};
+}
+
+function mapClusterToTheme(clusterName) {
+  if (!clusterName) return null;
+  return embeddingClusterMap()[clusterName] || clusterName;
 }
 
 function buildThemeClassifier() {
   const profiles = new Map();
   researchThemeNames().forEach((name) => profiles.set(name, new Map()));
 
+  state.data?.submissions?.forEach((submission) => {
+    const theme = submission.primary_theme;
+    if (!theme || !profiles.has(theme)) return;
+    const weights = profiles.get(theme);
+    tokenize(submission.topic_area).forEach((term) => weights.set(term, (weights.get(term) || 0) + 2));
+    tokenize(submission.title).forEach((term) => weights.set(term, (weights.get(term) || 0) + 1));
+  });
+
   state.embeddings?.points?.forEach((point) => {
-    const weights = profiles.get(point.cluster_name);
-    if (!weights) return;
+    const theme = mapClusterToTheme(point.cluster_name);
+    if (!theme || !profiles.has(theme)) return;
+    const weights = profiles.get(theme);
     tokenize(point.primary_area).forEach((term) => weights.set(term, (weights.get(term) || 0) + 3));
-    tokenize(point.secondary_area).forEach((term) => weights.set(term, (weights.get(term) || 0) + 2));
     tokenize(point.title).forEach((term) => weights.set(term, (weights.get(term) || 0) + 1));
   });
 
@@ -312,17 +329,18 @@ function setThemeFilter(themeName) {
 }
 
 function embeddingPointTooltip(point) {
-  const cluster = clusterMeta(point.cluster_name);
+  const primary = mapClusterToTheme(point.cluster_name);
   const parts = [
     `<strong>${truncateLabel(point.title, 72)}</strong>`,
     point.poster_number ? `Poster #${point.poster_number} · 2026 pending` : "2026 pending",
-    `<strong>Cluster:</strong> ${point.cluster_name}`,
-    `${cluster.count} abstracts in this theme`,
+    `<strong>Primary theme:</strong> ${primary || "—"}`,
+    point.cluster_name && point.cluster_name !== primary
+      ? `<strong>Embedding cluster:</strong> ${point.cluster_name}`
+      : "",
   ];
-  if (point.primary_area) parts.push(`<strong>Primary area:</strong> ${truncateLabel(point.primary_area, 48)}`);
-  if (point.secondary_area) parts.push(`<strong>Secondary:</strong> ${truncateLabel(point.secondary_area, 48)}`);
+  if (point.primary_area) parts.push(`<strong>Area:</strong> ${truncateLabel(point.primary_area, 48)}`);
   parts.push("<em>Click to filter by this primary theme</em>");
-  return parts.join("<br/>");
+  return parts.filter(Boolean).join("<br/>");
 }
 
 function clusterLegendTooltip(clusterName) {
@@ -669,8 +687,8 @@ function renderResearchThemesOverTime(submissions) {
   const cumulative = themeCumulativeByYear(years, byYear, themes);
 
   const width = container.node().clientWidth || 1000;
-  const height = 360;
-  const margin = { top: 20, right: 240, bottom: 44, left: 48 };
+  const height = 400;
+  const margin = { top: 20, right: 20, bottom: 44, left: 48 };
   const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`);
   const innerW = width - margin.left - margin.right;
   const innerH = height - margin.top - margin.bottom;
@@ -768,45 +786,43 @@ function renderResearchThemesOverTime(submissions) {
     .style("font-size", "10px")
     .text("Submissions per year");
 
-  const legend = svg.append("g").attr("transform", `translate(${width - margin.right + 16}, ${margin.top})`);
+  const legend = svg
+    .append("g")
+    .attr("transform", `translate(${margin.left}, ${height - 6})`);
+  const legendCols = width > 700 ? 3 : 2;
+  const colWidth = (width - margin.left - margin.right) / legendCols;
   const legendItems = legend
     .selectAll("g")
     .data(themes)
     .join("g")
-    .attr("transform", (_, i) => `translate(0, ${i * 24})`);
+    .attr("transform", (_, i) => {
+      const col = i % legendCols;
+      const row = Math.floor(i / legendCols);
+      return `translate(${col * colWidth}, ${row * 18})`;
+    });
 
   legendItems
     .append("line")
     .attr("x1", 0)
-    .attr("x2", 18)
+    .attr("x2", 14)
     .attr("y1", 6)
     .attr("y2", 6)
     .attr("stroke", (d) => color(d))
     .attr("stroke-width", 2.5);
 
   legendItems
-    .append("line")
-    .attr("x1", 0)
-    .attr("x2", 18)
-    .attr("y1", 12)
-    .attr("y2", 12)
-    .attr("stroke", (d) => color(d))
-    .attr("stroke-width", 1.5)
-    .attr("stroke-dasharray", "4 3")
-    .attr("opacity", 0.55);
-
-  legendItems
     .append("text")
-    .attr("x", 24)
-    .attr("y", 10)
+    .attr("x", 18)
+    .attr("y", 9)
     .attr("fill", CCN_COLORS.muted)
-    .style("font-size", "10px")
-    .text((d) => d);
+    .style("font-size", "9px")
+    .text((d) => truncateLabel(d, 34));
 
+  const legendRows = Math.ceil(themes.length / legendCols);
   svg
     .append("text")
-    .attr("x", width - margin.right + 16)
-    .attr("y", height - 10)
+    .attr("x", margin.left)
+    .attr("y", height - 6 - legendRows * 18)
     .attr("fill", CCN_COLORS.muted)
     .style("font-size", "9px")
     .text("Solid = annual count · dashed = cumulative total");
@@ -1040,7 +1056,7 @@ function renderEmbeddingCluster() {
     .nice()
     .range([height - margin.bottom, margin.top]);
 
-  const themes = [...new Set(state.embeddings.points.map((d) => d.cluster_name))];
+  const themes = [...new Set(state.embeddings.points.map((d) => mapClusterToTheme(d.cluster_name)))];
   const color = d3.scaleOrdinal(CHART_PALETTE).domain(themes);
 
   svg
@@ -1061,20 +1077,23 @@ function renderEmbeddingCluster() {
     .attr("r", (d) =>
       state.selectedTheme && d.cluster_name === state.selectedTheme ? 7 : 5.5
     )
-    .attr("fill", (d) => color(d.cluster_name))
-    .attr("stroke", (d) =>
-      state.selectedTheme && d.cluster_name === state.selectedTheme ? CCN_COLORS.pink : CCN_COLORS.navy
-    )
-    .attr("stroke-width", (d) =>
-      state.selectedTheme && d.cluster_name === state.selectedTheme ? 2 : 1
-    )
-    .attr("opacity", (d) =>
-      !state.selectedTheme || d.cluster_name === state.selectedTheme ? 0.9 : 0.18
-    )
+    .attr("fill", (d) => color(mapClusterToTheme(d.cluster_name)))
+    .attr("stroke", (d) => {
+      const theme = mapClusterToTheme(d.cluster_name);
+      return state.selectedTheme && theme === state.selectedTheme ? CCN_COLORS.pink : CCN_COLORS.navy;
+    })
+    .attr("stroke-width", (d) => {
+      const theme = mapClusterToTheme(d.cluster_name);
+      return state.selectedTheme && theme === state.selectedTheme ? 2 : 1;
+    })
+    .attr("opacity", (d) => {
+      const theme = mapClusterToTheme(d.cluster_name);
+      return !state.selectedTheme || theme === state.selectedTheme ? 0.9 : 0.18;
+    })
     .style("cursor", "pointer")
     .on("mousemove", (event, d) => showTooltip(embeddingPointTooltip(d), event))
     .on("mouseleave", hideTooltip)
-    .on("click", (_, d) => setThemeFilter(d.cluster_name));
+    .on("click", (_, d) => setThemeFilter(mapClusterToTheme(d.cluster_name)));
 
   const legend = svg
     .append("g")

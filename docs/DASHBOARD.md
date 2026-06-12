@@ -13,37 +13,41 @@ Every submission is assigned:
 | `primary_theme` | One of 10 embedding research themes — drives **all** charts, filters, and counts |
 | `secondary_topics` | Up to 3 additional theme tags — shown in the secondary-topics cloud and paper metadata only |
 
-### The 10 research themes
+### The 12 research themes (Google Form Q1)
 
-1. Cognition and Memory Systems
-2. Decision and Metacognition
-3. Naturalistic Brain Encoding
-4. Neural Population Dynamics
-5. Reinforcement Learning
-6. LLMs and Reasoning
-7. Language Neuroscience
-8. Neural Network Theory
-9. Computer Vision Models
-10. Visual Cortex Models
+From [CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform) — meetup topic affiliation:
 
-**2026** submissions use exact UMAP/KMeans cluster labels from `embeddings_2026.json`. **Earlier years** are inferred by matching title, abstract, and topic text against 2026 cluster profiles (`scripts/assign_research_themes.py`).
+1. RL, motor control & planning
+2. Naturalistic encoding/decoding
+3. Neural population geometry & dynamics
+4. Decision-making and metacognition
+5. Vision
+6. Language/auditory neuroscience
+7. LLMs, reasoning, interpretability
+8. Memory
+9. Social cognition & theory of mind
+10. Attention & cognitive control / executive function
+11. Clinical / computational psychiatry
+12. Methods, theory & everything else
+
+**2026** submissions map embedding clusters → Google topics. **Earlier years** are inferred by text match. Embedding cluster names may appear as **secondary topics**.
 
 ## Layout
 
+Single-column stack, max-width **1080px**, centered — fills a laptop screen without stretching ultra-wide on large monitors. On mobile, filters and KPI cards reflow to 1–2 columns.
+
 ```
-┌─────────────────────────────────────────────────────────────┐
-│ Header · Year / Research theme dropdown · Search             │
-│ KPI cards · Year chips                                      │
-├──────────────────────────────┬──────────────────────────────┤
-│ Submissions over time        │ Research theme ranking       │
-├──────────────────────────────┴──────────────────────────────┤
-│ Research themes over time (annual + cumulative lines)        │
-│ ├─ Total by research theme │ Year-over-year change         │
-├──────────────────────────────┬──────────────────────────────┤
-│ Abstract embedding map       │ Primary themes (donut)       │
-│ Matching submissions         │ Secondary topics (cloud)     │
-│                              │ Theme breakdown (bars)       │
-└──────────────────────────────┴──────────────────────────────┘
+┌──────────────────────────────────────┐
+│ Header · filters · KPIs · year chips │
+├──────────────────────────────────────┤
+│ Submissions over time                │
+│ Research theme ranking             │
+│ Research themes over time          │
+│   └ totals · year-over-year        │
+│ Abstract embedding map             │
+│ Matching submissions               │
+│ Primary themes · Secondary · Bars  │
+└──────────────────────────────────────┘
 ```
 
 ## Filters

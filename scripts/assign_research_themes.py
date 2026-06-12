@@ -13,19 +13,70 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA_PATH = ROOT / "data" / "submissions.json"
 DOCS_PATH = ROOT / "docs" / "data" / "submissions.json"
 EMBEDDINGS_PATH = ROOT / "docs" / "data" / "embeddings_2026.json"
+GOOGLE_TOPICS_PATH = ROOT / "data" / "google_topics.json"
 
-RESEARCH_THEMES = [
-    "Cognition and Memory Systems",
-    "Decision and Metacognition",
-    "Naturalistic Brain Encoding",
-    "Neural Population Dynamics",
-    "Reinforcement Learning",
-    "LLMs and Reasoning",
-    "Language Neuroscience",
-    "Neural Network Theory",
-    "Computer Vision Models",
-    "Visual Cortex Models",
+GOOGLE_FORM_TOPICS = [
+    "RL, motor control & planning",
+    "Naturalistic encoding/decoding",
+    "Neural population geometry & dynamics",
+    "Decision-making and metacognition",
+    "Vision",
+    "Language/auditory neuroscience",
+    "LLMs, reasoning, interpretability",
+    "Memory",
+    "Social cognition & theory of mind",
+    "Attention & cognitive control / executive function",
+    "Clinical / computational psychiatry",
+    "Methods, theory & everything else",
 ]
+
+EMBEDDING_TO_GOOGLE = {
+    "Reinforcement Learning": "RL, motor control & planning",
+    "Naturalistic Brain Encoding": "Naturalistic encoding/decoding",
+    "Neural Population Dynamics": "Neural population geometry & dynamics",
+    "Decision and Metacognition": "Decision-making and metacognition",
+    "Visual Cortex Models": "Vision",
+    "Computer Vision Models": "Vision",
+    "Language Neuroscience": "Language/auditory neuroscience",
+    "LLMs and Reasoning": "LLMs, reasoning, interpretability",
+    "Cognition and Memory Systems": "Memory",
+    "Neural Network Theory": "Methods, theory & everything else",
+}
+
+TOPIC_KEYWORDS: dict[str, list[str]] = {
+    "RL, motor control & planning": [
+        "reinforcement", "reward", "motor", "planning", "policy", "control", "navigation", "action",
+    ],
+    "Naturalistic encoding/decoding": [
+        "naturalistic", "encoding", "decoding", "fmri", "eeg", "movie", "stimulus", "neural",
+    ],
+    "Neural population geometry & dynamics": [
+        "population", "dynamics", "geometry", "manifold", "latent", "trajectory", "oscillation",
+    ],
+    "Decision-making and metacognition": [
+        "decision", "metacognition", "confidence", "choice", "judgment", "belief", "inference",
+    ],
+    "Vision": ["visual", "vision", "retina", "v1", "retinotopic", "image", "perception", "cortex"],
+    "Language/auditory neuroscience": [
+        "language", "auditory", "speech", "semantic", "syntax", "word", "listening", "voice",
+    ],
+    "LLMs, reasoning, interpretability": [
+        "llm", "language model", "reasoning", "interpretability", "transformer", "gpt", "prompt",
+    ],
+    "Memory": ["memory", "hippocampus", "recall", "working memory", "episodic", "retrieval"],
+    "Social cognition & theory of mind": [
+        "social", "theory mind", "mentalizing", "interaction", "communication", "empathy",
+    ],
+    "Attention & cognitive control / executive function": [
+        "attention", "executive", "control", "cognitive control", "working", "task", "switching",
+    ],
+    "Clinical / computational psychiatry": [
+        "clinical", "psychiatry", "depression", "schizophrenia", "patient", "disorder", "mental health",
+    ],
+    "Methods, theory & everything else": [
+        "theory", "method", "benchmark", "framework", "analysis", "model", "computational",
+    ],
+}
 
 THEME_STOPWORDS = {
     "the", "and", "for", "with", "from", "that", "this", "using", "based", "study", "results",
@@ -35,14 +86,39 @@ THEME_STOPWORDS = {
 TOKEN_RE = re.compile(r"[a-z][a-z0-9\-]{2,}")
 
 
+def load_google_config() -> dict:
+    if GOOGLE_TOPICS_PATH.exists():
+        with GOOGLE_TOPICS_PATH.open(encoding="utf-8") as fh:
+            return json.load(fh)
+    return {"enabled": True, "topics": GOOGLE_FORM_TOPICS}
+
+
+def active_topics(config: dict) -> list[str]:
+    if config.get("enabled") and config.get("topics"):
+        return list(config["topics"])
+    return GOOGLE_FORM_TOPICS
+
+
+def embedding_map(config: dict) -> dict[str, str]:
+    return config.get("embedding_cluster_map") or EMBEDDING_TO_GOOGLE
+
+
 def tokenize(text: str) -> list[str]:
     return [t for t in TOKEN_RE.findall((text or "").lower()) if t not in THEME_STOPWORDS]
 
 
-def build_profiles(points: list[dict]) -> dict[str, Counter]:
-    profiles = {theme: Counter() for theme in RESEARCH_THEMES}
+def build_profiles(points: list[dict], topics: list[str], cluster_map: dict[str, str]) -> dict[str, Counter]:
+    profiles = {theme: Counter() for theme in topics}
+    for theme, keywords in TOPIC_KEYWORDS.items():
+        if theme not in profiles:
+            continue
+        for kw in keywords:
+            for term in tokenize(kw):
+                profiles[theme][term] += 4
+
     for point in points:
-        theme = point.get("cluster_name")
+        cluster = point.get("cluster_name", "")
+        theme = cluster_map.get(cluster, "")
         if theme not in profiles:
             continue
         weights = profiles[theme]
@@ -55,7 +131,7 @@ def build_profiles(points: list[dict]) -> dict[str, Counter]:
     return profiles
 
 
-def score_submission(submission: dict, profiles: dict[str, Counter]) -> dict[str, float]:
+def score_submission(submission: dict, profiles: dict[str, Counter], topics: list[str]) -> dict[str, float]:
     text = " ".join(
         [
             submission.get("title", ""),
@@ -66,7 +142,7 @@ def score_submission(submission: dict, profiles: dict[str, Counter]) -> dict[str
     )
     tokens = tokenize(text)
     scores: dict[str, float] = {}
-    for theme in RESEARCH_THEMES:
+    for theme in topics:
         score = sum(profiles[theme].get(term, 0) for term in tokens)
         for term in tokenize(theme):
             if term in tokens:
@@ -78,33 +154,49 @@ def score_submission(submission: dict, profiles: dict[str, Counter]) -> dict[str
 def assign_themes(
     submission: dict,
     profiles: dict[str, Counter],
+    topics: list[str],
     embedding_lookup: dict[str, str],
+    cluster_map: dict[str, str],
+    form_assignments: dict[str, str],
 ) -> tuple[str, list[str]]:
     sub_id = submission.get("id", "")
+    if form_assignments.get(sub_id):
+        primary = form_assignments[sub_id]
+        scores = score_submission(submission, profiles, topics)
+        secondary = [
+            theme
+            for theme, score in sorted(scores.items(), key=lambda item: -item[1])
+            if theme != primary and score > 0
+        ][:3]
+        return primary, secondary
+
     poster = str(submission.get("poster_number") or "")
-    if submission.get("year") == 2026:
-        primary = embedding_lookup.get(sub_id) or embedding_lookup.get(f"2026-{poster}")
-        if primary:
-            scores = score_submission(submission, profiles)
-            secondary = [
-                theme
-                for theme, score in sorted(scores.items(), key=lambda item: -item[1])
-                if theme != primary and score > 0
-            ][:3]
-            return primary, secondary
-
-    scores = score_submission(submission, profiles)
+    cluster = embedding_lookup.get(sub_id) or embedding_lookup.get(f"2026-{poster}")
+    scores = score_submission(submission, profiles, topics)
     ranked = sorted(scores.items(), key=lambda item: -item[1])
-    primary, top_score = ranked[0]
-    if top_score <= 0:
-        primary = RESEARCH_THEMES[1]
 
-    threshold = top_score * 0.35 if top_score > 0 else 0
-    secondary = [theme for theme, score in ranked[1:] if theme != primary and score >= threshold][:3]
-    return primary, secondary
+    if cluster and cluster in cluster_map:
+        primary = cluster_map[cluster]
+    else:
+        primary, top_score = ranked[0]
+        if top_score <= 0:
+            primary = "Methods, theory & everything else"
+
+    threshold = (scores.get(primary, 0) or ranked[0][1]) * 0.35
+    secondary = []
+    if cluster and cluster not in secondary:
+        secondary.append(cluster)
+    for theme, score in ranked:
+        if theme == primary or score < threshold:
+            continue
+        if theme not in secondary:
+            secondary.append(theme)
+        if len(secondary) >= 3:
+            break
+    return primary, secondary[:3]
 
 
-def compute_theme_stats(submissions: list[dict]) -> dict:
+def compute_theme_stats(submissions: list[dict], topics: list[str]) -> dict:
     by_year: dict[str, Counter] = defaultdict(Counter)
     totals: Counter = Counter()
     secondary_totals: Counter = Counter()
@@ -120,7 +212,7 @@ def compute_theme_stats(submissions: list[dict]) -> dict:
             secondary_totals[topic] += 1
 
     return {
-        "research_themes": RESEARCH_THEMES,
+        "research_themes": topics,
         "primary_by_year": {year: counter.most_common() for year, counter in by_year.items()},
         "primary_totals": totals.most_common(),
         "secondary_totals": secondary_totals.most_common(30),
@@ -128,8 +220,13 @@ def compute_theme_stats(submissions: list[dict]) -> dict:
 
 
 def apply_assignments(payload: dict, embeddings: dict) -> dict:
+    config = load_google_config()
+    topics = active_topics(config)
+    cluster_map = embedding_map(config)
+    form_assignments = config.get("assignments") or {}
+
     points = embeddings.get("points", [])
-    profiles = build_profiles(points)
+    profiles = build_profiles(points, topics, cluster_map)
     embedding_lookup: dict[str, str] = {}
     for point in points:
         embedding_lookup[point["id"]] = point["cluster_name"]
@@ -137,16 +234,20 @@ def apply_assignments(payload: dict, embeddings: dict) -> dict:
             embedding_lookup[f"2026-{point['poster_number']}"] = point["cluster_name"]
 
     for submission in payload["submissions"]:
-        primary, secondary = assign_themes(submission, profiles, embedding_lookup)
+        primary, secondary = assign_themes(
+            submission, profiles, topics, embedding_lookup, cluster_map, form_assignments
+        )
         submission["primary_theme"] = primary
         submission["secondary_topics"] = secondary
 
     payload.setdefault("stats", {})
-    payload["stats"]["research_themes"] = compute_theme_stats(payload["submissions"])
+    payload["stats"]["research_themes"] = compute_theme_stats(payload["submissions"], topics)
     payload["metadata"]["research_themes_assigned_at"] = datetime.now(timezone.utc).isoformat()
     payload["metadata"]["research_theme_method"] = (
-        "2026: embedding cluster label; other years: text match to 2026 cluster profiles"
+        "Google Form Q1 topics; 2026 embedding clusters mapped to form topics; "
+        "other years scored by text match"
     )
+    payload["metadata"]["google_topics_source"] = config.get("source")
     return payload
 
 
