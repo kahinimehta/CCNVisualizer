@@ -80,7 +80,7 @@ Clusters without a direct meetup topic (e.g. social cognition, clinical psychiat
 
 ## Layout & responsive design
 
-The dashboard uses a **single-column stack** inside a centered container (`max-width: 1080px`). Cards are full-width so content reads top-to-bottom on any screen.
+The dashboard uses a **single-column stack** inside a centered app shell (`max-width: 1400px`) with the navigation sidebar directly beside the content. Cards are full-width so content reads top-to-bottom on any screen.
 
 ```
 ┌──────────────────────────────────────┐
@@ -104,7 +104,7 @@ The **Total by research theme** and **Year-over-year change** panels sit side by
 
 | Breakpoint | Behavior |
 |------------|----------|
-| **Desktop (≥900px)** | 1080px centered column; 4 KPI cards in a row; filters in a grid |
+| **Desktop (≥900px)** | 1400px centered app shell; sidebar flush to content; 4 KPI cards in a row; filters in a grid |
 | **Tablet (720–899px)** | 2×2 KPI grid; filters wrap |
 | **Mobile (<700px)** | Single-column filters; 2-column KPIs; collapsible sidebar overlay |
 
