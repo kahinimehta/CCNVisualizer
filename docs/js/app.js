@@ -171,16 +171,16 @@ function buildThemeClassifier() {
     const theme = submission.primary_theme;
     if (!theme || !profiles.has(theme)) return;
     const weights = profiles.get(theme);
-    tokenize(submission.topic_area).forEach((term) => weights.set(term, (weights.get(term) || 0) + 2));
     tokenize(submission.title).forEach((term) => weights.set(term, (weights.get(term) || 0) + 1));
+    tokenize(submission.abstract).forEach((term) => weights.set(term, (weights.get(term) || 0) + 1));
   });
 
   state.embeddings?.points?.forEach((point) => {
     const theme = mapClusterToTheme(point.cluster_name);
     if (!theme || !profiles.has(theme)) return;
     const weights = profiles.get(theme);
-    tokenize(point.primary_area).forEach((term) => weights.set(term, (weights.get(term) || 0) + 3));
     tokenize(point.title).forEach((term) => weights.set(term, (weights.get(term) || 0) + 1));
+    tokenize(point.abstract).forEach((term) => weights.set(term, (weights.get(term) || 0) + 1));
   });
 
   state.themeProfiles = profiles;
@@ -199,7 +199,7 @@ function submissionResearchTheme(submission) {
   if (submission.primary_theme) return submission.primary_theme;
 
   const point = embeddingPointForSubmission(submission);
-  if (point?.cluster_name) return point.cluster_name;
+  if (point?.cluster_name) return mapClusterToTheme(point.cluster_name);
 
   const profiles = state.themeProfiles;
   if (!profiles?.size) return null;

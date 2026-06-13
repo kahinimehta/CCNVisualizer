@@ -35,10 +35,10 @@ The 12 primary topics come from [**CCN 2026 Activity Preferences**](https://docs
 
 | Years | Assignment method |
 |-------|-------------------|
-| 2026 | Embedding cluster → Google topic (`embedding_cluster_map`) |
-| 2018–2025 | Text match against profiles built from 2026 data |
+| 2025, 2026 | Official CCN topic label → Google theme (`CCN_TOPIC_MAP`) |
+| 2018–2024 | Keyword + text scoring; 2026 papers also get a soft embedding-cluster boost |
 
-See [docs/DASHBOARD.md](docs/DASHBOARD.md) for the full topic list and cluster mapping.
+See [docs/DASHBOARD.md](docs/DASHBOARD.md) for the full topic list, label map, and why Vision skew was fixed.
 
 ## Data sources
 

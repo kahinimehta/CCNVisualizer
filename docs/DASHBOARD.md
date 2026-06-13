@@ -52,12 +52,23 @@ From [CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUND
 
 ### How themes are assigned
 
-| Years | Method |
-|-------|--------|
-| **2026** | UMAP embedding cluster → mapped to Google topic via `embedding_cluster_map` |
-| **2018–2025** | Text match (title, abstract, topic area, keywords) against keyword profiles built from 2026 data |
+Priority order (see `scripts/assign_research_themes.py`):
 
-Embedding cluster names (e.g. `Reinforcement Learning`, `Visual Cortex Models`) from the collaborator notebook may appear as **secondary topics** when they differ from the mapped Google primary.
+| Step | Rule |
+|------|------|
+| 1 | **Official CCN topic label** — when `topic_area` matches a specific MeetingTrakr (2025) or CSV (2026) taxonomy string, map directly to the closest Google Form theme |
+| 2 | **Text scoring** — keyword hits in title/abstract/keywords (primary signal), plus a small profile overlap from 2026 cluster papers |
+| 3 | **Coarse labels** — broad archive labels like `cognitive science` (2022–2023) nudge several themes instead of forcing one |
+| 4 | **2026 cluster boost** — embedding cluster adds ~35% soft boost to its mapped theme; it does **not** override official labels |
+| 5 | **Fallback** — `Methods, theory & everything else` when no signal |
+
+| Years | Typical outcome |
+|-------|-----------------|
+| **2025** | MeetingTrakr topic column → mapped primary (e.g. Visual Processing → Vision) |
+| **2026** | CSV `primary_area` → mapped primary (e.g. computational cognitive science → Decision-making) |
+| **2018–2024** | Text scoring from title/abstract; cluster boost for 2026 only |
+
+**Why Vision was overrepresented (fixed):** Earlier versions hard-assigned every 2026 paper in vision-named embedding clusters to Vision, and built text profiles from CSV `primary_area` tokens that were generic (`cognitive`, `computational`) rather than vision-specific. Broad keywords like `cortex` and `perception` also matched many non-vision papers. The pipeline now trusts official CCN labels first, uses tighter vision keywords, and treats clusters as a soft hint only.
 
 ### Embedding cluster → Google topic map
 

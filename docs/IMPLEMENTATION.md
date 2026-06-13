@@ -184,30 +184,36 @@ Schema version 3. See [DASHBOARD.md](DASHBOARD.md#google_topicsjson-schema).
 **Script:** `scripts/assign_research_themes.py`  
 **Runs on:** Every submission in `submissions.json`
 
-### Step 1 — Build keyword profiles per Google theme
+### Priority order
 
-For each of the 12 themes, accumulate token weights from:
+1. **Official CCN topic label** (`CCN_TOPIC_MAP`) — specific MeetingTrakr (2025) and CSV (2026) strings in `topic_area` map directly to a Google Form theme. Empty, `View PDF`, and other junk labels are skipped.
+2. **Keyword + profile text score** — hand-tuned `TOPIC_KEYWORDS` matches in title/abstract/keywords are the primary signal; token overlap with 2026 cluster paper profiles is weighted at 0.3×.
+3. **Broad label hints** (`BROAD_TOPIC_HINTS`) — coarse labels such as `cognitive science` (2022–2023) add a small boost to several themes instead of picking one winner.
+4. **2026 cluster soft boost** — mapped embedding cluster theme gets +35% of the current top text score (minimum +4). Clusters never override step 1.
+5. **Fallback** — `"Methods, theory & everything else"` when the top score is ≤ 0.
 
-1. **Hand-tuned `TOPIC_KEYWORDS`** — domain terms per theme (weight ×4 per token)
-2. **2026 embedding points** — for each point, tokens from `primary_area` (×3), `secondary_area` (×2), `title` (×1), attributed to the Google theme mapped from that point's `cluster_name`
+### Profile building (step 2 supplement only)
 
-### Step 2 — Score each submission
+For each Google theme, accumulate:
 
-Tokenize `title + abstract + topic_area + keywords`. For each theme, sum profile weights for matching tokens; add +2 per token that appears in the theme name itself.
+1. **`TOPIC_KEYWORDS`** — domain terms (weight ×4 per token in profile)
+2. **2026 embedding points** — title and abstract tokens only (×1), attributed to the cluster’s mapped theme
 
-### Step 3 — Assign primary theme
+CSV `primary_area` / `secondary_area` are **not** fed into profiles (they are broad and caused Vision inflation when paired with vision-named clusters).
 
-| Condition | Primary theme |
-|-----------|---------------|
-| 2026 submission with known embedding cluster in `embedding_cluster_map` | Mapped Google topic |
-| Otherwise | Highest-scoring theme; if score ≤ 0 → `"Methods, theory & everything else"` |
+### Secondary topics (up to 3)
 
-### Step 4 — Assign secondary topics (up to 3)
+1. Raw 2026 embedding cluster name when present
+2. Other themes scoring ≥ 35% of the primary score
 
-1. Include raw embedding cluster name if present and different from primary
-2. Add other themes scoring ≥ 35% of primary score, ranked by score
+### Vision skew — root cause and fix
 
-Pre-2026 papers never have embedding clusters; they rely entirely on text scoring.
+| Issue | Effect | Fix |
+|-------|--------|-----|
+| Hard cluster override for `Visual Cortex Models` / `Computer Vision Models` | ~31% of all papers forced to Vision regardless of CCN label | Soft cluster boost only |
+| `primary_area` tokens in vision-cluster profiles | Generic terms (`cognitive`, `computational`) inflated Vision text scores for 2018–2025 | Profiles use title/abstract only |
+| Broad Vision keywords (`cortex`, `perception`, `image`) | Matched most neuroscience abstracts | Tightened to retina/V1/scene/optic/etc. |
+| Weak pre-2026 `topic_area` | Empty or `View PDF` → text scoring inherited bad profiles | Keyword-first scoring + official maps where available |
 
 ---
 
