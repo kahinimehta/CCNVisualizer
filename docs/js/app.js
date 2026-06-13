@@ -905,8 +905,8 @@ function renderResearchThemeDeltas(submissions) {
 
   sub.text(`${pair.fromYear} → ${pair.toYear} · one bar per research theme`);
 
-  const width = container.node().clientWidth || 480;
-  const rowHeight = 30;
+  const width = container.node().clientWidth || s(480);
+  const rowHeight = s(30);
   const margin = { top: s(8), right: s(56), bottom: s(8), left: s(210) };
   const height = margin.top + margin.bottom + rows.length * rowHeight;
   const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`);
