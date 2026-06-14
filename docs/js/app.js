@@ -1027,11 +1027,15 @@ function renderResearchThemesOverTime(submissions) {
   const footnoteHeight = (isPhoneLayout() ? chartThemePx(8) : themeLabelPx(9)) + (isPhoneLayout() ? gs(10) : s(16));
   const marginTop = isPhoneLayout() ? gs(12) : s(24);
   const marginBottom = isPhoneLayout() ? gs(36) : s(52);
+  const yTitleText = "Submissions per year";
   const yTitleFontPx = isPhoneLayout() ? chartThemePx(8) : themeLabelPx(10);
-  const yTickLabelWidth = isPhoneLayout() ? gs(22) : s(44);
-  const yTitleAxisGap = isPhoneLayout() ? gs(16) : s(22);
-  const yTitleX = -(yTickLabelWidth + yTitleAxisGap);
-  const marginLeftForYTitle = yTickLabelWidth + yTitleAxisGap + yTitleFontPx * 0.75 + (isPhoneLayout() ? gs(10) : s(14));
+  const yTitleTextWidth = yTitleText.length * yTitleFontPx * 0.52;
+  const yTickLabelWidth = isPhoneLayout() ? gs(26) : s(44);
+  const yTitleAxisGap = isPhoneLayout() ? gs(6) : s(16);
+  const marginLeftForYTitle = Math.ceil(
+    yTickLabelWidth + yTitleAxisGap + yTitleTextWidth + (isPhoneLayout() ? gs(6) : s(12))
+  );
+  const yTitleCenterX = yTickLabelWidth + yTitleAxisGap + yTitleTextWidth / 2;
   const margin = isPhoneLayout()
     ? {
         top: gs(12),
@@ -1135,14 +1139,13 @@ function renderResearchThemesOverTime(submissions) {
     .call(styleThemeAxisLabels)
     .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
 
-  g.append("text")
-    .attr("x", yTitleX)
-    .attr("y", innerH / 2)
-    .attr("transform", "rotate(-90)")
+  svg
+    .append("text")
+    .attr("transform", `translate(${yTitleCenterX}, ${margin.top + innerH / 2}) rotate(-90)`)
     .attr("text-anchor", "middle")
     .attr("fill", CCN_COLORS.muted)
     .style("font-size", isPhoneLayout() ? chartThemeFs(8) : themeFs(10))
-    .text("Submissions per year");
+    .text(yTitleText);
 
   const legend = svg.append("g").attr("transform", `translate(${margin.left}, ${chartHeight + legendGap})`);
   const colWidth = (width - margin.left - margin.right) / legendCols;
