@@ -831,6 +831,7 @@ function renderResearchThemesOverTime(submissions) {
   const innerHForMargin = chartHeight - marginTop - marginBottom;
   const yTitleFontPx = themeLabelPx(10);
   const yTickLabelWidth = s(44);
+  const yTitleLeftGap = s(18);
   const yTitleLeftExtent = innerHForMargin / 2 + yTitleFontPx * 0.75;
   const phoneYAxisTitleWidth = s(40);
   const margin = isPhoneLayout()
@@ -838,13 +839,13 @@ function renderResearchThemesOverTime(submissions) {
         top: marginTop,
         right: s(20),
         bottom: marginBottom,
-        left: yTickLabelWidth + phoneYAxisTitleWidth + s(12),
+        left: yTickLabelWidth + phoneYAxisTitleWidth + yTitleLeftGap + s(8),
       }
     : {
         top: marginTop,
         right: s(24),
         bottom: marginBottom,
-        left: Math.max(s(72), yTitleLeftExtent + yTickLabelWidth + s(12)),
+        left: Math.max(s(72), yTitleLeftExtent + yTickLabelWidth + yTitleLeftGap + s(12)),
       };
   const height = chartHeight + legendGap + legendBlock + footnoteHeight;
   const svg = appendChartSvg(container, width, height);
@@ -938,7 +939,7 @@ function renderResearchThemesOverTime(submissions) {
 
   if (isPhoneLayout()) {
     g.append("text")
-      .attr("x", -(phoneYAxisTitleWidth + yTickLabelWidth + s(4)))
+      .attr("x", -(phoneYAxisTitleWidth + yTickLabelWidth + yTitleLeftGap))
       .attr("y", innerH / 2)
       .attr("transform", "rotate(-90)")
       .attr("text-anchor", "middle")
@@ -947,7 +948,7 @@ function renderResearchThemesOverTime(submissions) {
       .text("Submissions per year");
   } else {
     g.append("text")
-      .attr("x", -innerH / 2)
+      .attr("x", -innerH / 2 - yTitleLeftGap)
       .attr("y", -s(42))
       .attr("transform", "rotate(-90)")
       .attr("text-anchor", "middle")
