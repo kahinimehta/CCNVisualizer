@@ -104,16 +104,19 @@ function renderPhoneThemeBarChart(container, options) {
   const margin = { top: gs(5), right: gs(30), bottom: gs(5), left: gs(5) };
   const innerW = width - margin.left - margin.right;
   const labelFont = chartThemePx(7);
+  const valueFont = chartThemePx(8);
   const barH = gs(8);
   const rowGap = gs(3);
+  const valueGap = gs(3);
   const blockGap = gs(8);
+  const valueH = valueFont * 1.15;
   const maxVal = d3.max(data, getValue) || 1;
   const x = d3.scaleLinear().domain([0, maxVal]).range([0, innerW]);
 
   const rows = data.map((item) => {
     const lines = wrapThemeLabel(getLabel(item), innerW, labelFont);
     const labelH = lines.length * labelFont * 1.15;
-    return { item, lines, rowHeight: labelH + rowGap + barH + blockGap };
+    return { item, lines, rowHeight: labelH + rowGap + barH + valueGap + valueH + blockGap };
   });
   const height = margin.top + margin.bottom + d3.sum(rows, (r) => r.rowHeight);
   const svg = container
@@ -157,13 +160,11 @@ function renderPhoneThemeBarChart(container, options) {
       rect.on("mousemove", (event) => onBarTooltip(event, item)).on("mouseleave", hideTooltip);
     }
 
-    const valueInside = barWidth > innerW * 0.72;
     g.append("text")
-      .attr("x", valueInside ? barWidth - gs(4) : barWidth + gs(4))
-      .attr("y", barY + barH / 2)
-      .attr("dy", "0.35em")
-      .attr("text-anchor", valueInside ? "end" : "start")
-      .attr("fill", CCN_COLORS.white)
+      .attr("x", barWidth)
+      .attr("y", barY + barH + valueGap + valueFont * 0.85)
+      .attr("text-anchor", "end")
+      .attr("fill", CCN_COLORS.muted)
       .style("font-size", chartThemeFs(8))
       .text(valueFormat(val, item));
 
