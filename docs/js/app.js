@@ -1042,12 +1042,13 @@ function renderResearchThemesOverTime(submissions) {
   const yTitleFontPx = isPhoneLayout() ? chartThemePx(8) : themeLabelPx(10);
   const yTitleTextWidth = measureTextWidth(yTitleText, yTitleFontPx);
   const yTickLabelWidth = isPhoneLayout() ? gs(30) : s(50);
-  const yTitleLeftPad = isPhoneLayout() ? gs(6) : s(10);
-  const yTitleGapFromTicks = isPhoneLayout() ? gs(6) : s(12);
+  const yTitleLeftPad = isPhoneLayout() ? gs(0) : s(2);
+  const yTitleNudgeRight = isPhoneLayout() ? gs(10) : s(14);
+  const yTitleGapFromTicks = isPhoneLayout() ? gs(8) : s(10);
   const marginLeftForYTitle = Math.ceil(
-    yTitleLeftPad + yTitleTextWidth + yTitleGapFromTicks + yTickLabelWidth
+    yTitleLeftPad + yTitleNudgeRight + yTitleTextWidth + yTitleGapFromTicks + yTickLabelWidth
   );
-  const yTitleCenterX = yTitleLeftPad + yTitleTextWidth / 2;
+  const yTitleCenterX = yTitleLeftPad + yTitleTextWidth / 2 + yTitleNudgeRight;
   const margin = isPhoneLayout()
     ? {
         top: gs(12),
