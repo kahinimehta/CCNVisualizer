@@ -10,27 +10,10 @@
   --text: #e8f0f8;
   --muted: #8fa8c4;
   --border: rgba(197, 224, 243, 0.14);
-  --shadow: 0 24px 84px rgba(0, 0, 0, 0.35);
-  --ui-scale: 3;
-  --max-app-width: min(19200px, calc(100vw - 0.5rem));
-  --sidebar-width: 18rem;
-  --sidebar-collapsed-width: 10.8rem;
-}
-
-html {
-  font-size: clamp(48px, 36px + 1.14vw, 60px);
-}
-
-@media (min-width: 1600px) {
-  html {
-    font-size: clamp(51px, 39px + 1.02vw, 66px);
-  }
-}
-
-@media (min-width: 2400px) {
-  html {
-    font-size: clamp(54px, 42px + 0.84vw, 72px);
-  }
+  --shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+  --max-app-width: 1400px;
+  --sidebar-width: 11.5rem;
+  --sidebar-collapsed-width: 3.6rem;
 }
 
 * {
@@ -55,14 +38,14 @@ a {
   max-width: var(--max-app-width);
   margin-inline: auto;
   min-height: 100vh;
-  padding-inline: 0.25rem;
+  padding-inline: clamp(0.75rem, 2vw, 1.5rem);
 }
 
 .sidebar {
   width: var(--sidebar-width);
   background: #0a1829;
   border-right: 1px solid var(--border);
-  border-radius: 0 calc(12px * var(--ui-scale)) calc(12px * var(--ui-scale)) 0;
+  border-radius: 0 12px 12px 0;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -83,7 +66,7 @@ a {
   width: 2rem;
   height: 2rem;
   border: 1px solid var(--border);
-  border-radius: calc(8px * var(--ui-scale));
+  border-radius: 8px;
   background: var(--ccn-navy-card);
   color: var(--ccn-blue);
   cursor: pointer;
@@ -141,7 +124,7 @@ a {
 .nav-link {
   display: block;
   padding: 0.65rem 0.8rem;
-  border-radius: calc(8px * var(--ui-scale));
+  border-radius: 8px;
   background: transparent;
   color: var(--muted);
   font-size: 0.88rem;
@@ -233,7 +216,7 @@ a {
   gap: 0.75rem;
   align-items: end;
   width: 100%;
-  max-width: calc(640px * var(--ui-scale));
+  max-width: 640px;
 }
 
 .filter-field {
@@ -251,7 +234,7 @@ a {
   background: var(--ccn-navy-card);
   color: var(--text);
   border: 1px solid var(--border);
-  border-radius: calc(8px * var(--ui-scale));
+  border-radius: 8px;
   padding: 0.5rem 0.75rem;
   font-family: inherit;
   font-size: 0.9rem;
@@ -269,7 +252,7 @@ a {
 .kpi-card {
   background: var(--ccn-navy-card);
   border: 1px solid var(--border);
-  border-radius: calc(14px * var(--ui-scale));
+  border-radius: 14px;
   padding: 0.9rem 1rem;
   display: flex;
   align-items: center;
@@ -278,17 +261,17 @@ a {
 }
 
 .kpi-icon {
-  width: calc(44px * var(--ui-scale));
-  height: calc(44px * var(--ui-scale));
-  border-radius: calc(12px * var(--ui-scale));
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   display: grid;
   place-items: center;
   flex-shrink: 0;
 }
 
 .kpi-icon svg {
-  width: calc(20px * var(--ui-scale));
-  height: calc(20px * var(--ui-scale));
+  width: 20px;
+  height: 20px;
   stroke: currentColor;
   fill: none;
   stroke-width: 1.8;
@@ -325,7 +308,7 @@ a {
   border: 1px solid var(--border);
   background: var(--ccn-navy-card);
   color: var(--text);
-  border-radius: calc(8px * var(--ui-scale));
+  border-radius: 8px;
   padding: 0.35rem 0.75rem;
   cursor: pointer;
   font-size: 0.8rem;
@@ -349,7 +332,7 @@ a {
 .card {
   background: var(--ccn-navy-card);
   border: 1px solid var(--border);
-  border-radius: calc(16px * var(--ui-scale));
+  border-radius: 16px;
   padding: 1rem 1.05rem 1.1rem;
   box-shadow: var(--shadow);
   width: 100%;
@@ -400,7 +383,7 @@ a {
 #themes-over-time-chart,
 #theme-totals-chart,
 #theme-delta-chart {
-  min-height: calc(280px * var(--ui-scale));
+  min-height: 280px;
 }
 
 .theme-analytics {
@@ -431,11 +414,11 @@ a {
 }
 
 #cluster-bars-chart {
-  min-height: calc(320px * var(--ui-scale));
+  min-height: 320px;
 }
 
 #embedding-chart {
-  min-height: calc(420px * var(--ui-scale));
+  min-height: 420px;
 }
 
 .chart-note {
@@ -481,10 +464,10 @@ svg {
   border: 1px solid var(--border);
   color: var(--text);
   padding: 0.55rem 0.75rem;
-  border-radius: calc(8px * var(--ui-scale));
+  border-radius: 8px;
   font-size: 0.82rem;
   line-height: 1.45;
-  max-width: min(calc(320px * var(--ui-scale)), 90vw);
+  max-width: min(320px, 90vw);
   opacity: 0;
   transition: opacity 0.1s;
   z-index: 1000;
@@ -509,7 +492,7 @@ svg {
 }
 
 .paper-list {
-  max-height: calc(480px * var(--ui-scale));
+  max-height: 480px;
   overflow: auto;
   display: flex;
   flex-direction: column;
@@ -519,7 +502,7 @@ svg {
 .paper-item {
   background: var(--ccn-navy-elevated);
   border: 1px solid var(--border);
-  border-radius: calc(12px * var(--ui-scale));
+  border-radius: 12px;
   padding: 0.8rem 0.9rem;
 }
 
@@ -600,7 +583,7 @@ svg {
   }
 
   #embedding-chart {
-    min-height: calc(480px * var(--ui-scale));
+    min-height: 480px;
   }
 }
 
