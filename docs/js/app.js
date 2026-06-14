@@ -8,7 +8,7 @@ const CCN_COLORS = {
   card: "#162d47",
 };
 
-const UI_SCALE = 6;
+const UI_SCALE = 3;
 const s = (n) => n * UI_SCALE;
 const fs = (n) => `${s(n)}px`;
 

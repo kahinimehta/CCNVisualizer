@@ -8,6 +8,7 @@
   function setCollapsed(collapsed) {
     sidebar.classList.toggle("collapsed", collapsed);
     toggle.setAttribute("aria-expanded", String(!collapsed));
+    toggle.setAttribute("aria-label", collapsed ? "Open menu" : "Close menu");
     document.body.classList.toggle("sidebar-collapsed", collapsed);
     try {
       localStorage.setItem(storageKey, collapsed ? "1" : "0");
@@ -16,14 +17,12 @@
     }
   }
 
-  let collapsed = false;
+  let collapsed = true;
   try {
-    collapsed = localStorage.getItem(storageKey) === "1";
+    const saved = localStorage.getItem(storageKey);
+    if (saved === "0") collapsed = false;
+    else if (saved === "1") collapsed = true;
   } catch (_error) {
-    collapsed = window.matchMedia("(max-width: 700px)").matches;
-  }
-
-  if (window.matchMedia("(max-width: 700px)").matches && localStorage.getItem(storageKey) === null) {
     collapsed = true;
   }
 

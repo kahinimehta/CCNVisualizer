@@ -10,26 +10,26 @@
   --text: #e8f0f8;
   --muted: #8fa8c4;
   --border: rgba(197, 224, 243, 0.14);
-  --shadow: 0 48px 168px rgba(0, 0, 0, 0.35);
-  --ui-scale: 6;
-  --max-app-width: min(38400px, calc(100vw - 0.5rem));
-  --sidebar-width: 36rem;
-  --sidebar-collapsed-width: 21.6rem;
+  --shadow: 0 24px 84px rgba(0, 0, 0, 0.35);
+  --ui-scale: 3;
+  --max-app-width: min(19200px, calc(100vw - 0.5rem));
+  --sidebar-width: 18rem;
+  --sidebar-collapsed-width: 0;
 }
 
 html {
-  font-size: clamp(96px, 72px + 2.28vw, 120px);
+  font-size: clamp(48px, 36px + 1.14vw, 60px);
 }
 
 @media (min-width: 1600px) {
   html {
-    font-size: clamp(102px, 78px + 2.04vw, 132px);
+    font-size: clamp(51px, 39px + 1.02vw, 66px);
   }
 }
 
 @media (min-width: 2400px) {
   html {
-    font-size: clamp(108px, 84px + 1.68vw, 144px);
+    font-size: clamp(54px, 42px + 0.84vw, 72px);
   }
 }
 
@@ -69,19 +69,29 @@ a {
   padding: 0.85rem 0.65rem 1rem;
   gap: 0.85rem;
   flex-shrink: 0;
-  transition: width 0.2s ease, padding 0.2s ease;
+  transition: width 0.2s ease, padding 0.2s ease, background 0.2s ease, border-color 0.2s ease;
   overflow: hidden;
 }
 
 .sidebar.collapsed {
-  width: var(--sidebar-collapsed-width);
-  padding-inline: 0.45rem;
+  width: auto;
+  min-width: 0;
+  padding: 0.35rem 0.2rem;
+  background: transparent;
+  border-right-color: transparent;
+  border-radius: 0;
+  overflow: visible;
+}
+
+.sidebar.collapsed .sidebar-logo,
+.sidebar.collapsed .sidebar-nav {
+  display: none;
 }
 
 .sidebar-toggle {
   align-self: flex-end;
-  width: 2rem;
-  height: 2rem;
+  width: 2.5em;
+  height: 2.5em;
   border: 1px solid var(--border);
   border-radius: calc(8px * var(--ui-scale));
   background: var(--ccn-navy-card);
@@ -89,13 +99,15 @@ a {
   cursor: pointer;
   display: grid;
   place-items: center;
-  font-size: 1.1rem;
+  font-size: 1.15em;
   line-height: 1;
-  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
 }
 
 .sidebar.collapsed .sidebar-toggle {
-  align-self: center;
+  align-self: flex-start;
+  box-shadow: var(--shadow);
 }
 
 .sidebar.collapsed .sidebar-toggle .toggle-icon {
@@ -122,14 +134,12 @@ a {
 }
 
 .sidebar-logo .ccn-logo {
-  width: 8.25rem;
+  width: 8.25em;
+  max-width: 100%;
 }
 
 .sidebar.collapsed .sidebar-logo {
-  opacity: 0;
-  height: 0;
-  overflow: hidden;
-  padding: 0;
+  display: none;
 }
 
 .sidebar-nav {
@@ -152,8 +162,7 @@ a {
 }
 
 .sidebar.collapsed .nav-link {
-  padding: 0.65rem 0.35rem;
-  text-align: center;
+  display: none;
 }
 
 .sidebar.collapsed .nav-label {
@@ -207,7 +216,8 @@ a {
 }
 
 .brand-logo {
-  width: 9rem;
+  width: 9em;
+  max-width: min(100%, 12rem);
   flex-shrink: 0;
 }
 
@@ -278,17 +288,18 @@ a {
 }
 
 .kpi-icon {
-  width: calc(44px * var(--ui-scale));
-  height: calc(44px * var(--ui-scale));
-  border-radius: calc(12px * var(--ui-scale));
+  width: 2.75em;
+  height: 2.75em;
+  border-radius: 0.75em;
   display: grid;
   place-items: center;
   flex-shrink: 0;
+  font-size: 1em;
 }
 
 .kpi-icon svg {
-  width: calc(20px * var(--ui-scale));
-  height: calc(20px * var(--ui-scale));
+  width: 1.25em;
+  height: 1.25em;
   stroke: currentColor;
   fill: none;
   stroke-width: 1.8;
@@ -611,7 +622,7 @@ svg {
     padding-inline: 0;
   }
 
-  .sidebar {
+  .sidebar:not(.collapsed) {
     position: fixed;
     top: 0;
     left: 0;
@@ -619,10 +630,15 @@ svg {
     z-index: 100;
     box-shadow: var(--shadow);
     border-radius: 0;
+    width: min(var(--sidebar-width), 88vw);
+    background: #0a1829;
+    border-right: 1px solid var(--border);
   }
 
   .sidebar.collapsed {
-    width: var(--sidebar-collapsed-width);
+    position: relative;
+    width: auto;
+    box-shadow: none;
   }
 
   .main-area {
