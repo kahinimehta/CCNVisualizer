@@ -1041,14 +1041,19 @@ function renderResearchThemesOverTime(submissions) {
   const yTitleText = "Submissions per year";
   const yTitleFontPx = isPhoneLayout() ? chartThemePx(8) : themeLabelPx(10);
   const yTitleTextWidth = measureTextWidth(yTitleText, yTitleFontPx);
-  const yTickLabelWidth = isPhoneLayout() ? gs(30) : s(50);
-  const yTitleLeftPad = isPhoneLayout() ? gs(0) : s(2);
-  const yTitleNudgeRight = isPhoneLayout() ? gs(10) : s(14);
-  const yTitleGapFromTicks = isPhoneLayout() ? gs(8) : s(10);
+  const yTickLabelWidth = isPhoneLayout() ? gs(28) : s(42);
+  const yTitleGapFromTicks = isPhoneLayout() ? gs(2) : s(3);
+  const yTitleShiftTowardAxis = isPhoneLayout() ? gs(14) : s(20);
+  const yTitleEdgePad = isPhoneLayout() ? gs(2) : s(4);
   const marginLeftForYTitle = Math.ceil(
-    yTitleLeftPad + yTitleNudgeRight + yTitleTextWidth + yTitleGapFromTicks + yTickLabelWidth
+    yTitleEdgePad + yTitleTextWidth + yTitleGapFromTicks + yTickLabelWidth
   );
-  const yTitleCenterX = yTitleLeftPad + yTitleTextWidth / 2 + yTitleNudgeRight;
+  const yTitleCenterX =
+    marginLeftForYTitle -
+    yTickLabelWidth -
+    yTitleGapFromTicks -
+    yTitleTextWidth / 2 +
+    yTitleShiftTowardAxis;
   const margin = isPhoneLayout()
     ? {
         top: gs(12),
