@@ -1046,7 +1046,7 @@ function renderClusterBars() {
     .attr("y", (d) => y(d.name) + y.bandwidth() / 2)
     .attr("dy", "0.35em")
     .attr("fill", CCN_COLORS.white)
-    .style("font-size", fs(9))
+    .style("font-size", themeFs(9))
     .style("pointer-events", "none")
     .text((d) => d.count);
 }
