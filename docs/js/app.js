@@ -1072,11 +1072,9 @@ function renderResearchThemesOverTime(submissions) {
   let margin;
   if (isPhoneLayout()) {
     const yTitleEdgePad = gs(3);
-    const yTickLabelWidth = gs(20);
-    const yTitleGapFromTicks = gs(3);
-    marginLeftForYTitle = Math.ceil(
-      yTitleEdgePad + yTitleTextWidth + yTitleGapFromTicks + yTickLabelWidth
-    );
+    const yTickLabelWidth = gs(18);
+    const plotTickGap = gs(2);
+    marginLeftForYTitle = Math.ceil(yTickLabelWidth + plotTickGap);
     yTitleCenterX = yTitleEdgePad + yTitleTextWidth / 2;
     margin = {
       top: gs(12),
