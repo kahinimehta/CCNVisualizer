@@ -1024,22 +1024,21 @@ function renderResearchThemesOverTime(submissions) {
   const innerHForMargin = chartHeight - marginTop - marginBottom;
   const yTitleFontPx = isPhoneLayout() ? chartThemePx(8) : themeLabelPx(10);
   const yTickLabelWidth = isPhoneLayout() ? gs(22) : s(44);
-  const yTitleLeftGap = isPhoneLayout() ? gs(38) : s(48);
-  const yTitleLabelBuffer = yTitleFontPx * 0.65;
-  const yTitleLeftExtent = innerHForMargin / 2 + yTitleFontPx * 0.75;
-  const phoneYAxisTitleWidth = isPhoneLayout() ? gs(28) : s(40);
+  const yTitleAxisGap = isPhoneLayout() ? gs(16) : s(22);
+  const yTitleX = -(yTickLabelWidth + yTitleAxisGap);
+  const marginLeftForYTitle = yTickLabelWidth + yTitleAxisGap + yTitleFontPx * 0.75 + (isPhoneLayout() ? gs(10) : s(14));
   const margin = isPhoneLayout()
     ? {
         top: gs(12),
         right: gs(8),
         bottom: gs(36),
-        left: yTickLabelWidth + phoneYAxisTitleWidth + yTitleLeftGap + yTitleLabelBuffer + gs(8),
+        left: marginLeftForYTitle,
       }
     : {
         top: marginTop,
         right: s(24),
         bottom: marginBottom,
-        left: Math.max(s(72), yTitleLeftExtent + yTickLabelWidth + yTitleLeftGap + yTitleLabelBuffer + s(16)),
+        left: marginLeftForYTitle,
       };
   const height = chartHeight + legendGap + legendBlock + footnoteHeight;
   const svg = appendChartSvg(container, width, height);
@@ -1131,25 +1130,14 @@ function renderResearchThemesOverTime(submissions) {
     .call(styleThemeAxisLabels)
     .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
 
-  if (isPhoneLayout()) {
-    g.append("text")
-      .attr("x", -(phoneYAxisTitleWidth + yTickLabelWidth + yTitleLeftGap))
-      .attr("y", innerH / 2)
-      .attr("transform", "rotate(-90)")
-      .attr("text-anchor", "middle")
-      .attr("fill", CCN_COLORS.muted)
-      .style("font-size", isPhoneLayout() ? chartThemeFs(8) : themeFs(10))
-      .text("Submissions per year");
-  } else {
-    g.append("text")
-      .attr("x", -innerH / 2 - yTitleLeftGap)
-      .attr("y", -s(42))
-      .attr("transform", "rotate(-90)")
-      .attr("text-anchor", "middle")
-      .attr("fill", CCN_COLORS.muted)
-      .style("font-size", themeFs(10))
-      .text("Submissions per year");
-  }
+  g.append("text")
+    .attr("x", yTitleX)
+    .attr("y", innerH / 2)
+    .attr("transform", "rotate(-90)")
+    .attr("text-anchor", "middle")
+    .attr("fill", CCN_COLORS.muted)
+    .style("font-size", isPhoneLayout() ? chartThemeFs(8) : themeFs(10))
+    .text("Submissions per year");
 
   const legend = svg.append("g").attr("transform", `translate(${margin.left}, ${chartHeight + legendGap})`);
   const colWidth = (width - margin.left - margin.right) / legendCols;
