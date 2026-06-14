@@ -1067,32 +1067,44 @@ function renderResearchThemesOverTime(submissions) {
   const yTitleText = "Submissions per year";
   const yTitleFontPx = isPhoneLayout() ? chartThemePx(8) : themeLabelPx(10);
   const yTitleTextWidth = measureTextWidth(yTitleText, yTitleFontPx);
-  const yTickLabelWidth = isPhoneLayout() ? gs(28) : s(42);
-  const yTitleGapFromTicks = isPhoneLayout() ? gs(2) : s(3);
-  const yTitleShiftTowardAxis = isPhoneLayout() ? gs(38) : s(52);
-  const yTitleEdgePad = isPhoneLayout() ? gs(2) : s(4);
-  const marginLeftForYTitle = Math.ceil(
-    yTitleEdgePad + yTitleTextWidth + yTitleGapFromTicks + yTickLabelWidth
-  );
-  const yTitleCenterX =
-    marginLeftForYTitle -
-    yTickLabelWidth -
-    yTitleGapFromTicks -
-    yTitleTextWidth / 2 +
-    yTitleShiftTowardAxis;
-  const margin = isPhoneLayout()
-    ? {
-        top: gs(12),
-        right: gs(8),
-        bottom: gs(36),
-        left: marginLeftForYTitle,
-      }
-    : {
-        top: marginTop,
-        right: s(24),
-        bottom: marginBottom,
-        left: marginLeftForYTitle,
-      };
+  let marginLeftForYTitle;
+  let yTitleCenterX;
+  let margin;
+  if (isPhoneLayout()) {
+    const yTitleEdgePad = gs(3);
+    const yTickLabelWidth = gs(20);
+    const yTitleGapFromTicks = gs(3);
+    marginLeftForYTitle = Math.ceil(
+      yTitleEdgePad + yTitleTextWidth + yTitleGapFromTicks + yTickLabelWidth
+    );
+    yTitleCenterX = yTitleEdgePad + yTitleTextWidth / 2;
+    margin = {
+      top: gs(12),
+      right: gs(4),
+      bottom: gs(36),
+      left: marginLeftForYTitle,
+    };
+  } else {
+    const yTickLabelWidth = s(42);
+    const yTitleGapFromTicks = s(3);
+    const yTitleShiftTowardAxis = s(52);
+    const yTitleEdgePad = s(4);
+    marginLeftForYTitle = Math.ceil(
+      yTitleEdgePad + yTitleTextWidth + yTitleGapFromTicks + yTickLabelWidth
+    );
+    yTitleCenterX =
+      marginLeftForYTitle -
+      yTickLabelWidth -
+      yTitleGapFromTicks -
+      yTitleTextWidth / 2 +
+      yTitleShiftTowardAxis;
+    margin = {
+      top: marginTop,
+      right: s(24),
+      bottom: marginBottom,
+      left: marginLeftForYTitle,
+    };
+  }
   const height = chartHeight + legendGap + legendBlock + footnoteHeight;
   const svg = appendChartSvg(container, width, height);
   const innerW = width - margin.left - margin.right;
@@ -1193,8 +1205,8 @@ function renderResearchThemesOverTime(submissions) {
     .style("font-size", isPhoneLayout() ? chartThemeFs(8) : themeFs(10))
     .text(yTitleText);
 
-  const legendLeft = isPhoneLayout() ? gs(4) : margin.left;
-  const legendWidth = isPhoneLayout() ? width - gs(8) : width - margin.left - margin.right;
+  const legendLeft = isPhoneLayout() ? gs(3) : margin.left;
+  const legendWidth = isPhoneLayout() ? width - gs(6) : width - margin.left - margin.right;
   const legend = svg.append("g").attr("transform", `translate(${legendLeft}, ${chartHeight + legendGap})`);
   const colWidth = legendWidth / legendCols;
   const legendLineWidth = isPhoneLayout() ? gs(8) : s(14);
