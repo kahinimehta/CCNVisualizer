@@ -8,25 +8,43 @@ const CCN_COLORS = {
   card: "#162d47",
 };
 
-const MOBILE_MAX_WIDTH = 700;
-const DESKTOP_UI_SCALE = 3;
-const MOBILE_UI_SCALE = 1;
-const DESKTOP_THEME_LABEL_FONT_SCALE = 1.8;
-const MOBILE_THEME_LABEL_FONT_SCALE = 1;
+const COMPACT_LAYOUT_MAX_WIDTH = 960;
+const STACKED_LEGEND_MAX_WIDTH = 960;
 
-function isMobileLayout() {
-  return window.matchMedia(`(max-width: ${MOBILE_MAX_WIDTH}px)`).matches;
+function viewportWidth() {
+  return document.documentElement.clientWidth || window.innerWidth;
+}
+
+function readCssNumber(property, fallback) {
+  const raw = getComputedStyle(document.documentElement).getPropertyValue(property).trim();
+  const parsed = parseFloat(raw);
+  return Number.isFinite(parsed) ? parsed : fallback;
 }
 
 function getUiScale() {
-  return isMobileLayout() ? MOBILE_UI_SCALE : DESKTOP_UI_SCALE;
+  return readCssNumber("--ui-scale", Math.min(3, Math.max(1, 0.6 + viewportWidth() / 500)));
 }
 
 const s = (n) => n * getUiScale();
 const fs = (n) => `${s(n)}px`;
 
+function isCompactLayout() {
+  return viewportWidth() < COMPACT_LAYOUT_MAX_WIDTH;
+}
+
+function useStackedChartLegend(width = viewportWidth()) {
+  return width < STACKED_LEGEND_MAX_WIDTH;
+}
+
+function legendColumnCount(width) {
+  if (width < 480) return 1;
+  if (width < 1400) return 2;
+  return 3;
+}
+
 function themeLabelFontScale() {
-  return isMobileLayout() ? MOBILE_THEME_LABEL_FONT_SCALE : DESKTOP_THEME_LABEL_FONT_SCALE;
+  const ui = getUiScale();
+  return 1 + ((ui - 1) / 2) * 0.8;
 }
 
 function themeLabelPx(base) {
@@ -38,12 +56,12 @@ function themeFs(base) {
 }
 
 function themeBarLabelWidth(containerWidth = 0) {
-  const base = isMobileLayout() ? 118 : 300;
-  const scaled = s(base) * themeLabelFontScale();
-  if (isMobileLayout() && containerWidth > 0) {
-    return Math.min(scaled, Math.max(containerWidth * 0.42, s(64)));
-  }
-  return scaled;
+  const w = containerWidth || viewportWidth();
+  const maxFromScale = s(300) * themeLabelFontScale();
+  if (w >= COMPACT_LAYOUT_MAX_WIDTH) return maxFromScale;
+
+  const fraction = w < 400 ? 0.45 : w < 640 ? 0.42 : 0.36;
+  return Math.min(maxFromScale, Math.max(w * fraction, s(48)));
 }
 
 function themeBarRowHeight() {
@@ -742,7 +760,7 @@ function renderResearchThemesOverTime(submissions) {
   const cumulative = themeCumulativeByYear(years, byYear, themes);
 
   const width = container.node().clientWidth || s(1000);
-  const legendCols = width > s(1200) ? 3 : isMobileLayout() && width < s(520) ? 1 : 2;
+  const legendCols = legendColumnCount(width);
   const legendFont = themeLabelPx(9);
   const legendRowHeight = legendFont * 1.75;
   const legendRows = Math.ceil(themes.length / legendCols);
@@ -1084,11 +1102,11 @@ function renderEmbeddingCluster() {
 
   const points = state.embeddings.points;
   const width = container.node().clientWidth || s(1100);
-  const mobileLegend = isMobileLayout();
+  const mobileLegend = useStackedChartLegend(width);
   const legendFont = themeLabelPx(10);
   const legendItemHeight = legendFont * 1.5;
   const themes = [...new Set(state.embeddings.points.map((d) => mapClusterToTheme(d.cluster_name)))];
-  const legendCols = mobileLegend ? 2 : 1;
+  const legendCols = mobileLegend ? (width < 520 ? 1 : 2) : 1;
   const legendRows = mobileLegend ? Math.ceil(themes.length / legendCols) : themes.length;
   const legendBlock = mobileLegend ? legendRows * legendItemHeight + s(16) : 0;
   const plotHeight = mobileLegend ? s(300) : s(520);
