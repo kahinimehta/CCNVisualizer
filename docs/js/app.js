@@ -28,6 +28,26 @@ function chartContainerWidth(container) {
   return container.node()?.clientWidth || viewportWidth();
 }
 
+let lastLayoutWidth = viewportWidth();
+let lastLayoutHeight = window.innerHeight;
+
+function shouldReflowOnResize() {
+  const width = viewportWidth();
+  const height = window.innerHeight;
+  const widthChanged = Math.abs(width - lastLayoutWidth) >= 8;
+  const heightChanged = Math.abs(height - lastLayoutHeight) >= 48;
+  lastLayoutWidth = width;
+  lastLayoutHeight = height;
+  if (widthChanged) return true;
+  if (isTouchLike()) return false;
+  return heightChanged;
+}
+
+function restorePageScroll(scrollX, scrollY) {
+  window.scrollTo(scrollX, scrollY);
+  requestAnimationFrame(() => window.scrollTo(scrollX, scrollY));
+}
+
 function removeChartScrollWrappers() {
   document.querySelectorAll(".chart-scroll-x").forEach((wrapper) => {
     const chart = wrapper.firstElementChild;
@@ -746,8 +766,12 @@ function renderWordCloud(counts) {
   container.selectAll("*").remove();
 
   const width = container.node().clientWidth || s(800);
-  const height = s(300);
-  const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`);
+  const height = isPhoneLayout() ? gs(220) : s(300);
+  const svg = container
+    .append("svg")
+    .attr("viewBox", `0 0 ${width} ${height}`)
+    .attr("width", "100%")
+    .style("height", `${height}px`);
   const top = counts.slice(0, 40);
 
   if (!top.length) {
@@ -768,13 +792,14 @@ function renderWordCloud(counts) {
   const max = d3.max(top, (d) => d.count) || 1;
   const fontSize = (d) => s(12) + (d.count / max) * s(32);
   const colorScale = d3.scaleOrdinal(CHART_PALETTE);
+  const scrollSnapshot = { x: window.scrollX, y: window.scrollY };
 
   d3.layout
     .cloud()
     .size([width, height])
     .words(top.map((d) => ({ text: d.text, size: fontSize(d), count: d.count })))
     .padding(s(5))
-    .rotate(() => (~~(Math.random() * 2) * 90))
+    .rotate((_, i) => (i % 2 === 0 ? 0 : 90))
     .font("Open Sans")
     .fontSize((d) => d.size)
     .on("end", (words) => {
@@ -793,6 +818,7 @@ function renderWordCloud(counts) {
         .text((d) => d.text)
         .on("mousemove", (event, d) => showTooltip(`<strong>${d.text}</strong><br/>${d.count} secondary tags`, event))
         .on("mouseleave", hideTooltip);
+      restorePageScroll(scrollSnapshot.x, scrollSnapshot.y);
     })
     .start();
 }
@@ -1676,6 +1702,7 @@ function renderPaperList() {
 }
 
 function renderAll() {
+  const scrollSnapshot = { x: window.scrollX, y: window.scrollY };
   removeChartScrollWrappers();
   const submissions = filteredSubmissions();
   const primaryCounts = primaryThemeCounts(submissions);
@@ -1697,6 +1724,8 @@ function renderAll() {
   d3.select("#year-chips")
     .selectAll(".year-chip")
     .classed("active", (d) => d === state.selectedYear);
+
+  restorePageScroll(scrollSnapshot.x, scrollSnapshot.y);
 }
 
 async function loadOptionalJson(path) {
@@ -1749,7 +1778,9 @@ async function init() {
   let resizeTimer = null;
   window.addEventListener("resize", () => {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => renderAll(), 150);
+    resizeTimer = setTimeout(() => {
+      if (shouldReflowOnResize()) renderAll();
+    }, 150);
   });
 }
 

@@ -419,6 +419,11 @@ a {
   min-height: calc(280px * var(--ui-scale));
 }
 
+#word-cloud {
+  height: clamp(12rem, 34vh, 18.75rem);
+  min-height: clamp(12rem, 34vh, 18.75rem);
+}
+
 .theme-analytics {
   display: flex;
   flex-direction: column;
