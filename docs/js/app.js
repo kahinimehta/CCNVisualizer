@@ -1077,6 +1077,7 @@ function renderResearchThemesOverTime(submissions) {
   let margin;
   if (isPhoneLayout()) {
     const phoneChartInset = 12;
+    const gapTitleToTicks = 2;
     const yTitleFontPx = chartThemePx(7);
     const yTitleTextWidth = measureTextWidth(yTitleText, yTitleFontPx, '"Open Sans", sans-serif');
     const yTickFontPx = chartThemePx(7);
@@ -1085,9 +1086,10 @@ function renderResearchThemesOverTime(submissions) {
         measureTextWidth(String(t), yTickFontPx, '"Open Sans", sans-serif')
       ) + 4
     );
-    const gapTitleToTicks = 2;
-    marginLeftForYTitle = Math.ceil(phoneChartInset + yTickLabelWidth + 4);
-    yTitleCenterX = marginLeftForYTitle - yTickLabelWidth - gapTitleToTicks - yTitleTextWidth / 2;
+    marginLeftForYTitle = Math.ceil(
+      phoneChartInset + yTitleTextWidth + gapTitleToTicks + yTickLabelWidth + 4
+    );
+    yTitleCenterX = phoneChartInset + yTitleTextWidth / 2;
     margin = {
       top: gs(12),
       right: gs(4),
@@ -1123,7 +1125,11 @@ function renderResearchThemesOverTime(submissions) {
   const innerH = chartHeight - margin.top - margin.bottom;
   const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
-  const x = d3.scalePoint().domain(years).range([0, innerW]).padding(isPhoneLayout() ? 0.12 : 0.45);
+  const x = d3
+    .scalePoint()
+    .domain(years)
+    .range([0, innerW])
+    .padding(isPhoneLayout() ? 0 : 0.45);
   const y = d3.scaleLinear().domain([0, yMax]).nice().range([innerH, 0]);
   const color = d3.scaleOrdinal(CHART_PALETTE).domain(themes);
 
@@ -1189,7 +1195,15 @@ function renderResearchThemesOverTime(submissions) {
 
   g.append("g")
     .attr("transform", `translate(0,${innerH})`)
-    .call(d3.axisBottom(x).tickFormat(d3.format("d")).tickPadding(isPhoneLayout() ? gs(8) : s(16)))
+    .call((sel) => {
+      const axis = d3
+        .axisBottom(x)
+        .tickFormat(d3.format("d"))
+        .tickSizeOuter(0)
+        .tickPadding(isPhoneLayout() ? gs(8) : s(16));
+      if (isPhoneLayout()) axis.tickValues(years);
+      sel.call(axis);
+    })
     .call(styleThemeAxisLabels)
     .call((sel) => sel.selectAll("text").attr("dy", isPhoneLayout() ? gs(8) : s(14)))
     .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
