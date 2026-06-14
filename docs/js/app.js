@@ -234,12 +234,12 @@ function themeFs(base) {
 
 let measureTextCanvas = null;
 
-function measureTextWidth(text, fontSizePx) {
+function measureTextWidth(text, fontSizePx, fontFamily = 'system-ui, -apple-system, "Segoe UI", sans-serif') {
   if (typeof document === "undefined") return text.length * fontSizePx * 0.58;
   measureTextCanvas = measureTextCanvas || document.createElement("canvas");
   const ctx = measureTextCanvas.getContext("2d");
   if (!ctx) return text.length * fontSizePx * 0.58;
-  ctx.font = `${fontSizePx}px system-ui, -apple-system, "Segoe UI", sans-serif`;
+  ctx.font = `${fontSizePx}px ${fontFamily}`;
   return ctx.measureText(text).width;
 }
 
@@ -1076,18 +1076,17 @@ function renderResearchThemesOverTime(submissions) {
   let yTitleFontPx;
   let margin;
   if (isPhoneLayout()) {
-    const yTitleEdgePad = gs(3);
     const yTitleFontPx = chartThemePx(7);
-    const yTitleTextWidth = measureTextWidth(yTitleText, yTitleFontPx);
-    const titleBandWidth = Math.ceil(yTitleEdgePad + yTitleTextWidth);
+    const yTitleTextWidth = measureTextWidth(yTitleText, yTitleFontPx, '"Open Sans", sans-serif');
     const yTickFontPx = chartThemePx(7);
     const yTickLabelWidth = Math.ceil(
       d3.max(d3.scaleLinear().domain([0, yMax]).nice().ticks(4), (t) =>
-        measureTextWidth(String(t), yTickFontPx)
-      ) + gs(3)
+        measureTextWidth(String(t), yTickFontPx, '"Open Sans", sans-serif')
+      ) + gs(2)
     );
-    marginLeftForYTitle = Math.ceil(titleBandWidth + yTickLabelWidth);
-    yTitleCenterX = yTitleEdgePad + yTitleTextWidth / 2;
+    const gapTitleToTicks = 2;
+    marginLeftForYTitle = Math.ceil(yTickLabelWidth + gs(1));
+    yTitleCenterX = marginLeftForYTitle - yTickLabelWidth - gapTitleToTicks - yTitleTextWidth / 2;
     margin = {
       top: gs(12),
       right: gs(4),
@@ -1195,7 +1194,7 @@ function renderResearchThemesOverTime(submissions) {
     .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
 
   g.append("g")
-    .call(d3.axisLeft(y).ticks(isPhoneLayout() ? 4 : 5).tickPadding(isPhoneLayout() ? gs(4) : s(8)))
+    .call(d3.axisLeft(y).ticks(isPhoneLayout() ? 4 : 5).tickPadding(isPhoneLayout() ? gs(2) : s(8)))
     .call(styleThemeAxisLabels)
     .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
 
