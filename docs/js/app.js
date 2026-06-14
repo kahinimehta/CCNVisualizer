@@ -1077,20 +1077,15 @@ function renderResearchThemesOverTime(submissions) {
   let margin;
   if (isPhoneLayout()) {
     const gapTitleToTicks = 2;
-    const minBorder = 10;
-    yTitleFontPx = themeLabelPx(9);
+    yTitleFontPx = chartThemePx(8);
     const yTitleTextWidth = measureTextWidth(yTitleText, yTitleFontPx, '"Open Sans", sans-serif');
     const yTickFontPx = chartThemePx(7);
     const yTickLabelWidth = Math.ceil(
       d3.max(d3.scaleLinear().domain([0, yMax]).nice().ticks(4), (t) =>
         measureTextWidth(String(t), yTickFontPx, '"Open Sans", sans-serif')
-      ) + 4
+      ) + 6
     );
-    const plotMarginLeft = yTickLabelWidth + 4;
-    const snugTitleCenterX = plotMarginLeft - yTickLabelWidth - gapTitleToTicks - yTitleTextWidth / 2;
-    const titleLeftEdge = snugTitleCenterX - yTitleTextWidth / 2;
-    const phoneChartInset = Math.max(0, Math.ceil(minBorder - titleLeftEdge));
-    marginLeftForYTitle = phoneChartInset + plotMarginLeft;
+    marginLeftForYTitle = yTickLabelWidth + 6;
     yTitleCenterX = marginLeftForYTitle - yTickLabelWidth - gapTitleToTicks - yTitleTextWidth / 2;
     margin = {
       top: gs(12),
@@ -1123,6 +1118,10 @@ function renderResearchThemesOverTime(submissions) {
   }
   const height = chartHeight + legendGap + legendBlock + footnoteHeight;
   const svg = appendChartSvg(container, width, height);
+  if (isPhoneLayout()) {
+    svg.style("overflow", "visible");
+    container.style("overflow", "visible");
+  }
   const innerW = width - margin.left - margin.right;
   const innerH = chartHeight - margin.top - margin.bottom;
   const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
@@ -1225,8 +1224,8 @@ function renderResearchThemesOverTime(submissions) {
     .style("font-size", isPhoneLayout() ? `${yTitleFontPx}px` : themeFs(10))
     .text(yTitleText);
 
-  const legendLeft = isPhoneLayout() ? 10 : margin.left;
-  const legendWidth = isPhoneLayout() ? width - 24 : width - margin.left - margin.right;
+  const legendLeft = isPhoneLayout() ? 6 : margin.left;
+  const legendWidth = isPhoneLayout() ? width - 12 : width - margin.left - margin.right;
   const legend = svg.append("g").attr("transform", `translate(${legendLeft}, ${chartHeight + legendGap})`);
   const colWidth = legendWidth / legendCols;
   const legendLineWidth = isPhoneLayout() ? gs(8) : s(14);

@@ -539,6 +539,18 @@ svg {
   #embedding-chart {
     min-height: 0;
   }
+
+  .theme-analytics.card-full {
+    overflow: visible;
+  }
+
+  #themes-over-time-chart {
+    overflow: visible;
+  }
+
+  #themes-over-time-chart svg {
+    overflow: visible;
+  }
 }
 
 .tooltip {
