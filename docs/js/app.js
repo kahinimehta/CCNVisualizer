@@ -936,7 +936,8 @@ function renderResearchThemesOverTime(submissions) {
   const innerHForMargin = chartHeight - marginTop - marginBottom;
   const yTitleFontPx = themeLabelPx(10);
   const yTickLabelWidth = isPhoneLayout() ? s(28) : s(44);
-  const yTitleLeftGap = s(18);
+  const yTitleLeftGap = s(32);
+  const yTitleLabelBuffer = yTitleFontPx * 0.55;
   const yTitleLeftExtent = innerHForMargin / 2 + yTitleFontPx * 0.75;
   const phoneYAxisTitleWidth = isPhoneLayout() ? s(30) : s(40);
   const margin = isPhoneLayout()
@@ -944,13 +945,13 @@ function renderResearchThemesOverTime(submissions) {
         top: s(16),
         right: s(12),
         bottom: s(44),
-        left: yTickLabelWidth + phoneYAxisTitleWidth + yTitleLeftGap + s(6),
+        left: yTickLabelWidth + phoneYAxisTitleWidth + yTitleLeftGap + yTitleLabelBuffer + s(6),
       }
     : {
         top: marginTop,
         right: s(24),
         bottom: marginBottom,
-        left: Math.max(s(72), yTitleLeftExtent + yTickLabelWidth + yTitleLeftGap + s(12)),
+        left: Math.max(s(72), yTitleLeftExtent + yTickLabelWidth + yTitleLeftGap + yTitleLabelBuffer + s(12)),
       };
   const height = chartHeight + legendGap + legendBlock + footnoteHeight;
   const svg = appendChartSvg(container, width, height);
