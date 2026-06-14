@@ -192,7 +192,7 @@ function useStackedChartLegend(width = viewportWidth()) {
 }
 
 function legendColumnCount(width) {
-  if (isPhoneLayout()) return 1;
+  if (isPhoneLayout()) return 2;
   if (width < 480) return 1;
   if (width < 1400) return 2;
   return 3;
@@ -1032,8 +1032,8 @@ function renderResearchThemesOverTime(submissions) {
   const legendFont = isPhoneLayout() ? chartThemePx(7) : themeLabelPx(9);
   const legendRowHeight = isPhoneLayout() ? legendFont * 2.35 : legendFont * 1.75;
   const legendRows = Math.ceil(themes.length / legendCols);
-  const legendGap = isPhoneLayout() ? gs(16) : s(40);
-  const legendBlock = legendRows * legendRowHeight + (isPhoneLayout() ? gs(12) : s(20));
+  const legendGap = isPhoneLayout() ? gs(12) : s(40);
+  const legendBlock = legendRows * legendRowHeight + (isPhoneLayout() ? gs(8) : s(20));
   const chartHeight = isPhoneLayout() ? gs(210) : s(400);
   const footnoteHeight = (isPhoneLayout() ? chartThemePx(8) : themeLabelPx(9)) + (isPhoneLayout() ? gs(10) : s(16));
   const marginTop = isPhoneLayout() ? gs(12) : s(24);
@@ -1167,10 +1167,12 @@ function renderResearchThemesOverTime(submissions) {
     .style("font-size", isPhoneLayout() ? chartThemeFs(8) : themeFs(10))
     .text(yTitleText);
 
-  const legend = svg.append("g").attr("transform", `translate(${margin.left}, ${chartHeight + legendGap})`);
-  const colWidth = (width - margin.left - margin.right) / legendCols;
-  const legendLineWidth = isPhoneLayout() ? gs(10) : s(14);
-  const legendTextX = isPhoneLayout() ? gs(13) : s(18);
+  const legendLeft = isPhoneLayout() ? gs(4) : margin.left;
+  const legendWidth = isPhoneLayout() ? width - gs(8) : width - margin.left - margin.right;
+  const legend = svg.append("g").attr("transform", `translate(${legendLeft}, ${chartHeight + legendGap})`);
+  const colWidth = legendWidth / legendCols;
+  const legendLineWidth = isPhoneLayout() ? gs(8) : s(14);
+  const legendTextX = isPhoneLayout() ? gs(11) : s(18);
   const legendItems = legend
     .selectAll("g")
     .data(themes)
@@ -1200,8 +1202,8 @@ function renderResearchThemesOverTime(submissions) {
 
   svg
     .append("text")
-    .attr("x", margin.left)
-    .attr("y", chartHeight + legendGap + legendBlock + (isPhoneLayout() ? gs(8) : s(12)))
+    .attr("x", legendLeft)
+    .attr("y", chartHeight + legendGap + legendBlock + (isPhoneLayout() ? gs(6) : s(12)))
     .attr("fill", CCN_COLORS.muted)
     .style("font-size", isPhoneLayout() ? chartThemeFs(7) : themeFs(9))
     .text("Solid = annual count · dashed = cumulative total");
