@@ -1076,16 +1076,17 @@ function renderResearchThemesOverTime(submissions) {
   let yTitleFontPx;
   let margin;
   if (isPhoneLayout()) {
+    const phoneChartInset = 12;
     const yTitleFontPx = chartThemePx(7);
     const yTitleTextWidth = measureTextWidth(yTitleText, yTitleFontPx, '"Open Sans", sans-serif');
     const yTickFontPx = chartThemePx(7);
     const yTickLabelWidth = Math.ceil(
       d3.max(d3.scaleLinear().domain([0, yMax]).nice().ticks(4), (t) =>
         measureTextWidth(String(t), yTickFontPx, '"Open Sans", sans-serif')
-      ) + gs(2)
+      ) + 4
     );
     const gapTitleToTicks = 2;
-    marginLeftForYTitle = Math.ceil(yTickLabelWidth + gs(1));
+    marginLeftForYTitle = Math.ceil(phoneChartInset + yTickLabelWidth + 4);
     yTitleCenterX = marginLeftForYTitle - yTickLabelWidth - gapTitleToTicks - yTitleTextWidth / 2;
     margin = {
       top: gs(12),
@@ -1208,8 +1209,8 @@ function renderResearchThemesOverTime(submissions) {
     .style("font-size", isPhoneLayout() ? chartThemeFs(7) : themeFs(10))
     .text(yTitleText);
 
-  const legendLeft = isPhoneLayout() ? gs(4) : margin.left;
-  const legendWidth = isPhoneLayout() ? width - gs(14) : width - margin.left - margin.right;
+  const legendLeft = isPhoneLayout() ? 12 : margin.left;
+  const legendWidth = isPhoneLayout() ? width - 24 : width - margin.left - margin.right;
   const legend = svg.append("g").attr("transform", `translate(${legendLeft}, ${chartHeight + legendGap})`);
   const colWidth = legendWidth / legendCols;
   const legendLineWidth = isPhoneLayout() ? gs(8) : s(14);
