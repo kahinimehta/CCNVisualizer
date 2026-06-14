@@ -668,7 +668,7 @@ function embeddingDefaultNote() {
   }
   return isTouchLike()
     ? "Tap a dot to view one abstract · tap a legend item to filter by research theme"
-    : "Hover for cluster details · click a point or legend to filter by primary research theme.";
+    : "Click a point or legend to filter by primary research theme.";
 }
 
 function renderEmbeddingNote(note) {
