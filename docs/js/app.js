@@ -1076,19 +1076,17 @@ function renderResearchThemesOverTime(submissions) {
   let yTitleFontPx;
   let margin;
   if (isPhoneLayout()) {
-    const yTitleEdgePad = gs(4);
+    const yTitleEdgePad = gs(3);
     const yTitleFontPx = chartThemePx(7);
-    const yTitleTextWidth = measureTextWidth(yTitleText, yTitleFontPx) + gs(1);
-    const gapBeforeTicks = gs(1);
-    const titleBandWidth = Math.ceil(yTitleEdgePad + yTitleTextWidth + gapBeforeTicks);
+    const yTitleTextWidth = measureTextWidth(yTitleText, yTitleFontPx);
+    const titleBandWidth = Math.ceil(yTitleEdgePad + yTitleTextWidth);
     const yTickFontPx = chartThemePx(7);
     const yTickLabelWidth = Math.ceil(
       d3.max(d3.scaleLinear().domain([0, yMax]).nice().ticks(4), (t) =>
         measureTextWidth(String(t), yTickFontPx)
-      ) + gs(4)
+      ) + gs(3)
     );
-    const plotTickGap = gs(1);
-    marginLeftForYTitle = Math.ceil(titleBandWidth + yTickLabelWidth + plotTickGap);
+    marginLeftForYTitle = Math.ceil(titleBandWidth + yTickLabelWidth);
     yTitleCenterX = yTitleEdgePad + yTitleTextWidth / 2;
     margin = {
       top: gs(12),
