@@ -1076,24 +1076,20 @@ function renderResearchThemesOverTime(submissions) {
   let yTitleFontPx;
   let margin;
   if (isPhoneLayout()) {
-    const phoneShiftRight = gs(12);
-    const yTitleEdgePad = phoneShiftRight * 0.55;
+    const yTitleEdgePad = gs(4);
     const yTitleFontPx = chartThemePx(7);
     const yTitleTextWidth = measureTextWidth(yTitleText, yTitleFontPx) + gs(2);
+    const gapBeforeTicks = gs(5);
+    const titleBandWidth = yTitleEdgePad + yTitleTextWidth + gapBeforeTicks;
     const yTickFontPx = chartThemePx(7);
     const yTickLabelWidth = Math.ceil(
       d3.max(d3.scaleLinear().domain([0, yMax]).nice().ticks(4), (t) =>
         measureTextWidth(String(t), yTickFontPx)
       ) + gs(6)
     );
-    const plotTickGap = gs(4);
-    marginLeftForYTitle = Math.ceil(phoneShiftRight + yTickLabelWidth + plotTickGap);
-    const gapBeforeTicks = gs(4);
-    const maxTitleRightX = marginLeftForYTitle - yTickLabelWidth - gapBeforeTicks;
-    yTitleCenterX = Math.max(
-      yTitleEdgePad + yTitleTextWidth / 2,
-      maxTitleRightX - yTitleTextWidth / 2
-    );
+    const plotTickGap = gs(3);
+    marginLeftForYTitle = Math.ceil(titleBandWidth + yTickLabelWidth + plotTickGap);
+    yTitleCenterX = yTitleEdgePad + yTitleTextWidth / 2;
     margin = {
       top: gs(12),
       right: gs(4),
@@ -1215,7 +1211,7 @@ function renderResearchThemesOverTime(submissions) {
     .style("font-size", isPhoneLayout() ? chartThemeFs(7) : themeFs(10))
     .text(yTitleText);
 
-  const legendLeft = isPhoneLayout() ? gs(10) : margin.left;
+  const legendLeft = isPhoneLayout() ? gs(4) : margin.left;
   const legendWidth = isPhoneLayout() ? width - gs(14) : width - margin.left - margin.right;
   const legend = svg.append("g").attr("transform", `translate(${legendLeft}, ${chartHeight + legendGap})`);
   const colWidth = legendWidth / legendCols;
