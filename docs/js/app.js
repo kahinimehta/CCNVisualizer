@@ -810,8 +810,9 @@ function renderResearchThemesOverTime(submissions) {
 
   g.append("g")
     .attr("transform", `translate(0,${innerH})`)
-    .call(d3.axisBottom(x).tickFormat(d3.format("d")))
+    .call(d3.axisBottom(x).tickFormat(d3.format("d")).tickPadding(s(10)))
     .call(styleThemeAxisLabels)
+    .call((sel) => sel.selectAll("text").attr("dy", s(4)))
     .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
 
   g.append("g")
