@@ -1030,7 +1030,7 @@ function renderResearchThemesOverTime(submissions) {
   const width = chartContainerWidth(container);
   const legendCols = legendColumnCount(width);
   const legendFont = isPhoneLayout() ? chartThemePx(7) : themeLabelPx(9);
-  const legendRowHeight = isPhoneLayout() ? legendFont * 2.35 : legendFont * 1.75;
+  const legendRowHeight = isPhoneLayout() ? legendFont * 2.05 : legendFont * 1.75;
   const legendRows = Math.ceil(themes.length / legendCols);
   const legendGap = isPhoneLayout() ? gs(12) : s(40);
   const legendBlock = legendRows * legendRowHeight + (isPhoneLayout() ? gs(8) : s(20));
@@ -1043,7 +1043,7 @@ function renderResearchThemesOverTime(submissions) {
   const yTitleTextWidth = measureTextWidth(yTitleText, yTitleFontPx);
   const yTickLabelWidth = isPhoneLayout() ? gs(28) : s(42);
   const yTitleGapFromTicks = isPhoneLayout() ? gs(2) : s(3);
-  const yTitleShiftTowardAxis = isPhoneLayout() ? gs(32) : s(44);
+  const yTitleShiftTowardAxis = isPhoneLayout() ? gs(38) : s(52);
   const yTitleEdgePad = isPhoneLayout() ? gs(2) : s(4);
   const marginLeftForYTitle = Math.ceil(
     yTitleEdgePad + yTitleTextWidth + yTitleGapFromTicks + yTickLabelWidth
