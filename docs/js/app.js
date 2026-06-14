@@ -212,6 +212,17 @@ function themeFs(base) {
   return `${themeLabelPx(base)}px`;
 }
 
+let measureTextCanvas = null;
+
+function measureTextWidth(text, fontSizePx) {
+  if (typeof document === "undefined") return text.length * fontSizePx * 0.58;
+  measureTextCanvas = measureTextCanvas || document.createElement("canvas");
+  const ctx = measureTextCanvas.getContext("2d");
+  if (!ctx) return text.length * fontSizePx * 0.58;
+  ctx.font = `${fontSizePx}px system-ui, -apple-system, "Segoe UI", sans-serif`;
+  return ctx.measureText(text).width;
+}
+
 function themeBarLabelWidth(containerWidth = 0) {
   const w = containerWidth || viewportWidth();
   const maxFromScale = s(300) * themeLabelFontScale();
@@ -1029,13 +1040,14 @@ function renderResearchThemesOverTime(submissions) {
   const marginBottom = isPhoneLayout() ? gs(36) : s(52);
   const yTitleText = "Submissions per year";
   const yTitleFontPx = isPhoneLayout() ? chartThemePx(8) : themeLabelPx(10);
-  const yTitleTextWidth = yTitleText.length * yTitleFontPx * 0.52;
-  const yTickLabelWidth = isPhoneLayout() ? gs(26) : s(44);
-  const yTitleAxisGap = isPhoneLayout() ? gs(6) : s(16);
+  const yTitleTextWidth = measureTextWidth(yTitleText, yTitleFontPx);
+  const yTickLabelWidth = isPhoneLayout() ? gs(30) : s(50);
+  const yTitleLeftPad = isPhoneLayout() ? gs(6) : s(10);
+  const yTitleGapFromTicks = isPhoneLayout() ? gs(6) : s(12);
   const marginLeftForYTitle = Math.ceil(
-    yTickLabelWidth + yTitleAxisGap + yTitleTextWidth + (isPhoneLayout() ? gs(6) : s(12))
+    yTitleLeftPad + yTitleTextWidth + yTitleGapFromTicks + yTickLabelWidth
   );
-  const yTitleCenterX = yTickLabelWidth + yTitleAxisGap + yTitleTextWidth / 2;
+  const yTitleCenterX = yTitleLeftPad + yTitleTextWidth / 2;
   const margin = isPhoneLayout()
     ? {
         top: gs(12),
@@ -1141,8 +1153,10 @@ function renderResearchThemesOverTime(submissions) {
 
   svg
     .append("text")
+    .attr("class", "y-axis-title")
     .attr("transform", `translate(${yTitleCenterX}, ${margin.top + innerH / 2}) rotate(-90)`)
     .attr("text-anchor", "middle")
+    .attr("dominant-baseline", "middle")
     .attr("fill", CCN_COLORS.muted)
     .style("font-size", isPhoneLayout() ? chartThemeFs(8) : themeFs(10))
     .text(yTitleText);
