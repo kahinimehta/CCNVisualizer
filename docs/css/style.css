@@ -575,11 +575,6 @@ svg {
   padding: 0.8rem 0.9rem;
 }
 
-.paper-item.focused {
-  border-color: rgba(244, 199, 195, 0.65);
-  box-shadow: 0 0 0 1px rgba(244, 199, 195, 0.25);
-}
-
 .paper-item h3 {
   margin: 0 0 0.35rem;
   font-size: 0.92rem;

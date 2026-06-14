@@ -293,8 +293,6 @@ const state = {
   selectedYear: "all",
   search: "",
   selectedTheme: "",
-  embeddingFocusId: "",
-  embeddingDetailHtml: "",
 };
 
 let tooltip = null;
@@ -352,18 +350,6 @@ function submissionMatchesSearch(item, search) {
 function filteredSubmissions() {
   const { submissions } = state.data;
   const search = state.search.trim().toLowerCase();
-
-  if (state.embeddingFocusId) {
-    const focused = submissions.filter((item) => item.id === state.embeddingFocusId);
-    if (!focused.length) {
-      state.embeddingFocusId = "";
-    } else if (!search) {
-      return focused;
-    } else {
-      const matched = focused.filter((item) => submissionMatchesSearch(item, search));
-      return matched;
-    }
-  }
 
   return submissions.filter((item) => {
     const yearOk = state.selectedYear === "all" || String(item.year) === state.selectedYear;
@@ -592,94 +578,35 @@ function themeEmbeddingPoints(themeName) {
   return state.embeddings?.points?.filter((p) => mapClusterToTheme(p.cluster_name) === themeName) || [];
 }
 
-function syncYearControls() {
-  d3.select("#year-select").property("value", state.selectedYear);
-  d3.select("#year-chips")
-    .selectAll(".year-chip")
-    .classed("active", (d) => d === state.selectedYear);
-}
-
-function ensureEmbeddingYearVisible() {
-  if (state.selectedYear === "all" || state.selectedYear === "2026") return;
-  state.selectedYear = "2026";
-  syncYearControls();
-}
-
-function clearEmbeddingSelection() {
-  state.embeddingFocusId = "";
-  state.embeddingDetailHtml = "";
-  state.selectedTheme = "";
-  d3.select("#theme-select").property("value", "");
-  renderAll();
-}
-
 function displaySubmissions() {
   return filteredSubmissions();
 }
 
-function setThemeFilter(themeName, options = {}) {
-  const allowToggle = !options.fromEmbedding || !isTouchLike();
-  const nextTheme = allowToggle && state.selectedTheme === themeName ? "" : themeName;
+function setThemeFilter(themeName) {
+  const nextTheme = state.selectedTheme === themeName ? "" : themeName;
   state.selectedTheme = nextTheme;
-  if (nextTheme) {
-    state.embeddingFocusId = "";
-    if (options.fromEmbedding) ensureEmbeddingYearVisible();
-    if (options.detailHtml) state.embeddingDetailHtml = options.detailHtml;
-  } else {
-    state.embeddingDetailHtml = "";
-  }
   d3.select("#theme-select").property("value", state.selectedTheme);
   renderAll();
 }
 
-function setEmbeddingPointFocus(point) {
-  state.embeddingFocusId = point.id || "";
-  state.selectedTheme = "";
-  state.embeddingDetailHtml = embeddingPointTooltip(point);
-  d3.select("#theme-select").property("value", "");
-  ensureEmbeddingYearVisible();
-  renderAll();
-  requestAnimationFrame(() => {
-    document.querySelector(".paper-item.focused")?.scrollIntoView({ block: "nearest", behavior: "smooth" });
-  });
-}
-
 function embeddingActionHint(kind) {
-  if (isTouchLike()) {
-    return kind === "cluster"
-      ? "<em>Use “Clear map filter” in the list to reset</em>"
-      : "<em>Tap a legend item to see all submissions in that theme</em>";
-  }
+  const action = isTouchLike() ? "Tap" : "Click";
   return kind === "cluster"
-    ? "<em>Click to filter submissions</em>"
-    : "<em>Click to filter by this primary theme</em>";
+    ? `<em>${action} to filter submissions</em>`
+    : `<em>${action} to filter by this primary theme</em>`;
 }
 
 function embeddingDefaultNote() {
-  if (state.embeddingFocusId) {
-    return isTouchLike()
-      ? "Showing the selected abstract below · use “Clear map filter” to reset"
-      : "Showing the selected abstract in the submissions list.";
-  }
   if (state.selectedTheme) {
-    return isTouchLike()
-      ? `Showing 2026 submissions in “${state.selectedTheme}” · use “Clear map filter” to reset`
-      : `Showing submissions with primary theme “${state.selectedTheme}” · click again to clear`;
+    const clearHint = isTouchLike() ? "tap again to clear" : "click again to clear";
+    return `Showing submissions with primary theme “${state.selectedTheme}” · ${clearHint}`;
   }
   return isTouchLike()
-    ? "Tap a dot to view one abstract · tap a legend item to filter by research theme"
+    ? "Tap a point or legend to filter by primary research theme"
     : "Click a point or legend to filter by primary research theme.";
 }
 
 function renderEmbeddingNote(note) {
-  if (state.embeddingDetailHtml && isTouchLike() && !state.selectedTheme) {
-    note.html(state.embeddingDetailHtml);
-    return;
-  }
-  if (state.embeddingDetailHtml && isTouchLike() && state.selectedTheme) {
-    note.html(`${state.embeddingDetailHtml}<br/><br/>${embeddingDefaultNote()}`);
-    return;
-  }
   note.text(embeddingDefaultNote());
 }
 
@@ -742,18 +669,6 @@ function themeLegendTooltip(themeName) {
   return parts.join("<br/>");
 }
 
-function showEmbeddingPointDetail(point) {
-  if (isTouchLike()) {
-    setEmbeddingPointFocus(point);
-    hideTooltip();
-    return;
-  }
-  state.embeddingDetailHtml = embeddingPointTooltip(point);
-  const note = d3.select("#embedding-note");
-  if (note.node()) note.html(state.embeddingDetailHtml);
-  hideTooltip();
-}
-
 function renderKpis(filtered) {
   const { metadata, stats } = state.data;
   const cards = [
@@ -797,8 +712,6 @@ function renderYearControls() {
     .text((d) => (d === "all" ? "All years" : d))
     .on("click", (_, d) => {
       state.selectedYear = d;
-      state.embeddingFocusId = "";
-      state.embeddingDetailHtml = "";
       d3.select("#year-select").property("value", d);
       renderAll();
     });
@@ -995,8 +908,6 @@ function renderYearChart() {
     .style("cursor", "pointer")
     .on("click", (_, d) => {
       state.selectedYear = String(d.year);
-      state.embeddingFocusId = "";
-      state.embeddingDetailHtml = "";
       d3.select("#year-select").property("value", state.selectedYear);
       renderAll();
     })
@@ -1564,9 +1475,6 @@ function renderEmbeddingCluster() {
     .attr("cx", (d) => x(d.x))
     .attr("cy", (d) => y(d.y))
     .attr("r", (d) => {
-      if (state.embeddingFocusId && d.id === state.embeddingFocusId) {
-        return isPhoneLayout() ? gs(pointRadius.selected + 1) : s(pointRadius.selected + 1);
-      }
       const theme = mapClusterToTheme(d.cluster_name);
       return state.selectedTheme && theme === state.selectedTheme
         ? (isPhoneLayout() ? gs(pointRadius.selected) : s(pointRadius.selected))
@@ -1576,14 +1484,10 @@ function renderEmbeddingCluster() {
     })
     .attr("fill", (d) => color(mapClusterToTheme(d.cluster_name)))
     .attr("stroke", (d) => {
-      if (state.embeddingFocusId && d.id === state.embeddingFocusId) return CCN_COLORS.pink;
       const theme = mapClusterToTheme(d.cluster_name);
       return state.selectedTheme && theme === state.selectedTheme ? CCN_COLORS.pink : CCN_COLORS.navy;
     })
     .attr("stroke-width", (d) => {
-      if (state.embeddingFocusId && d.id === state.embeddingFocusId) {
-        return isPhoneLayout() ? gs(2) : s(2.5);
-      }
       const theme = mapClusterToTheme(d.cluster_name);
       return state.selectedTheme && theme === state.selectedTheme
         ? (isPhoneLayout() ? gs(1.5) : s(2))
@@ -1592,7 +1496,6 @@ function renderEmbeddingCluster() {
           : s(1);
     })
     .attr("opacity", (d) => {
-      if (state.embeddingFocusId) return d.id === state.embeddingFocusId ? 1 : 0.2;
       const theme = mapClusterToTheme(d.cluster_name);
       return !state.selectedTheme || theme === state.selectedTheme ? 0.9 : 0.18;
     })
@@ -1612,7 +1515,7 @@ function renderEmbeddingCluster() {
       .style("cursor", "pointer")
       .on("click", (event, d) => {
         event.stopPropagation();
-        showEmbeddingPointDetail(d);
+        setThemeFilter(mapClusterToTheme(d.cluster_name));
       });
   } else {
     svg
@@ -1638,13 +1541,7 @@ function renderEmbeddingCluster() {
         return `translate(${col * colWidth}, ${row * legendItemHeight})`;
       })
       .style("cursor", "pointer")
-      .on("click", (_, theme) => {
-        if (isTouchLike()) {
-          setThemeFilter(theme, { detailHtml: themeLegendTooltip(theme), fromEmbedding: true });
-        } else {
-          setThemeFilter(theme);
-        }
-      })
+      .on("click", (_, theme) => setThemeFilter(theme))
       .on("mousemove", isTouchLike() ? null : (event, theme) => showTooltip(themeLegendTooltip(theme), event))
       .on("mouseleave", isTouchLike() ? null : hideTooltip)
       .each(function appendMobileLegendItem() {
@@ -1674,13 +1571,7 @@ function renderEmbeddingCluster() {
       .join("g")
       .attr("transform", (_, i) => `translate(0, ${i * legendItemHeight})`)
       .style("cursor", "pointer")
-      .on("click", (_, theme) => {
-        if (isTouchLike()) {
-          setThemeFilter(theme, { detailHtml: themeLegendTooltip(theme), fromEmbedding: true });
-        } else {
-          setThemeFilter(theme);
-        }
-      })
+      .on("click", (_, theme) => setThemeFilter(theme))
       .on("mousemove", isTouchLike() ? null : (event, theme) => showTooltip(themeLegendTooltip(theme), event))
       .on("mouseleave", isTouchLike() ? null : hideTooltip);
 
@@ -1712,31 +1603,20 @@ function renderPaperList() {
   const countEl = d3.select("#results-count");
   countEl.selectAll("*").remove();
 
-  let countLabel;
-  if (state.embeddingFocusId) {
-    countLabel = submissions.length
-      ? "1 selected abstract from the embedding map"
-      : "Selected abstract not found (search may be hiding it)";
-  } else if (state.selectedTheme) {
-    countLabel = `${submissions.length} submissions with primary theme “${state.selectedTheme}”`;
-  } else {
-    countLabel = `${submissions.length} matching submissions`;
-  }
+  const countLabel = state.selectedTheme
+    ? `${submissions.length} submissions with primary theme “${state.selectedTheme}”`
+    : `${submissions.length} matching submissions`;
   countEl.append("span").text(countLabel);
 
-  if (state.embeddingFocusId || state.selectedTheme) {
+  if (state.selectedTheme) {
     countEl
       .append("span")
       .attr("class", "cluster-filter-pill")
-      .text("Clear map filter ×")
-      .on("click", () => clearEmbeddingSelection());
+      .text("Clear theme filter ×")
+      .on("click", () => setThemeFilter(state.selectedTheme));
   }
 
-  const items = list
-    .selectAll(".paper-item")
-    .data(submissions)
-    .join("div")
-    .attr("class", (d) => `paper-item${state.embeddingFocusId && d.id === state.embeddingFocusId ? " focused" : ""}`);
+  const items = list.selectAll(".paper-item").data(submissions).join("div").attr("class", "paper-item");
   items.selectAll("*").remove();
 
   items
@@ -1826,8 +1706,6 @@ async function init() {
 
   d3.select("#year-select").on("change", (event) => {
     state.selectedYear = event.target.value;
-    state.embeddingFocusId = "";
-    state.embeddingDetailHtml = "";
     renderAll();
   });
 
@@ -1838,8 +1716,6 @@ async function init() {
 
   d3.select("#theme-select").on("change", (event) => {
     state.selectedTheme = event.target.value;
-    state.embeddingFocusId = "";
-    state.embeddingDetailHtml = "";
     renderAll();
   });
 
