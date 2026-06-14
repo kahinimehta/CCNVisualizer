@@ -1076,6 +1076,7 @@ function renderResearchThemesOverTime(submissions) {
   let yTitleFontPx;
   let margin;
   if (isPhoneLayout()) {
+    const boxInset = 6;
     const gapTitleToTicks = 2;
     yTitleFontPx = chartThemePx(8);
     const yTitleTextWidth = measureTextWidth(yTitleText, yTitleFontPx, '"Open Sans", sans-serif');
@@ -1085,8 +1086,8 @@ function renderResearchThemesOverTime(submissions) {
         measureTextWidth(String(t), yTickFontPx, '"Open Sans", sans-serif')
       ) + 6
     );
-    marginLeftForYTitle = yTickLabelWidth + 6;
-    yTitleCenterX = marginLeftForYTitle - yTickLabelWidth - gapTitleToTicks - yTitleTextWidth / 2;
+    marginLeftForYTitle = boxInset + yTitleTextWidth + gapTitleToTicks + yTickLabelWidth;
+    yTitleCenterX = boxInset + yTitleTextWidth / 2;
     margin = {
       top: gs(12),
       right: gs(4),
@@ -1118,10 +1119,6 @@ function renderResearchThemesOverTime(submissions) {
   }
   const height = chartHeight + legendGap + legendBlock + footnoteHeight;
   const svg = appendChartSvg(container, width, height);
-  if (isPhoneLayout()) {
-    svg.style("overflow", "visible");
-    container.style("overflow", "visible");
-  }
   const innerW = width - margin.left - margin.right;
   const innerH = chartHeight - margin.top - margin.bottom;
   const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
