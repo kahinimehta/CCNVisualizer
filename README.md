@@ -13,7 +13,7 @@ Interactive dashboard for poster and paper submissions across the [Cognitive Com
 - Archive data (`2018`–`2025`) was scraped once from ccneuro.org and is treated as static
 - **2026** posters are merged from `data/ccn-2026-pending-posters.csv` — this is the only data that gets updated going forward
 - Research themes are the 12 meetup topics from the [Google Form](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform); every submission is classified with a **primary theme** plus optional **secondary topics**
-- Responsive single-column dashboard (1400px centered app shell) where all charts and filters use primary themes
+- Responsive single-column dashboard (6× UI scale, wide centered app shell) where all charts and filters use primary themes
 
 ## Dashboard features
 

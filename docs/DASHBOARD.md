@@ -91,7 +91,7 @@ Clusters without a direct meetup topic (e.g. social cognition, clinical psychiat
 
 ## Layout & responsive design
 
-The dashboard uses a **single-column stack** inside a centered app shell (`--max-app-width: 1400px`) with the navigation sidebar directly beside the content.
+The dashboard uses a **single-column stack** inside a wide centered app shell (`--max-app-width: min(38400px, calc(100vw - 0.5rem))`) with the navigation sidebar directly beside the content. UI type, icons, and charts are scaled **6×** via root `font-size`, `--ui-scale`, and chart dimensions.
 
 ```
 ┌──────────────────────────────────────┐
