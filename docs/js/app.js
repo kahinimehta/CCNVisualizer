@@ -1076,8 +1076,8 @@ function renderResearchThemesOverTime(submissions) {
   let yTitleFontPx;
   let margin;
   if (isPhoneLayout()) {
-    const boxInset = 4;
-    const gapTitleToTicks = 2;
+    const boxInset = 2;
+    const gapTitleToTicks = 4;
     yTitleFontPx = chartThemePx(8);
     const yTitleHorizontalSpan = Math.ceil(yTitleFontPx * 1.2) + 2;
     const yTickFontPx = chartThemePx(7);
@@ -1087,7 +1087,7 @@ function renderResearchThemesOverTime(submissions) {
       ) + 6
     );
     marginLeftForYTitle = boxInset + yTitleHorizontalSpan + gapTitleToTicks + yTickLabelWidth;
-    yTitleCenterX = boxInset + yTitleHorizontalSpan / 2;
+    yTitleCenterX = boxInset + yTitleHorizontalSpan / 2 - 1;
     margin = {
       top: gs(12),
       right: gs(4),
