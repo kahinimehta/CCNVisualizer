@@ -29,21 +29,22 @@ function themeBarRowHeight() {
   return Math.max(s(36), themeLabelPx(10) * 1.3);
 }
 
-function themeBarLabelX(leftMargin) {
-  return -(leftMargin - s(10));
+function themeBarLabelX(gap = 8) {
+  return -s(gap);
 }
 
-function drawThemeBarLabels(g, data, y, getLabel, leftMargin, options = {}) {
+function drawThemeBarLabels(g, data, y, getLabel, options = {}) {
   const baseFont = options.baseFont ?? 10;
   const fill = options.fill ?? CCN_COLORS.muted;
+  const gap = options.gap ?? 8;
   g.selectAll("text.theme-label")
     .data(data)
     .join("text")
     .attr("class", "theme-label")
-    .attr("x", themeBarLabelX(leftMargin))
+    .attr("x", themeBarLabelX(gap))
     .attr("y", (d) => y(getLabel(d)) + y.bandwidth() / 2)
     .attr("dy", "0.35em")
-    .attr("text-anchor", "start")
+    .attr("text-anchor", "end")
     .attr("fill", (d) => (typeof fill === "function" ? fill(d) : fill))
     .style("font-size", themeFs(baseFont))
     .style("pointer-events", options.pointerEvents || "auto")
@@ -563,7 +564,7 @@ function renderThemeBars(counts) {
     .on("mousemove", (event, d) => showTooltip(`<strong>${d.text}</strong><br/>${d.count} submissions`, event))
     .on("mouseleave", hideTooltip);
 
-  drawThemeBarLabels(g, data, y, (d) => d.text, leftMargin);
+  drawThemeBarLabels(g, data, y, (d) => d.text);
 
   g.selectAll("text.value")
     .data(data)
@@ -720,14 +721,16 @@ function renderResearchThemesOverTime(submissions) {
   const cumulative = themeCumulativeByYear(years, byYear, themes);
 
   const width = container.node().clientWidth || s(1000);
-  const legendCols = width > s(700) ? 3 : 2;
+  const legendCols = width > s(1200) ? 3 : 2;
   const legendFont = themeLabelPx(9);
-  const legendRowHeight = legendFont * 1.45;
+  const legendRowHeight = legendFont * 1.75;
   const legendRows = Math.ceil(themes.length / legendCols);
-  const legendBlock = legendRows * legendRowHeight + s(36);
-  const chartHeight = s(300);
-  const height = chartHeight + legendBlock;
-  const margin = { top: s(20), right: s(20), bottom: s(16), left: s(48) };
+  const legendGap = s(40);
+  const legendBlock = legendRows * legendRowHeight + s(20);
+  const chartHeight = s(400);
+  const footnoteHeight = themeLabelPx(9) + s(16);
+  const height = chartHeight + legendGap + legendBlock + footnoteHeight;
+  const margin = { top: s(24), right: s(24), bottom: s(28), left: s(52) };
   const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`).attr("width", "100%").style("height", `${height}px`);
   const innerW = width - margin.left - margin.right;
   const innerH = chartHeight - margin.top - margin.bottom;
@@ -825,7 +828,7 @@ function renderResearchThemesOverTime(submissions) {
     .style("font-size", themeFs(10))
     .text("Submissions per year");
 
-  const legend = svg.append("g").attr("transform", `translate(${margin.left}, ${chartHeight + s(8)})`);
+  const legend = svg.append("g").attr("transform", `translate(${margin.left}, ${chartHeight + legendGap})`);
   const colWidth = (width - margin.left - margin.right) / legendCols;
   const legendItems = legend
     .selectAll("g")
@@ -841,15 +844,15 @@ function renderResearchThemesOverTime(submissions) {
     .append("line")
     .attr("x1", 0)
     .attr("x2", s(14))
-    .attr("y1", legendFont * 0.55)
-    .attr("y2", legendFont * 0.55)
+    .attr("y1", legendFont * 0.6)
+    .attr("y2", legendFont * 0.6)
     .attr("stroke", (d) => color(d))
     .attr("stroke-width", s(2.5));
 
   legendItems
     .append("text")
     .attr("x", s(18))
-    .attr("y", legendFont * 0.65)
+    .attr("y", legendFont * 0.72)
     .attr("fill", CCN_COLORS.muted)
     .style("font-size", themeFs(9))
     .text((d) => d);
@@ -857,7 +860,7 @@ function renderResearchThemesOverTime(submissions) {
   svg
     .append("text")
     .attr("x", margin.left)
-    .attr("y", chartHeight + s(4))
+    .attr("y", chartHeight + legendGap + legendBlock + s(12))
     .attr("fill", CCN_COLORS.muted)
     .style("font-size", themeFs(9))
     .text("Solid = annual count · dashed = cumulative total");
@@ -906,7 +909,7 @@ function renderResearchThemeTotals(submissions) {
     .on("mousemove", (event, d) => showTooltip(`<strong>${d.theme}</strong><br/>${d.count} total submissions`, event))
     .on("mouseleave", hideTooltip);
 
-  drawThemeBarLabels(g, data, y, (d) => d.theme, leftMargin);
+  drawThemeBarLabels(g, data, y, (d) => d.theme);
 
   g.selectAll("text.value")
     .data(data)
@@ -968,7 +971,7 @@ function renderResearchThemeDeltas(submissions) {
     )
     .on("mouseleave", hideTooltip);
 
-  drawThemeBarLabels(g, rows, y, (d) => d.theme, leftMargin);
+  drawThemeBarLabels(g, rows, y, (d) => d.theme);
 
   g.selectAll("text.value")
     .data(rows)
@@ -1028,7 +1031,7 @@ function renderClusterBars() {
     .on("mousemove", (event, d) => showTooltip(`<strong>${d.name}</strong><br/>${d.count} primary assignments`, event))
     .on("mouseleave", hideTooltip);
 
-  drawThemeBarLabels(g, data, y, (d) => d.name, leftMargin, {
+  drawThemeBarLabels(g, data, y, (d) => d.name, {
     baseFont: 9,
     fill: (d) => (d.name === state.selectedTheme ? CCN_COLORS.white : CCN_COLORS.muted),
     pointerEvents: "none",
