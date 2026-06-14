@@ -1076,18 +1076,18 @@ function renderResearchThemesOverTime(submissions) {
   let yTitleFontPx;
   let margin;
   if (isPhoneLayout()) {
-    const boxInset = 6;
+    const boxInset = 4;
     const gapTitleToTicks = 2;
     yTitleFontPx = chartThemePx(8);
-    const yTitleTextWidth = measureTextWidth(yTitleText, yTitleFontPx, '"Open Sans", sans-serif');
+    const yTitleHorizontalSpan = Math.ceil(yTitleFontPx * 1.2) + 2;
     const yTickFontPx = chartThemePx(7);
     const yTickLabelWidth = Math.ceil(
       d3.max(d3.scaleLinear().domain([0, yMax]).nice().ticks(4), (t) =>
         measureTextWidth(String(t), yTickFontPx, '"Open Sans", sans-serif')
       ) + 6
     );
-    marginLeftForYTitle = boxInset + yTitleTextWidth + gapTitleToTicks + yTickLabelWidth;
-    yTitleCenterX = boxInset + yTitleTextWidth / 2;
+    marginLeftForYTitle = boxInset + yTitleHorizontalSpan + gapTitleToTicks + yTickLabelWidth;
+    yTitleCenterX = boxInset + yTitleHorizontalSpan / 2;
     margin = {
       top: gs(12),
       right: gs(4),
