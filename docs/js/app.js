@@ -768,8 +768,19 @@ function renderResearchThemesOverTime(submissions) {
   const legendBlock = legendRows * legendRowHeight + s(20);
   const chartHeight = s(400);
   const footnoteHeight = themeLabelPx(9) + s(16);
+  const marginTop = s(24);
+  const marginBottom = s(52);
+  const innerHForMargin = chartHeight - marginTop - marginBottom;
+  const yTitleFontPx = themeLabelPx(10);
+  const yTickLabelWidth = s(44);
+  const yTitleLeftExtent = innerHForMargin / 2 + yTitleFontPx * 0.75;
+  const margin = {
+    top: marginTop,
+    right: s(24),
+    bottom: marginBottom,
+    left: Math.max(s(72), yTitleLeftExtent + yTickLabelWidth + s(12)),
+  };
   const height = chartHeight + legendGap + legendBlock + footnoteHeight;
-  const margin = { top: s(24), right: s(24), bottom: s(28), left: s(52) };
   const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`).attr("width", "100%").style("height", `${height}px`);
   const innerW = width - margin.left - margin.right;
   const innerH = chartHeight - margin.top - margin.bottom;
@@ -849,13 +860,13 @@ function renderResearchThemesOverTime(submissions) {
 
   g.append("g")
     .attr("transform", `translate(0,${innerH})`)
-    .call(d3.axisBottom(x).tickFormat(d3.format("d")).tickPadding(s(10)))
+    .call(d3.axisBottom(x).tickFormat(d3.format("d")).tickPadding(s(16)))
     .call(styleThemeAxisLabels)
-    .call((sel) => sel.selectAll("text").attr("dy", s(4)))
+    .call((sel) => sel.selectAll("text").attr("dy", s(14)))
     .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
 
   g.append("g")
-    .call(d3.axisLeft(y).ticks(5))
+    .call(d3.axisLeft(y).ticks(5).tickPadding(s(8)))
     .call(styleThemeAxisLabels)
     .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
 
