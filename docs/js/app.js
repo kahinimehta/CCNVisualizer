@@ -1043,7 +1043,7 @@ function renderResearchThemesOverTime(submissions) {
   const yTitleTextWidth = measureTextWidth(yTitleText, yTitleFontPx);
   const yTickLabelWidth = isPhoneLayout() ? gs(28) : s(42);
   const yTitleGapFromTicks = isPhoneLayout() ? gs(2) : s(3);
-  const yTitleShiftTowardAxis = isPhoneLayout() ? gs(14) : s(20);
+  const yTitleShiftTowardAxis = isPhoneLayout() ? gs(20) : s(28);
   const yTitleEdgePad = isPhoneLayout() ? gs(2) : s(4);
   const marginLeftForYTitle = Math.ceil(
     yTitleEdgePad + yTitleTextWidth + yTitleGapFromTicks + yTickLabelWidth
