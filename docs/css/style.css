@@ -459,6 +459,12 @@ a {
   color: var(--muted);
   font-size: 0.75rem;
   font-style: italic;
+  line-height: 1.45;
+}
+
+.chart-note strong {
+  color: var(--ccn-white);
+  font-style: normal;
 }
 
 .card-header {

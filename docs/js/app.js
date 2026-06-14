@@ -20,6 +20,10 @@ function isPhoneLayout() {
   return viewportWidth() < PHONE_MAX_WIDTH;
 }
 
+function isTouchLike() {
+  return window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+}
+
 function chartContainerWidth(container) {
   return container.node()?.clientWidth || viewportWidth();
 }
@@ -289,6 +293,7 @@ const state = {
   selectedYear: "all",
   search: "",
   selectedTheme: "",
+  embeddingDetailHtml: "",
 };
 
 let tooltip = null;
@@ -568,10 +573,50 @@ function displaySubmissions() {
   return filteredSubmissions();
 }
 
-function setThemeFilter(themeName) {
-  state.selectedTheme = state.selectedTheme === themeName ? "" : themeName;
+function setThemeFilter(themeName, options = {}) {
+  const nextTheme = state.selectedTheme === themeName ? "" : themeName;
+  state.selectedTheme = nextTheme;
+  if (!nextTheme) {
+    state.embeddingDetailHtml = "";
+  } else if (options.detailHtml) {
+    state.embeddingDetailHtml = options.detailHtml;
+  }
   d3.select("#theme-select").property("value", state.selectedTheme);
   renderAll();
+}
+
+function embeddingActionHint(kind) {
+  if (isTouchLike()) {
+    return kind === "cluster"
+      ? "<em>Tap again to clear the theme filter</em>"
+      : "<em>Tap a legend item below to filter by theme</em>";
+  }
+  return kind === "cluster"
+    ? "<em>Click to filter submissions</em>"
+    : "<em>Click to filter by this primary theme</em>";
+}
+
+function embeddingDefaultNote() {
+  if (state.selectedTheme) {
+    return isTouchLike()
+      ? `Filtering by “${state.selectedTheme}” · tap the same legend again to clear`
+      : `Showing submissions with primary theme “${state.selectedTheme}” · click again to clear`;
+  }
+  return isTouchLike()
+    ? "Tap a point for abstract details · tap a legend item to filter submissions"
+    : "Hover for cluster details · click a point or legend to filter by primary research theme.";
+}
+
+function renderEmbeddingNote(note) {
+  if (state.embeddingDetailHtml && isTouchLike() && !state.selectedTheme) {
+    note.html(state.embeddingDetailHtml);
+    return;
+  }
+  if (state.embeddingDetailHtml && isTouchLike() && state.selectedTheme) {
+    note.html(`${state.embeddingDetailHtml}<br/><br/>${embeddingDefaultNote()}`);
+    return;
+  }
+  note.text(embeddingDefaultNote());
 }
 
 function embeddingPointTooltip(point) {
@@ -585,7 +630,7 @@ function embeddingPointTooltip(point) {
       : "",
   ];
   if (point.primary_area) parts.push(`<strong>Area:</strong> ${truncateLabel(point.primary_area, s(48))}`);
-  parts.push("<em>Click to filter by this primary theme</em>");
+  parts.push(embeddingActionHint("point"));
   return parts.filter(Boolean).join("<br/>");
 }
 
@@ -607,8 +652,15 @@ function clusterLegendTooltip(clusterName) {
     `${cluster.count} abstracts in cluster`,
   ];
   if (topAreas) parts.push(`<strong>Top areas:</strong><br/>${topAreas}`);
-  parts.push("<em>Click to filter submissions</em>");
+  parts.push(embeddingActionHint("cluster"));
   return parts.join("<br/>");
+}
+
+function showEmbeddingPointDetail(point) {
+  state.embeddingDetailHtml = embeddingPointTooltip(point);
+  const note = d3.select("#embedding-note");
+  if (note.node()) note.html(state.embeddingDetailHtml);
+  hideTooltip();
 }
 
 function renderKpis(filtered) {
@@ -1423,9 +1475,10 @@ function renderEmbeddingCluster() {
     .attr("rx", isPhoneLayout() ? gs(8) : s(12));
 
   svg
-    .selectAll("circle")
+    .selectAll("circle.embedding-point")
     .data(points)
     .join("circle")
+    .attr("class", "embedding-point")
     .attr("cx", (d) => x(d.x))
     .attr("cy", (d) => y(d.y))
     .attr("r", (d) => {
@@ -1454,9 +1507,30 @@ function renderEmbeddingCluster() {
       return !state.selectedTheme || theme === state.selectedTheme ? 0.9 : 0.18;
     })
     .style("cursor", "pointer")
-    .on("mousemove", (event, d) => showTooltip(embeddingPointTooltip(d), event))
-    .on("mouseleave", hideTooltip)
-    .on("click", (_, d) => setThemeFilter(mapClusterToTheme(d.cluster_name)));
+    .style("pointer-events", isTouchLike() ? "none" : "auto");
+
+  if (isTouchLike()) {
+    svg
+      .selectAll("circle.embedding-hit")
+      .data(points)
+      .join("circle")
+      .attr("class", "embedding-hit")
+      .attr("cx", (d) => x(d.x))
+      .attr("cy", (d) => y(d.y))
+      .attr("r", isPhoneLayout() ? gs(14) : s(16))
+      .attr("fill", "transparent")
+      .style("cursor", "pointer")
+      .on("click", (event, d) => {
+        event.stopPropagation();
+        showEmbeddingPointDetail(d);
+      });
+  } else {
+    svg
+      .selectAll("circle.embedding-point")
+      .on("mousemove", (event, d) => showTooltip(embeddingPointTooltip(d), event))
+      .on("mouseleave", hideTooltip)
+      .on("click", (_, d) => setThemeFilter(mapClusterToTheme(d.cluster_name)));
+  }
 
   const legend = svg.append("g");
   if (mobileLegend) {
@@ -1474,9 +1548,15 @@ function renderEmbeddingCluster() {
         return `translate(${col * colWidth}, ${row * legendItemHeight})`;
       })
       .style("cursor", "pointer")
-      .on("click", (_, theme) => setThemeFilter(theme))
-      .on("mousemove", (event, theme) => showTooltip(clusterLegendTooltip(theme), event))
-      .on("mouseleave", hideTooltip)
+      .on("click", (_, theme) => {
+        if (isTouchLike()) {
+          setThemeFilter(theme, { detailHtml: clusterLegendTooltip(theme) });
+        } else {
+          setThemeFilter(theme);
+        }
+      })
+      .on("mousemove", isTouchLike() ? null : (event, theme) => showTooltip(clusterLegendTooltip(theme), event))
+      .on("mouseleave", isTouchLike() ? null : hideTooltip)
       .each(function appendMobileLegendItem() {
         const item = d3.select(this);
         item
@@ -1504,9 +1584,15 @@ function renderEmbeddingCluster() {
       .join("g")
       .attr("transform", (_, i) => `translate(0, ${i * legendItemHeight})`)
       .style("cursor", "pointer")
-      .on("click", (_, theme) => setThemeFilter(theme))
-      .on("mousemove", (event, theme) => showTooltip(clusterLegendTooltip(theme), event))
-      .on("mouseleave", hideTooltip);
+      .on("click", (_, theme) => {
+        if (isTouchLike()) {
+          setThemeFilter(theme, { detailHtml: clusterLegendTooltip(theme) });
+        } else {
+          setThemeFilter(theme);
+        }
+      })
+      .on("mousemove", isTouchLike() ? null : (event, theme) => showTooltip(clusterLegendTooltip(theme), event))
+      .on("mouseleave", isTouchLike() ? null : hideTooltip);
 
     legendItems
       .append("rect")
@@ -1527,11 +1613,7 @@ function renderEmbeddingCluster() {
       .text((d) => d);
   }
 
-  note.text(
-    state.selectedTheme
-      ? `Showing submissions with primary theme “${state.selectedTheme}” · click again to clear`
-      : "Hover for cluster details · click a point or legend to filter by primary research theme."
-  );
+  renderEmbeddingNote(note);
 }
 
 function renderPaperList() {
