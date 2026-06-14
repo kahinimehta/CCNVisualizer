@@ -1077,8 +1077,8 @@ function renderResearchThemesOverTime(submissions) {
   let margin;
   if (isPhoneLayout()) {
     const yTitleEdgePad = gs(3);
-    const yTitleFontPx = chartThemePx(7);
-    const yTitleTextWidth = measureTextWidth(yTitleText, yTitleFontPx);
+    const yTitleFontPx = chartThemePx(6);
+    const yTitleTextWidth = measureTextWidth(yTitleText, yTitleFontPx) + gs(2);
     const yTickFontPx = chartThemePx(7);
     const yTickLabelWidth = Math.ceil(
       d3.max(d3.scaleLinear().domain([0, yMax]).nice().ticks(4), (t) =>
@@ -1087,9 +1087,9 @@ function renderResearchThemesOverTime(submissions) {
     );
     const plotTickGap = gs(2);
     marginLeftForYTitle = Math.ceil(yTickLabelWidth + plotTickGap);
-    const gapBeforePlot = gs(5);
-    const labelCenterBesidePlot = marginLeftForYTitle - gapBeforePlot - yTitleTextWidth / 2;
-    yTitleCenterX = Math.max(yTitleEdgePad + yTitleTextWidth / 2, labelCenterBesidePlot);
+    const gapBeforeTicks = gs(4);
+    const maxTitleRightX = marginLeftForYTitle - yTickLabelWidth - gapBeforeTicks;
+    yTitleCenterX = maxTitleRightX - yTitleTextWidth / 2;
     margin = {
       top: gs(12),
       right: gs(4),
@@ -1208,7 +1208,7 @@ function renderResearchThemesOverTime(submissions) {
     .attr("text-anchor", "middle")
     .attr("dominant-baseline", "middle")
     .attr("fill", CCN_COLORS.muted)
-    .style("font-size", isPhoneLayout() ? chartThemeFs(7) : themeFs(10))
+    .style("font-size", isPhoneLayout() ? chartThemeFs(6) : themeFs(10))
     .text(yTitleText);
 
   const legendLeft = isPhoneLayout() ? gs(3) : margin.left;
