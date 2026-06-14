@@ -574,7 +574,7 @@ function renderThemeBars(counts) {
     .attr("y", (d) => y(d.text) + y.bandwidth() / 2)
     .attr("dy", "0.35em")
     .attr("fill", CCN_COLORS.white)
-    .style("font-size", fs(10))
+    .style("font-size", themeFs(10))
     .text((d) => d.count);
 }
 
@@ -920,7 +920,7 @@ function renderResearchThemeTotals(submissions) {
     .attr("y", (d) => y(d.theme) + y.bandwidth() / 2)
     .attr("dy", "0.35em")
     .attr("fill", CCN_COLORS.white)
-    .style("font-size", fs(10))
+    .style("font-size", themeFs(10))
     .text((d) => d.count);
 }
 
@@ -982,7 +982,7 @@ function renderResearchThemeDeltas(submissions) {
     .attr("y", (d) => y(d.theme) + y.bandwidth() / 2)
     .attr("dy", "0.35em")
     .attr("fill", CCN_COLORS.white)
-    .style("font-size", fs(10))
+    .style("font-size", themeFs(10))
     .text((d) => `${d.delta >= 0 ? "+" : ""}${d.delta}`);
 }
 
