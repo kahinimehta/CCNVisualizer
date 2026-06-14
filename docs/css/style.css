@@ -491,6 +491,36 @@ svg {
   display: block;
 }
 
+.chart-scroll-x {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  margin-inline: -0.15rem;
+  padding-inline: 0.15rem;
+}
+
+.chart-scroll-x::after {
+  content: "";
+  display: block;
+  height: 0.01px;
+}
+
+@media (max-width: 639px) {
+  :root {
+    --ui-scale: clamp(0.75, calc(0.4 + 100vw / 820), 0.88);
+  }
+
+  html {
+    font-size: clamp(13px, calc(7px + 1.8vw), 15px);
+  }
+
+  #themes-over-time-chart,
+  #year-chart,
+  #embedding-chart {
+    min-height: 0;
+  }
+}
+
 .tooltip {
   position: fixed;
   pointer-events: none;
