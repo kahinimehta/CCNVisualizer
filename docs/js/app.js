@@ -77,12 +77,12 @@ function renderPhoneThemeBarChart(container, options) {
 
   container.selectAll("*").remove();
   const width = chartContainerWidth(container);
-  const margin = { top: s(6), right: s(36), bottom: s(6), left: s(6) };
+  const margin = { top: gs(5), right: gs(30), bottom: gs(5), left: gs(5) };
   const innerW = width - margin.left - margin.right;
-  const labelFont = themeLabelPx(8);
-  const barH = s(11);
-  const rowGap = s(4);
-  const blockGap = s(6);
+  const labelFont = chartThemePx(7);
+  const barH = gs(8);
+  const rowGap = gs(3);
+  const blockGap = gs(8);
   const maxVal = d3.max(data, getValue) || 1;
   const x = d3.scaleLinear().domain([0, maxVal]).range([0, innerW]);
 
@@ -117,7 +117,7 @@ function renderPhoneThemeBarChart(container, options) {
 
     const barY = yCursor + lines.length * labelFont * 1.15 + rowGap;
     const val = getValue(item);
-    const barWidth = Math.max(x(val), val > 0 ? s(2) : 0);
+    const barWidth = Math.max(x(val), val > 0 ? gs(2) : 0);
     const rect = g
       .append("rect")
       .attr("x", 0)
@@ -125,7 +125,7 @@ function renderPhoneThemeBarChart(container, options) {
       .attr("height", barH)
       .attr("width", barWidth)
       .attr("fill", getBarFill(item))
-      .attr("rx", s(3));
+      .attr("rx", gs(3));
     if (onBarClick) {
       rect.style("cursor", "pointer").on("click", () => onBarClick(item));
     }
@@ -135,12 +135,12 @@ function renderPhoneThemeBarChart(container, options) {
 
     const valueInside = barWidth > innerW * 0.72;
     g.append("text")
-      .attr("x", valueInside ? barWidth - s(4) : barWidth + s(4))
+      .attr("x", valueInside ? barWidth - gs(4) : barWidth + gs(4))
       .attr("y", barY + barH / 2)
       .attr("dy", "0.35em")
       .attr("text-anchor", valueInside ? "end" : "start")
       .attr("fill", CCN_COLORS.white)
-      .style("font-size", themeFs(9))
+      .style("font-size", chartThemeFs(8))
       .text(valueFormat(val, item));
 
     yCursor += rowHeight;
@@ -153,12 +153,31 @@ function readCssNumber(property, fallback) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+const PHONE_GRAPH_SCALE = 0.58;
+
 function getUiScale() {
   return readCssNumber("--ui-scale", Math.min(3, Math.max(1, 0.6 + viewportWidth() / 500)));
 }
 
 const s = (n) => n * getUiScale();
+const gs = (n) => (isPhoneLayout() ? n * getUiScale() * PHONE_GRAPH_SCALE : s(n));
 const fs = (n) => `${s(n)}px`;
+
+function chartThemePx(base) {
+  return isPhoneLayout() ? gs(base) : themeLabelPx(base);
+}
+
+function chartThemeFs(base) {
+  return `${chartThemePx(base)}px`;
+}
+
+function fitLegendLabel(text, maxWidth, fontPx) {
+  const usable = Math.max(40, maxWidth - fontPx * 2.4);
+  const maxChars = Math.max(10, Math.floor(usable / (fontPx * 0.48)));
+  const label = String(text);
+  if (label.length <= maxChars) return label;
+  return `${label.slice(0, Math.max(1, maxChars - 1))}…`;
+}
 
 function isCompactLayout() {
   return viewportWidth() < COMPACT_LAYOUT_MAX_WIDTH;
@@ -169,12 +188,14 @@ function useStackedChartLegend(width = viewportWidth()) {
 }
 
 function legendColumnCount(width) {
+  if (isPhoneLayout()) return 1;
   if (width < 480) return 1;
   if (width < 1400) return 2;
   return 3;
 }
 
 function themeLabelFontScale() {
+  if (isPhoneLayout()) return 1;
   const ui = getUiScale();
   return 1 + ((ui - 1) / 2) * 0.8;
 }
@@ -234,7 +255,7 @@ function styleThemeAxisLabels(selection) {
   selection
     .selectAll("text")
     .attr("fill", CCN_COLORS.muted)
-    .style("font-size", themeFs(10));
+    .style("font-size", isPhoneLayout() ? chartThemeFs(8) : themeFs(10));
 }
 
 const CHART_PALETTE = [
@@ -785,9 +806,9 @@ function renderYearChart() {
     .sort((a, b) => a.year - b.year);
 
   const width = chartContainerWidth(container);
-  const height = isPhoneLayout() ? s(240) : s(300);
+  const height = isPhoneLayout() ? gs(200) : s(300);
   const margin = isPhoneLayout()
-    ? { top: s(14), right: s(10), bottom: s(38), left: s(34) }
+    ? { top: gs(12), right: gs(8), bottom: gs(42), left: gs(28) }
     : { top: s(24), right: s(24), bottom: s(36), left: s(44) };
   const svg = appendChartSvg(container, width, height);
 
@@ -795,7 +816,7 @@ function renderYearChart() {
     .scalePoint()
     .domain(counts.map((d) => d.year))
     .range([margin.left, width - margin.right])
-    .padding(isPhoneLayout() ? 0.2 : 0.5);
+    .padding(isPhoneLayout() ? 0.15 : 0.5);
   const y = d3
     .scaleLinear()
     .domain([0, d3.max(counts, (d) => d.count) || 1])
@@ -814,7 +835,7 @@ function renderYearChart() {
     .datum(counts)
     .attr("fill", "none")
     .attr("stroke", CCN_COLORS.blue)
-    .attr("stroke-width", s(3))
+    .attr("stroke-width", isPhoneLayout() ? gs(2) : s(3))
     .attr("d", line);
 
   g.selectAll("circle")
@@ -822,10 +843,10 @@ function renderYearChart() {
     .join("circle")
     .attr("cx", (d) => x(d.year))
     .attr("cy", (d) => y(d.count))
-    .attr("r", (d) => (String(d.year) === state.selectedYear ? s(7) : s(5)))
+    .attr("r", (d) => (String(d.year) === state.selectedYear ? (isPhoneLayout() ? gs(4.5) : s(7)) : isPhoneLayout() ? gs(3.5) : s(5)))
     .attr("fill", (d) => (String(d.year) === state.selectedYear ? CCN_COLORS.pink : CCN_COLORS.green))
     .attr("stroke", CCN_COLORS.navy)
-    .attr("stroke-width", s(2))
+    .attr("stroke-width", isPhoneLayout() ? gs(1.5) : s(2))
     .style("cursor", "pointer")
     .on("click", (_, d) => {
       state.selectedYear = String(d.year);
@@ -838,18 +859,33 @@ function renderYearChart() {
   g.append("g")
     .attr("transform", `translate(0,${height - margin.bottom})`)
     .call(d3.axisBottom(x).tickFormat(d3.format("d")).tickSizeOuter(0))
-    .call((sel) => sel.selectAll("text").attr("fill", CCN_COLORS.muted).style("font-size", themeFs(isPhoneLayout() ? 8 : 10)))
+    .call((sel) =>
+      sel
+        .selectAll("text")
+        .attr("fill", CCN_COLORS.muted)
+        .style("font-size", isPhoneLayout() ? chartThemeFs(7) : themeFs(10))
+    )
     .call((sel) => {
       if (isPhoneLayout()) {
-        sel.selectAll("text").attr("dy", s(8));
+        sel
+          .selectAll("text")
+          .attr("transform", "rotate(-40)")
+          .attr("text-anchor", "end")
+          .attr("dx", gs(-2))
+          .attr("dy", gs(3));
       }
     })
     .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
 
   g.append("g")
     .attr("transform", `translate(${margin.left},0)`)
-    .call(d3.axisLeft(y).ticks(5))
-    .call((sel) => sel.selectAll("text").attr("fill", CCN_COLORS.muted))
+    .call(d3.axisLeft(y).ticks(isPhoneLayout() ? 4 : 5))
+    .call((sel) =>
+      sel
+        .selectAll("text")
+        .attr("fill", CCN_COLORS.muted)
+        .style("font-size", isPhoneLayout() ? chartThemeFs(7) : themeFs(10))
+    )
     .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
 }
 
@@ -858,9 +894,9 @@ function renderTopicChart(submissions) {
   container.selectAll("*").remove();
 
   const data = primaryThemeDistribution(submissions);
-  const width = container.node().clientWidth || s(320);
-  const height = s(280);
-  const radius = Math.min(width, height) / 2 - s(16);
+  const width = container.node().clientWidth || (isPhoneLayout() ? gs(320) : s(320));
+  const height = isPhoneLayout() ? gs(220) : s(280);
+  const radius = Math.min(width, height) / 2 - (isPhoneLayout() ? gs(12) : s(16));
 
   if (!data.length) {
     container.append("p").style("color", CCN_COLORS.muted).style("font-size", "0.85rem").text("No primary themes in filter.");
@@ -886,7 +922,7 @@ function renderTopicChart(submissions) {
     .attr("d", arc)
     .attr("fill", (_, i) => color(i))
     .attr("stroke", CCN_COLORS.card)
-    .attr("stroke-width", s(2))
+    .attr("stroke-width", isPhoneLayout() ? gs(1.5) : s(2))
     .style("cursor", "pointer")
     .on("click", (_, d) => setThemeFilter(d.data.text))
     .on("mousemove", (event, d) => {
@@ -924,28 +960,28 @@ function renderResearchThemesOverTime(submissions) {
 
   const width = chartContainerWidth(container);
   const legendCols = legendColumnCount(width);
-  const legendFont = themeLabelPx(9);
-  const legendRowHeight = legendFont * 1.75;
+  const legendFont = isPhoneLayout() ? chartThemePx(7) : themeLabelPx(9);
+  const legendRowHeight = isPhoneLayout() ? legendFont * 2.35 : legendFont * 1.75;
   const legendRows = Math.ceil(themes.length / legendCols);
-  const legendGap = isPhoneLayout() ? s(24) : s(40);
-  const legendBlock = legendRows * legendRowHeight + s(20);
-  const chartHeight = isPhoneLayout() ? s(260) : s(400);
-  const footnoteHeight = themeLabelPx(9) + s(16);
-  const marginTop = isPhoneLayout() ? s(16) : s(24);
-  const marginBottom = isPhoneLayout() ? s(44) : s(52);
+  const legendGap = isPhoneLayout() ? gs(16) : s(40);
+  const legendBlock = legendRows * legendRowHeight + (isPhoneLayout() ? gs(12) : s(20));
+  const chartHeight = isPhoneLayout() ? gs(210) : s(400);
+  const footnoteHeight = (isPhoneLayout() ? chartThemePx(8) : themeLabelPx(9)) + (isPhoneLayout() ? gs(10) : s(16));
+  const marginTop = isPhoneLayout() ? gs(12) : s(24);
+  const marginBottom = isPhoneLayout() ? gs(36) : s(52);
   const innerHForMargin = chartHeight - marginTop - marginBottom;
-  const yTitleFontPx = themeLabelPx(10);
-  const yTickLabelWidth = isPhoneLayout() ? s(28) : s(44);
-  const yTitleLeftGap = s(32);
+  const yTitleFontPx = isPhoneLayout() ? chartThemePx(8) : themeLabelPx(10);
+  const yTickLabelWidth = isPhoneLayout() ? gs(22) : s(44);
+  const yTitleLeftGap = isPhoneLayout() ? gs(24) : s(32);
   const yTitleLabelBuffer = yTitleFontPx * 0.55;
   const yTitleLeftExtent = innerHForMargin / 2 + yTitleFontPx * 0.75;
-  const phoneYAxisTitleWidth = isPhoneLayout() ? s(30) : s(40);
+  const phoneYAxisTitleWidth = isPhoneLayout() ? gs(24) : s(40);
   const margin = isPhoneLayout()
     ? {
-        top: s(16),
-        right: s(12),
-        bottom: s(44),
-        left: yTickLabelWidth + phoneYAxisTitleWidth + yTitleLeftGap + yTitleLabelBuffer + s(6),
+        top: gs(12),
+        right: gs(8),
+        bottom: gs(36),
+        left: yTickLabelWidth + phoneYAxisTitleWidth + yTitleLeftGap + yTitleLabelBuffer + gs(4),
       }
     : {
         top: marginTop,
@@ -999,8 +1035,8 @@ function renderResearchThemesOverTime(submissions) {
       .datum(cumulativeSeries)
       .attr("fill", "none")
       .attr("stroke", color(theme))
-      .attr("stroke-width", s(1.5))
-      .attr("stroke-dasharray", `${s(5)} ${s(4)}`)
+      .attr("stroke-width", isPhoneLayout() ? gs(1) : s(1.5))
+      .attr("stroke-dasharray", isPhoneLayout() ? `${gs(4)} ${gs(3)}` : `${s(5)} ${s(4)}`)
       .attr("opacity", 0.45)
       .attr("d", cumulativeLine);
 
@@ -1008,7 +1044,7 @@ function renderResearchThemesOverTime(submissions) {
       .datum(annualSeries)
       .attr("fill", "none")
       .attr("stroke", color(theme))
-      .attr("stroke-width", s(2.5))
+      .attr("stroke-width", isPhoneLayout() ? gs(1.5) : s(2.5))
       .attr("opacity", 0.95)
       .attr("d", annualLine);
 
@@ -1017,10 +1053,10 @@ function renderResearchThemesOverTime(submissions) {
       .join("circle")
       .attr("cx", (d) => x(d.year))
       .attr("cy", (d) => y(d.count))
-      .attr("r", (d) => (d.count > 0 ? s(4) : 0))
+      .attr("r", (d) => (d.count > 0 ? (isPhoneLayout() ? gs(2.5) : s(4)) : 0))
       .attr("fill", color(theme))
       .attr("stroke", CCN_COLORS.navy)
-      .attr("stroke-width", s(1.5))
+      .attr("stroke-width", isPhoneLayout() ? gs(1) : s(1.5))
       .on("mousemove", (event, d) => {
         const cum = cumulative.get(String(d.year))?.get(theme) || 0;
         showTooltip(
@@ -1033,13 +1069,13 @@ function renderResearchThemesOverTime(submissions) {
 
   g.append("g")
     .attr("transform", `translate(0,${innerH})`)
-    .call(d3.axisBottom(x).tickFormat(d3.format("d")).tickPadding(s(16)))
+    .call(d3.axisBottom(x).tickFormat(d3.format("d")).tickPadding(isPhoneLayout() ? gs(8) : s(16)))
     .call(styleThemeAxisLabels)
-    .call((sel) => sel.selectAll("text").attr("dy", s(14)))
+    .call((sel) => sel.selectAll("text").attr("dy", isPhoneLayout() ? gs(8) : s(14)))
     .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
 
   g.append("g")
-    .call(d3.axisLeft(y).ticks(5).tickPadding(s(8)))
+    .call(d3.axisLeft(y).ticks(isPhoneLayout() ? 4 : 5).tickPadding(isPhoneLayout() ? gs(4) : s(8)))
     .call(styleThemeAxisLabels)
     .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
 
@@ -1050,7 +1086,7 @@ function renderResearchThemesOverTime(submissions) {
       .attr("transform", "rotate(-90)")
       .attr("text-anchor", "middle")
       .attr("fill", CCN_COLORS.muted)
-      .style("font-size", themeFs(10))
+      .style("font-size", isPhoneLayout() ? chartThemeFs(8) : themeFs(10))
       .text("Submissions per year");
   } else {
     g.append("text")
@@ -1065,6 +1101,8 @@ function renderResearchThemesOverTime(submissions) {
 
   const legend = svg.append("g").attr("transform", `translate(${margin.left}, ${chartHeight + legendGap})`);
   const colWidth = (width - margin.left - margin.right) / legendCols;
+  const legendLineWidth = isPhoneLayout() ? gs(10) : s(14);
+  const legendTextX = isPhoneLayout() ? gs(13) : s(18);
   const legendItems = legend
     .selectAll("g")
     .data(themes)
@@ -1078,26 +1116,26 @@ function renderResearchThemesOverTime(submissions) {
   legendItems
     .append("line")
     .attr("x1", 0)
-    .attr("x2", s(14))
+    .attr("x2", legendLineWidth)
     .attr("y1", legendFont * 0.6)
     .attr("y2", legendFont * 0.6)
     .attr("stroke", (d) => color(d))
-    .attr("stroke-width", s(2.5));
+    .attr("stroke-width", isPhoneLayout() ? gs(1.5) : s(2.5));
 
   legendItems
     .append("text")
-    .attr("x", s(18))
+    .attr("x", legendTextX)
     .attr("y", legendFont * 0.72)
     .attr("fill", CCN_COLORS.muted)
-    .style("font-size", themeFs(9))
-    .text((d) => d);
+    .style("font-size", isPhoneLayout() ? chartThemeFs(7) : themeFs(9))
+    .text((d) => fitLegendLabel(d, colWidth - legendTextX, legendFont));
 
   svg
     .append("text")
     .attr("x", margin.left)
-    .attr("y", chartHeight + legendGap + legendBlock + s(12))
+    .attr("y", chartHeight + legendGap + legendBlock + (isPhoneLayout() ? gs(8) : s(12)))
     .attr("fill", CCN_COLORS.muted)
-    .style("font-size", themeFs(9))
+    .style("font-size", isPhoneLayout() ? chartThemeFs(7) : themeFs(9))
     .text("Solid = annual count · dashed = cumulative total");
 }
 
@@ -1341,14 +1379,16 @@ function renderEmbeddingCluster() {
   const points = state.embeddings.points;
   const width = chartContainerWidth(container);
   const mobileLegend = useStackedChartLegend(width) || isPhoneLayout();
-  const legendFont = themeLabelPx(10);
-  const legendItemHeight = legendFont * 1.5;
+  const legendFont = isPhoneLayout() ? chartThemePx(7) : themeLabelPx(10);
+  const legendItemHeight = isPhoneLayout() ? legendFont * 2.2 : legendFont * 1.5;
   const themes = [...new Set(state.embeddings.points.map((d) => mapClusterToTheme(d.cluster_name)))];
-  const legendCols = mobileLegend ? (width < 520 ? 1 : 2) : 1;
+  const legendCols = isPhoneLayout() ? 1 : mobileLegend ? (width < 520 ? 1 : 2) : 1;
   const legendRows = mobileLegend ? Math.ceil(themes.length / legendCols) : themes.length;
-  const legendBlock = mobileLegend ? legendRows * legendItemHeight + s(16) : 0;
+  const legendBlock = mobileLegend ? legendRows * legendItemHeight + (isPhoneLayout() ? gs(10) : s(16)) : 0;
   const margin = mobileLegend
-    ? { top: s(12), right: s(12), bottom: s(12), left: s(12) }
+    ? isPhoneLayout()
+      ? { top: gs(8), right: gs(8), bottom: gs(8), left: gs(8) }
+      : { top: s(12), right: s(12), bottom: s(12), left: s(12) }
     : { top: s(20), right: s(320), bottom: s(20), left: s(20) };
   const plotSide = isPhoneLayout()
     ? width - margin.left - margin.right
@@ -1360,7 +1400,7 @@ function renderEmbeddingCluster() {
   const svg = appendChartSvg(container, width, height);
   const color = d3.scaleOrdinal(CHART_PALETTE).domain(themes);
   const plotBottom = mobileLegend ? plotHeight - margin.bottom : height - margin.bottom;
-  const pointRadius = isPhoneLayout() ? { base: 3.5, selected: 4.5 } : { base: 5.5, selected: 7 };
+  const pointRadius = isPhoneLayout() ? { base: 2.2, selected: 3 } : { base: 5.5, selected: 7 };
 
   const x = d3
     .scaleLinear()
@@ -1380,7 +1420,7 @@ function renderEmbeddingCluster() {
     .attr("width", width - margin.left - margin.right)
     .attr("height", plotBottom - margin.top)
     .attr("fill", "rgba(197,224,243,0.04)")
-    .attr("rx", s(12));
+    .attr("rx", isPhoneLayout() ? gs(8) : s(12));
 
   svg
     .selectAll("circle")
@@ -1390,7 +1430,11 @@ function renderEmbeddingCluster() {
     .attr("cy", (d) => y(d.y))
     .attr("r", (d) => {
       const theme = mapClusterToTheme(d.cluster_name);
-      return state.selectedTheme && theme === state.selectedTheme ? s(pointRadius.selected) : s(pointRadius.base);
+      return state.selectedTheme && theme === state.selectedTheme
+        ? (isPhoneLayout() ? gs(pointRadius.selected) : s(pointRadius.selected))
+        : isPhoneLayout()
+          ? gs(pointRadius.base)
+          : s(pointRadius.base);
     })
     .attr("fill", (d) => color(mapClusterToTheme(d.cluster_name)))
     .attr("stroke", (d) => {
@@ -1399,7 +1443,11 @@ function renderEmbeddingCluster() {
     })
     .attr("stroke-width", (d) => {
       const theme = mapClusterToTheme(d.cluster_name);
-      return state.selectedTheme && theme === state.selectedTheme ? s(2) : s(1);
+      return state.selectedTheme && theme === state.selectedTheme
+        ? (isPhoneLayout() ? gs(1.5) : s(2))
+        : isPhoneLayout()
+          ? gs(0.75)
+          : s(1);
     })
     .attr("opacity", (d) => {
       const theme = mapClusterToTheme(d.cluster_name);
@@ -1413,7 +1461,9 @@ function renderEmbeddingCluster() {
   const legend = svg.append("g");
   if (mobileLegend) {
     const colWidth = (width - margin.left - margin.right) / legendCols;
-    legend.attr("transform", `translate(${margin.left}, ${plotHeight + s(8)})`);
+    const legendMarker = isPhoneLayout() ? gs(8) : s(12);
+    const legendTextX = isPhoneLayout() ? gs(12) : s(18);
+    legend.attr("transform", `translate(${margin.left}, ${plotHeight + (isPhoneLayout() ? gs(6) : s(8))})`);
     legend
       .selectAll("g")
       .data(themes)
@@ -1431,20 +1481,20 @@ function renderEmbeddingCluster() {
         const item = d3.select(this);
         item
           .append("rect")
-          .attr("width", s(12))
-          .attr("height", s(12))
-          .attr("rx", s(3))
+          .attr("width", legendMarker)
+          .attr("height", legendMarker)
+          .attr("rx", isPhoneLayout() ? gs(2) : s(3))
           .attr("y", legendFont * 0.15)
           .attr("fill", (d) => color(d))
           .attr("stroke", (d) => (d === state.selectedTheme ? CCN_COLORS.pink : "transparent"))
-          .attr("stroke-width", s(2));
+          .attr("stroke-width", isPhoneLayout() ? gs(1.5) : s(2));
         item
           .append("text")
-          .attr("x", s(18))
+          .attr("x", legendTextX)
           .attr("y", legendFont * 0.85)
           .attr("fill", (d) => (d === state.selectedTheme ? CCN_COLORS.white : CCN_COLORS.muted))
-          .style("font-size", themeFs(10))
-          .text((d) => d);
+          .style("font-size", isPhoneLayout() ? chartThemeFs(7) : themeFs(10))
+          .text((d) => fitLegendLabel(d, colWidth - legendTextX, legendFont));
       });
   } else {
     const legendItems = legend
