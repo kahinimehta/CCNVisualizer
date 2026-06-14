@@ -8,21 +8,42 @@ const CCN_COLORS = {
   card: "#162d47",
 };
 
-const UI_SCALE = 3;
-const s = (n) => n * UI_SCALE;
+const MOBILE_MAX_WIDTH = 700;
+const DESKTOP_UI_SCALE = 3;
+const MOBILE_UI_SCALE = 1;
+const DESKTOP_THEME_LABEL_FONT_SCALE = 1.8;
+const MOBILE_THEME_LABEL_FONT_SCALE = 1;
+
+function isMobileLayout() {
+  return window.matchMedia(`(max-width: ${MOBILE_MAX_WIDTH}px)`).matches;
+}
+
+function getUiScale() {
+  return isMobileLayout() ? MOBILE_UI_SCALE : DESKTOP_UI_SCALE;
+}
+
+const s = (n) => n * getUiScale();
 const fs = (n) => `${s(n)}px`;
-const THEME_LABEL_FONT_SCALE = 1.8;
+
+function themeLabelFontScale() {
+  return isMobileLayout() ? MOBILE_THEME_LABEL_FONT_SCALE : DESKTOP_THEME_LABEL_FONT_SCALE;
+}
 
 function themeLabelPx(base) {
-  return s(base) * THEME_LABEL_FONT_SCALE;
+  return s(base) * themeLabelFontScale();
 }
 
 function themeFs(base) {
   return `${themeLabelPx(base)}px`;
 }
 
-function themeBarLabelWidth() {
-  return s(300) * THEME_LABEL_FONT_SCALE;
+function themeBarLabelWidth(containerWidth = 0) {
+  const base = isMobileLayout() ? 118 : 300;
+  const scaled = s(base) * themeLabelFontScale();
+  if (isMobileLayout() && containerWidth > 0) {
+    return Math.min(scaled, Math.max(containerWidth * 0.42, s(64)));
+  }
+  return scaled;
 }
 
 function themeBarRowHeight() {
@@ -534,7 +555,7 @@ function renderThemeBars(counts) {
 
   const width = container.node().clientWidth || s(360);
   const data = counts;
-  const leftMargin = themeBarLabelWidth();
+  const leftMargin = themeBarLabelWidth(width);
   const rowHeight = themeBarRowHeight();
   const margin = { top: s(8), right: s(56), bottom: s(8), left: leftMargin };
   const height = margin.top + margin.bottom + data.length * rowHeight;
@@ -721,7 +742,7 @@ function renderResearchThemesOverTime(submissions) {
   const cumulative = themeCumulativeByYear(years, byYear, themes);
 
   const width = container.node().clientWidth || s(1000);
-  const legendCols = width > s(1200) ? 3 : 2;
+  const legendCols = width > s(1200) ? 3 : isMobileLayout() && width < s(520) ? 1 : 2;
   const legendFont = themeLabelPx(9);
   const legendRowHeight = legendFont * 1.75;
   const legendRows = Math.ceil(themes.length / legendCols);
@@ -883,7 +904,7 @@ function renderResearchThemeTotals(submissions) {
   }
 
   const width = container.node().clientWidth || s(480);
-  const leftMargin = themeBarLabelWidth();
+  const leftMargin = themeBarLabelWidth(width);
   const rowHeight = themeBarRowHeight();
   const margin = { top: s(8), right: s(52), bottom: s(8), left: leftMargin };
   const height = margin.top + margin.bottom + data.length * rowHeight;
@@ -940,7 +961,7 @@ function renderResearchThemeDeltas(submissions) {
   sub.text(`${pair.fromYear} → ${pair.toYear} · one bar per research theme`);
 
   const width = container.node().clientWidth || s(480);
-  const leftMargin = themeBarLabelWidth();
+  const leftMargin = themeBarLabelWidth(width);
   const rowHeight = themeBarRowHeight();
   const margin = { top: s(8), right: s(60), bottom: s(8), left: leftMargin };
   const height = margin.top + margin.bottom + rows.length * rowHeight;
@@ -1002,9 +1023,9 @@ function renderClusterBars() {
     .map((name) => ({ name, count: countMap.get(name) || 0 }))
     .sort((a, b) => b.count - a.count);
   const width = container.node().clientWidth || s(360);
-  const leftMargin = themeBarLabelWidth();
+  const leftMargin = themeBarLabelWidth(width);
   const rowHeight = themeBarRowHeight();
-  const margin = { top: s(8), right: s(40), bottom: s(8), left: leftMargin };
+  const margin = { top: s(8), right: s(56), bottom: s(8), left: leftMargin };
   const height = margin.top + margin.bottom + Math.max(data.length * rowHeight, s(200));
   const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`).attr("width", "100%").style("height", `${height}px`);
   const innerW = width - margin.left - margin.right;
@@ -1033,7 +1054,6 @@ function renderClusterBars() {
     .on("mouseleave", hideTooltip);
 
   drawThemeBarLabels(g, data, y, (d) => d.name, {
-    baseFont: 9,
     fill: (d) => (d.name === state.selectedTheme ? CCN_COLORS.white : CCN_COLORS.muted),
     pointerEvents: "none",
   });
@@ -1046,7 +1066,7 @@ function renderClusterBars() {
     .attr("y", (d) => y(d.name) + y.bandwidth() / 2)
     .attr("dy", "0.35em")
     .attr("fill", CCN_COLORS.white)
-    .style("font-size", themeFs(9))
+    .style("font-size", themeFs(10))
     .style("pointer-events", "none")
     .text((d) => d.count);
 }
@@ -1064,11 +1084,21 @@ function renderEmbeddingCluster() {
 
   const points = state.embeddings.points;
   const width = container.node().clientWidth || s(1100);
-  const height = s(520);
+  const mobileLegend = isMobileLayout();
   const legendFont = themeLabelPx(10);
   const legendItemHeight = legendFont * 1.5;
-  const margin = { top: s(20), right: s(320), bottom: s(20), left: s(20) };
-  const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`);
+  const themes = [...new Set(state.embeddings.points.map((d) => mapClusterToTheme(d.cluster_name)))];
+  const legendCols = mobileLegend ? 2 : 1;
+  const legendRows = mobileLegend ? Math.ceil(themes.length / legendCols) : themes.length;
+  const legendBlock = mobileLegend ? legendRows * legendItemHeight + s(16) : 0;
+  const plotHeight = mobileLegend ? s(300) : s(520);
+  const height = mobileLegend ? plotHeight + legendBlock : plotHeight;
+  const margin = mobileLegend
+    ? { top: s(20), right: s(16), bottom: s(20), left: s(20) }
+    : { top: s(20), right: s(320), bottom: s(20), left: s(20) };
+  const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`).attr("width", "100%").style("height", `${height}px`);
+  const color = d3.scaleOrdinal(CHART_PALETTE).domain(themes);
+  const plotBottom = mobileLegend ? plotHeight - margin.bottom : height - margin.bottom;
 
   const x = d3
     .scaleLinear()
@@ -1079,17 +1109,14 @@ function renderEmbeddingCluster() {
     .scaleLinear()
     .domain(d3.extent(state.embeddings.points, (d) => d.y))
     .nice()
-    .range([height - margin.bottom, margin.top]);
-
-  const themes = [...new Set(state.embeddings.points.map((d) => mapClusterToTheme(d.cluster_name)))];
-  const color = d3.scaleOrdinal(CHART_PALETTE).domain(themes);
+    .range([plotBottom, margin.top]);
 
   svg
     .append("rect")
     .attr("x", margin.left)
     .attr("y", margin.top)
     .attr("width", width - margin.left - margin.right)
-    .attr("height", height - margin.top - margin.bottom)
+    .attr("height", plotBottom - margin.top)
     .attr("fill", "rgba(197,224,243,0.04)")
     .attr("rx", s(12));
 
@@ -1121,36 +1148,72 @@ function renderEmbeddingCluster() {
     .on("mouseleave", hideTooltip)
     .on("click", (_, d) => setThemeFilter(mapClusterToTheme(d.cluster_name)));
 
-  const legend = svg
-    .append("g")
-    .attr("transform", `translate(${width - margin.right + s(12)}, ${margin.top})`);
-  const legendItems = legend
-    .selectAll("g")
-    .data(themes)
-    .join("g")
-    .attr("transform", (_, i) => `translate(0, ${i * legendItemHeight})`)
-    .style("cursor", "pointer")
-    .on("click", (_, theme) => setThemeFilter(theme))
-    .on("mousemove", (event, theme) => showTooltip(clusterLegendTooltip(theme), event))
-    .on("mouseleave", hideTooltip);
+  const legend = svg.append("g");
+  if (mobileLegend) {
+    const colWidth = (width - margin.left - margin.right) / legendCols;
+    legend.attr("transform", `translate(${margin.left}, ${plotHeight + s(8)})`);
+    legend
+      .selectAll("g")
+      .data(themes)
+      .join("g")
+      .attr("transform", (_, i) => {
+        const col = i % legendCols;
+        const row = Math.floor(i / legendCols);
+        return `translate(${col * colWidth}, ${row * legendItemHeight})`;
+      })
+      .style("cursor", "pointer")
+      .on("click", (_, theme) => setThemeFilter(theme))
+      .on("mousemove", (event, theme) => showTooltip(clusterLegendTooltip(theme), event))
+      .on("mouseleave", hideTooltip)
+      .each(function appendMobileLegendItem() {
+        const item = d3.select(this);
+        item
+          .append("rect")
+          .attr("width", s(12))
+          .attr("height", s(12))
+          .attr("rx", s(3))
+          .attr("y", legendFont * 0.15)
+          .attr("fill", (d) => color(d))
+          .attr("stroke", (d) => (d === state.selectedTheme ? CCN_COLORS.pink : "transparent"))
+          .attr("stroke-width", s(2));
+        item
+          .append("text")
+          .attr("x", s(18))
+          .attr("y", legendFont * 0.85)
+          .attr("fill", (d) => (d === state.selectedTheme ? CCN_COLORS.white : CCN_COLORS.muted))
+          .style("font-size", themeFs(10))
+          .text((d) => d);
+      });
+  } else {
+    const legendItems = legend
+      .attr("transform", `translate(${width - margin.right + s(12)}, ${margin.top})`)
+      .selectAll("g")
+      .data(themes)
+      .join("g")
+      .attr("transform", (_, i) => `translate(0, ${i * legendItemHeight})`)
+      .style("cursor", "pointer")
+      .on("click", (_, theme) => setThemeFilter(theme))
+      .on("mousemove", (event, theme) => showTooltip(clusterLegendTooltip(theme), event))
+      .on("mouseleave", hideTooltip);
 
-  legendItems
-    .append("rect")
-    .attr("width", s(12))
-    .attr("height", s(12))
-    .attr("rx", s(3))
-    .attr("y", legendFont * 0.15)
-    .attr("fill", (d) => color(d))
-    .attr("stroke", (d) => (d === state.selectedTheme ? CCN_COLORS.pink : "transparent"))
-    .attr("stroke-width", s(2));
+    legendItems
+      .append("rect")
+      .attr("width", s(12))
+      .attr("height", s(12))
+      .attr("rx", s(3))
+      .attr("y", legendFont * 0.15)
+      .attr("fill", (d) => color(d))
+      .attr("stroke", (d) => (d === state.selectedTheme ? CCN_COLORS.pink : "transparent"))
+      .attr("stroke-width", s(2));
 
-  legendItems
-    .append("text")
-    .attr("x", s(18))
-    .attr("y", legendFont * 0.85)
-    .attr("fill", (d) => (d === state.selectedTheme ? CCN_COLORS.white : CCN_COLORS.muted))
-    .style("font-size", themeFs(10))
-    .text((d) => d);
+    legendItems
+      .append("text")
+      .attr("x", s(18))
+      .attr("y", legendFont * 0.85)
+      .attr("fill", (d) => (d === state.selectedTheme ? CCN_COLORS.white : CCN_COLORS.muted))
+      .style("font-size", themeFs(10))
+      .text((d) => d);
+  }
 
   note.text(
     state.selectedTheme
@@ -1281,6 +1344,12 @@ async function init() {
   });
 
   renderAll();
+
+  let resizeTimer = null;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => renderAll(), 150);
+  });
 }
 
 if (document.readyState === "loading") {
