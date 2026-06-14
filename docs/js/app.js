@@ -822,7 +822,7 @@ function renderResearchThemesOverTime(submissions) {
 
   g.append("text")
     .attr("x", -innerH / 2)
-    .attr("y", -s(34))
+    .attr("y", -s(42))
     .attr("transform", "rotate(-90)")
     .attr("text-anchor", "middle")
     .attr("fill", CCN_COLORS.muted)
