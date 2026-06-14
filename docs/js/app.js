@@ -11,6 +11,113 @@ const CCN_COLORS = {
 const UI_SCALE = 3;
 const s = (n) => n * UI_SCALE;
 const fs = (n) => `${s(n)}px`;
+const THEME_LABEL_FONT_SCALE = 1.5;
+
+function themeLabelPx(base) {
+  return s(base) * THEME_LABEL_FONT_SCALE;
+}
+
+function themeFs(base) {
+  return `${themeLabelPx(base)}px`;
+}
+
+function themeBarLabelWidth() {
+  return s(210) * THEME_LABEL_FONT_SCALE;
+}
+
+function wrapThemeLabel(text, maxChars = 26) {
+  const words = String(text || "").split(/\s+/).filter(Boolean);
+  if (!words.length) return [""];
+  const lines = [];
+  let current = "";
+  words.forEach((word) => {
+    const next = current ? `${current} ${word}` : word;
+    if (next.length > maxChars && current) {
+      lines.push(current);
+      current = word;
+    } else {
+      current = next;
+    }
+  });
+  if (current) lines.push(current);
+  return lines;
+}
+
+function buildThemeBarRows(items, getLabel, options = {}) {
+  const baseFont = options.baseFont || 10;
+  const minRow = options.minRow || 34;
+  const charsPerLine = options.charsPerLine || 26;
+  const fontSize = themeLabelPx(baseFont);
+  const lineHeight = fontSize * 1.22;
+  let y = 0;
+  const rows = items.map((item) => {
+    const label = getLabel(item);
+    const lines = wrapThemeLabel(label, charsPerLine);
+    const rowHeight = Math.max(s(minRow), lines.length * lineHeight + s(10));
+    const row = {
+      item,
+      label,
+      lines,
+      y,
+      rowHeight,
+      centerY: y + rowHeight / 2,
+      fontSize,
+      lineHeight,
+    };
+    y += rowHeight;
+    return row;
+  });
+  return { rows, totalHeight: y };
+}
+
+function drawWrappedThemeLabels(g, rows, options = {}) {
+  const xOffset = options.xOffset ?? 10;
+  const fill = options.fill ?? CCN_COLORS.muted;
+  const labels = g
+    .selectAll("text.theme-label")
+    .data(rows, (d) => d.label)
+    .join("text")
+    .attr("class", "theme-label")
+    .attr("text-anchor", "end")
+    .attr("fill", (d) => (typeof fill === "function" ? fill(d) : fill))
+    .style("font-size", (d) => `${d.fontSize}px`)
+    .style("pointer-events", options.pointerEvents || "auto");
+
+  labels.each(function (row) {
+    const el = d3.select(this);
+    el.selectAll("tspan").remove();
+    const x = -s(xOffset);
+    const blockOffset = -((row.lines.length - 1) * row.lineHeight) / 2;
+    row.lines.forEach((line, i) => {
+      el.append("tspan")
+        .attr("x", x)
+        .attr("y", row.centerY)
+        .attr("dy", i === 0 ? `${blockOffset}px` : `${row.lineHeight}px`)
+        .text(line);
+    });
+  });
+}
+
+function appendThemeLegendLabel(parent, text, width, fontSize, color) {
+  parent
+    .append("foreignObject")
+    .attr("width", width)
+    .attr("height", fontSize * 4.2)
+    .append("xhtml:div")
+    .style("font-size", `${fontSize}px`)
+    .style("line-height", "1.2")
+    .style("color", color)
+    .style("word-wrap", "break-word")
+    .style("overflow-wrap", "anywhere")
+    .text(text);
+}
+
+function styleThemeAxisLabels(selection) {
+  selection
+    .selectAll("text")
+    .attr("fill", CCN_COLORS.muted)
+    .style("font-size", themeFs(10));
+}
 
 const CHART_PALETTE = [
   CCN_COLORS.pink,
@@ -487,61 +594,43 @@ function renderThemeBars(counts) {
   container.selectAll("*").remove();
 
   const width = container.node().clientWidth || s(360);
-  const height = s(340);
-  const margin = { top: s(8), right: s(52), bottom: s(8), left: s(210) };
   const data = counts;
-
-  const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`);
+  const { rows, totalHeight } = buildThemeBarRows(data, (d) => d.text);
+  const margin = { top: s(8), right: s(56), bottom: s(8), left: themeBarLabelWidth() };
+  const height = margin.top + margin.bottom + Math.max(totalHeight, s(120));
+  const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`).attr("width", "100%").style("height", `${height}px`);
   const innerW = width - margin.left - margin.right;
-  const rowHeight = Math.max(s(28), (height - margin.top - margin.bottom) / Math.max(data.length, 1));
-
   const x = d3.scaleLinear().domain([0, d3.max(data, (d) => d.count) || 1]).range([0, innerW]);
-  const y = d3
-    .scaleBand()
-    .domain(data.map((d) => d.text))
-    .range([0, data.length * rowHeight])
-    .padding(0.18);
-
   const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
   g.selectAll("rect")
-    .data(data)
+    .data(rows)
     .join("rect")
     .attr("x", 0)
-    .attr("y", (d) => y(d.text))
-    .attr("height", y.bandwidth())
-    .attr("width", (d) => x(d.count))
+    .attr("y", (d) => d.y)
+    .attr("height", (d) => d.rowHeight)
+    .attr("width", (d) => x(d.item.count))
     .attr("fill", (d, i) =>
-      d.text === state.selectedTheme ? CCN_COLORS.pink : CHART_PALETTE[i % CHART_PALETTE.length]
+      d.item.text === state.selectedTheme ? CCN_COLORS.pink : CHART_PALETTE[i % CHART_PALETTE.length]
     )
     .attr("rx", s(4))
     .style("cursor", "pointer")
-    .on("click", (_, d) => setThemeFilter(d.text))
-    .on("mousemove", (event, d) => showTooltip(`<strong>${d.text}</strong><br/>${d.count} submissions`, event))
+    .on("click", (_, d) => setThemeFilter(d.item.text))
+    .on("mousemove", (event, d) => showTooltip(`<strong>${d.item.text}</strong><br/>${d.item.count} submissions`, event))
     .on("mouseleave", hideTooltip);
 
-  g.selectAll("text.label")
-    .data(data)
-    .join("text")
-    .attr("class", "label")
-    .attr("x", -s(8))
-    .attr("y", (d) => y(d.text) + y.bandwidth() / 2)
-    .attr("dy", "0.35em")
-    .attr("text-anchor", "end")
-    .attr("fill", CCN_COLORS.muted)
-    .style("font-size", fs(10))
-    .text((d) => d.text);
+  drawWrappedThemeLabels(g, rows);
 
   g.selectAll("text.value")
-    .data(data)
+    .data(rows)
     .join("text")
     .attr("class", "value")
-    .attr("x", (d) => x(d.count) + s(6))
-    .attr("y", (d) => y(d.text) + y.bandwidth() / 2)
+    .attr("x", (d) => x(d.item.count) + s(6))
+    .attr("y", (d) => d.centerY)
     .attr("dy", "0.35em")
     .attr("fill", CCN_COLORS.white)
     .style("font-size", fs(10))
-    .text((d) => d.count);
+    .text((d) => d.item.count);
 }
 
 function renderKeywordBars(counts) {
@@ -667,7 +756,7 @@ function renderTopicChart(submissions) {
     .attr("transform", (d) => `translate(${labelArc.centroid(d)})`)
     .attr("text-anchor", "middle")
     .attr("fill", CCN_COLORS.navy)
-    .style("font-size", fs(9))
+    .style("font-size", themeFs(9))
     .style("font-weight", "600")
     .text((d) => (d.data.count / total > 0.08 ? `${Math.round((d.data.count / total) * 100)}%` : ""));
 }
@@ -688,12 +777,14 @@ function renderResearchThemesOverTime(submissions) {
 
   const width = container.node().clientWidth || s(1000);
   const legendCols = width > s(700) ? 3 : 2;
+  const legendFont = themeLabelPx(9);
+  const legendRowHeight = legendFont * 3.6;
   const legendRows = Math.ceil(themes.length / legendCols);
-  const legendBlock = legendRows * s(20) + s(28);
+  const legendBlock = legendRows * legendRowHeight + s(36);
   const chartHeight = s(300);
   const height = chartHeight + legendBlock;
   const margin = { top: s(20), right: s(20), bottom: s(16), left: s(48) };
-  const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`);
+  const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`).attr("width", "100%").style("height", `${height}px`);
   const innerW = width - margin.left - margin.right;
   const innerH = chartHeight - margin.top - margin.bottom;
   const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
@@ -773,12 +864,12 @@ function renderResearchThemesOverTime(submissions) {
   g.append("g")
     .attr("transform", `translate(0,${innerH})`)
     .call(d3.axisBottom(x).tickFormat(d3.format("d")))
-    .call((sel) => sel.selectAll("text").attr("fill", CCN_COLORS.muted))
+    .call(styleThemeAxisLabels)
     .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
 
   g.append("g")
     .call(d3.axisLeft(y).ticks(5))
-    .call((sel) => sel.selectAll("text").attr("fill", CCN_COLORS.muted))
+    .call(styleThemeAxisLabels)
     .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
 
   g.append("text")
@@ -787,7 +878,7 @@ function renderResearchThemesOverTime(submissions) {
     .attr("transform", "rotate(-90)")
     .attr("text-anchor", "middle")
     .attr("fill", CCN_COLORS.muted)
-    .style("font-size", fs(10))
+    .style("font-size", themeFs(10))
     .text("Submissions per year");
 
   const legend = svg.append("g").attr("transform", `translate(${margin.left}, ${chartHeight + s(8)})`);
@@ -799,32 +890,36 @@ function renderResearchThemesOverTime(submissions) {
     .attr("transform", (_, i) => {
       const col = i % legendCols;
       const row = Math.floor(i / legendCols);
-      return `translate(${col * colWidth}, ${row * s(18)})`;
+      return `translate(${col * colWidth}, ${row * legendRowHeight})`;
     });
 
   legendItems
     .append("line")
     .attr("x1", 0)
     .attr("x2", s(14))
-    .attr("y1", s(6))
-    .attr("y2", s(6))
+    .attr("y1", legendFont * 0.55)
+    .attr("y2", legendFont * 0.55)
     .attr("stroke", (d) => color(d))
     .attr("stroke-width", s(2.5));
 
-  legendItems
-    .append("text")
-    .attr("x", s(18))
-    .attr("y", s(9))
-    .attr("fill", CCN_COLORS.muted)
-    .style("font-size", fs(9))
-    .text((d) => truncateLabel(d, s(34)));
+  legendItems.each(function (theme) {
+    const group = d3.select(this);
+    appendThemeLegendLabel(
+      group,
+      theme,
+      colWidth - s(22),
+      legendFont,
+      CCN_COLORS.muted
+    );
+    group.select("foreignObject").attr("x", s(18)).attr("y", 0);
+  });
 
   svg
     .append("text")
     .attr("x", margin.left)
     .attr("y", chartHeight + s(4))
     .attr("fill", CCN_COLORS.muted)
-    .style("font-size", fs(9))
+    .style("font-size", themeFs(9))
     .text("Solid = annual count · dashed = cumulative total");
 }
 
@@ -844,50 +939,39 @@ function renderResearchThemeTotals(submissions) {
   }
 
   const width = container.node().clientWidth || s(480);
-  const rowHeight = s(30);
-  const margin = { top: s(8), right: s(48), bottom: s(8), left: s(210) };
-  const height = margin.top + margin.bottom + data.length * rowHeight;
-  const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`);
+  const { rows, totalHeight } = buildThemeBarRows(data, (d) => d.theme);
+  const margin = { top: s(8), right: s(52), bottom: s(8), left: themeBarLabelWidth() };
+  const height = margin.top + margin.bottom + totalHeight;
+  const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`).attr("width", "100%").style("height", `${height}px`);
   const innerW = width - margin.left - margin.right;
   const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
   const x = d3.scaleLinear().domain([0, d3.max(data, (d) => d.count) || 1]).range([0, innerW]);
-  const y = d3.scaleBand().domain(data.map((d) => d.theme)).range([0, data.length * rowHeight]).padding(0.22);
   const color = d3.scaleOrdinal(CHART_PALETTE).domain(themes);
 
   g.selectAll("rect")
-    .data(data)
+    .data(rows)
     .join("rect")
     .attr("x", 0)
-    .attr("y", (d) => y(d.theme))
-    .attr("height", y.bandwidth())
-    .attr("width", (d) => x(d.count))
-    .attr("fill", (d) => color(d.theme))
+    .attr("y", (d) => d.y)
+    .attr("height", (d) => d.rowHeight)
+    .attr("width", (d) => x(d.item.count))
+    .attr("fill", (d) => color(d.item.theme))
     .attr("rx", s(4))
-    .on("mousemove", (event, d) => showTooltip(`<strong>${d.theme}</strong><br/>${d.count} total submissions`, event))
+    .on("mousemove", (event, d) => showTooltip(`<strong>${d.item.theme}</strong><br/>${d.item.count} total submissions`, event))
     .on("mouseleave", hideTooltip);
 
-  g.selectAll("text.label")
-    .data(data)
-    .join("text")
-    .attr("class", "label")
-    .attr("x", -s(10))
-    .attr("y", (d) => y(d.theme) + y.bandwidth() / 2)
-    .attr("dy", "0.35em")
-    .attr("text-anchor", "end")
-    .attr("fill", CCN_COLORS.muted)
-    .style("font-size", fs(10))
-    .text((d) => d.theme);
+  drawWrappedThemeLabels(g, rows);
 
   g.selectAll("text.value")
-    .data(data)
+    .data(rows)
     .join("text")
     .attr("class", "value")
-    .attr("x", (d) => x(d.count) + s(6))
-    .attr("y", (d) => y(d.theme) + y.bandwidth() / 2)
+    .attr("x", (d) => x(d.item.count) + s(6))
+    .attr("y", (d) => d.centerY)
     .attr("dy", "0.35em")
     .attr("fill", CCN_COLORS.white)
     .style("font-size", fs(10))
-    .text((d) => d.count);
+    .text((d) => d.item.count);
 }
 
 function renderResearchThemeDeltas(submissions) {
@@ -906,56 +990,45 @@ function renderResearchThemeDeltas(submissions) {
   sub.text(`${pair.fromYear} → ${pair.toYear} · one bar per research theme`);
 
   const width = container.node().clientWidth || s(480);
-  const rowHeight = s(30);
-  const margin = { top: s(8), right: s(56), bottom: s(8), left: s(210) };
-  const height = margin.top + margin.bottom + rows.length * rowHeight;
-  const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`);
+  const { rows: barRows, totalHeight } = buildThemeBarRows(rows, (d) => d.theme);
+  const margin = { top: s(8), right: s(60), bottom: s(8), left: themeBarLabelWidth() };
+  const height = margin.top + margin.bottom + totalHeight;
+  const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`).attr("width", "100%").style("height", `${height}px`);
   const innerW = width - margin.left - margin.right;
-  const maxAbs = d3.max(rows, (d) => Math.abs(d.delta)) || 1;
+  const maxAbs = d3.max(barRows, (d) => Math.abs(d.item.delta)) || 1;
   const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
   const x = d3.scaleLinear().domain([0, maxAbs]).range([0, innerW]);
-  const y = d3.scaleBand().domain(rows.map((d) => d.theme)).range([0, rows.length * rowHeight]).padding(0.22);
   const color = d3.scaleOrdinal(CHART_PALETTE).domain(rows.map((d) => d.theme));
 
   g.selectAll("rect")
-    .data(rows)
+    .data(barRows)
     .join("rect")
     .attr("x", 0)
-    .attr("y", (d) => y(d.theme))
-    .attr("height", y.bandwidth())
-    .attr("width", (d) => x(Math.abs(d.delta)))
-    .attr("fill", (d) => (d.delta >= 0 ? CCN_COLORS.green : CCN_COLORS.pink))
+    .attr("y", (d) => d.y)
+    .attr("height", (d) => d.rowHeight)
+    .attr("width", (d) => x(Math.abs(d.item.delta)))
+    .attr("fill", (d) => (d.item.delta >= 0 ? CCN_COLORS.green : CCN_COLORS.pink))
     .attr("rx", s(4))
     .on("mousemove", (event, d) =>
       showTooltip(
-        `<strong>${d.theme}</strong><br/>${d.fromYear}: ${d.fromCount}<br/>${d.toYear}: ${d.toCount}<br/>Change: ${d.delta >= 0 ? "+" : ""}${d.delta}`,
+        `<strong>${d.item.theme}</strong><br/>${d.item.fromYear}: ${d.item.fromCount}<br/>${d.item.toYear}: ${d.item.toCount}<br/>Change: ${d.item.delta >= 0 ? "+" : ""}${d.item.delta}`,
         event
       )
     )
     .on("mouseleave", hideTooltip);
 
-  g.selectAll("text.label")
-    .data(rows)
-    .join("text")
-    .attr("class", "label")
-    .attr("x", -s(10))
-    .attr("y", (d) => y(d.theme) + y.bandwidth() / 2)
-    .attr("dy", "0.35em")
-    .attr("text-anchor", "end")
-    .attr("fill", CCN_COLORS.muted)
-    .style("font-size", fs(10))
-    .text((d) => d.theme);
+  drawWrappedThemeLabels(g, barRows);
 
   g.selectAll("text.value")
-    .data(rows)
+    .data(barRows)
     .join("text")
     .attr("class", "value")
-    .attr("x", (d) => x(Math.abs(d.delta)) + s(6))
-    .attr("y", (d) => y(d.theme) + y.bandwidth() / 2)
+    .attr("x", (d) => x(Math.abs(d.item.delta)) + s(6))
+    .attr("y", (d) => d.centerY)
     .attr("dy", "0.35em")
     .attr("fill", CCN_COLORS.white)
     .style("font-size", fs(10))
-    .text((d) => `${d.delta >= 0 ? "+" : ""}${d.delta}`);
+    .text((d) => `${d.item.delta >= 0 ? "+" : ""}${d.item.delta}`);
 }
 
 function renderClusterBars() {
@@ -974,58 +1047,47 @@ function renderClusterBars() {
     .map((name) => ({ name, count: countMap.get(name) || 0 }))
     .sort((a, b) => b.count - a.count);
   const width = container.node().clientWidth || s(360);
-  const height = s(380);
-  const margin = { top: s(8), right: s(36), bottom: s(8), left: s(132) };
-  const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`);
+  const { rows, totalHeight } = buildThemeBarRows(data, (d) => d.name, { baseFont: 9, charsPerLine: 24 });
+  const margin = { top: s(8), right: s(40), bottom: s(8), left: themeBarLabelWidth() };
+  const height = margin.top + margin.bottom + Math.max(totalHeight, s(200));
+  const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`).attr("width", "100%").style("height", `${height}px`);
   const innerW = width - margin.left - margin.right;
 
   const x = d3.scaleLinear().domain([0, d3.max(data, (d) => d.count) || 1]).range([0, innerW]);
-  const y = d3
-    .scaleBand()
-    .domain(data.map((d) => d.name))
-    .range([0, height - margin.top - margin.bottom])
-    .padding(0.18);
   const color = d3.scaleOrdinal(CHART_PALETTE).domain(data.map((d) => d.name));
   const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
   g.selectAll("rect")
-    .data(data)
+    .data(rows)
     .join("rect")
     .attr("x", 0)
-    .attr("y", (d) => y(d.name))
-    .attr("height", y.bandwidth())
-    .attr("width", (d) => x(d.count))
-    .attr("fill", (d) => (d.name === state.selectedTheme ? CCN_COLORS.pink : color(d.name)))
+    .attr("y", (d) => d.y)
+    .attr("height", (d) => d.rowHeight)
+    .attr("width", (d) => x(d.item.count))
+    .attr("fill", (d) => (d.item.name === state.selectedTheme ? CCN_COLORS.pink : color(d.item.name)))
     .attr("rx", s(4))
     .style("cursor", "pointer")
-    .on("click", (_, d) => setThemeFilter(d.name))
-    .on("mousemove", (event, d) => showTooltip(`<strong>${d.name}</strong><br/>${d.count} primary assignments`, event))
+    .on("click", (_, d) => setThemeFilter(d.item.name))
+    .on("mousemove", (event, d) => showTooltip(`<strong>${d.item.name}</strong><br/>${d.item.count} primary assignments`, event))
     .on("mouseleave", hideTooltip);
 
-  g.selectAll("text.label")
-    .data(data)
-    .join("text")
-    .attr("class", "label")
-    .attr("x", -s(8))
-    .attr("y", (d) => y(d.name) + y.bandwidth() / 2)
-    .attr("dy", "0.35em")
-    .attr("text-anchor", "end")
-    .attr("fill", (d) => (d.name === state.selectedTheme ? CCN_COLORS.white : CCN_COLORS.muted))
-    .style("font-size", fs(9))
-    .style("pointer-events", "none")
-    .text((d) => truncateLabel(d.name, s(22)));
+  drawWrappedThemeLabels(g, rows, {
+    xOffset: 8,
+    fill: (d) => (d.item.name === state.selectedTheme ? CCN_COLORS.white : CCN_COLORS.muted),
+    pointerEvents: "none",
+  });
 
   g.selectAll("text.value")
-    .data(data)
+    .data(rows)
     .join("text")
     .attr("class", "value")
-    .attr("x", (d) => x(d.count) + s(6))
-    .attr("y", (d) => y(d.name) + y.bandwidth() / 2)
+    .attr("x", (d) => x(d.item.count) + s(6))
+    .attr("y", (d) => d.centerY)
     .attr("dy", "0.35em")
     .attr("fill", CCN_COLORS.white)
     .style("font-size", fs(9))
     .style("pointer-events", "none")
-    .text((d) => d.count);
+    .text((d) => d.item.count);
 }
 
 function renderEmbeddingCluster() {
@@ -1042,7 +1104,9 @@ function renderEmbeddingCluster() {
   const points = state.embeddings.points;
   const width = container.node().clientWidth || s(1100);
   const height = s(520);
-  const margin = { top: s(20), right: s(200), bottom: s(20), left: s(20) };
+  const legendFont = themeLabelPx(10);
+  const legendItemHeight = legendFont * 3.8;
+  const margin = { top: s(20), right: s(280), bottom: s(20), left: s(20) };
   const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`);
 
   const x = d3
@@ -1103,7 +1167,7 @@ function renderEmbeddingCluster() {
     .selectAll("g")
     .data(themes)
     .join("g")
-    .attr("transform", (_, i) => `translate(0, ${i * s(22)})`)
+    .attr("transform", (_, i) => `translate(0, ${i * legendItemHeight})`)
     .style("cursor", "pointer")
     .on("click", (_, theme) => setThemeFilter(theme))
     .on("mousemove", (event, theme) => showTooltip(clusterLegendTooltip(theme), event))
@@ -1114,17 +1178,17 @@ function renderEmbeddingCluster() {
     .attr("width", s(12))
     .attr("height", s(12))
     .attr("rx", s(3))
+    .attr("y", legendFont * 0.15)
     .attr("fill", (d) => color(d))
     .attr("stroke", (d) => (d === state.selectedTheme ? CCN_COLORS.pink : "transparent"))
     .attr("stroke-width", s(2));
 
-  legendItems
-    .append("text")
-    .attr("x", s(18))
-    .attr("y", s(10))
-    .attr("fill", (d) => (d === state.selectedTheme ? CCN_COLORS.white : CCN_COLORS.muted))
-    .style("font-size", fs(10))
-    .text((d) => truncateLabel(d, s(24)));
+  legendItems.each(function (theme) {
+    const group = d3.select(this);
+    const labelColor = theme === state.selectedTheme ? CCN_COLORS.white : CCN_COLORS.muted;
+    appendThemeLegendLabel(group, theme, margin.right - s(36), legendFont, labelColor);
+    group.select("foreignObject").attr("x", s(18)).attr("y", 0);
+  });
 
   note.text(
     state.selectedTheme
