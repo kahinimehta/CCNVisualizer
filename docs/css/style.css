@@ -484,6 +484,16 @@ a {
   font-size: 0.78rem;
 }
 
+#submissions-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+#submissions-panel .card-header {
+  flex-shrink: 0;
+}
+
 #results-count {
   display: flex;
   flex-wrap: wrap;
@@ -561,11 +571,17 @@ svg {
 }
 
 .paper-list {
-  max-height: calc(480px * var(--ui-scale));
-  overflow: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: clamp(14rem, 38vh, 26rem);
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
+  scrollbar-gutter: stable;
 }
 
 .paper-item {
