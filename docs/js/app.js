@@ -1077,8 +1077,7 @@ function renderResearchThemesOverTime(submissions) {
   let margin;
   if (isPhoneLayout()) {
     const yTitleEdgePad = gs(3);
-    const yTitleGapAfter = gs(4);
-    yTitleFontPx = chartThemePx(7);
+    const yTitleFontPx = chartThemePx(7);
     const yTitleTextWidth = measureTextWidth(yTitleText, yTitleFontPx);
     const yTickFontPx = chartThemePx(7);
     const yTickLabelWidth = Math.ceil(
@@ -1086,9 +1085,11 @@ function renderResearchThemesOverTime(submissions) {
         measureTextWidth(String(t), yTickFontPx)
       ) + gs(3)
     );
-    const titleColumnWidth = yTitleEdgePad + yTitleTextWidth + yTitleGapAfter;
-    marginLeftForYTitle = Math.ceil(titleColumnWidth + yTickLabelWidth);
-    yTitleCenterX = yTitleEdgePad + yTitleTextWidth / 2;
+    const plotTickGap = gs(2);
+    marginLeftForYTitle = Math.ceil(yTickLabelWidth + plotTickGap);
+    const gapBeforePlot = gs(5);
+    const labelCenterBesidePlot = marginLeftForYTitle - gapBeforePlot - yTitleTextWidth / 2;
+    yTitleCenterX = Math.max(yTitleEdgePad + yTitleTextWidth / 2, labelCenterBesidePlot);
     margin = {
       top: gs(12),
       right: gs(4),
