@@ -1052,6 +1052,12 @@ function renderResearchThemesOverTime(submissions) {
   const years = [...state.data.metadata.years].sort((a, b) => a - b);
   const byYear = themeCountsByYear(submissions);
   const cumulative = themeCumulativeByYear(years, byYear, themes);
+  const annualMax =
+    d3.max(themes, (theme) => d3.max(years, (year) => byYear.get(String(year))?.get(theme) || 0)) || 1;
+  const cumulativeMax =
+    d3.max(themes, (theme) => d3.max(years, (year) => cumulative.get(String(year))?.get(theme) || 0)) ||
+    1;
+  const yMax = Math.max(annualMax, cumulativeMax);
 
   const width = chartContainerWidth(container);
   const legendCols = legendColumnCount(width);
@@ -1065,16 +1071,23 @@ function renderResearchThemesOverTime(submissions) {
   const marginTop = isPhoneLayout() ? gs(12) : s(24);
   const marginBottom = isPhoneLayout() ? gs(36) : s(52);
   const yTitleText = "Submissions per year";
-  const yTitleFontPx = isPhoneLayout() ? chartThemePx(8) : themeLabelPx(10);
-  const yTitleTextWidth = measureTextWidth(yTitleText, yTitleFontPx);
   let marginLeftForYTitle;
   let yTitleCenterX;
+  let yTitleFontPx;
   let margin;
   if (isPhoneLayout()) {
     const yTitleEdgePad = gs(3);
-    const yTickLabelWidth = gs(18);
-    const plotTickGap = gs(2);
-    marginLeftForYTitle = Math.ceil(yTickLabelWidth + plotTickGap);
+    const yTitleGapAfter = gs(4);
+    yTitleFontPx = chartThemePx(7);
+    const yTitleTextWidth = measureTextWidth(yTitleText, yTitleFontPx);
+    const yTickFontPx = chartThemePx(7);
+    const yTickLabelWidth = Math.ceil(
+      d3.max(d3.scaleLinear().domain([0, yMax]).nice().ticks(4), (t) =>
+        measureTextWidth(String(t), yTickFontPx)
+      ) + gs(3)
+    );
+    const titleColumnWidth = yTitleEdgePad + yTitleTextWidth + yTitleGapAfter;
+    marginLeftForYTitle = Math.ceil(titleColumnWidth + yTickLabelWidth);
     yTitleCenterX = yTitleEdgePad + yTitleTextWidth / 2;
     margin = {
       top: gs(12),
@@ -1083,6 +1096,8 @@ function renderResearchThemesOverTime(submissions) {
       left: marginLeftForYTitle,
     };
   } else {
+    yTitleFontPx = themeLabelPx(10);
+    const yTitleTextWidth = measureTextWidth(yTitleText, yTitleFontPx);
     const yTickLabelWidth = s(42);
     const yTitleGapFromTicks = s(3);
     const yTitleShiftTowardAxis = s(52);
@@ -1108,14 +1123,6 @@ function renderResearchThemesOverTime(submissions) {
   const innerW = width - margin.left - margin.right;
   const innerH = chartHeight - margin.top - margin.bottom;
   const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
-
-  const annualMax = d3.max(themes, (theme) =>
-    d3.max(years, (year) => byYear.get(String(year))?.get(theme) || 0)
-  ) || 1;
-  const cumulativeMax = d3.max(themes, (theme) =>
-    d3.max(years, (year) => cumulative.get(String(year))?.get(theme) || 0)
-  ) || 1;
-  const yMax = Math.max(annualMax, cumulativeMax);
 
   const x = d3.scalePoint().domain(years).range([0, innerW]).padding(isPhoneLayout() ? 0.12 : 0.45);
   const y = d3.scaleLinear().domain([0, yMax]).nice().range([innerH, 0]);
@@ -1200,7 +1207,7 @@ function renderResearchThemesOverTime(submissions) {
     .attr("text-anchor", "middle")
     .attr("dominant-baseline", "middle")
     .attr("fill", CCN_COLORS.muted)
-    .style("font-size", isPhoneLayout() ? chartThemeFs(8) : themeFs(10))
+    .style("font-size", isPhoneLayout() ? chartThemeFs(7) : themeFs(10))
     .text(yTitleText);
 
   const legendLeft = isPhoneLayout() ? gs(3) : margin.left;
