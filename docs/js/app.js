@@ -1076,9 +1076,9 @@ function renderResearchThemesOverTime(submissions) {
   let yTitleFontPx;
   let margin;
   if (isPhoneLayout()) {
-    const phoneChartInset = 12;
     const gapTitleToTicks = 2;
-    const yTitleFontPx = chartThemePx(7);
+    const minBorder = 10;
+    yTitleFontPx = themeLabelPx(9);
     const yTitleTextWidth = measureTextWidth(yTitleText, yTitleFontPx, '"Open Sans", sans-serif');
     const yTickFontPx = chartThemePx(7);
     const yTickLabelWidth = Math.ceil(
@@ -1086,10 +1086,12 @@ function renderResearchThemesOverTime(submissions) {
         measureTextWidth(String(t), yTickFontPx, '"Open Sans", sans-serif')
       ) + 4
     );
-    marginLeftForYTitle = Math.ceil(
-      phoneChartInset + yTitleTextWidth + gapTitleToTicks + yTickLabelWidth + 4
-    );
-    yTitleCenterX = phoneChartInset + yTitleTextWidth / 2;
+    const plotMarginLeft = yTickLabelWidth + 4;
+    const snugTitleCenterX = plotMarginLeft - yTickLabelWidth - gapTitleToTicks - yTitleTextWidth / 2;
+    const titleLeftEdge = snugTitleCenterX - yTitleTextWidth / 2;
+    const phoneChartInset = Math.max(0, Math.ceil(minBorder - titleLeftEdge));
+    marginLeftForYTitle = phoneChartInset + plotMarginLeft;
+    yTitleCenterX = marginLeftForYTitle - yTickLabelWidth - gapTitleToTicks - yTitleTextWidth / 2;
     margin = {
       top: gs(12),
       right: gs(4),
@@ -1220,10 +1222,10 @@ function renderResearchThemesOverTime(submissions) {
     .attr("text-anchor", "middle")
     .attr("dominant-baseline", "middle")
     .attr("fill", CCN_COLORS.muted)
-    .style("font-size", isPhoneLayout() ? chartThemeFs(7) : themeFs(10))
+    .style("font-size", isPhoneLayout() ? `${yTitleFontPx}px` : themeFs(10))
     .text(yTitleText);
 
-  const legendLeft = isPhoneLayout() ? 12 : margin.left;
+  const legendLeft = isPhoneLayout() ? 10 : margin.left;
   const legendWidth = isPhoneLayout() ? width - 24 : width - margin.left - margin.right;
   const legend = svg.append("g").attr("transform", `translate(${legendLeft}, ${chartHeight + legendGap})`);
   const colWidth = legendWidth / legendCols;
