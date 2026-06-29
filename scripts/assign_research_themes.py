@@ -292,9 +292,13 @@ def apply_assignments(payload: dict, embeddings: dict) -> dict:
     payload["metadata"]["research_themes_assigned_at"] = datetime.now(timezone.utc).isoformat()
     payload["metadata"]["research_theme_method"] = (
         "Google Form Q1 topics; official CCN topic labels mapped first; "
-        "author-provided keywords matched to themes; 2026 embedding clusters add a soft boost only"
+        "submission keywords matched to themes (author keywords, else topic/track, "
+        "else archive text fallback for 2018-2019); 2026 embedding clusters add a soft boost only"
     )
-    payload["metadata"]["keyword_source"] = "author_provided"
+    payload["metadata"]["keyword_source"] = (
+        "author_keywords when present; else official topic/track labels; "
+        "else title/abstract tokens for 2018-2019 archives without keyword fields"
+    )
     keyword_years = sorted({sub["year"] for sub in payload["submissions"] if sub.get("keywords")})
     payload["metadata"]["keyword_years"] = keyword_years
     payload["metadata"]["google_topics_source"] = config.get("source")

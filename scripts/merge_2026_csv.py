@@ -11,7 +11,7 @@ from pathlib import Path
 
 from dataclasses import asdict
 
-from scrape_ccn import Submission, compute_stats, normalize_author_keywords, serialize_stats
+from scrape_ccn import Submission, compute_stats, resolve_submission_keywords, serialize_stats
 
 ROOT = Path(__file__).resolve().parents[1]
 CSV_PATH = ROOT / "data" / "ccn-2026-pending-posters.csv"
@@ -37,7 +37,7 @@ def author_keywords_from_csv(row: dict[str, str]) -> list[str]:
             kw = part.strip()
             if kw:
                 keywords.append(kw)
-    return normalize_author_keywords(keywords)
+    return keywords
 
 
 def csv_row_to_submission(row: dict[str, str]) -> Submission:
@@ -48,7 +48,10 @@ def csv_row_to_submission(row: dict[str, str]) -> Submission:
     secondary = (row.get("secondary_area") or "").strip()
     topic_area = normalize_topic_area(primary, secondary)
     track = (row.get("track") or "").strip()
-    keywords = author_keywords_from_csv(row)
+    keywords = resolve_submission_keywords(
+        author_keywords=author_keywords_from_csv(row),
+        topic_area=topic_area,
+    )
 
     return Submission(
         id=f"2026-{poster or title[:24]}",

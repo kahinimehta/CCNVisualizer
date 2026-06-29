@@ -38,6 +38,31 @@ NOISE_KEYWORDS = {
 }
 
 
+STOPWORDS = {
+    "a", "about", "above", "across", "after", "again", "against", "all", "also",
+    "an", "and", "any", "are", "as", "at", "be", "been", "before", "being", "between",
+    "both", "but", "by", "can", "could", "did", "do", "does", "during", "each", "for",
+    "from", "further", "had", "has", "have", "having", "he", "her", "here", "hers",
+    "him", "his", "how", "however", "if", "in", "into", "is", "it", "its", "just",
+    "may", "might", "more", "most", "much", "must", "no", "not", "of", "on", "one",
+    "only", "or", "other", "our", "out", "over", "own", "same", "she", "should", "so",
+    "some", "such", "than", "that", "the", "their", "them", "then", "there", "these",
+    "they", "this", "those", "through", "to", "too", "under", "until", "up", "use",
+    "using", "very", "was", "we", "were", "what", "when", "where", "which", "while",
+    "who", "whom", "why", "will", "with", "within", "without", "would", "you", "your",
+    "abstract", "paper", "study", "studies", "results", "show", "shows", "shown",
+    "find", "found", "used", "using", "based", "approach", "model", "models", "data",
+    "analysis", "method", "methods", "work", "present", "propose", "proposed",
+    "here", "thus", "however", "although", "across", "among", "via", "well", "new",
+    "two", "three", "first", "second", "third", "many", "several", "different",
+    "including", "compared", "compare", "related", "across", "provide", "provides",
+    "demonstrate", "demonstrates", "investigate", "investigates", "examined",
+    "examines", "test", "tests", "tested", "human", "humans", "brain", "neural",
+}
+
+IGNORED_TOPIC_LABELS = {"view pdf", "view paper pdf", ""}
+
+
 @dataclass
 class Submission:
     id: str
@@ -104,6 +129,44 @@ def normalize_author_keywords(keywords: list[str]) -> list[str]:
             seen.add(cleaned)
             normalized.append(cleaned)
     return normalized
+
+
+def tokenize(text: str) -> list[str]:
+    tokens = re.findall(r"[a-z][a-z0-9\-]{2,}", text.lower())
+    return [t for t in tokens if t not in STOPWORDS and not t.isdigit()]
+
+
+def derive_archive_keywords(title: str, abstract: str, limit: int = 6) -> list[str]:
+    """Fallback for archive years that never published author keyword fields."""
+    derived: list[str] = []
+    derived.extend(tokenize(title)[:4])
+    if abstract and abstract != title and "@" not in abstract:
+        counts = Counter(tokenize(abstract))
+        for term, _ in counts.most_common(limit):
+            if term not in derived:
+                derived.append(term)
+    return derived[:limit]
+
+
+def resolve_submission_keywords(
+    *,
+    author_keywords: list[str],
+    topic_area: str = "",
+    track: str = "",
+    title: str = "",
+    abstract: str = "",
+) -> list[str]:
+    """Prefer author keywords, then official topic labels, then archive text fallback."""
+    author = normalize_author_keywords(author_keywords)
+    if author:
+        return author
+
+    for label in (topic_area, track):
+        normalized = clean_text(label).lower()
+        if normalized and normalized not in IGNORED_TOPIC_LABELS:
+            return [normalized]
+
+    return normalize_author_keywords(derive_archive_keywords(title, abstract))
 
 
 def parse_meetingtrakr_listing(html: str, base_url: str, year: int) -> list[dict]:
@@ -308,7 +371,12 @@ def scrape_meetingtrakr_year(year: int) -> list[Submission]:
         topic_area = detail.get("topic_area") or item.get("topic_area", "")
         title = detail.get("title") or item.get("title", "")
         abstract = detail.get("abstract", "")
-        keywords = normalize_author_keywords(detail.get("keywords", []))
+        keywords = resolve_submission_keywords(
+            author_keywords=detail.get("keywords", []),
+            topic_area=topic_area,
+            title=title,
+            abstract=abstract,
+        )
         return Submission(
             id=item["id"],
             year=year,
@@ -337,7 +405,11 @@ def scrape_meetingtrakr_year(year: int) -> list[Submission]:
                         title=item.get("title", ""),
                         authors=item.get("authors", ""),
                         abstract="",
-                        keywords=[],
+                        keywords=resolve_submission_keywords(
+                            author_keywords=[],
+                            topic_area=item.get("topic_area", ""),
+                            title=item.get("title", ""),
+                        ),
                         topic_area=item.get("topic_area", ""),
                         poster_number=item.get("poster_number", ""),
                         source_url=item.get("detail_url", ""),
@@ -367,7 +439,12 @@ def scrape_legacy_year(year: int, listing_path: str, link_pattern: str) -> list[
             title = item.get("title", title)
         abstract = detail.get("abstract", "")
         track = detail.get("track", "")
-        keywords = normalize_author_keywords(detail.get("keywords", []))
+        keywords = resolve_submission_keywords(
+            author_keywords=detail.get("keywords", []),
+            track=track,
+            title=title,
+            abstract=abstract,
+        )
         return Submission(
             id=item["id"],
             year=year,
@@ -396,7 +473,11 @@ def scrape_legacy_year(year: int, listing_path: str, link_pattern: str) -> list[
                         title=item.get("title", ""),
                         authors=item.get("authors", ""),
                         abstract="",
-                        keywords=[],
+                        keywords=resolve_submission_keywords(
+                            author_keywords=[],
+                            topic_area=item.get("topic_area", ""),
+                            title=item.get("title", ""),
+                        ),
                         topic_area=item.get("topic_area", ""),
                         poster_number=item.get("poster_number", ""),
                         source_url=item.get("detail_url", ""),
@@ -526,7 +607,7 @@ def assign_research_themes(payload: dict) -> dict:
         return payload
 
 
-def write_outputs(payload: dict) -> None:
+def write_outputs(payload: dict) -> dict:
     payload = merge_2026_csv(payload)
     payload = assign_research_themes(payload)
     DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -539,6 +620,7 @@ def write_outputs(payload: dict) -> None:
         with path.open("w", encoding="utf-8") as fh:
             json.dump(payload, fh, indent=2, ensure_ascii=False)
         print(f"Wrote {path}")
+    return payload
 
 
 def main() -> None:
@@ -554,7 +636,7 @@ def main() -> None:
         years = [2024, 2025]
 
     payload = scrape_all(years)
-    write_outputs(payload)
+    payload = write_outputs(payload)
     print(f"Done. Scraped {payload['metadata']['total_count']} submissions.")
 
 
