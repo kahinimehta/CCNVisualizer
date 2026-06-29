@@ -37,28 +37,6 @@ NOISE_KEYWORDS = {
     "conference", "neuroscience", "computational", "cognitive", "ccn",
 }
 
-STOPWORDS = {
-    "a", "about", "above", "across", "after", "again", "against", "all", "also",
-    "an", "and", "any", "are", "as", "at", "be", "been", "before", "being", "between",
-    "both", "but", "by", "can", "could", "did", "do", "does", "during", "each", "for",
-    "from", "further", "had", "has", "have", "having", "he", "her", "here", "hers",
-    "him", "his", "how", "however", "if", "in", "into", "is", "it", "its", "just",
-    "may", "might", "more", "most", "much", "must", "no", "not", "of", "on", "one",
-    "only", "or", "other", "our", "out", "over", "own", "same", "she", "should", "so",
-    "some", "such", "than", "that", "the", "their", "them", "then", "there", "these",
-    "they", "this", "those", "through", "to", "too", "under", "until", "up", "use",
-    "using", "very", "was", "we", "were", "what", "when", "where", "which", "while",
-    "who", "whom", "why", "will", "with", "within", "without", "would", "you", "your",
-    "abstract", "paper", "study", "studies", "results", "show", "shows", "shown",
-    "find", "found", "used", "using", "based", "approach", "model", "models", "data",
-    "analysis", "method", "methods", "work", "present", "propose", "proposed",
-    "here", "thus", "however", "although", "across", "among", "via", "well", "new",
-    "two", "three", "first", "second", "third", "many", "several", "different",
-    "including", "compared", "compare", "related", "across", "provide", "provides",
-    "demonstrate", "demonstrates", "investigate", "investigates", "examined",
-    "examines", "test", "tests", "tested", "human", "humans", "brain", "neural",
-}
-
 
 @dataclass
 class Submission:
@@ -97,7 +75,12 @@ def clean_text(text: str) -> str:
 def parse_keyword_field(raw: str) -> list[str]:
     if not raw:
         return []
-    parts = re.split(r"[&;,]+|\s{2,}", raw)
+    normalized = (
+        raw.replace("\u2003", "\u0001")
+        .replace("\u00a0", " ")
+        .replace("\u2002", "\u0001")
+    )
+    parts = re.split(r"[\u0001,;&|]+|\s{2,}", normalized)
     keywords = []
     for part in parts:
         kw = clean_text(part)
@@ -106,44 +89,21 @@ def parse_keyword_field(raw: str) -> list[str]:
     return keywords
 
 
-def tokenize(text: str) -> list[str]:
-    tokens = re.findall(r"[a-z][a-z0-9\-]{2,}", text.lower())
-    return [t for t in tokens if t not in STOPWORDS and not t.isdigit()]
-
-
-def derive_keywords(title: str, abstract: str, topic_area: str = "", limit: int = 6) -> list[str]:
-    derived: list[str] = []
-    if topic_area and topic_area.lower() not in {"view pdf", "view paper pdf"}:
-        derived.append(topic_area.lower())
-
-    title_tokens = tokenize(title)
-    derived.extend(title_tokens[:4])
-
-    if abstract and abstract != title and "@" not in abstract:
-        abstract_tokens = tokenize(abstract)
-        counts = Counter(abstract_tokens)
-        for term, _ in counts.most_common(limit):
-            if term not in derived:
-                derived.append(term)
-
-    return derived[:limit]
-
-
-def merge_keywords(explicit: list[str], derived: list[str]) -> list[str]:
+def normalize_author_keywords(keywords: list[str]) -> list[str]:
     blocked = {"view pdf", "view paper pdf", "extended abstract", "search papers"}
     seen: set[str] = set()
-    merged: list[str] = []
-    for kw in explicit + derived:
-        normalized = clean_text(kw).lower()
+    normalized: list[str] = []
+    for kw in keywords:
+        cleaned = clean_text(kw).lower()
         if (
-            normalized
-            and normalized not in seen
-            and normalized not in blocked
-            and normalized not in NOISE_KEYWORDS
+            cleaned
+            and cleaned not in seen
+            and cleaned not in blocked
+            and cleaned not in NOISE_KEYWORDS
         ):
-            seen.add(normalized)
-            merged.append(normalized)
-    return merged
+            seen.add(cleaned)
+            normalized.append(cleaned)
+    return normalized
 
 
 def parse_meetingtrakr_listing(html: str, base_url: str, year: int) -> list[dict]:
@@ -212,6 +172,10 @@ def parse_meetingtrakr_detail(html: str) -> dict:
     candidate_abstracts: list[str] = []
 
     for p in rich.find_all("p"):
+        raw_text = p.get_text()
+        if "Keywords:" in raw_text:
+            keywords = parse_keyword_field(raw_text.split("Keywords:", 1)[1])
+            continue
         text = clean_text(p.get_text(" ", strip=True))
         if is_noise_paragraph(text):
             continue
@@ -220,9 +184,6 @@ def parse_meetingtrakr_detail(html: str) -> dict:
             continue
         if text.startswith("Topic Area:"):
             topic_area = clean_text(text.replace("Topic Area:", ""))
-            continue
-        if text.startswith("Keywords:"):
-            keywords = parse_keyword_field(text.replace("Keywords:", ""))
             continue
         if not authors and ("<sup>" in str(p) or re.search(r"\([a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}\)", text, re.I)):
             authors = text
@@ -344,12 +305,10 @@ def scrape_meetingtrakr_year(year: int) -> list[Submission]:
     def fetch_detail(item: dict) -> Submission:
         detail_html = fetch(item["detail_url"])
         detail = parse_meetingtrakr_detail(detail_html)
-        explicit_keywords = detail.get("keywords", [])
         topic_area = detail.get("topic_area") or item.get("topic_area", "")
         title = detail.get("title") or item.get("title", "")
         abstract = detail.get("abstract", "")
-        derived = derive_keywords(title, abstract, topic_area=topic_area)
-        keywords = merge_keywords(explicit_keywords, derived)
+        keywords = normalize_author_keywords(detail.get("keywords", []))
         return Submission(
             id=item["id"],
             year=year,
@@ -366,7 +325,25 @@ def scrape_meetingtrakr_year(year: int) -> list[Submission]:
     with ThreadPoolExecutor(max_workers=8) as executor:
         futures = {executor.submit(fetch_detail, item): item for item in listings}
         for future in as_completed(futures):
-            submissions.append(future.result())
+            item = futures[future]
+            try:
+                submissions.append(future.result())
+            except Exception as exc:  # noqa: BLE001
+                print(f"  Warning: failed {year} poster {item.get('id')}: {exc}")
+                submissions.append(
+                    Submission(
+                        id=item["id"],
+                        year=year,
+                        title=item.get("title", ""),
+                        authors=item.get("authors", ""),
+                        abstract="",
+                        keywords=[],
+                        topic_area=item.get("topic_area", ""),
+                        poster_number=item.get("poster_number", ""),
+                        source_url=item.get("detail_url", ""),
+                        submission_type="poster",
+                    )
+                )
 
     submissions.sort(key=lambda s: s.poster_number or s.title)
     return submissions
@@ -390,8 +367,7 @@ def scrape_legacy_year(year: int, listing_path: str, link_pattern: str) -> list[
             title = item.get("title", title)
         abstract = detail.get("abstract", "")
         track = detail.get("track", "")
-        derived = derive_keywords(title, abstract, topic_area=track)
-        keywords = merge_keywords(detail.get("keywords", []), derived)
+        keywords = normalize_author_keywords(detail.get("keywords", []))
         return Submission(
             id=item["id"],
             year=year,
@@ -408,7 +384,25 @@ def scrape_legacy_year(year: int, listing_path: str, link_pattern: str) -> list[
     with ThreadPoolExecutor(max_workers=8) as executor:
         futures = {executor.submit(fetch_detail, item): item for item in listings}
         for future in as_completed(futures):
-            submissions.append(future.result())
+            item = futures[future]
+            try:
+                submissions.append(future.result())
+            except Exception as exc:  # noqa: BLE001
+                print(f"  Warning: failed {year} poster {item.get('id')}: {exc}")
+                submissions.append(
+                    Submission(
+                        id=item["id"],
+                        year=year,
+                        title=item.get("title", ""),
+                        authors=item.get("authors", ""),
+                        abstract="",
+                        keywords=[],
+                        topic_area=item.get("topic_area", ""),
+                        poster_number=item.get("poster_number", ""),
+                        source_url=item.get("detail_url", ""),
+                        submission_type="poster",
+                    )
+                )
 
     submissions.sort(key=lambda s: s.title.lower())
     return submissions

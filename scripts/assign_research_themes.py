@@ -77,7 +77,6 @@ BROAD_TOPIC_HINTS: dict[str, list[str]] = {
 BROAD_HINT_BOOST = 3.0
 PHRASE_MATCH_BOOST = 12.0
 KEYWORD_TOKEN_BOOST = 8.0
-PROFILE_WEIGHT = 0.3
 
 TOPIC_KEYWORDS: dict[str, list[str]] = {
     "RL, motor control & planning": [
@@ -177,39 +176,16 @@ def apply_label_hints(label: str, scores: dict[str, float], topics: list[str]) -
             scores[theme] = scores.get(theme, 0) + BROAD_HINT_BOOST
 
 
-def build_profiles(points: list[dict], topics: list[str], cluster_map: dict[str, str]) -> dict[str, Counter]:
-    """Keyword profiles from hand-tuned terms + 2026 title/abstract tokens only."""
-    profiles = {theme: Counter() for theme in topics}
-    for theme, keywords in TOPIC_KEYWORDS.items():
-        if theme not in profiles:
-            continue
-        for kw in keywords:
-            for term in tokenize(kw):
-                profiles[theme][term] += 4
-
-    for point in points:
-        cluster = point.get("cluster_name", "")
-        theme = cluster_map.get(cluster, "")
-        if theme not in profiles:
-            continue
-        weights = profiles[theme]
-        for term in tokenize(point.get("title", "")):
-            weights[term] += 1
-        for term in tokenize(point.get("abstract", "")):
-            weights[term] += 1
-    return profiles
+def author_keyword_text(submission: dict) -> str:
+    return " ".join(submission.get("keywords", []))
 
 
-def score_submission(submission: dict, profiles: dict[str, Counter], topics: list[str]) -> dict[str, float]:
-    text = " ".join(
-        [
-            submission.get("title", ""),
-            submission.get("abstract", ""),
-            " ".join(submission.get("keywords", [])),
-        ]
-    )
-    text_lower = text.lower()
-    tokens = tokenize(text)
+def score_submission(submission: dict, topics: list[str]) -> dict[str, float]:
+    keywords = submission.get("keywords", [])
+    text_lower = author_keyword_text(submission).lower()
+    tokens: list[str] = []
+    for kw in keywords:
+        tokens.extend(tokenize(kw))
     token_set = set(tokens)
     scores: dict[str, float] = {}
     for theme in topics:
@@ -220,7 +196,6 @@ def score_submission(submission: dict, profiles: dict[str, Counter], topics: lis
                     score += PHRASE_MATCH_BOOST
             elif phrase in token_set:
                 score += KEYWORD_TOKEN_BOOST
-        score += sum(profiles[theme].get(term, 0) for term in tokens) * PROFILE_WEIGHT
         for term in tokenize(theme):
             if term in token_set:
                 score += 2
@@ -230,7 +205,6 @@ def score_submission(submission: dict, profiles: dict[str, Counter], topics: lis
 
 def assign_themes(
     submission: dict,
-    profiles: dict[str, Counter],
     topics: list[str],
     embedding_lookup: dict[str, str],
     cluster_map: dict[str, str],
@@ -242,7 +216,7 @@ def assign_themes(
 
     official = official_theme_from_label(submission.get("topic_area", ""), topics)
 
-    scores = score_submission(submission, profiles, topics)
+    scores = score_submission(submission, topics)
     apply_label_hints(submission.get("topic_area", ""), scores, topics)
     if cluster_theme:
         boost = max(max(scores.values(), default=0) * CLUSTER_BOOST_FACTOR, 4.0)
@@ -300,7 +274,6 @@ def apply_assignments(payload: dict, embeddings: dict) -> dict:
     cluster_map = embedding_map(config)
 
     points = embeddings.get("points", [])
-    profiles = build_profiles(points, topics, cluster_map)
     embedding_lookup: dict[str, str] = {}
     for point in points:
         embedding_lookup[point["id"]] = point["cluster_name"]
@@ -309,7 +282,7 @@ def apply_assignments(payload: dict, embeddings: dict) -> dict:
 
     for submission in payload["submissions"]:
         primary, secondary = assign_themes(
-            submission, profiles, topics, embedding_lookup, cluster_map
+            submission, topics, embedding_lookup, cluster_map
         )
         submission["primary_theme"] = primary
         submission["secondary_topics"] = secondary
@@ -319,8 +292,11 @@ def apply_assignments(payload: dict, embeddings: dict) -> dict:
     payload["metadata"]["research_themes_assigned_at"] = datetime.now(timezone.utc).isoformat()
     payload["metadata"]["research_theme_method"] = (
         "Google Form Q1 topics; official CCN topic labels mapped first; "
-        "text scoring from title/abstract/keywords; 2026 embedding clusters add a soft boost only"
+        "author-provided keywords matched to themes; 2026 embedding clusters add a soft boost only"
     )
+    payload["metadata"]["keyword_source"] = "author_provided"
+    keyword_years = sorted({sub["year"] for sub in payload["submissions"] if sub.get("keywords")})
+    payload["metadata"]["keyword_years"] = keyword_years
     payload["metadata"]["google_topics_source"] = config.get("source")
     return payload
 

@@ -11,7 +11,7 @@ from pathlib import Path
 
 from dataclasses import asdict
 
-from scrape_ccn import Submission, compute_stats, derive_keywords, merge_keywords, serialize_stats
+from scrape_ccn import Submission, compute_stats, normalize_author_keywords, serialize_stats
 
 ROOT = Path(__file__).resolve().parents[1]
 CSV_PATH = ROOT / "data" / "ccn-2026-pending-posters.csv"
@@ -27,6 +27,19 @@ def normalize_topic_area(primary: str, secondary: str = "") -> str:
     return parts[0].lower()
 
 
+def author_keywords_from_csv(row: dict[str, str]) -> list[str]:
+    keywords: list[str] = []
+    for field in ("primary_area", "secondary_area"):
+        raw = (row.get(field) or "").strip()
+        if not raw:
+            continue
+        for part in re.split(r"[+;,]", raw):
+            kw = part.strip()
+            if kw:
+                keywords.append(kw)
+    return normalize_author_keywords(keywords)
+
+
 def csv_row_to_submission(row: dict[str, str]) -> Submission:
     poster = (row.get("or_number") or "").strip()
     title = (row.get("title") or "").strip()
@@ -35,8 +48,7 @@ def csv_row_to_submission(row: dict[str, str]) -> Submission:
     secondary = (row.get("secondary_area") or "").strip()
     topic_area = normalize_topic_area(primary, secondary)
     track = (row.get("track") or "").strip()
-    derived = derive_keywords(title, abstract, topic_area=topic_area)
-    keywords = merge_keywords([], derived)
+    keywords = author_keywords_from_csv(row)
 
     return Submission(
         id=f"2026-{poster or title[:24]}",
