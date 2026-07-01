@@ -30,7 +30,7 @@ ccneuro.org archives
 
 **Step 3 — Dashboard.** The browser loads only `docs/data/abstracts.csv`. Map coordinates (`umap_x`, `umap_y`), assigned topics, and all display fields are already in that file.
 
-To refresh everything after a scrape:
+### Rebuild commands
 
 ```bash
 pip install -r scripts/requirements.txt
@@ -41,11 +41,24 @@ python scripts/assign_research_themes.py  # themes + UMAP + abstracts.csv
 
 `assign_research_themes.py` is the single command that regenerates themes, the embedding map, and both copies of the CSV. You can also run `build_all_embeddings.py` or `build_abstracts_csv.py` individually.
 
-The CSV is written as **UTF-8 with BOM** (`utf-8-sig`) so Excel and similar tools display non-English characters correctly. Text fields are passed through `repair_mojibake()` to fix UTF-8 bytes that were mis-read as Latin-1 during scraping.
+For **2026-only updates**, replace `data/ccn-2026-pending-posters.csv` and run `merge_2026_csv.py` followed by `assign_research_themes.py`. GitHub Actions: **Update 2026 Data** or **Scrape CCN Data** (full archive).
+
+The CSV is written as **UTF-8 with BOM** (`utf-8-sig`) so Excel displays non-English characters correctly. Text fields pass through `repair_mojibake()` to fix UTF-8 bytes mis-read as Latin-1 during scraping.
+
+### Build artifacts vs runtime
+
+| File | Used by dashboard? |
+|------|-------------------|
+| `docs/data/abstracts.csv` | **Yes** — sole runtime data source |
+| `data/submissions.json`, `docs/data/submissions.json` | No — intermediate build artifact |
+| `embeddings_all.json` | No — UMAP coords are copied into the CSV |
+| `google_topics.json` | No — optional theme-name override at build time only |
+
+---
 
 ## Data source
 
-The dashboard loads **only** `data/abstracts.csv`. No other JSON or API calls are required at runtime.
+The dashboard loads **only** `data/abstracts.csv`. No JSON or API calls at runtime.
 
 ### Core columns
 
@@ -55,11 +68,9 @@ The dashboard loads **only** `data/abstracts.csv`. No other JSON or API calls ar
 | `title` | Submission title |
 | `author` | First author |
 | `keywords` | Cleaned content keywords (metadata area labels and citation fragments removed) |
-| `assigned_topics` | One or more of the **12 CCN research themes**, pipe-separated (` \| `), **ordered by importance** (best match first) |
+| `assigned_topics` | One or more of the **12 CCN research themes**, pipe-separated (` \| `), **ordered by importance** (primary first) |
 
 ### Additional columns (precomputed at build time)
-
-These are written into the same CSV so the UI can link, search, and plot without extra files:
 
 | Column | Meaning |
 |--------|---------|
@@ -70,9 +81,11 @@ These are written into the same CSV so the UI can link, search, and plot without
 | `source_url` | Link to poster / PDF |
 | `poster_number` | Poster number when available |
 
+List-valued fields use ` | ` as the delimiter.
+
 ## The 12 research themes
 
-Topics in `assigned_topics` are always drawn from this fixed list (CCN 2026 Activity Preferences):
+Topics in `assigned_topics` are drawn from this fixed list ([CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform), question 1):
 
 1. RL, motor control & planning  
 2. Naturalistic encoding/decoding  
@@ -87,21 +100,33 @@ Topics in `assigned_topics` are always drawn from this fixed list (CCN 2026 Acti
 11. Clinical / computational psychiatry  
 12. Methods, theory & everything else  
 
+Theme names and colors in the UI are defined in `docs/js/app.js`. To change names at build time, edit `data/google_topics.json` and re-run `assign_research_themes.py`.
+
 ## Filters
 
-- **Year** — all years or a single conference year  
-- **Research theme** — matches any value in `assigned_topics`  
+- **Year** — all years or a single conference year (header dropdown + year chips)  
+- **Research theme** — header dropdown lists all 12 themes; matches any value in `assigned_topics`  
 - **Search** — title, author(s), abstract, keywords, assigned topics  
-- **Embedding map** — shows filtered rows; dot color = primary topic; click a dot to see all assigned topics in the list below  
+- **Embedding map topic dropdown** — same theme filter, scoped to the map panel; default shows all topics with dots colored by **primary** topic only  
 
-## Charts
+## Charts & panels
 
 | Panel | What it uses from the CSV |
 |-------|---------------------------|
-| Theme ranking / year-over-year change | `assigned_topics` (multi-label counts) |
-| Embedding map | `umap_x`, `umap_y`, `assigned_topics` |
-| Paper list | `title`, `author`, `authors`, `year`, `assigned_topics`, `source_url` |
+| KPI summary | Row count, year span, theme count |
+| Submissions over time | `year` |
+| Research theme ranking | `assigned_topics` (multi-label counts in current filter) |
+| Year-over-year change | `assigned_topics` share between two selected years (ignores year filter) |
+| Embedding map | `umap_x`, `umap_y`, `assigned_topics` — dot color = primary topic; click/tap to jump to paper list |
+| Matching submissions | `title`, `author`, `authors`, `year`, `assigned_topics`, `source_url` |
 
-## Rebuilding `abstracts.csv`
+## Local preview
 
-See **How data gets here** above for the full workflow. In short: scrape → JSON → `assign_research_themes.py` → CSV → dashboard.
+```bash
+pip install -r scripts/requirements.txt
+python -m http.server 8080 --directory docs
+```
+
+Open http://localhost:8080
+
+Further implementation detail: [IMPLEMENTATION.md](IMPLEMENTATION.md)
