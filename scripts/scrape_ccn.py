@@ -94,7 +94,10 @@ def fetch(url: str, retries: int = 3) -> str:
 
 
 def clean_text(text: str) -> str:
+    from text_encoding import repair_mojibake
+
     text = unescape(text or "")
+    text = repair_mojibake(text)
     text = re.sub(r"\s+", " ", text).strip()
     return text
 

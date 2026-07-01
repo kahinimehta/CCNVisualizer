@@ -38,6 +38,8 @@ ccneuro.org archives  →  submissions.json  →  abstracts.csv
 
 List-valued fields use ` | ` as the delimiter. Topics in `assigned_topics` are ordered by importance.
 
+The CSV is exported as **UTF-8 with BOM** (`utf-8-sig`). `text_encoding.repair_mojibake()` fixes common UTF-8-as-Latin-1 corruption in titles, authors, and abstracts before export.
+
 ## Keyword column
 
 `keywords` in the CSV stores extraction-pipeline output:
@@ -50,9 +52,10 @@ List-valued fields use ` | ` as the delimiter. Topics in `assigned_topics` are o
 
 Priority when building `assigned_topics`:
 
-1. Official CCN topic/track label → mapped Google Form theme  
-2. Keyword scoring against the theme lexicon  
-3. Optional soft boost from 2026 Gemma embedding cluster mapped to the same 12 themes (internal to `assign_research_themes.py` only)
+1. Official CCN topic/track label → mapped Google Form theme (specific labels only)  
+2. Keyword scoring against the theme lexicon — **title matches count double** (phrases like `conscious vision` beat generic area keywords)  
+3. Soft boost from broad area labels such as `psychological / behavioral research` (nudge only; never override title/abstract)  
+4. Optional soft boost from 2026 Gemma embedding cluster mapped to the same 12 themes (internal to `assign_research_themes.py` only)
 
 There is no separate cluster label in the CSV — only the 12 research themes.
 

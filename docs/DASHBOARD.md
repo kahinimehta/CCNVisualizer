@@ -75,3 +75,5 @@ python scripts/build_abstracts_csv.py     # write data/abstracts.csv + docs/data
 ```
 
 `build_abstracts_csv.py` can compute UMAP on the fly if `embeddings_all.json` is missing, but running `build_all_embeddings.py` first is recommended.
+
+The CSV is written as **UTF-8 with BOM** (`utf-8-sig`) so Excel and similar tools display non-English characters correctly. Text fields are passed through `repair_mojibake()` to fix UTF-8 bytes that were mis-read as Latin-1 during scraping.

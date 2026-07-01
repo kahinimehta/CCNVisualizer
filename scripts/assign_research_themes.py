@@ -9,6 +9,8 @@ from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
+from text_encoding import repair_submission_text
+
 ROOT = Path(__file__).resolve().parents[1]
 DATA_PATH = ROOT / "data" / "submissions.json"
 DOCS_PATH = ROOT / "docs" / "data" / "submissions.json"
@@ -66,11 +68,9 @@ CCN_TOPIC_MAP: dict[str, str] = {
     "engineering": "Methods, theory & everything else",
     "mathematics": "Methods, theory & everything else",
     # 2026 pending-poster CSV primary_area (stored lowercased in topic_area)
-    "computational cognitive science / cognitive modeling": "Decision-making and metacognition",
     "theoretical / computational neuroscience": "Methods, theory & everything else",
     "experimental neuroscience (systems / cognitive)": "Neural population geometry & dynamics",
     "artificial intelligence / machine learning": "LLMs, reasoning, interpretability",
-    "psychological / behavioral research": "Decision-making and metacognition",
 }
 
 # Coarse archive labels: nudge several themes instead of forcing one primary.
@@ -81,9 +81,18 @@ BROAD_TOPIC_HINTS: dict[str, list[str]] = {
         "Neural population geometry & dynamics",
         "Methods, theory & everything else",
     ],
+    "psychological / behavioral research": [
+        "Decision-making and metacognition",
+        "Attention & cognitive control / executive function",
+    ],
+    "computational cognitive science / cognitive modeling": [
+        "Decision-making and metacognition",
+        "Methods, theory & everything else",
+    ],
 }
 
 BROAD_HINT_BOOST = 3.0
+TITLE_MATCH_MULTIPLIER = 2.0
 PHRASE_MATCH_BOOST = 12.0
 KEYWORD_TOKEN_BOOST = 8.0
 
@@ -105,6 +114,7 @@ TOPIC_KEYWORDS: dict[str, list[str]] = {
     ],
     "Vision": [
         "visual", "vision", "retina", "v1", "v2", "retinotopic", "scene", "optic", "gaze", "saccade",
+        "conscious vision", "visual awareness", "perceptual",
     ],
     "Language/auditory neuroscience": [
         "language", "auditory", "speech", "semantic", "syntax", "word", "listening", "voice", "reading",
@@ -218,6 +228,9 @@ def author_keyword_text(submission: dict) -> str:
 
 
 def score_submission(submission: dict, topics: list[str]) -> dict[str, float]:
+    title = submission.get("title", "")
+    title_lower = title.lower()
+    title_tokens = set(tokenize(title))
     text_lower = scoring_blob(submission).lower()
     tokens = tokenize(scoring_blob(submission))
     token_set = set(tokens)
@@ -226,12 +239,18 @@ def score_submission(submission: dict, topics: list[str]) -> dict[str, float]:
         score = 0.0
         for phrase in TOPIC_KEYWORDS.get(theme, []):
             if " " in phrase:
-                if phrase in text_lower:
+                if phrase in title_lower:
+                    score += PHRASE_MATCH_BOOST * TITLE_MATCH_MULTIPLIER
+                elif phrase in text_lower:
                     score += PHRASE_MATCH_BOOST
+            elif phrase in title_tokens:
+                score += KEYWORD_TOKEN_BOOST * TITLE_MATCH_MULTIPLIER
             elif phrase in token_set:
                 score += KEYWORD_TOKEN_BOOST
         for term in tokenize(theme):
-            if term in token_set:
+            if term in title_tokens:
+                score += 2 * TITLE_MATCH_MULTIPLIER
+            elif term in token_set:
                 score += 2
         scores[theme] = float(score)
     return scores
@@ -322,6 +341,7 @@ def apply_assignments(payload: dict, embeddings: dict) -> dict:
             embedding_lookup[f"2026-{point['poster_number']}"] = cluster_name
 
     for submission in payload["submissions"]:
+        repair_submission_text(submission)
         primary, secondary, assigned_topics = assign_themes(
             submission, topics, embedding_lookup, cluster_map
         )

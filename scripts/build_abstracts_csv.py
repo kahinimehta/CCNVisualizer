@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Build the dashboard CSV — single artifact the visualizer loads at runtime."""
 
-from __future__ import annotations
-
 import csv
 import json
 import re
 from pathlib import Path
+
+from text_encoding import repair_mojibake
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_PATH = ROOT / "data" / "submissions.json"
@@ -165,12 +165,12 @@ def build_rows(payload: dict, embeddings: dict | None = None) -> list[dict[str, 
             {
                 "id": sub_id,
                 "year": str(submission.get("year", "")),
-                "title": submission.get("title", ""),
-                "author": first_author(authors),
+                "title": repair_mojibake(submission.get("title", "")),
+                "author": repair_mojibake(first_author(authors)),
                 "keywords": join_list(dashboard_keywords(submission)),
                 "assigned_topics": join_list(assigned_topics(submission)),
-                "authors": authors,
-                "abstract": submission.get("abstract", ""),
+                "authors": repair_mojibake(authors),
+                "abstract": repair_mojibake(submission.get("abstract", "")),
                 "umap_x": "" if not point else str(point.get("x", "")),
                 "umap_y": "" if not point else str(point.get("y", "")),
                 "source_url": submission.get("source_url", ""),
@@ -183,7 +183,7 @@ def build_rows(payload: dict, embeddings: dict | None = None) -> list[dict[str, 
 def write_csv(rows: list[dict[str, str]]) -> None:
     for path in OUTPUT_PATHS:
         path.parent.mkdir(parents=True, exist_ok=True)
-        with path.open("w", encoding="utf-8", newline="") as fh:
+        with path.open("w", encoding="utf-8-sig", newline="") as fh:
             writer = csv.DictWriter(fh, fieldnames=CSV_FIELDS)
             writer.writeheader()
             writer.writerows(rows)
