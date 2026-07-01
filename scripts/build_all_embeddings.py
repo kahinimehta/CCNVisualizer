@@ -31,7 +31,16 @@ def submission_text(submission: dict) -> str:
     return blob or title or "empty"
 
 
-def build_payload(submissions: list[dict]) -> dict:
+def build_payload(submissions: list[dict] | None = None) -> dict:
+    if submissions is None:
+        if not DATA_PATH.exists():
+            raise SystemExit(f"Missing {DATA_PATH}")
+        with DATA_PATH.open(encoding="utf-8") as fh:
+            submissions = json.load(fh).get("submissions", [])
+
+    if not submissions:
+        raise SystemExit("No submissions found.")
+
     texts = [submission_text(sub) for sub in submissions]
     vectorizer = TfidfVectorizer(
         max_features=8000,
@@ -77,19 +86,9 @@ def write_outputs(payload: dict) -> None:
 
 
 def main() -> None:
-    if not DATA_PATH.exists():
-        raise SystemExit(f"Missing {DATA_PATH}")
-
-    with DATA_PATH.open(encoding="utf-8") as fh:
-        payload = json.load(fh)
-
-    submissions = payload.get("submissions", [])
-    if not submissions:
-        raise SystemExit("No submissions found.")
-
-    result = build_payload(submissions)
-    write_outputs(result)
-    print(f"Done. Exported {result['metadata']['count']} embedding points across {len(result['metadata']['years'])} years.")
+    payload = build_payload()
+    write_outputs(payload)
+    print(f"Done. Exported {payload['metadata']['count']} embedding points across {len(payload['metadata']['years'])} years.")
 
 
 if __name__ == "__main__":

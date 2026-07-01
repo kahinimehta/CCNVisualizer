@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the dashboard CSV from submissions.json + embedding coordinates."""
+"""Build the dashboard CSV — single artifact the visualizer loads at runtime."""
 
 from __future__ import annotations
 
@@ -11,21 +11,20 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DATA_PATH = ROOT / "data" / "submissions.json"
 EMBEDDINGS_ALL_PATH = ROOT / "docs" / "data" / "embeddings_all.json"
-EMBEDDINGS_2026_PATH = ROOT / "docs" / "data" / "embeddings_2026.json"
 OUTPUT_PATHS = (ROOT / "data" / "abstracts.csv", ROOT / "docs" / "data" / "abstracts.csv")
 
 LIST_DELIMITER = " | "
 
+# Core columns (documented in DASHBOARD.md) plus precomputed fields the UI needs.
 CSV_FIELDS = [
     "id",
     "year",
     "title",
-    "first_author",
-    "authors",
-    "author_keywords",
-    "extracted_keywords",
-    "abstract",
+    "author",
+    "keywords",
     "assigned_topics",
+    "authors",
+    "abstract",
     "umap_x",
     "umap_y",
     "source_url",
@@ -90,7 +89,6 @@ def join_list(values: list[str]) -> str:
 
 
 def keyword_fields(submission: dict) -> tuple[list[str], list[str]]:
-    """Split stored author vs extracted keywords, with legacy fallbacks for older JSON."""
     author = list(submission.get("author_keywords") or [])
     extracted = list(submission.get("extracted_keywords") or [])
     if author or extracted:
@@ -103,7 +101,19 @@ def keyword_fields(submission: dict) -> tuple[list[str], list[str]]:
     return keywords, []
 
 
+def dashboard_keywords(submission: dict) -> list[str]:
+    """Keywords column: extracted tokens first, author-provided fallback."""
+    _author, extracted = keyword_fields(submission)
+    if extracted:
+        return extracted
+    author = list(submission.get("author_keywords") or [])
+    if author:
+        return author
+    return list(submission.get("keywords") or [])
+
+
 def assigned_topics(submission: dict) -> list[str]:
+    """Topics in order of importance (primary first, then secondaries)."""
     assigned = list(submission.get("assigned_topics") or [])
     if assigned:
         return assigned
@@ -126,30 +136,41 @@ def embedding_index(embeddings: dict) -> dict[str, dict]:
     return lookup
 
 
+def load_embeddings(submissions: list[dict]) -> dict:
+    if EMBEDDINGS_ALL_PATH.exists():
+        with EMBEDDINGS_ALL_PATH.open(encoding="utf-8") as fh:
+            return json.load(fh)
+
+    from build_all_embeddings import build_payload
+
+    print("embeddings_all.json missing — computing UMAP coordinates…")
+    return build_payload(submissions)
+
+
 def build_rows(payload: dict, embeddings: dict | None = None) -> list[dict[str, str]]:
-    embedding_lookup = embedding_index(embeddings or {})
+    submissions = payload.get("submissions", [])
+    embedding_lookup = embedding_index(embeddings or load_embeddings(submissions))
     rows: list[dict[str, str]] = []
 
     for submission in sorted(
-        payload.get("submissions", []),
+        submissions,
         key=lambda item: (item.get("year", 0), str(item.get("title", "")).lower()),
     ):
-        author_keywords, extracted_keywords = keyword_fields(submission)
         sub_id = submission.get("id", "")
         poster = str(submission.get("poster_number") or "")
         point = embedding_lookup.get(sub_id) or embedding_lookup.get(f"2026-{poster}")
+        authors = submission.get("authors", "")
 
         rows.append(
             {
                 "id": sub_id,
                 "year": str(submission.get("year", "")),
                 "title": submission.get("title", ""),
-                "first_author": first_author(submission.get("authors", "")),
-                "authors": submission.get("authors", ""),
-                "author_keywords": join_list(author_keywords),
-                "extracted_keywords": join_list(extracted_keywords),
-                "abstract": submission.get("abstract", ""),
+                "author": first_author(authors),
+                "keywords": join_list(dashboard_keywords(submission)),
                 "assigned_topics": join_list(assigned_topics(submission)),
+                "authors": authors,
+                "abstract": submission.get("abstract", ""),
                 "umap_x": "" if not point else str(point.get("x", "")),
                 "umap_y": "" if not point else str(point.get("y", "")),
                 "source_url": submission.get("source_url", ""),
@@ -170,17 +191,11 @@ def write_csv(rows: list[dict[str, str]]) -> None:
 
 
 def build_from_payload(payload: dict, embeddings: dict | None = None) -> list[dict[str, str]]:
-    rows = build_rows(payload, embeddings)
+    submissions = payload.get("submissions", [])
+    coords = embeddings or load_embeddings(submissions)
+    rows = build_rows(payload, coords)
     write_csv(rows)
     return rows
-
-
-def load_embeddings() -> dict | None:
-    for path in (EMBEDDINGS_ALL_PATH, EMBEDDINGS_2026_PATH):
-        if path.exists():
-            with path.open(encoding="utf-8") as fh:
-                return json.load(fh)
-    return None
 
 
 def main() -> None:
@@ -190,8 +205,7 @@ def main() -> None:
     with DATA_PATH.open(encoding="utf-8") as fh:
         payload = json.load(fh)
 
-    embeddings = load_embeddings()
-    rows = build_from_payload(payload, embeddings)
+    rows = build_from_payload(payload)
     print(f"Built {len(rows)} rows")
 
 

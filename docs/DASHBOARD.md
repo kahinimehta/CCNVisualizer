@@ -2,54 +2,76 @@
 
 Interactive exploration of CCN poster and paper archives (2017–2026).
 
-## Data
+## Data source
 
-The live dashboard reads **`data/abstracts.csv`** — one row per submission with:
+The dashboard loads **only** `data/abstracts.csv`. No other JSON or API calls are required at runtime.
+
+### Core columns
 
 | Column | Meaning |
 |--------|---------|
-| `title`, `first_author`, `year`, `authors` | Bibliographic fields |
-| `author_keywords` | Author-provided keywords (poster HTML, proceedings/authored PDF, or 2026 CSV areas) |
-| `extracted_keywords` | Algorithmic title/abstract tokens only when no author keywords exist |
-| `abstract` | Full abstract text |
-| `assigned_topics` | Research themes matched from keywords (multiple allowed, ` \| ` separated) |
-| `umap_x`, `umap_y` | Map coordinates for all years (TF-IDF + UMAP on title + abstract) |
+| `year` | Conference year |
+| `title` | Submission title |
+| `author` | First author |
+| `keywords` | Keywords from the extraction pipeline (`extracted_keywords` when available; author keywords as fallback) |
+| `assigned_topics` | One or more of the **12 CCN research themes**, pipe-separated (` \| `), **ordered by importance** (best match first) |
 
-There is **one topic system** — the 12 CCN 2026 Activity Preferences research themes. Older separate “embedding cluster” labels (e.g. *Visual Cortex Models*) are no longer shown; they were machine clusters that duplicated the same theme vocabulary.
+### Additional columns (precomputed at build time)
 
-## Keyword priority
+These are written into the same CSV so the UI can link, search, and plot without extra files:
 
-For every submission we prefer **author-provided keywords** in this order:
+| Column | Meaning |
+|--------|---------|
+| `id` | Stable row identifier |
+| `authors` | Full author list |
+| `abstract` | Full abstract text (search only) |
+| `umap_x`, `umap_y` | 2D map coordinates (TF-IDF + UMAP on title + abstract) |
+| `source_url` | Link to poster / PDF |
+| `poster_number` | Poster number when available |
 
-1. **Poster / paper HTML** — `Keywords:` field on MeetingTrakr pages (2024–2025)
-2. **Proceedings or authored PDF** — keyword line parsed from linked PDFs (2017–2025)
-3. **2026 CSV** — `primary_area` / `secondary_area`
-4. **`extracted_keywords`** — title/abstract token fallback only when steps 1–3 find nothing
+## The 12 research themes
+
+Topics in `assigned_topics` are always drawn from this fixed list (CCN 2026 Activity Preferences):
+
+1. RL, motor control & planning  
+2. Naturalistic encoding/decoding  
+3. Neural population geometry & dynamics  
+4. Decision-making and metacognition  
+5. Vision  
+6. Language/auditory neuroscience  
+7. LLMs, reasoning, interpretability  
+8. Memory  
+9. Social cognition & theory of mind  
+10. Attention & cognitive control / executive function  
+11. Clinical / computational psychiatry  
+12. Methods, theory & everything else  
 
 ## Filters
 
-- **Year** — all years or a single conference year
-- **Research theme** — matches any value in `assigned_topics` for that row
-- **Search** — title, authors, abstract, keywords, assigned topics
-- **Embedding map** — shows submissions that pass the same filters; topic dropdown filters by any assigned topic
+- **Year** — all years or a single conference year  
+- **Research theme** — matches any value in `assigned_topics`  
+- **Search** — title, author(s), abstract, keywords, assigned topics  
+- **Embedding map** — shows filtered rows; pie-slice dots encode every assigned topic  
 
 ## Charts
 
-| Panel | What it counts |
-|-------|----------------|
-| Theme ranking / year-over-year change | Each assigned topic separately; submissions can appear in multiple topics |
-| Embedding map | All years; each dot is a **pie slice per assigned topic** (same colors as legend) |
-| Paper list | Colored topic tags only (no separate cluster line) |
+| Panel | What it uses from the CSV |
+|-------|---------------------------|
+| Theme ranking / year-over-year change | `assigned_topics` (multi-label counts) |
+| Embedding map | `umap_x`, `umap_y`, `assigned_topics` |
+| Paper list | `title`, `author`, `authors`, `year`, `assigned_topics`, `source_url` |
 
-## Updating data
+## Rebuilding `abstracts.csv`
+
+Pipeline scripts produce `submissions.json`; the CSV export is the dashboard artifact:
 
 ```bash
 pip install -r scripts/requirements.txt
-python scripts/scrape_ccn.py              # rebuild JSON from ccneuro.org
-python scripts/backfill_pdf_keywords.py   # refresh author keywords from HTML + PDFs
-python scripts/assign_research_themes.py  # assign Google Form topics
-python scripts/build_all_embeddings.py    # UMAP coordinates for all years
-python scripts/build_abstracts_csv.py     # regenerate abstracts.csv from JSON
+python scripts/scrape_ccn.py              # rebuild submissions.json
+python scripts/backfill_pdf_keywords.py   # refresh keywords
+python scripts/assign_research_themes.py  # assign the 12 topics (ordered)
+python scripts/build_all_embeddings.py    # UMAP coordinates → embeddings_all.json
+python scripts/build_abstracts_csv.py     # write data/abstracts.csv + docs/data/abstracts.csv
 ```
 
-The scraper runs keyword enrichment automatically; use `backfill_pdf_keywords.py` after JSON changes to re-fetch PDF keyword lines and reassign themes.
+`build_abstracts_csv.py` can compute UMAP on the fly if `embeddings_all.json` is missing, but running `build_all_embeddings.py` first is recommended.

@@ -330,10 +330,24 @@ const KPI_ICONS = {
 
 const LIST_DELIMITER = " | ";
 
+const GOOGLE_FORM_TOPICS = [
+  "RL, motor control & planning",
+  "Naturalistic encoding/decoding",
+  "Neural population geometry & dynamics",
+  "Decision-making and metacognition",
+  "Vision",
+  "Language/auditory neuroscience",
+  "LLMs, reasoning, interpretability",
+  "Memory",
+  "Social cognition & theory of mind",
+  "Attention & cognitive control / executive function",
+  "Clinical / computational psychiatry",
+  "Methods, theory & everything else",
+];
+
 const state = {
   data: null,
   embeddings: null,
-  googleTopics: null,
   selectedYear: "all",
   search: "",
   selectedTheme: "",
@@ -384,18 +398,15 @@ function splitField(value) {
 function csvRowToSubmission(row) {
   const umapX = row.umap_x === "" || row.umap_x == null ? null : Number(row.umap_x);
   const umapY = row.umap_y === "" || row.umap_y == null ? null : Number(row.umap_y);
-  const authorKeywords = splitField(row.author_keywords);
-  const extractedKeywords = splitField(row.extracted_keywords);
+  const keywords = splitField(row.keywords);
   return {
     id: row.id,
     year: Number(row.year),
     title: row.title || "",
-    authors: row.authors || "",
-    first_author: row.first_author || "",
+    author: row.author || row.first_author || "",
+    authors: row.authors || row.author || "",
     abstract: row.abstract || "",
-    author_keywords: authorKeywords,
-    extracted_keywords: extractedKeywords,
-    keywords: [...authorKeywords, ...extractedKeywords],
+    keywords,
     assigned_topics: splitField(row.assigned_topics),
     umap_x: Number.isFinite(umapX) ? umapX : null,
     umap_y: Number.isFinite(umapY) ? umapY : null,
@@ -473,8 +484,7 @@ function submissionMatchesSearch(item, search) {
     item.authors,
     item.abstract,
     ...assignedTopics(item),
-    ...(item.author_keywords || []),
-    ...(item.extracted_keywords || []),
+    ...(item.keywords || []),
   ]
     .join(" ")
     .toLowerCase();
@@ -540,21 +550,13 @@ function globalThemeTotals() {
 }
 
 function googleTopicNames() {
-  if (state.googleTopics?.topics?.length) return state.googleTopics.topics;
-  return researchThemeNames();
+  return GOOGLE_FORM_TOPICS;
 }
 
 function researchThemeNames() {
   const totals = globalThemeTotals();
   const hasAssignments = (theme) => (totals.get(theme) || 0) > 0;
-
-  if (state.googleTopics?.enabled && state.googleTopics.topics?.length) {
-    return state.googleTopics.topics.filter(hasAssignments);
-  }
-
-  return [...totals.keys()]
-    .filter(hasAssignments)
-    .sort((a, b) => a.localeCompare(b));
+  return GOOGLE_FORM_TOPICS.filter(hasAssignments);
 }
 
 function themeColor(theme) {
@@ -1503,31 +1505,16 @@ function renderAll() {
   restorePageScroll(scrollSnapshot.x, scrollSnapshot.y);
 }
 
-async function loadOptionalJson(path) {
-  try {
-    const response = await fetch(path);
-    if (!response.ok) return null;
-    return response.json();
-  } catch {
-    return null;
-  }
-}
-
 async function init() {
   ensureD3();
 
-  const [csvRows, googleTopics] = await Promise.all([
-    d3.csv("data/abstracts.csv"),
-    loadOptionalJson("data/google_topics.json"),
-  ]);
-
+  const csvRows = await d3.csv("data/abstracts.csv");
   if (!csvRows?.length) {
     throw new Error("Could not load data/abstracts.csv");
   }
 
   state.data = buildStateFromCsv(csvRows);
   state.embeddings = buildEmbeddingsFromSubmissions(state.data.submissions);
-  state.googleTopics = googleTopics;
   buildThemeClassifier();
 
   renderYearControls();
