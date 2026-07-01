@@ -397,7 +397,6 @@ function csvRowToSubmission(row) {
     extracted_keywords: extractedKeywords,
     keywords: [...authorKeywords, ...extractedKeywords],
     assigned_topics: splitField(row.assigned_topics),
-    cluster_track: row.cluster_track || "",
     umap_x: Number.isFinite(umapX) ? umapX : null,
     umap_y: Number.isFinite(umapY) ? umapY : null,
     source_url: row.source_url || "",
@@ -428,8 +427,7 @@ function buildStateFromCsv(rows) {
   };
 }
 
-function buildEmbeddingsFromSubmissions(submissions, embeddingsJson) {
-  if (embeddingsJson?.points?.length) return embeddingsJson;
+function buildEmbeddingsFromSubmissions(submissions) {
   const points = submissions
     .filter((item) => item.umap_x != null && item.umap_y != null)
     .map((item) => ({
@@ -439,19 +437,24 @@ function buildEmbeddingsFromSubmissions(submissions, embeddingsJson) {
       y: item.umap_y,
       title: item.title,
       abstract: item.abstract,
-      cluster_name: item.cluster_track,
       year: item.year,
     }));
   if (!points.length) return null;
-  const clusterCounts = new Map();
-  points.forEach((point) => {
-    if (!point.cluster_name) return;
-    clusterCounts.set(point.cluster_name, (clusterCounts.get(point.cluster_name) || 0) + 1);
-  });
-  return {
-    points,
-    clusters: [...clusterCounts.entries()].map(([name, count], id) => ({ id, name, count })),
-  };
+  return { points };
+}
+
+function embeddingDisplayPoints() {
+  return filteredSubmissions()
+    .filter((item) => item.umap_x != null && item.umap_y != null)
+    .map((item) => ({
+      id: item.id,
+      x: item.umap_x,
+      y: item.umap_y,
+      year: item.year,
+      title: item.title,
+      poster_number: item.poster_number,
+      abstract: item.abstract,
+    }));
 }
 
 function assignedTopics(submission) {
@@ -469,7 +472,6 @@ function submissionMatchesSearch(item, search) {
     item.title,
     item.authors,
     item.abstract,
-    item.cluster_track,
     ...assignedTopics(item),
     ...(item.author_keywords || []),
     ...(item.extracted_keywords || []),
@@ -561,21 +563,49 @@ function themeColor(theme) {
   return CHART_PALETTE[(index >= 0 ? index : 0) % CHART_PALETTE.length];
 }
 
-function themesPresentOnEmbedding() {
-  if (!state.embeddings?.points?.length) return [];
-  const present = new Set(
-    state.embeddings.points.map((point) => embeddingPointPrimaryTheme(point)).filter(Boolean)
-  );
-  return googleTopicNames().filter((theme) => present.has(theme));
+function themeLegendThemes() {
+  return googleTopicNames();
 }
 
-function embeddingClusterMap() {
-  return state.googleTopics?.embedding_cluster_map || {};
+function embeddingPointTopics(point) {
+  const submission = submissionForEmbeddingPoint(point);
+  return submission ? assignedTopics(submission) : [];
 }
 
-function mapClusterToTheme(clusterName) {
-  if (!clusterName) return null;
-  return embeddingClusterMap()[clusterName] || clusterName;
+function appendTopicPieDot(parent, radius, topics, options = {}) {
+  const { opacity = 0.92, stroke = CCN_COLORS.navy, strokeWidth = 1 } = options;
+  const topicList = topics.length ? topics : ["Methods, theory & everything else"];
+
+  if (topicList.length === 1) {
+    parent
+      .append("circle")
+      .attr("r", radius)
+      .attr("fill", themeColor(topicList[0]))
+      .attr("stroke", stroke)
+      .attr("stroke-width", strokeWidth)
+      .attr("opacity", opacity);
+    return;
+  }
+
+  const pie = d3.pie().sort(null).value(1);
+  const arc = d3.arc().innerRadius(0).outerRadius(radius);
+  parent
+    .selectAll("path.topic-slice")
+    .data(pie(topicList))
+    .join("path")
+    .attr("class", "topic-slice")
+    .attr("d", arc)
+    .attr("fill", (d) => themeColor(d.data))
+    .attr("stroke", "rgba(15,34,56,0.35)")
+    .attr("stroke-width", Math.max(strokeWidth * 0.45, 0.5))
+    .attr("opacity", opacity);
+
+  parent
+    .append("circle")
+    .attr("r", radius)
+    .attr("fill", "none")
+    .attr("stroke", stroke)
+    .attr("stroke-width", strokeWidth);
 }
 
 function buildThemeClassifier() {
@@ -583,55 +613,36 @@ function buildThemeClassifier() {
   researchThemeNames().forEach((name) => profiles.set(name, new Map()));
 
   state.data?.submissions?.forEach((submission) => {
-    const theme = submission.primary_theme;
-    if (!theme || !profiles.has(theme)) return;
-    const weights = profiles.get(theme);
-    tokenize(submission.title).forEach((term) => weights.set(term, (weights.get(term) || 0) + 1));
-    tokenize(submission.abstract).forEach((term) => weights.set(term, (weights.get(term) || 0) + 1));
-  });
-
-  state.embeddings?.points?.forEach((point) => {
-    const theme = mapClusterToTheme(point.cluster_name);
-    if (!theme || !profiles.has(theme)) return;
-    const weights = profiles.get(theme);
-    tokenize(point.title).forEach((term) => weights.set(term, (weights.get(term) || 0) + 1));
-    tokenize(point.abstract).forEach((term) => weights.set(term, (weights.get(term) || 0) + 1));
+    assignedTopics(submission).forEach((theme) => {
+      if (!profiles.has(theme)) return;
+      const weights = profiles.get(theme);
+      tokenize(submission.title).forEach((term) => weights.set(term, (weights.get(term) || 0) + 1));
+      tokenize(submission.abstract).forEach((term) => weights.set(term, (weights.get(term) || 0) + 1));
+    });
   });
 
   state.themeProfiles = profiles;
 }
 
 function submissionForEmbeddingPoint(point) {
-  return state.data?.submissions?.find(
-    (item) =>
-      item.id === point.id ||
-      (item.year === 2026 && String(item.poster_number) === String(point.poster_number))
-  );
+  return state.data?.submissions?.find((item) => item.id === point.id);
 }
 
 function embeddingPointForSubmission(submission) {
-  if (!state.embeddings?.points) return null;
-  return state.embeddings.points.find(
-    (p) =>
-      p.id === submission.id ||
-      (submission.year === 2026 && String(p.poster_number) === String(submission.poster_number))
-  );
-}
-
-function embeddingPointPrimaryTheme(point) {
-  const submission = submissionForEmbeddingPoint(point);
-  return submission ? primaryTheme(submission) : null;
-}
-
-function embeddingPointTheme(point) {
-  return embeddingPointPrimaryTheme(point);
+  if (submission.umap_x == null || submission.umap_y == null) return null;
+  return {
+    id: submission.id,
+    x: submission.umap_x,
+    y: submission.umap_y,
+    year: submission.year,
+    title: submission.title,
+    poster_number: submission.poster_number,
+  };
 }
 
 function submissionResearchTheme(submission) {
-  if (submission.primary_theme) return submission.primary_theme;
-
-  const point = embeddingPointForSubmission(submission);
-  if (point?.cluster_name) return mapClusterToTheme(point.cluster_name);
+  const assigned = primaryTheme(submission);
+  if (assigned) return assigned;
 
   const profiles = state.themeProfiles;
   if (!profiles?.size) return null;
@@ -843,16 +854,17 @@ function embeddingActionHint() {
 }
 
 function embeddingDefaultNote() {
+  const count = embeddingDisplayPoints().length;
   if (state.highlightedSubmissionId) {
     return "Jumped to highlighted submission in the list below";
   }
   if (state.selectedTheme) {
     const clearHint = isTouchLike() ? "choose “All topics” to clear" : "choose “All topics” to clear";
-    return `Showing submissions with “${state.selectedTheme}” in any assigned topic (primary or secondary) · ${clearHint}`;
+    return `Showing ${count} submissions with “${state.selectedTheme}” in any assigned topic · ${clearHint}`;
   }
   return isTouchLike()
-    ? "Tap a dot to jump to that submission · use the topic dropdown to filter by any assigned topic"
-    : "Click a dot to jump to that submission · use the topic dropdown to filter by any assigned topic";
+    ? `${count} submissions on map · each dot is a pie slice per assigned topic · tap to jump · use dropdown to filter`
+    : `${count} submissions on map · each dot is a pie slice per assigned topic · click to jump · use dropdown to filter`;
 }
 
 function renderEmbeddingNote(note) {
@@ -861,25 +873,27 @@ function renderEmbeddingNote(note) {
 
 function embeddingPointTooltip(point) {
   const submission = submissionForEmbeddingPoint(point);
-  const theme = embeddingPointPrimaryTheme(point);
-  const assigned = submission ? assignedTopics(submission).join("; ") : "";
+  const topics = submission ? assignedTopics(submission) : [];
+  const topicLines = topics
+    .map((topic) => `<span style="color:${themeColor(topic)}">■</span> ${topic}`)
+    .join("<br/>");
   const parts = [
     `<strong>${truncateLabel(point.title, s(72))}</strong>`,
-    point.poster_number ? `Poster #${point.poster_number} · 2026` : "2026",
-    theme ? `<strong>Primary topic:</strong> ${theme}` : "",
-    assigned ? `<strong>All assigned topics:</strong> ${truncateLabel(assigned, s(72))}` : "",
+    `${point.year}${point.poster_number ? ` · Poster #${point.poster_number}` : ""}`,
+    topicLines ? `<strong>Assigned topics:</strong><br/>${topicLines}` : "",
   ];
   parts.push(embeddingActionHint());
   return parts.filter(Boolean).join("<br/>");
 }
 
 function themeLegendTooltip(themeName) {
-  const points =
-    state.embeddings?.points?.filter((point) => embeddingPointPrimaryTheme(point) === themeName) || [];
+  const count = embeddingDisplayPoints().filter((point) =>
+    assignedTopics(submissionForEmbeddingPoint(point)).includes(themeName)
+  ).length;
   return [
     `<strong>${themeName}</strong>`,
-    `${points.length} abstracts with this primary topic on the map`,
-    "Legend shows primary topics only (dot colors)",
+    `${count} visible on the map with this topic`,
+    "Pie-slice fill shows every assigned topic on each dot",
   ].join("<br/>");
 }
 
@@ -1210,18 +1224,18 @@ function renderEmbeddingCluster() {
   container.selectAll("*").remove();
 
   const note = d3.select("#embedding-note");
-  if (!state.embeddings?.points?.length) {
-    container.append("p").style("color", CCN_COLORS.muted).text("2026 embedding map unavailable.");
+  const points = embeddingDisplayPoints();
+  if (!points.length) {
+    container.append("p").style("color", CCN_COLORS.muted).text("No submissions with map coordinates match the current filters.");
     note.text("");
     return;
   }
 
-  const points = state.embeddings.points;
   const width = chartContainerWidth(container);
   const mobileLegend = useStackedChartLegend(width) || isPhoneLayout();
   const legendFont = isPhoneLayout() ? chartThemePx(7) : themeLabelPx(10);
   const legendItemHeight = isPhoneLayout() ? legendFont * 2.2 : legendFont * 1.5;
-  const legendThemes = themesPresentOnEmbedding();
+  const legendThemes = themeLegendThemes();
   const legendCols = isPhoneLayout() ? 1 : mobileLegend ? (width < 520 ? 1 : 2) : 1;
   const legendTitleHeight = legendFont * 1.6;
   const legendRows = mobileLegend ? Math.ceil(legendThemes.length / legendCols) : legendThemes.length;
@@ -1243,18 +1257,10 @@ function renderEmbeddingCluster() {
   const svg = appendChartSvg(container, width, height);
   const color = (theme) => themeColor(theme);
   const plotBottom = mobileLegend ? plotHeight - margin.bottom : height - margin.bottom;
-  const pointRadius = isPhoneLayout() ? { base: 2.2, selected: 3 } : { base: 5.5, selected: 7 };
+  const pointRadius = isPhoneLayout() ? { base: 4, selected: 5.5, highlighted: 6 } : { base: 7, selected: 8.5, highlighted: 10 };
 
-  const x = d3
-    .scaleLinear()
-    .domain(d3.extent(state.embeddings.points, (d) => d.x))
-    .nice()
-    .range([margin.left, width - margin.right]);
-  const y = d3
-    .scaleLinear()
-    .domain(d3.extent(state.embeddings.points, (d) => d.y))
-    .nice()
-    .range([plotBottom, margin.top]);
+  const x = d3.scaleLinear().domain(d3.extent(points, (d) => d.x)).nice().range([margin.left, width - margin.right]);
+  const y = d3.scaleLinear().domain(d3.extent(points, (d) => d.y)).nice().range([plotBottom, margin.top]);
 
   svg
     .append("rect")
@@ -1269,46 +1275,62 @@ function renderEmbeddingCluster() {
     navigateToSubmission(point);
   };
 
-  svg
-    .selectAll("circle.embedding-point")
-    .data(points)
-    .join("circle")
-    .attr("class", "embedding-point")
-    .attr("cx", (d) => x(d.x))
-    .attr("cy", (d) => y(d.y))
-    .attr("r", (d) => {
-      if (pointIsHighlighted(d)) return isPhoneLayout() ? gs(4.5) : s(8);
-      if (pointMatchesThemeFilter(d) && state.selectedTheme) {
-        return isPhoneLayout() ? gs(pointRadius.selected) : s(pointRadius.selected);
-      }
-      return isPhoneLayout() ? gs(pointRadius.base) : s(pointRadius.base);
-    })
-    .attr("fill", (d) => color(embeddingPointPrimaryTheme(d)))
-    .attr("stroke", (d) => {
-      if (pointIsHighlighted(d)) return CCN_COLORS.white;
-      if (pointMatchesThemeFilter(d) && state.selectedTheme) return CCN_COLORS.pink;
-      return CCN_COLORS.navy;
-    })
-    .attr("stroke-width", (d) => {
-      if (pointIsHighlighted(d)) return isPhoneLayout() ? gs(2) : s(2.5);
-      if (pointMatchesThemeFilter(d) && state.selectedTheme) {
-        return isPhoneLayout() ? gs(1.5) : s(2);
-      }
-      return isPhoneLayout() ? gs(0.75) : s(1);
-    })
-    .attr("opacity", (d) => (!state.selectedTheme || pointMatchesThemeFilter(d) ? 0.9 : 0.18))
+  const pointStyle = (point) => {
+    const highlighted = pointIsHighlighted(point);
+    const matches = pointMatchesThemeFilter(point);
+    const filtered = Boolean(state.selectedTheme);
+    let radius = isPhoneLayout() ? gs(pointRadius.base) : s(pointRadius.base);
+    if (highlighted) radius = isPhoneLayout() ? gs(pointRadius.highlighted) : s(pointRadius.highlighted);
+    else if (matches && filtered) radius = isPhoneLayout() ? gs(pointRadius.selected) : s(pointRadius.selected);
+    return {
+      radius,
+      opacity: !filtered || matches ? 0.92 : 0.14,
+      stroke: highlighted ? CCN_COLORS.white : matches && filtered ? CCN_COLORS.pink : CCN_COLORS.navy,
+      strokeWidth: highlighted
+        ? isPhoneLayout()
+          ? gs(2.5)
+          : s(2.5)
+        : matches && filtered
+          ? isPhoneLayout()
+            ? gs(1.75)
+            : s(2)
+          : isPhoneLayout()
+            ? gs(1)
+            : s(1.25),
+    };
+  };
+
+  const pointGroups = svg
+    .append("g")
+    .attr("class", "embedding-points")
+    .selectAll("g.embedding-point-group")
+    .data(points, (d) => d.id)
+    .join("g")
+    .attr("class", "embedding-point-group")
+    .attr("transform", (d) => `translate(${x(d.x)},${y(d.y)})`)
     .style("cursor", "pointer")
     .style("pointer-events", isTouchLike() ? "none" : "auto");
+
+  pointGroups.each(function renderPiePoint(point) {
+    const group = d3.select(this);
+    group.selectAll("*").remove();
+    const style = pointStyle(point);
+    appendTopicPieDot(group, style.radius, embeddingPointTopics(point), {
+      opacity: style.opacity,
+      stroke: style.stroke,
+      strokeWidth: style.strokeWidth,
+    });
+  });
 
   if (isTouchLike()) {
     svg
       .selectAll("circle.embedding-hit")
-      .data(points)
+      .data(points, (d) => d.id)
       .join("circle")
       .attr("class", "embedding-hit")
       .attr("cx", (d) => x(d.x))
       .attr("cy", (d) => y(d.y))
-      .attr("r", isPhoneLayout() ? gs(14) : s(16))
+      .attr("r", isPhoneLayout() ? gs(16) : s(18))
       .attr("fill", "transparent")
       .style("cursor", "pointer")
       .on("click", (event, d) => {
@@ -1316,8 +1338,7 @@ function renderEmbeddingCluster() {
         handlePointNavigate(null, d);
       });
   } else {
-    svg
-      .selectAll("circle.embedding-point")
+    pointGroups
       .on("mousemove", (event, d) => showTooltip(embeddingPointTooltip(d), event))
       .on("mouseleave", hideTooltip)
       .on("click", handlePointNavigate);
@@ -1337,7 +1358,7 @@ function renderEmbeddingCluster() {
       .attr("fill", CCN_COLORS.muted)
       .style("font-size", isPhoneLayout() ? chartThemeFs(7) : themeFs(10))
       .style("font-weight", 600)
-      .text("Primary topics (dot colors)");
+      .text("Research topics (pie-slice fill)");
     legend
       .selectAll("g.legend-item")
       .data(legendThemes)
@@ -1379,7 +1400,7 @@ function renderEmbeddingCluster() {
       .attr("fill", CCN_COLORS.muted)
       .style("font-size", themeFs(10))
       .style("font-weight", 600)
-      .text("Primary topics (dot colors)");
+      .text("Research topics (pie-slice fill)");
 
     const legendItems = legendRoot
       .selectAll("g.legend-item")
@@ -1442,12 +1463,9 @@ function renderPaperList() {
   items
     .append("div")
     .attr("class", "meta")
-    .text((d) => {
-      const topics = assignedTopics(d);
-      const topicText = topics.length ? ` · topics: ${topics.join("; ")}` : "";
-      const clusterText = d.cluster_track ? ` · cluster: ${d.cluster_track}` : "";
-      return `${d.year}${d.poster_number ? ` · Poster ${d.poster_number}` : ""}${d.authors ? ` · ${d.authors}` : ""}${topicText}${clusterText}`;
-    });
+    .text((d) =>
+      `${d.year}${d.poster_number ? ` · Poster ${d.poster_number}` : ""}${d.authors ? ` · ${d.authors}` : ""}`
+    );
 
   items.each(function renderTags(d) {
     const tagData = assignedTopics(d);
@@ -1456,7 +1474,8 @@ function renderPaperList() {
       .selectAll(".keyword-tag")
       .data(tagData)
       .join("span")
-      .attr("class", (theme) => `keyword-tag${theme === state.selectedTheme ? " active" : ""}`)
+      .attr("class", (theme) => `keyword-tag topic-tag${theme === state.selectedTheme ? " active" : ""}`)
+      .style("--topic-color", (theme) => themeColor(theme))
       .text((theme) => theme);
   });
 }
@@ -1497,9 +1516,8 @@ async function loadOptionalJson(path) {
 async function init() {
   ensureD3();
 
-  const [csvRows, embeddings, googleTopics] = await Promise.all([
+  const [csvRows, googleTopics] = await Promise.all([
     d3.csv("data/abstracts.csv"),
-    loadOptionalJson("data/embeddings_2026.json"),
     loadOptionalJson("data/google_topics.json"),
   ]);
 
@@ -1508,7 +1526,7 @@ async function init() {
   }
 
   state.data = buildStateFromCsv(csvRows);
-  state.embeddings = buildEmbeddingsFromSubmissions(state.data.submissions, embeddings);
+  state.embeddings = buildEmbeddingsFromSubmissions(state.data.submissions);
   state.googleTopics = googleTopics;
   buildThemeClassifier();
 

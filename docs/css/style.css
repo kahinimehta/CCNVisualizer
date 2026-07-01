@@ -657,6 +657,16 @@ svg {
   cursor: pointer;
 }
 
+.keyword-tag.topic-tag {
+  background: color-mix(in srgb, var(--topic-color) 30%, transparent);
+  border-color: var(--topic-color);
+  color: var(--topic-color);
+}
+
+.keyword-tag.topic-tag.active {
+  box-shadow: 0 0 0 1px var(--topic-color);
+}
+
 .keyword-tag.active {
   background: rgba(244, 199, 195, 0.25);
   border-color: var(--ccn-pink);

@@ -10,7 +10,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_PATH = ROOT / "data" / "submissions.json"
-EMBEDDINGS_PATH = ROOT / "docs" / "data" / "embeddings_2026.json"
+EMBEDDINGS_ALL_PATH = ROOT / "docs" / "data" / "embeddings_all.json"
+EMBEDDINGS_2026_PATH = ROOT / "docs" / "data" / "embeddings_2026.json"
 OUTPUT_PATHS = (ROOT / "data" / "abstracts.csv", ROOT / "docs" / "data" / "abstracts.csv")
 
 LIST_DELIMITER = " | "
@@ -29,7 +30,6 @@ CSV_FIELDS = [
     "umap_y",
     "source_url",
     "poster_number",
-    "cluster_track",
 ]
 
 AFFILIATION_HINTS = (
@@ -139,10 +139,6 @@ def build_rows(payload: dict, embeddings: dict | None = None) -> list[dict[str, 
         poster = str(submission.get("poster_number") or "")
         point = embedding_lookup.get(sub_id) or embedding_lookup.get(f"2026-{poster}")
 
-        cluster_track = submission.get("cluster_track") or ""
-        if not cluster_track and point:
-            cluster_track = point.get("cluster_name", "")
-
         rows.append(
             {
                 "id": sub_id,
@@ -158,7 +154,6 @@ def build_rows(payload: dict, embeddings: dict | None = None) -> list[dict[str, 
                 "umap_y": "" if not point else str(point.get("y", "")),
                 "source_url": submission.get("source_url", ""),
                 "poster_number": poster,
-                "cluster_track": cluster_track,
             }
         )
     return rows
@@ -180,6 +175,14 @@ def build_from_payload(payload: dict, embeddings: dict | None = None) -> list[di
     return rows
 
 
+def load_embeddings() -> dict | None:
+    for path in (EMBEDDINGS_ALL_PATH, EMBEDDINGS_2026_PATH):
+        if path.exists():
+            with path.open(encoding="utf-8") as fh:
+                return json.load(fh)
+    return None
+
+
 def main() -> None:
     if not DATA_PATH.exists():
         raise SystemExit(f"Missing {DATA_PATH}")
@@ -187,11 +190,7 @@ def main() -> None:
     with DATA_PATH.open(encoding="utf-8") as fh:
         payload = json.load(fh)
 
-    embeddings = None
-    if EMBEDDINGS_PATH.exists():
-        with EMBEDDINGS_PATH.open(encoding="utf-8") as fh:
-            embeddings = json.load(fh)
-
+    embeddings = load_embeddings()
     rows = build_from_payload(payload, embeddings)
     print(f"Built {len(rows)} rows")
 

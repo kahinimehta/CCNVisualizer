@@ -12,7 +12,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DATA_PATH = ROOT / "data" / "submissions.json"
 DOCS_PATH = ROOT / "docs" / "data" / "submissions.json"
-EMBEDDINGS_PATH = ROOT / "docs" / "data" / "embeddings_2026.json"
+EMBEDDINGS_ALL_PATH = ROOT / "docs" / "data" / "embeddings_all.json"
+EMBEDDINGS_2026_PATH = ROOT / "docs" / "data" / "embeddings_2026.json"
 GOOGLE_TOPICS_PATH = ROOT / "data" / "google_topics.json"
 
 GOOGLE_FORM_TOPICS = [
@@ -241,7 +242,7 @@ def assign_themes(
     topics: list[str],
     embedding_lookup: dict[str, str],
     cluster_map: dict[str, str],
-) -> tuple[str, list[str], list[str], str]:
+) -> tuple[str, list[str], list[str]]:
     sub_id = submission.get("id", "")
     poster = str(submission.get("poster_number") or "")
     cluster = embedding_lookup.get(sub_id) or embedding_lookup.get(f"2026-{poster}")
@@ -266,8 +267,8 @@ def assign_themes(
 
     threshold = (scores.get(primary, 0) or ranked[0][1]) * 0.35
     secondary: list[str] = []
-    if cluster and cluster not in secondary:
-        secondary.append(cluster)
+    if cluster_theme and cluster_theme != primary and cluster_theme not in secondary:
+        secondary.append(cluster_theme)
     for theme, score in ranked:
         if theme == primary or score < threshold:
             continue
@@ -277,7 +278,7 @@ def assign_themes(
             break
     google_secondaries = [theme for theme in secondary if theme in topics]
     assigned_topics = list(dict.fromkeys([primary, *google_secondaries]))
-    return primary, secondary[:3], assigned_topics, cluster or ""
+    return primary, secondary[:3], assigned_topics
 
 
 def compute_theme_stats(submissions: list[dict], topics: list[str]) -> dict:
@@ -312,18 +313,22 @@ def apply_assignments(payload: dict, embeddings: dict) -> dict:
     points = embeddings.get("points", [])
     embedding_lookup: dict[str, str] = {}
     for point in points:
-        embedding_lookup[point["id"]] = point["cluster_name"]
+        cluster_name = point.get("cluster_name")
+        if not cluster_name:
+            continue
+        mapped = cluster_map.get(cluster_name, cluster_name)
+        embedding_lookup[point["id"]] = cluster_name
         if point.get("poster_number"):
-            embedding_lookup[f"2026-{point['poster_number']}"] = point["cluster_name"]
+            embedding_lookup[f"2026-{point['poster_number']}"] = cluster_name
 
     for submission in payload["submissions"]:
-        primary, secondary, assigned_topics, cluster_track = assign_themes(
+        primary, secondary, assigned_topics = assign_themes(
             submission, topics, embedding_lookup, cluster_map
         )
         submission["primary_theme"] = primary
         submission["secondary_topics"] = secondary
         submission["assigned_topics"] = assigned_topics
-        submission["cluster_track"] = cluster_track
+        submission.pop("cluster_track", None)
 
     payload.setdefault("stats", {})
     payload["stats"]["research_themes"] = compute_theme_stats(payload["submissions"], topics)
@@ -331,7 +336,8 @@ def apply_assignments(payload: dict, embeddings: dict) -> dict:
     payload["metadata"]["research_theme_method"] = (
         "Google Form Q1 topics; official CCN topic labels mapped first; "
         "submission keywords matched to themes (author keywords, else topic/track, "
-        "else archive text fallback for 2018-2019); 2026 embedding clusters add a soft boost only"
+        "else archive text fallback for 2018-2019); optional soft boost from "
+        "2026 embedding cluster mapped to the same Google topic set"
     )
     payload["metadata"]["keyword_source"] = (
         "author_keywords prefer poster HTML, proceedings/authored PDFs (2017-2025), or 2026 CSV; "
@@ -350,24 +356,32 @@ def write_payload(payload: dict) -> None:
         print(f"Wrote {path}")
 
 
+def load_embeddings() -> dict | None:
+    for path in (EMBEDDINGS_2026_PATH,):
+        if path.exists():
+            with path.open(encoding="utf-8") as fh:
+                return json.load(fh)
+    return None
+
+
 def main() -> None:
     if not DATA_PATH.exists():
         raise SystemExit(f"Missing {DATA_PATH}")
-    if not EMBEDDINGS_PATH.exists():
-        raise SystemExit(f"Missing {EMBEDDINGS_PATH}. Run build_cluster_viz.py first.")
 
     with DATA_PATH.open(encoding="utf-8") as fh:
         payload = json.load(fh)
-    with EMBEDDINGS_PATH.open(encoding="utf-8") as fh:
-        embeddings = json.load(fh)
+    embeddings = load_embeddings()
+    if embeddings:
+        payload = apply_assignments(payload, embeddings)
+    else:
+        print("Warning: no 2026 embedding clusters found; assigning themes from keywords only.")
 
-    payload = apply_assignments(payload, embeddings)
     write_payload(payload)
 
     try:
         from build_abstracts_csv import build_from_payload
 
-        build_from_payload(payload, embeddings)
+        build_from_payload(payload)
     except Exception as exc:  # noqa: BLE001
         print(f"Warning: abstracts.csv export skipped: {exc}")
 
