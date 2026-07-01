@@ -13,7 +13,6 @@ from pdf_keywords import KEYWORD_SOURCE_NOTE, enrich_submission_keywords, needs_
 from scrape_ccn import ROOT, fetch
 
 DATA_PATH = ROOT / "data" / "submissions.json"
-EMBEDDINGS_PATH = ROOT / "docs" / "data" / "embeddings_2026.json"
 
 
 def refresh_submission(submission: dict) -> tuple[str, bool]:
@@ -52,15 +51,9 @@ def main() -> None:
                 print(f"  processed {index}/{len(submissions)} ({updated} gained author keywords)")
 
     payload["metadata"]["keyword_source"] = KEYWORD_SOURCE_NOTE
-
-    embeddings = None
-    if EMBEDDINGS_PATH.exists():
-        with EMBEDDINGS_PATH.open(encoding="utf-8") as fh:
-            embeddings = json.load(fh)
-        payload = apply_assignments(payload, embeddings)
-
+    payload = apply_assignments(payload)
     write_payload(payload)
-    build_from_payload(payload, embeddings)
+    build_from_payload(payload)
     print(f"Done. {updated} submissions now have author keywords from HTML/PDF.")
 
 

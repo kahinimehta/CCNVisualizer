@@ -18,17 +18,5 @@
     "Attention & cognitive control / executive function",
     "Clinical / computational psychiatry",
     "Methods, theory & everything else"
-  ],
-  "embedding_cluster_map": {
-    "Reinforcement Learning": "RL, motor control & planning",
-    "Naturalistic Brain Encoding": "Naturalistic encoding/decoding",
-    "Neural Population Dynamics": "Neural population geometry & dynamics",
-    "Decision and Metacognition": "Decision-making and metacognition",
-    "Visual Cortex Models": "Vision",
-    "Computer Vision Models": "Vision",
-    "Language Neuroscience": "Language/auditory neuroscience",
-    "LLMs and Reasoning": "LLMs, reasoning, interpretability",
-    "Cognition and Memory Systems": "Memory",
-    "Neural Network Theory": "Methods, theory & everything else"
-  }
+  ]
 }

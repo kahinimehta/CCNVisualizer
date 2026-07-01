@@ -15,7 +15,6 @@ from text_encoding import repair_submission_text
 from topic_features import (
     ABSOLUTE_COSINE_FLOOR,
     BROAD_HINT_BOOST,
-    CLUSTER_BOOST,
     MAX_ASSIGNED_TOPICS,
     RELEVANCE_RATIO,
     TOPIC_ANCHORS,
@@ -30,23 +29,9 @@ from topic_features import (
 ROOT = Path(__file__).resolve().parents[1]
 DATA_PATH = ROOT / "data" / "submissions.json"
 DOCS_PATH = ROOT / "docs" / "data" / "submissions.json"
-EMBEDDINGS_2026_PATH = ROOT / "docs" / "data" / "embeddings_2026.json"
 GOOGLE_TOPICS_PATH = ROOT / "data" / "google_topics.json"
 
 GOOGLE_FORM_TOPICS = list(TOPIC_ANCHORS.keys())
-
-EMBEDDING_TO_GOOGLE = {
-    "Reinforcement Learning": "RL, motor control & planning",
-    "Naturalistic Brain Encoding": "Naturalistic encoding/decoding",
-    "Neural Population Dynamics": "Neural population geometry & dynamics",
-    "Decision and Metacognition": "Decision-making and metacognition",
-    "Visual Cortex Models": "Vision",
-    "Computer Vision Models": "Vision",
-    "Language Neuroscience": "Language/auditory neuroscience",
-    "LLMs and Reasoning": "LLMs, reasoning, interpretability",
-    "Cognition and Memory Systems": "Memory",
-    "Neural Network Theory": "Methods, theory & everything else",
-}
 
 CCN_TOPIC_MAP: dict[str, str] = {
     "visual processing & computational vision": "Vision",
@@ -130,10 +115,6 @@ def active_topics(config: dict) -> list[str]:
     return GOOGLE_FORM_TOPICS
 
 
-def embedding_map(config: dict) -> dict[str, str]:
-    return config.get("embedding_cluster_map") or EMBEDDING_TO_GOOGLE
-
-
 def normalize_topic_label(label: str) -> str:
     return normalize_keyword_phrase(label)
 
@@ -170,20 +151,10 @@ def assign_themes(
     topics: list[str],
     scorer: ThemeScorer,
     submission_index: int,
-    embedding_lookup: dict[str, str],
-    cluster_map: dict[str, str],
 ) -> tuple[str, list[str], list[str]]:
-    sub_id = submission.get("id", "")
-    poster = str(submission.get("poster_number") or "")
-    cluster = embedding_lookup.get(sub_id) or embedding_lookup.get(f"2026-{poster}")
-    cluster_theme = cluster_map.get(cluster) if cluster else None
-
     official = official_theme_from_label(conference_label(submission), topics)
     scores = scorer.score_index(submission_index)
     apply_label_hints(conference_label(submission), scores, topics)
-
-    if cluster_theme and cluster_theme in topics:
-        scores[cluster_theme] = scores.get(cluster_theme, 0.0) + CLUSTER_BOOST
 
     ranked = sorted(scores.items(), key=lambda item: (-item[1], item[0]))
     max_score = ranked[0][1] if ranked else 0.0
@@ -239,20 +210,9 @@ def compute_theme_stats(submissions: list[dict], topics: list[str]) -> dict:
     }
 
 
-def apply_assignments(payload: dict, embeddings: dict | None = None) -> dict:
+def apply_assignments(payload: dict) -> dict:
     config = load_google_config()
     topics = active_topics(config)
-    cluster_map = embedding_map(config)
-
-    embedding_lookup: dict[str, str] = {}
-    if embeddings:
-        for point in embeddings.get("points", []):
-            cluster_name = point.get("cluster_name")
-            if not cluster_name:
-                continue
-            embedding_lookup[point["id"]] = cluster_name
-            if point.get("poster_number"):
-                embedding_lookup[f"2026-{point['poster_number']}"] = cluster_name
 
     submissions = payload["submissions"]
     for submission in submissions:
@@ -267,8 +227,6 @@ def apply_assignments(payload: dict, embeddings: dict | None = None) -> dict:
             topics,
             scorer,
             index,
-            embedding_lookup,
-            cluster_map,
         )
         submission["primary_theme"] = primary
         submission["secondary_topics"] = secondary
@@ -282,8 +240,7 @@ def apply_assignments(payload: dict, embeddings: dict | None = None) -> dict:
         "Google Form Q1 topics; weighted TF-IDF cosine similarity to topic prototype anchors "
         "(title x2, abstract x3, cleaned keywords x1; metadata keywords excluded); "
         f"multi-label threshold max_score * {RELEVANCE_RATIO} (floor {ABSOLUTE_COSINE_FLOOR}), "
-        f"cap {MAX_ASSIGNED_TOPICS}; official CCN labels override primary when specific; "
-        "optional soft boost from 2026 embedding cluster"
+        f"cap {MAX_ASSIGNED_TOPICS}; official CCN labels override primary when specific"
     )
     payload["metadata"]["keyword_source"] = (
         "author_keywords prefer poster HTML, proceedings/authored PDFs (2017-2025), or 2026 CSV; "
@@ -303,13 +260,6 @@ def write_payload(payload: dict) -> None:
         print(f"Wrote {path}")
 
 
-def load_embeddings() -> dict | None:
-    if EMBEDDINGS_2026_PATH.exists():
-        with EMBEDDINGS_2026_PATH.open(encoding="utf-8") as fh:
-            return json.load(fh)
-    return None
-
-
 def main() -> None:
     if not DATA_PATH.exists():
         raise SystemExit(f"Missing {DATA_PATH}")
@@ -317,11 +267,7 @@ def main() -> None:
     with DATA_PATH.open(encoding="utf-8") as fh:
         payload = json.load(fh)
 
-    embeddings = load_embeddings()
-    if not embeddings:
-        print("Warning: no 2026 embedding clusters found; assigning themes from text similarity only.")
-
-    payload = apply_assignments(payload, embeddings)
+    payload = apply_assignments(payload)
     write_payload(payload)
 
     try:

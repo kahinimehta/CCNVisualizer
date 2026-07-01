@@ -22,9 +22,6 @@ jobs:
       - name: Merge 2026 CSV
         run: python scripts/merge_2026_csv.py
 
-      - name: Build 2026 embedding visualization
-        run: python scripts/build_cluster_viz.py
-
       - name: Assign research themes
         run: python scripts/assign_research_themes.py
 
@@ -32,7 +29,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/submissions.json docs/data/submissions.json data/abstracts.csv docs/data/abstracts.csv data/embeddings_2026.json docs/data/embeddings_2026.json
+          git add data/submissions.json docs/data/submissions.json data/abstracts.csv docs/data/abstracts.csv data/embeddings_all.json docs/data/embeddings_all.json
           if git diff --staged --quiet; then
             echo "No data changes to commit."
           else

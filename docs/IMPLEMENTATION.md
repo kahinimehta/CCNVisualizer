@@ -93,7 +93,6 @@ Themes are **not** discovered by clustering submissions. Instead, each of the 12
 
 1. **Official CCN label** — specific conference topic/track strings map directly to a theme (broad labels like `psychological / behavioral research` do *not* force a primary; they only nudge scores by +0.04).
 2. **Broad area hints** — coarse archive labels nudge several themes without overriding title/abstract signal.
-3. **2026 Gemma cluster** — optional +0.05 boost from `embeddings_2026.json` cluster names (internal to theme assignment only; not shown in the dashboard).
 
 **LLM vs Methods split:** the theme **LLMs, reasoning, interpretability** uses a strict anchor set (transformer, GPT, prompting, RLHF, chain-of-thought, in-context learning, …). General interpretability / RNN / symbolic-reasoning terms anchor **Methods, theory & everything else** so the category name reflects actual LLM work.
 

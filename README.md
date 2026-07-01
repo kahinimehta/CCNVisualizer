@@ -11,71 +11,62 @@ Interactive dashboard for poster and paper submissions across the [Cognitive Com
 ## Overview
 
 - Archive data (`2017`–`2025`) was scraped once from ccneuro.org and is treated as static
-- **2026** posters are merged from `data/ccn-2026-pending-posters.csv` — this is the only data that gets updated going forward
-- Research themes are the 12 meetup topics from the [Google Form](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform); submissions can carry **multiple assigned topics** plus a **cluster track** for 2026 audit
-- The live dashboard reads **`docs/data/abstracts.csv`** (built from JSON) — one row per submission with author keywords, extracted keywords, abstract, assigned topics, and cluster track
+- **2026** posters are merged from `data/ccn-2026-pending-posters.csv` — the main data that gets updated going forward
+- Research themes are the 12 meetup topics from the [Google Form](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform); submissions can carry **multiple assigned topics**
+- The live dashboard reads **`docs/data/abstracts.csv` only** — one row per submission with keywords, assigned topics, UMAP coordinates, and links
+
+## Data pipeline
+
+```
+scrape → submissions.json → assign_research_themes.py → abstracts.csv → dashboard
+```
+
+See [docs/DASHBOARD.md](docs/DASHBOARD.md) and [docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md) for the full workflow and clustering algorithm.
 
 ## Dashboard features
 
 | Feature | Description |
 |---------|-------------|
-| Research theme filter | Dropdown of all 12 Google Form topics with counts |
+| Research theme filter | Dropdown of all 12 Google Form topics |
 | Submissions over time | Line chart by conference year |
 | Research theme ranking | Horizontal bars, full theme names |
-| Theme mix by year | Stacked share of assigned themes within each conference year |
-| Theme totals & YoY change | All-time bars + year-pair delta |
-| Abstract embedding map | 2026 UMAP scatter, colored by cluster track; click to filter |
-| Matching submissions | Searchable list with assigned topic tags and cluster track |
-| Primary themes donut | Share of submissions by primary theme |
+| Year-over-year change | Theme share delta between two years |
+| Abstract embedding map | All-years UMAP scatter; dot color = primary topic |
+| Matching submissions | Searchable list with assigned topic tags |
 
 ## Research themes
 
-The 12 primary topics come from [**CCN 2026 Activity Preferences**](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform), question 1. They are stored in `data/google_topics.json` and `docs/data/google_topics.json`.
+The 12 topics come from [**CCN 2026 Activity Preferences**](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform), question 1. Optional override list: `data/google_topics.json`.
 
 | Years | Keyword source |
 |-------|----------------|
-| 2017–2025 | Poster HTML `Keywords:` field and/or proceedings/authored PDF keyword line → `author_keywords` |
-| 2026 | CSV `primary_area` / `secondary_area` → `author_keywords` |
-| Any year (fallback) | Title/abstract tokens → `extracted_keywords` only when author keywords unavailable |
-
-Theme assignment also uses official CCN topic labels and (for 2026) embedding-cluster boosts. See [docs/DASHBOARD.md](docs/DASHBOARD.md).
-
-## Data sources
-
-| Years | Source | Updates? |
-|-------|--------|----------|
-| 2017 | `index.html@p=618.html` proceedings PDFs | Static |
-| 2018–2019 | `Papers/AcceptedPapers.html` | Static |
-| 2022–2023 | `accepted_papers.html` | Static |
-| 2024–2025 | MeetingTrakr poster sessions | Static |
-| 2026 | `data/ccn-2026-pending-posters.csv` | **Replace CSV when new data arrives** |
+| 2017–2025 | Poster HTML `Keywords:` field and/or proceedings PDF keyword line |
+| 2026 | CSV `primary_area` / `secondary_area` |
+| Any year (fallback) | Title/abstract tokens when author keywords unavailable |
 
 ## Updating 2026 data
 
 When an updated 2026 poster list is available:
 
 1. Replace `data/ccn-2026-pending-posters.csv`
-2. Run the update pipeline:
+2. Run:
 
 ```bash
 pip install -r scripts/requirements.txt
 python scripts/merge_2026_csv.py
-python scripts/backfill_pdf_keywords.py
-python scripts/build_cluster_viz.py
+python scripts/assign_research_themes.py
 ```
 
-Or trigger the **Update 2026 Data** GitHub Action (Actions → Update 2026 Data → Run workflow).
+Or trigger the **Update 2026 Data** GitHub Action.
 
-This refreshes `submissions.json`, `abstracts.csv`, `embeddings_2026.json`, and theme assignments. Commit and push to deploy.
+This refreshes `submissions.json`, `embeddings_all.json`, `abstracts.csv`, and theme assignments.
 
 ## Initial / full rebuild
 
-To re-scrape the full archive (rarely needed):
-
 ```bash
-python scripts/scrape_ccn.py              # scrape 2017–2025 + merge 2026 CSV
-python scripts/backfill_pdf_keywords.py  # refresh author keywords from HTML + PDFs
-python scripts/build_cluster_viz.py       # 2026 UMAP JSON
+python scripts/scrape_ccn.py
+python scripts/backfill_pdf_keywords.py   # optional keyword refresh
+python scripts/assign_research_themes.py
 ```
 
 ## Local development
@@ -87,17 +78,9 @@ python -m http.server 8080 --directory docs
 
 Open http://localhost:8080
 
-## Google Form topics
-
-The form link is the canonical source for theme names. If question 1 options change on the form, update the `topics` array in `data/google_topics.json`, copy to `docs/data/google_topics.json`, and re-run `python scripts/assign_research_themes.py`.
-
-No form response data or analytics are used — only the published topic list from the form.
-
 ## Deployment
 
 Pushes to `main` deploy the static `docs/` folder (GitHub Pages / Vercel).
-
-### Vercel settings
 
 | Setting | Value |
 |---------|--------|
@@ -109,28 +92,25 @@ Pushes to `main` deploy the static `docs/` folder (GitHub Pages / Vercel).
 
 ```
 scripts/
-  scrape_ccn.py                 # One-time archive scraper
-  merge_2026_csv.py             # Merge/replace 2026 CSV (primary update path)
-  build_cluster_viz.py          # UMAP export for dashboard
-  add_2017_archive.py           # Scrape 2017 proceedings PDFs into existing JSON
-  pdf_keywords.py               # Author keyword resolution (HTML → PDF → fallback)
-  backfill_pdf_keywords.py      # Refresh author keywords from HTML + PDFs for all years
-  build_abstracts_csv.py        # Export audit CSV for the dashboard
-  assign_research_themes.py     # Google topic assignment + CSV export
-  ccn_abstract_clustering.ipynb # Collaborator embedding notebook
+  scrape_ccn.py               # Archive scraper
+  merge_2026_csv.py             # Merge/replace 2026 CSV
+  pdf_keywords.py               # Keyword resolution (HTML → PDF → fallback)
+  backfill_pdf_keywords.py      # Refresh keywords for all years
+  assign_research_themes.py     # Theme assignment + UMAP + CSV export
+  build_all_embeddings.py       # UMAP coordinates (embeddings_all.json)
+  build_abstracts_csv.py        # Dashboard CSV export
+  topic_features.py             # Text weighting, stoplists, topic anchors
 data/
-  ccn-2026-pending-posters.csv  # Updated when new 2026 data arrives
-  google_topics.json            # 12 themes from Google Form Q1
+  ccn-2026-pending-posters.csv
+  google_topics.json            # Optional theme name override
+  submissions.json              # Build artifact (not loaded by dashboard)
+  embeddings_all.json           # UMAP coords (merged into CSV)
+  abstracts.csv
 docs/
-  index.html
-  DASHBOARD.md
-  IMPLEMENTATION.md             # Data sources, algorithms, per-chart reference
+  data/abstracts.csv            # Dashboard runtime source of truth
   js/app.js
-  css/style.css
-  data/abstracts.csv            # Dashboard source of truth (also in docs/data/)
-  data/submissions.json
-  data/embeddings_2026.json
-  data/google_topics.json
+  DASHBOARD.md
+  IMPLEMENTATION.md
 ```
 
 ## Licenses

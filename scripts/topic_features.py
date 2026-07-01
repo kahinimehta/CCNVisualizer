@@ -234,7 +234,6 @@ RELEVANCE_RATIO = 0.5
 ABSOLUTE_COSINE_FLOOR = 0.05
 MAX_ASSIGNED_TOPICS = 5
 BROAD_HINT_BOOST = 0.04
-CLUSTER_BOOST = 0.05
 
 
 def strip_citation_fragments(text: str) -> str:

@@ -753,16 +753,8 @@ def assign_research_themes(payload: dict) -> dict:
     """Assign primary_theme and secondary_topics on every submission."""
     try:
         from assign_research_themes import apply_assignments
-        import json
-        from pathlib import Path
 
-        embeddings_path = ROOT / "docs" / "data" / "embeddings_2026.json"
-        if not embeddings_path.exists():
-            print("Warning: embeddings_2026.json missing; theme assignment skipped.")
-            return payload
-        with embeddings_path.open(encoding="utf-8") as fh:
-            embeddings = json.load(fh)
-        return apply_assignments(payload, embeddings)
+        return apply_assignments(payload)
     except Exception as exc:  # noqa: BLE001
         print(f"Warning: research theme assignment skipped: {exc}")
         return payload
@@ -774,15 +766,8 @@ def write_outputs(payload: dict) -> dict:
     payload = assign_research_themes(payload)
     try:
         from build_abstracts_csv import build_from_payload
-        import json
-        from pathlib import Path
 
-        embeddings_path = ROOT / "docs" / "data" / "embeddings_2026.json"
-        embeddings = None
-        if embeddings_path.exists():
-            with embeddings_path.open(encoding="utf-8") as fh:
-                embeddings = json.load(fh)
-        build_from_payload(payload, embeddings)
+        build_from_payload(payload)
     except Exception as exc:  # noqa: BLE001
         print(f"Warning: abstracts.csv export skipped: {exc}")
 
