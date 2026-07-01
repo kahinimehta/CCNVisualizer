@@ -19,7 +19,7 @@
       "count": 617,
       "note": "Provisional — replace CSV and re-run merge when updated data is available."
     },
-    "research_themes_assigned_at": "2026-07-01T23:43:53.998993+00:00",
+    "research_themes_assigned_at": "2026-07-01T23:47:59.240979+00:00",
     "research_theme_method": "Google Form Q1 topics; weighted TF-IDF cosine similarity to topic prototype anchors (title x2, abstract x3, cleaned keywords x1; metadata keywords excluded); multi-label threshold max_score * 0.5 (floor 0.05), cap 5; official CCN labels override primary when specific; optional soft boost from 2026 embedding cluster",
     "keyword_source": "author_keywords prefer poster HTML, proceedings/authored PDFs (2017-2025), or 2026 CSV; extracted_keywords only when no author keywords are available; citation fragments and metadata area labels stripped before scoring",
     "keyword_years": [
@@ -135,9 +135,12 @@
       "source_url": "https://2017.ccneuro.org/abstracts/abstract_3000195.pdf",
       "submission_type": "poster",
       "primary_theme": "Language/auditory neuroscience",
-      "secondary_topics": [],
+      "secondary_topics": [
+        "Neural population geometry & dynamics"
+      ],
       "assigned_topics": [
-        "Language/auditory neuroscience"
+        "Language/auditory neuroscience",
+        "Neural population geometry & dynamics"
       ]
     },
     {
@@ -694,14 +697,14 @@
       "primary_theme": "Naturalistic encoding/decoding",
       "secondary_topics": [
         "Methods, theory & everything else",
-        "Language/auditory neuroscience",
-        "Neural population geometry & dynamics"
+        "Neural population geometry & dynamics",
+        "Language/auditory neuroscience"
       ],
       "assigned_topics": [
         "Naturalistic encoding/decoding",
         "Methods, theory & everything else",
-        "Language/auditory neuroscience",
-        "Neural population geometry & dynamics"
+        "Neural population geometry & dynamics",
+        "Language/auditory neuroscience"
       ]
     },
     {
@@ -1470,9 +1473,12 @@
       "source_url": "https://2017.ccneuro.org/abstracts/abstract_3000272.pdf",
       "submission_type": "poster",
       "primary_theme": "Decision-making and metacognition",
-      "secondary_topics": [],
+      "secondary_topics": [
+        "Neural population geometry & dynamics"
+      ],
       "assigned_topics": [
-        "Decision-making and metacognition"
+        "Decision-making and metacognition",
+        "Neural population geometry & dynamics"
       ]
     },
     {
@@ -1565,13 +1571,13 @@
       "submission_type": "poster",
       "primary_theme": "Decision-making and metacognition",
       "secondary_topics": [
-        "Clinical / computational psychiatry",
-        "Neural population geometry & dynamics"
+        "Neural population geometry & dynamics",
+        "Clinical / computational psychiatry"
       ],
       "assigned_topics": [
         "Decision-making and metacognition",
-        "Clinical / computational psychiatry",
-        "Neural population geometry & dynamics"
+        "Neural population geometry & dynamics",
+        "Clinical / computational psychiatry"
       ]
     },
     {
@@ -1968,15 +1974,13 @@
       "poster_number": "",
       "source_url": "https://2017.ccneuro.org/abstracts/abstract_3000163.pdf",
       "submission_type": "poster",
-      "primary_theme": "Naturalistic encoding/decoding",
+      "primary_theme": "Neural population geometry & dynamics",
       "secondary_topics": [
-        "Neural population geometry & dynamics",
-        "Methods, theory & everything else"
+        "Naturalistic encoding/decoding"
       ],
       "assigned_topics": [
-        "Naturalistic encoding/decoding",
         "Neural population geometry & dynamics",
-        "Methods, theory & everything else"
+        "Naturalistic encoding/decoding"
       ]
     },
     {
@@ -2962,15 +2966,15 @@
       "secondary_topics": [
         "RL, motor control & planning",
         "Methods, theory & everything else",
-        "Decision-making and metacognition",
-        "Neural population geometry & dynamics"
+        "Neural population geometry & dynamics",
+        "Decision-making and metacognition"
       ],
       "assigned_topics": [
         "Memory",
         "RL, motor control & planning",
         "Methods, theory & everything else",
-        "Decision-making and metacognition",
-        "Neural population geometry & dynamics"
+        "Neural population geometry & dynamics",
+        "Decision-making and metacognition"
       ]
     },
     {
@@ -3771,14 +3775,14 @@
       "primary_theme": "Decision-making and metacognition",
       "secondary_topics": [
         "Methods, theory & everything else",
-        "Attention & cognitive control / executive function",
-        "Neural population geometry & dynamics"
+        "Neural population geometry & dynamics",
+        "Attention & cognitive control / executive function"
       ],
       "assigned_topics": [
         "Decision-making and metacognition",
         "Methods, theory & everything else",
-        "Attention & cognitive control / executive function",
-        "Neural population geometry & dynamics"
+        "Neural population geometry & dynamics",
+        "Attention & cognitive control / executive function"
       ]
     },
     {
@@ -5770,10 +5774,10 @@
       "poster_number": "",
       "source_url": "https://2017.ccneuro.org/abstracts/abstract_3000313.pdf",
       "submission_type": "poster",
-      "primary_theme": "Methods, theory & everything else",
+      "primary_theme": "LLMs, reasoning, interpretability",
       "secondary_topics": [],
       "assigned_topics": [
-        "Methods, theory & everything else"
+        "LLMs, reasoning, interpretability"
       ]
     },
     {
@@ -12072,9 +12076,12 @@
       "source_url": "https://2018.ccneuro.org/Papers/ViewPapers7742.html?PaperNum=1300",
       "submission_type": "poster",
       "primary_theme": "Decision-making and metacognition",
-      "secondary_topics": [],
+      "secondary_topics": [
+        "Neural population geometry & dynamics"
+      ],
       "assigned_topics": [
-        "Decision-making and metacognition"
+        "Decision-making and metacognition",
+        "Neural population geometry & dynamics"
       ]
     },
     {
@@ -14546,10 +14553,10 @@
       "poster_number": "",
       "source_url": "https://2018.ccneuro.org/Papers/ViewPapersd8f8.html?PaperNum=1141",
       "submission_type": "poster",
-      "primary_theme": "Methods, theory & everything else",
+      "primary_theme": "RL, motor control & planning",
       "secondary_topics": [],
       "assigned_topics": [
-        "Methods, theory & everything else"
+        "RL, motor control & planning"
       ]
     },
     {
@@ -18389,10 +18396,10 @@
       "poster_number": "",
       "source_url": "https://2018.ccneuro.org/Papers/ViewPapersb338.html?PaperNum=1071",
       "submission_type": "poster",
-      "primary_theme": "Methods, theory & everything else",
+      "primary_theme": "Naturalistic encoding/decoding",
       "secondary_topics": [],
       "assigned_topics": [
-        "Methods, theory & everything else"
+        "Naturalistic encoding/decoding"
       ]
     },
     {
@@ -22629,12 +22636,9 @@
       "poster_number": "",
       "source_url": "https://2019.ccneuro.org/Papers/ViewPapers6e6c.html?PaperNum=1326",
       "submission_type": "poster",
-      "primary_theme": "Neural population geometry & dynamics",
-      "secondary_topics": [
-        "Vision"
-      ],
+      "primary_theme": "Vision",
+      "secondary_topics": [],
       "assigned_topics": [
-        "Neural population geometry & dynamics",
         "Vision"
       ]
     },
@@ -30804,10 +30808,10 @@
       "poster_number": "",
       "source_url": "https://2019.ccneuro.org/Papers/ViewPapers4723.html?PaperNum=1261",
       "submission_type": "poster",
-      "primary_theme": "Methods, theory & everything else",
+      "primary_theme": "Neural population geometry & dynamics",
       "secondary_topics": [],
       "assigned_topics": [
-        "Methods, theory & everything else"
+        "Neural population geometry & dynamics"
       ]
     },
     {
@@ -31704,9 +31708,12 @@
       "source_url": "https://2019.ccneuro.org/Papers/ViewPapersaae7.html?PaperNum=1366",
       "submission_type": "poster",
       "primary_theme": "Naturalistic encoding/decoding",
-      "secondary_topics": [],
+      "secondary_topics": [
+        "Neural population geometry & dynamics"
+      ],
       "assigned_topics": [
-        "Naturalistic encoding/decoding"
+        "Naturalistic encoding/decoding",
+        "Neural population geometry & dynamics"
       ]
     },
     {
@@ -41124,15 +41131,15 @@
       "submission_type": "poster",
       "primary_theme": "RL, motor control & planning",
       "secondary_topics": [
-        "Naturalistic encoding/decoding",
         "Neural population geometry & dynamics",
+        "Naturalistic encoding/decoding",
         "Methods, theory & everything else",
         "Decision-making and metacognition"
       ],
       "assigned_topics": [
         "RL, motor control & planning",
-        "Naturalistic encoding/decoding",
         "Neural population geometry & dynamics",
+        "Naturalistic encoding/decoding",
         "Methods, theory & everything else",
         "Decision-making and metacognition"
       ]
@@ -41944,7 +41951,7 @@
         "and use this to identify key mutations that induce large functional changes. altogether",
         "our approach enabes us to discover and understand many creative solutions that are hard to come by via conventional point-wise modeling approaches. 513 this work is licensed under the creative commons attribution 3.0 unported license. to view a copy of this license",
         "visit /gid00064/gid00081/gid00081/gid00078/gid00086: single mutation /gid00086/gid00064/gid00085/gid00088/gid00001/gid00064/gid00081/gid00081/gid00078/gid00086: key mutation b environment constrained agent beliefpolicy small program with /f_inite states a environment full agent action observations beliefpolicy value iteration bayesian inference lineage 1 (structrually bayesian) lineage 3 (non-b) lineage 2 (functionally bayesian) lineage 4 (non-b) a fe l: lose stay l: lose go w: win stay w: win go /gid00039/gid00072/gid00070/gid00084/gid00081/gid00068/gid00001/gid00019/gid00027/gid00001/gid00054/gid00077/gid00067/gid00068/gid00081/gid00082/gid00083/gid00064/gid00077/gid00067/gid00072/gid00077/gid00070/gid00001/gid00079/gid00081/gid00078/gid00070/gid00081/gid00064/gid00076/gid00001/gid00082/gid00079/gid00064/gid00066/gid00068/gid00015/gid00001/gid00064/gid00010/gid00001/gid00056/gid00068/gid00001/gid00068/gid00077/gid00084/gid00076/gid00068/gid00081/gid00064/gid00083/gid00068/gid00001/gid00019/gid00014/gid00082/gid00083/gid00064/gid00083/gid00068/gid00001/gid00079/gid00081/gid00078/gid00070/gid00081/gid00064/gid00076/gid00082/gid00015/gid00001/gid00065/gid00010/gid00001/gid00052/gid00083/gid00064/gid00083/gid00072/gid00082/gid00083/gid00072/gid00066/gid00082/gid00001/gid00078/gid00069/gid00001/gid00079/gid00081/gid00078/gid00070/gid00081/gid00064/gid00076/gid00001/gid00082/gid00079/gid00064/gid00066/gid00068/gid00001/gid00084/gid00079/gid00001/gid00083/gid00078/gid00001/gid00022/gid00001/gid00082/gid00083/gid00064/gid00083/gid00068/gid00082/gid00015/gid00001/gid00066/gid00010/gid00001/gid00034/gid00001/gid00083/gid00081/gid00068/gid00068/gid00001 /gid00068/gid00076/gid00065/gid00068/gid00067/gid00067/gid00072/gid00077/gid00070/gid00001/gid00081/gid00068/gid00085/gid00068/gid00064/gid00075/gid00082/gid00001/gid00064/gid00001/gid00071/gid00072/gid00070/gid00071/gid00075/gid00088/gid00001/gid00082/gid00083/gid00081/gid00084/gid00066/gid00083/gid00084/gid00081/gid00068/gid00067/gid00001/gid00079/gid00081/gid00078/gid00070/gid00081/gid00064/gid00076/gid00001/gid00082/gid00079/gid00064/gid00066/gid00068/gid00015/gid00001/gid00067/gid00010/gid00001/gid00038/gid00192/gid00066/gid00072/gid00068/gid00077/gid00083/gid00001/gid00082/gid00068/gid00064/gid00081/gid00066/gid00071/gid00001/gid00072/gid00077/gid00001/gid00083/gid00071/gid00068/gid00001/gid00082/gid00083/gid00081/gid00084/gid00066/gid00083/gid00084/gid00081/gid00068/gid00067/gid00001/gid00079/gid00081/gid00078/gid00070/gid00081/gid00064/gid00076/gid00001/gid00082/gid00079/gid00064/gid00066/gid00068/gid00001/gid00085/gid00072/gid00064/gid00001/gid00064/gid00077/gid00001/gid00068/gid00085/gid00078/gid00075/gid00084/gid00083/gid00072/gid00078/gid00077/gid00064/gid00081/gid00088/gid00001/gid00064/gid00075/gid00070/gid00078/gid00014 /gid00081/gid00072/gid00083/gid00071/gid00076/gid00015/gid00001/gid00068/gid00013/gid00069 /gid00010/gid00001/gid00038/gid00087/gid00064/gid00076/gid00079/gid00075/gid00068/gid00001/gid00075/gid00072/gid00077/gid00068/gid00064/gid00070/gid00068/gid00082/gid00001/gid00082/gid00071/gid00078/gid00086/gid00001/gid00083/gid00071/gid00064/gid00083/gid00001/gid00069/gid00068/gid00064/gid00083/gid00084/gid00081/gid00068/gid00082/gid00001/gid00078/gid00069/gid00001/gid00077/gid00078/gid00085/gid00068/gid00075/gid00001/gid00082/gid00083/gid00081/gid00064/gid00083/gid00068/gid00070/gid00072/gid00068/gid00082/gid00013/gid00001/gid00067/gid00072/gid00082/gid00083/gid00072/gid00077/gid00066/gid00083/gid00001/gid00069/gid00081/gid00078/gid00076/gid00001/gid00035/gid00064/gid00088/gid00068/gid00082/gid00072/gid00064/gid00077/gid00013/gid00001/gid00078/gid00081/gid00072/gid00070/gid00072/gid00077/gid00064/gid00083/gid00068/gid00001/gid00069/gid00081/gid00078/gid00076/gid00001/gid00064/gid00001/gid00071/gid00064/gid00077/gid00067/gid00069/gid00084/gid00075/gid00001/gid00078/gid00069/gid00001/gid00074/gid00068/gid00088/gid00001/gid00076/gid00084/gid00083/gid00064/gid00083/gid00072/gid00078/gid00077/gid00082/gid00015 c goal: maximize two actions:",
-        "outcome outcome 0 persistence of strategy features (action-outcome loops) across lineages strategy feature mutations lineage 1 lineage 3 lineage 2 lineage 4 0 5 129 5108 5108: llw lllw ll lw w l 5739: www wwwl ww llw lllw wll ll lw w l 9172: llw ll llw lw w 8151: llww lw lll llw lw w simple statistics of program space small program: action action winning outcome ( ) losing outcome ( ) either outcome p2-3p2-4 b reward rate (% optimiality) program id (bayesian) .316 (100%) (top 2-state) .278 (88%).264 (random policy) .25 .229.223.176 9 51089172 7 8151 5739 5 133 131 129p2-0(0) (1) p2-4 01 5 7 9 131 133129 7 9 1335 131 129 p2-4 c /gid00083/gid00081/gid00068/gid00068/gid00001/gid00068/gid00076/gid00065/gid00068/gid00067/gid00067/gid00072/gid00077/gid00070/gid00027 /gid00077/gid00078/gid00067/gid00068/gid00027/gid00001program /gid00068/gid00067/gid00070/gid00068/gid00027/gid00001single mutation 0 5 129 5108 131 5135 5140 5154 5183 5380 5739 7 9 24 277 133 136 229 446 9172 8151 #: program id /gid00039/gid00072/gid00070/gid00084/gid00081/gid00068/gid00001/gid00018/gid00027/gid00001/gid00052/gid00068/gid00083/gid00084/gid00079/gid00015/gid00001/gid00064/gid00010/gid00001/gid00053/gid00078/gid00001/gid00078/gid00079/gid00083/gid00072/gid00076/gid00072/gid00089/gid00068/gid00001/gid00064/gid00077/gid00001/gid00084/gid00077/gid00066/gid00078/gid00077/gid00082/gid00083/gid00081/gid00064/gid00072/gid00077/gid00068/gid00067/gid00001/gid00064/gid00070/gid00068/gid00077/gid00083/gid00013/gid00001/gid00078/gid00077/gid00068/gid00001/gid00066/gid00064/gid00077/gid00001/gid00082/gid00068/gid00079/gid00068/gid00081/gid00064/gid00083/gid00068/gid00075/gid00088/gid00001/gid00018/gid00010/gid00001/gid00067/gid00068/gid00081/gid00072/gid00085/gid00068/gid00001/gid00064/gid00001/gid00035/gid00064/gid00088/gid00068/gid00082/gid00072/gid00064/gid00077/gid00001/gid00065/gid00068/gid00075/gid00072/gid00068/gid00069/gid00001/gid00084/gid00079/gid00067/gid00064/gid00083/gid00068/gid00001/gid00064/gid00077/gid00067/gid00001/gid00019/gid00010/gid00001/gid00078/gid00079/gid00083/gid00072/gid00076/gid00072/gid00089/gid00068/gid00001/gid00064/gid00001/gid00079/gid00078/gid00075/gid00072/gid00066/gid00088/gid00001 /gid00085/gid00072/gid00064/gid00001/gid00085/gid00064/gid00075/gid00084/gid00068/gid00001/gid00072/gid00083/gid00068/gid00081/gid00064/gid00083/gid00072/gid00078/gid00077/gid00015/gid00001 /gid00065/gid00010/gid00001/gid00056/gid00072/gid00083/gid00071/gid00001/gid00075/gid00072/gid00076/gid00072/gid00083/gid00068/gid00067/gid00001/gid00081/gid00068/gid00082/gid00078/gid00084/gid00081/gid00066/gid00068/gid00082/gid00013/gid00001/gid00078/gid00077/gid00068/gid00001/gid00076/gid00084/gid00082/gid00083/gid00001/gid00073/gid00078/gid00072/gid00077/gid00083/gid00075/gid00088/gid00001/gid00078/gid00079/gid00083/gid00072/gid00076/gid00072/gid00089/gid00068/gid00001/gid00083/gid00071/gid00068/gid00001/gid00065/gid00068/gid00075/gid00072/gid00068/gid00069/gid00001/gid00084/gid00079/gid00067/gid00064/gid00083/gid00068/gid00001/gid00064/gid00077/gid00067/gid00001/gid00079/gid00078/gid00075/gid00072/gid00066/gid00088/gid00015/gid00001/gid00066/gid00010/gid00001/gid00056/gid00068/gid00001/gid00066/gid00078/gid00077/gid00082/gid00072/gid00067/gid00068/gid00081/gid00001/gid00064/gid00001/gid00077/gid00078/gid00077/gid00082/gid00083/gid00064/gid00083/gid00072/gid00078/gid00077/gid00064/gid00081/gid00088/gid00001 /gid00083/gid00064/gid00082/gid00074/gid00001/gid00083/gid00071/gid00064/gid00083/gid00001/gid00067/gid00068/gid00076/gid00064/gid00077/gid00067/gid00082/gid00001/gid00064/gid00077/gid00001/gid00064/gid00070/gid00068/gid00077/gid00083/gid00001/gid00083/gid00078/gid00001/gid00066/gid00078/gid00077/gid00083/gid00072/gid00077/gid00084/gid00064/gid00075/gid00075/gid00088/gid00001/gid00072/gid00077/gid00069/gid00068/gid00081/gid00001/gid00064/gid00001/gid00071/gid00072/gid00067/gid00067/gid00068/gid00077/gid00001/gid00086/gid00078/gid00081/gid00075/gid00067/gid00001/gid00082/gid00083/gid00064/gid00083/gid00068/gid00001/gid00064/gid00077/gid00067/gid00001/gid00082/gid00068/gid00075/gid00068/gid00066/gid00083/gid00001/gid00064/gid00077/gid00001/gid00064/gid00079/gid00079/gid00081/gid00078/gid00079/gid00081/gid00072/gid00064/gid00083/gid00068/gid00001/gid00064/gid00066/gid00083/gid00072/gid00078/gid00077/gid00001/gid00083/gid00078/gid00001/gid00076/gid00064/gid00087/gid00072/gid00076/gid00072/gid00089/gid00068/gid00001/gid00081/gid00068/gid00086/gid00064/gid00081/gid00067/gid00015 all possible distinct 2-state programs d eﬃcient search functionally bayesian: 3904 (87%) programs full program space: # states = 2~5 good program network (gpn) 4492 (1.7%) programs 268",
+        "outcome outcome 0 persistence of strategy features (action-outcome loops) across lineages strategy feature mutations lineage 1 lineage 3 lineage 2 lineage 4 0 5 129 5108 5108: llw lllw ll lw w l 5739: www wwwl ww llw lllw wll ll lw w l 9172: llw ll llw lw w 8151: llww lw lll llw lw w simple statistics of program space small program: action action winning outcome ( ) losing outcome ( ) either outcome p2-4 b reward rate (% optimiality) program id (bayesian) .316 (100%) (top 2-state) .278 (88%).264 (random policy) .25 .229.223.176 9 51089172 7 8151 5739 5 133 131 129p2-0(0) (1) 01 5 7 9 131 133129 7 9 1335 131 129 c /gid00083/gid00081/gid00068/gid00068/gid00001/gid00068/gid00076/gid00065/gid00068/gid00067/gid00067/gid00072/gid00077/gid00070/gid00027 /gid00077/gid00078/gid00067/gid00068/gid00027/gid00001program /gid00068/gid00067/gid00070/gid00068/gid00027/gid00001single mutation 0 5 129 5108 131 5135 5140 5154 5183 5380 5739 7 9 24 277 133 136 229 446 9172 8151 #: program id /gid00039/gid00072/gid00070/gid00084/gid00081/gid00068/gid00001/gid00018/gid00027/gid00001/gid00052/gid00068/gid00083/gid00084/gid00079/gid00015/gid00001/gid00064/gid00010/gid00001/gid00053/gid00078/gid00001/gid00078/gid00079/gid00083/gid00072/gid00076/gid00072/gid00089/gid00068/gid00001/gid00064/gid00077/gid00001/gid00084/gid00077/gid00066/gid00078/gid00077/gid00082/gid00083/gid00081/gid00064/gid00072/gid00077/gid00068/gid00067/gid00001/gid00064/gid00070/gid00068/gid00077/gid00083/gid00013/gid00001/gid00078/gid00077/gid00068/gid00001/gid00066/gid00064/gid00077/gid00001/gid00082/gid00068/gid00079/gid00068/gid00081/gid00064/gid00083/gid00068/gid00075/gid00088/gid00001/gid00018/gid00010/gid00001/gid00067/gid00068/gid00081/gid00072/gid00085/gid00068/gid00001/gid00064/gid00001/gid00035/gid00064/gid00088/gid00068/gid00082/gid00072/gid00064/gid00077/gid00001/gid00065/gid00068/gid00075/gid00072/gid00068/gid00069/gid00001/gid00084/gid00079/gid00067/gid00064/gid00083/gid00068/gid00001/gid00064/gid00077/gid00067/gid00001/gid00019/gid00010/gid00001/gid00078/gid00079/gid00083/gid00072/gid00076/gid00072/gid00089/gid00068/gid00001/gid00064/gid00001/gid00079/gid00078/gid00075/gid00072/gid00066/gid00088/gid00001 /gid00085/gid00072/gid00064/gid00001/gid00085/gid00064/gid00075/gid00084/gid00068/gid00001/gid00072/gid00083/gid00068/gid00081/gid00064/gid00083/gid00072/gid00078/gid00077/gid00015/gid00001 /gid00065/gid00010/gid00001/gid00056/gid00072/gid00083/gid00071/gid00001/gid00075/gid00072/gid00076/gid00072/gid00083/gid00068/gid00067/gid00001/gid00081/gid00068/gid00082/gid00078/gid00084/gid00081/gid00066/gid00068/gid00082/gid00013/gid00001/gid00078/gid00077/gid00068/gid00001/gid00076/gid00084/gid00082/gid00083/gid00001/gid00073/gid00078/gid00072/gid00077/gid00083/gid00075/gid00088/gid00001/gid00078/gid00079/gid00083/gid00072/gid00076/gid00072/gid00089/gid00068/gid00001/gid00083/gid00071/gid00068/gid00001/gid00065/gid00068/gid00075/gid00072/gid00068/gid00069/gid00001/gid00084/gid00079/gid00067/gid00064/gid00083/gid00068/gid00001/gid00064/gid00077/gid00067/gid00001/gid00079/gid00078/gid00075/gid00072/gid00066/gid00088/gid00015/gid00001/gid00066/gid00010/gid00001/gid00056/gid00068/gid00001/gid00066/gid00078/gid00077/gid00082/gid00072/gid00067/gid00068/gid00081/gid00001/gid00064/gid00001/gid00077/gid00078/gid00077/gid00082/gid00083/gid00064/gid00083/gid00072/gid00078/gid00077/gid00064/gid00081/gid00088/gid00001 /gid00083/gid00064/gid00082/gid00074/gid00001/gid00083/gid00071/gid00064/gid00083/gid00001/gid00067/gid00068/gid00076/gid00064/gid00077/gid00067/gid00082/gid00001/gid00064/gid00077/gid00001/gid00064/gid00070/gid00068/gid00077/gid00083/gid00001/gid00083/gid00078/gid00001/gid00066/gid00078/gid00077/gid00083/gid00072/gid00077/gid00084/gid00064/gid00075/gid00075/gid00088/gid00001/gid00072/gid00077/gid00069/gid00068/gid00081/gid00001/gid00064/gid00001/gid00071/gid00072/gid00067/gid00067/gid00068/gid00077/gid00001/gid00086/gid00078/gid00081/gid00075/gid00067/gid00001/gid00082/gid00083/gid00064/gid00083/gid00068/gid00001/gid00064/gid00077/gid00067/gid00001/gid00082/gid00068/gid00075/gid00068/gid00066/gid00083/gid00001/gid00064/gid00077/gid00001/gid00064/gid00079/gid00079/gid00081/gid00078/gid00079/gid00081/gid00072/gid00064/gid00083/gid00068/gid00001/gid00064/gid00066/gid00083/gid00072/gid00078/gid00077/gid00001/gid00083/gid00078/gid00001/gid00076/gid00064/gid00087/gid00072/gid00076/gid00072/gid00089/gid00068/gid00001/gid00081/gid00068/gid00086/gid00064/gid00081/gid00067/gid00015 all possible distinct 2-state programs d eﬃcient search functionally bayesian: 3904 (87%) programs full program space: # states = 2~5 good program network (gpn) 4492 (1.7%) programs 268",
         "536 programs structurally bayesian: 65 (1.4%) programs non-bayesian (non-b): 588 (13%) programs space boundary space explored gpn discovered 11% 50% 5% 52% 10% 70% 514acknowledgments this work is funded by the howard hughes medical institute. references pearl",
         "j. . heuristics: intelligent search strategies for computer problem solving. addison-wesley longman publishing co",
         "inc. sutton",
@@ -41995,7 +42002,7 @@
         "and use this to identify key mutations that induce large functional changes. altogether",
         "our approach enabes us to discover and understand many creative solutions that are hard to come by via conventional point-wise modeling approaches. 513 this work is licensed under the creative commons attribution 3.0 unported license. to view a copy of this license",
         "visit /gid00064/gid00081/gid00081/gid00078/gid00086: single mutation /gid00086/gid00064/gid00085/gid00088/gid00001/gid00064/gid00081/gid00081/gid00078/gid00086: key mutation b environment constrained agent beliefpolicy small program with /f_inite states a environment full agent action observations beliefpolicy value iteration bayesian inference lineage 1 (structrually bayesian) lineage 3 (non-b) lineage 2 (functionally bayesian) lineage 4 (non-b) a fe l: lose stay l: lose go w: win stay w: win go /gid00039/gid00072/gid00070/gid00084/gid00081/gid00068/gid00001/gid00019/gid00027/gid00001/gid00054/gid00077/gid00067/gid00068/gid00081/gid00082/gid00083/gid00064/gid00077/gid00067/gid00072/gid00077/gid00070/gid00001/gid00079/gid00081/gid00078/gid00070/gid00081/gid00064/gid00076/gid00001/gid00082/gid00079/gid00064/gid00066/gid00068/gid00015/gid00001/gid00064/gid00010/gid00001/gid00056/gid00068/gid00001/gid00068/gid00077/gid00084/gid00076/gid00068/gid00081/gid00064/gid00083/gid00068/gid00001/gid00019/gid00014/gid00082/gid00083/gid00064/gid00083/gid00068/gid00001/gid00079/gid00081/gid00078/gid00070/gid00081/gid00064/gid00076/gid00082/gid00015/gid00001/gid00065/gid00010/gid00001/gid00052/gid00083/gid00064/gid00083/gid00072/gid00082/gid00083/gid00072/gid00066/gid00082/gid00001/gid00078/gid00069/gid00001/gid00079/gid00081/gid00078/gid00070/gid00081/gid00064/gid00076/gid00001/gid00082/gid00079/gid00064/gid00066/gid00068/gid00001/gid00084/gid00079/gid00001/gid00083/gid00078/gid00001/gid00022/gid00001/gid00082/gid00083/gid00064/gid00083/gid00068/gid00082/gid00015/gid00001/gid00066/gid00010/gid00001/gid00034/gid00001/gid00083/gid00081/gid00068/gid00068/gid00001 /gid00068/gid00076/gid00065/gid00068/gid00067/gid00067/gid00072/gid00077/gid00070/gid00001/gid00081/gid00068/gid00085/gid00068/gid00064/gid00075/gid00082/gid00001/gid00064/gid00001/gid00071/gid00072/gid00070/gid00071/gid00075/gid00088/gid00001/gid00082/gid00083/gid00081/gid00084/gid00066/gid00083/gid00084/gid00081/gid00068/gid00067/gid00001/gid00079/gid00081/gid00078/gid00070/gid00081/gid00064/gid00076/gid00001/gid00082/gid00079/gid00064/gid00066/gid00068/gid00015/gid00001/gid00067/gid00010/gid00001/gid00038/gid00192/gid00066/gid00072/gid00068/gid00077/gid00083/gid00001/gid00082/gid00068/gid00064/gid00081/gid00066/gid00071/gid00001/gid00072/gid00077/gid00001/gid00083/gid00071/gid00068/gid00001/gid00082/gid00083/gid00081/gid00084/gid00066/gid00083/gid00084/gid00081/gid00068/gid00067/gid00001/gid00079/gid00081/gid00078/gid00070/gid00081/gid00064/gid00076/gid00001/gid00082/gid00079/gid00064/gid00066/gid00068/gid00001/gid00085/gid00072/gid00064/gid00001/gid00064/gid00077/gid00001/gid00068/gid00085/gid00078/gid00075/gid00084/gid00083/gid00072/gid00078/gid00077/gid00064/gid00081/gid00088/gid00001/gid00064/gid00075/gid00070/gid00078/gid00014 /gid00081/gid00072/gid00083/gid00071/gid00076/gid00015/gid00001/gid00068/gid00013/gid00069 /gid00010/gid00001/gid00038/gid00087/gid00064/gid00076/gid00079/gid00075/gid00068/gid00001/gid00075/gid00072/gid00077/gid00068/gid00064/gid00070/gid00068/gid00082/gid00001/gid00082/gid00071/gid00078/gid00086/gid00001/gid00083/gid00071/gid00064/gid00083/gid00001/gid00069/gid00068/gid00064/gid00083/gid00084/gid00081/gid00068/gid00082/gid00001/gid00078/gid00069/gid00001/gid00077/gid00078/gid00085/gid00068/gid00075/gid00001/gid00082/gid00083/gid00081/gid00064/gid00083/gid00068/gid00070/gid00072/gid00068/gid00082/gid00013/gid00001/gid00067/gid00072/gid00082/gid00083/gid00072/gid00077/gid00066/gid00083/gid00001/gid00069/gid00081/gid00078/gid00076/gid00001/gid00035/gid00064/gid00088/gid00068/gid00082/gid00072/gid00064/gid00077/gid00013/gid00001/gid00078/gid00081/gid00072/gid00070/gid00072/gid00077/gid00064/gid00083/gid00068/gid00001/gid00069/gid00081/gid00078/gid00076/gid00001/gid00064/gid00001/gid00071/gid00064/gid00077/gid00067/gid00069/gid00084/gid00075/gid00001/gid00078/gid00069/gid00001/gid00074/gid00068/gid00088/gid00001/gid00076/gid00084/gid00083/gid00064/gid00083/gid00072/gid00078/gid00077/gid00082/gid00015 c goal: maximize two actions:",
-        "outcome outcome 0 persistence of strategy features (action-outcome loops) across lineages strategy feature mutations lineage 1 lineage 3 lineage 2 lineage 4 0 5 129 5108 5108: llw lllw ll lw w l 5739: www wwwl ww llw lllw wll ll lw w l 9172: llw ll llw lw w 8151: llww lw lll llw lw w simple statistics of program space small program: action action winning outcome ( ) losing outcome ( ) either outcome p2-3p2-4 b reward rate (% optimiality) program id (bayesian) .316 (100%) (top 2-state) .278 (88%).264 (random policy) .25 .229.223.176 9 51089172 7 8151 5739 5 133 131 129p2-0(0) (1) p2-4 01 5 7 9 131 133129 7 9 1335 131 129 p2-4 c /gid00083/gid00081/gid00068/gid00068/gid00001/gid00068/gid00076/gid00065/gid00068/gid00067/gid00067/gid00072/gid00077/gid00070/gid00027 /gid00077/gid00078/gid00067/gid00068/gid00027/gid00001program /gid00068/gid00067/gid00070/gid00068/gid00027/gid00001single mutation 0 5 129 5108 131 5135 5140 5154 5183 5380 5739 7 9 24 277 133 136 229 446 9172 8151 #: program id /gid00039/gid00072/gid00070/gid00084/gid00081/gid00068/gid00001/gid00018/gid00027/gid00001/gid00052/gid00068/gid00083/gid00084/gid00079/gid00015/gid00001/gid00064/gid00010/gid00001/gid00053/gid00078/gid00001/gid00078/gid00079/gid00083/gid00072/gid00076/gid00072/gid00089/gid00068/gid00001/gid00064/gid00077/gid00001/gid00084/gid00077/gid00066/gid00078/gid00077/gid00082/gid00083/gid00081/gid00064/gid00072/gid00077/gid00068/gid00067/gid00001/gid00064/gid00070/gid00068/gid00077/gid00083/gid00013/gid00001/gid00078/gid00077/gid00068/gid00001/gid00066/gid00064/gid00077/gid00001/gid00082/gid00068/gid00079/gid00068/gid00081/gid00064/gid00083/gid00068/gid00075/gid00088/gid00001/gid00018/gid00010/gid00001/gid00067/gid00068/gid00081/gid00072/gid00085/gid00068/gid00001/gid00064/gid00001/gid00035/gid00064/gid00088/gid00068/gid00082/gid00072/gid00064/gid00077/gid00001/gid00065/gid00068/gid00075/gid00072/gid00068/gid00069/gid00001/gid00084/gid00079/gid00067/gid00064/gid00083/gid00068/gid00001/gid00064/gid00077/gid00067/gid00001/gid00019/gid00010/gid00001/gid00078/gid00079/gid00083/gid00072/gid00076/gid00072/gid00089/gid00068/gid00001/gid00064/gid00001/gid00079/gid00078/gid00075/gid00072/gid00066/gid00088/gid00001 /gid00085/gid00072/gid00064/gid00001/gid00085/gid00064/gid00075/gid00084/gid00068/gid00001/gid00072/gid00083/gid00068/gid00081/gid00064/gid00083/gid00072/gid00078/gid00077/gid00015/gid00001 /gid00065/gid00010/gid00001/gid00056/gid00072/gid00083/gid00071/gid00001/gid00075/gid00072/gid00076/gid00072/gid00083/gid00068/gid00067/gid00001/gid00081/gid00068/gid00082/gid00078/gid00084/gid00081/gid00066/gid00068/gid00082/gid00013/gid00001/gid00078/gid00077/gid00068/gid00001/gid00076/gid00084/gid00082/gid00083/gid00001/gid00073/gid00078/gid00072/gid00077/gid00083/gid00075/gid00088/gid00001/gid00078/gid00079/gid00083/gid00072/gid00076/gid00072/gid00089/gid00068/gid00001/gid00083/gid00071/gid00068/gid00001/gid00065/gid00068/gid00075/gid00072/gid00068/gid00069/gid00001/gid00084/gid00079/gid00067/gid00064/gid00083/gid00068/gid00001/gid00064/gid00077/gid00067/gid00001/gid00079/gid00078/gid00075/gid00072/gid00066/gid00088/gid00015/gid00001/gid00066/gid00010/gid00001/gid00056/gid00068/gid00001/gid00066/gid00078/gid00077/gid00082/gid00072/gid00067/gid00068/gid00081/gid00001/gid00064/gid00001/gid00077/gid00078/gid00077/gid00082/gid00083/gid00064/gid00083/gid00072/gid00078/gid00077/gid00064/gid00081/gid00088/gid00001 /gid00083/gid00064/gid00082/gid00074/gid00001/gid00083/gid00071/gid00064/gid00083/gid00001/gid00067/gid00068/gid00076/gid00064/gid00077/gid00067/gid00082/gid00001/gid00064/gid00077/gid00001/gid00064/gid00070/gid00068/gid00077/gid00083/gid00001/gid00083/gid00078/gid00001/gid00066/gid00078/gid00077/gid00083/gid00072/gid00077/gid00084/gid00064/gid00075/gid00075/gid00088/gid00001/gid00072/gid00077/gid00069/gid00068/gid00081/gid00001/gid00064/gid00001/gid00071/gid00072/gid00067/gid00067/gid00068/gid00077/gid00001/gid00086/gid00078/gid00081/gid00075/gid00067/gid00001/gid00082/gid00083/gid00064/gid00083/gid00068/gid00001/gid00064/gid00077/gid00067/gid00001/gid00082/gid00068/gid00075/gid00068/gid00066/gid00083/gid00001/gid00064/gid00077/gid00001/gid00064/gid00079/gid00079/gid00081/gid00078/gid00079/gid00081/gid00072/gid00064/gid00083/gid00068/gid00001/gid00064/gid00066/gid00083/gid00072/gid00078/gid00077/gid00001/gid00083/gid00078/gid00001/gid00076/gid00064/gid00087/gid00072/gid00076/gid00072/gid00089/gid00068/gid00001/gid00081/gid00068/gid00086/gid00064/gid00081/gid00067/gid00015 all possible distinct 2-state programs d eﬃcient search functionally bayesian: 3904 (87%) programs full program space: # states = 2~5 good program network (gpn) 4492 (1.7%) programs 268",
+        "outcome outcome 0 persistence of strategy features (action-outcome loops) across lineages strategy feature mutations lineage 1 lineage 3 lineage 2 lineage 4 0 5 129 5108 5108: llw lllw ll lw w l 5739: www wwwl ww llw lllw wll ll lw w l 9172: llw ll llw lw w 8151: llww lw lll llw lw w simple statistics of program space small program: action action winning outcome ( ) losing outcome ( ) either outcome p2-4 b reward rate (% optimiality) program id (bayesian) .316 (100%) (top 2-state) .278 (88%).264 (random policy) .25 .229.223.176 9 51089172 7 8151 5739 5 133 131 129p2-0(0) (1) 01 5 7 9 131 133129 7 9 1335 131 129 c /gid00083/gid00081/gid00068/gid00068/gid00001/gid00068/gid00076/gid00065/gid00068/gid00067/gid00067/gid00072/gid00077/gid00070/gid00027 /gid00077/gid00078/gid00067/gid00068/gid00027/gid00001program /gid00068/gid00067/gid00070/gid00068/gid00027/gid00001single mutation 0 5 129 5108 131 5135 5140 5154 5183 5380 5739 7 9 24 277 133 136 229 446 9172 8151 #: program id /gid00039/gid00072/gid00070/gid00084/gid00081/gid00068/gid00001/gid00018/gid00027/gid00001/gid00052/gid00068/gid00083/gid00084/gid00079/gid00015/gid00001/gid00064/gid00010/gid00001/gid00053/gid00078/gid00001/gid00078/gid00079/gid00083/gid00072/gid00076/gid00072/gid00089/gid00068/gid00001/gid00064/gid00077/gid00001/gid00084/gid00077/gid00066/gid00078/gid00077/gid00082/gid00083/gid00081/gid00064/gid00072/gid00077/gid00068/gid00067/gid00001/gid00064/gid00070/gid00068/gid00077/gid00083/gid00013/gid00001/gid00078/gid00077/gid00068/gid00001/gid00066/gid00064/gid00077/gid00001/gid00082/gid00068/gid00079/gid00068/gid00081/gid00064/gid00083/gid00068/gid00075/gid00088/gid00001/gid00018/gid00010/gid00001/gid00067/gid00068/gid00081/gid00072/gid00085/gid00068/gid00001/gid00064/gid00001/gid00035/gid00064/gid00088/gid00068/gid00082/gid00072/gid00064/gid00077/gid00001/gid00065/gid00068/gid00075/gid00072/gid00068/gid00069/gid00001/gid00084/gid00079/gid00067/gid00064/gid00083/gid00068/gid00001/gid00064/gid00077/gid00067/gid00001/gid00019/gid00010/gid00001/gid00078/gid00079/gid00083/gid00072/gid00076/gid00072/gid00089/gid00068/gid00001/gid00064/gid00001/gid00079/gid00078/gid00075/gid00072/gid00066/gid00088/gid00001 /gid00085/gid00072/gid00064/gid00001/gid00085/gid00064/gid00075/gid00084/gid00068/gid00001/gid00072/gid00083/gid00068/gid00081/gid00064/gid00083/gid00072/gid00078/gid00077/gid00015/gid00001 /gid00065/gid00010/gid00001/gid00056/gid00072/gid00083/gid00071/gid00001/gid00075/gid00072/gid00076/gid00072/gid00083/gid00068/gid00067/gid00001/gid00081/gid00068/gid00082/gid00078/gid00084/gid00081/gid00066/gid00068/gid00082/gid00013/gid00001/gid00078/gid00077/gid00068/gid00001/gid00076/gid00084/gid00082/gid00083/gid00001/gid00073/gid00078/gid00072/gid00077/gid00083/gid00075/gid00088/gid00001/gid00078/gid00079/gid00083/gid00072/gid00076/gid00072/gid00089/gid00068/gid00001/gid00083/gid00071/gid00068/gid00001/gid00065/gid00068/gid00075/gid00072/gid00068/gid00069/gid00001/gid00084/gid00079/gid00067/gid00064/gid00083/gid00068/gid00001/gid00064/gid00077/gid00067/gid00001/gid00079/gid00078/gid00075/gid00072/gid00066/gid00088/gid00015/gid00001/gid00066/gid00010/gid00001/gid00056/gid00068/gid00001/gid00066/gid00078/gid00077/gid00082/gid00072/gid00067/gid00068/gid00081/gid00001/gid00064/gid00001/gid00077/gid00078/gid00077/gid00082/gid00083/gid00064/gid00083/gid00072/gid00078/gid00077/gid00064/gid00081/gid00088/gid00001 /gid00083/gid00064/gid00082/gid00074/gid00001/gid00083/gid00071/gid00064/gid00083/gid00001/gid00067/gid00068/gid00076/gid00064/gid00077/gid00067/gid00082/gid00001/gid00064/gid00077/gid00001/gid00064/gid00070/gid00068/gid00077/gid00083/gid00001/gid00083/gid00078/gid00001/gid00066/gid00078/gid00077/gid00083/gid00072/gid00077/gid00084/gid00064/gid00075/gid00075/gid00088/gid00001/gid00072/gid00077/gid00069/gid00068/gid00081/gid00001/gid00064/gid00001/gid00071/gid00072/gid00067/gid00067/gid00068/gid00077/gid00001/gid00086/gid00078/gid00081/gid00075/gid00067/gid00001/gid00082/gid00083/gid00064/gid00083/gid00068/gid00001/gid00064/gid00077/gid00067/gid00001/gid00082/gid00068/gid00075/gid00068/gid00066/gid00083/gid00001/gid00064/gid00077/gid00001/gid00064/gid00079/gid00079/gid00081/gid00078/gid00079/gid00081/gid00072/gid00064/gid00083/gid00068/gid00001/gid00064/gid00066/gid00083/gid00072/gid00078/gid00077/gid00001/gid00083/gid00078/gid00001/gid00076/gid00064/gid00087/gid00072/gid00076/gid00072/gid00089/gid00068/gid00001/gid00081/gid00068/gid00086/gid00064/gid00081/gid00067/gid00015 all possible distinct 2-state programs d eﬃcient search functionally bayesian: 3904 (87%) programs full program space: # states = 2~5 good program network (gpn) 4492 (1.7%) programs 268",
         "536 programs structurally bayesian: 65 (1.4%) programs non-bayesian (non-b): 588 (13%) programs space boundary space explored gpn discovered 11% 50% 5% 52% 10% 70% 514acknowledgments this work is funded by the howard hughes medical institute. references pearl",
         "j. . heuristics: intelligent search strategies for computer problem solving. addison-wesley longman publishing co",
         "inc. sutton",
@@ -42241,9 +42248,12 @@
       "source_url": "https://2022.ccneuro.org/view_paper7245.html?PaperNum=1211",
       "submission_type": "poster",
       "primary_theme": "Neural population geometry & dynamics",
-      "secondary_topics": [],
+      "secondary_topics": [
+        "Decision-making and metacognition"
+      ],
       "assigned_topics": [
-        "Neural population geometry & dynamics"
+        "Neural population geometry & dynamics",
+        "Decision-making and metacognition"
       ]
     },
     {
@@ -46638,15 +46648,15 @@
       "poster_number": "",
       "source_url": "https://2022.ccneuro.org/view_paperce16.html?PaperNum=1277&talk",
       "submission_type": "poster",
-      "primary_theme": "Decision-making and metacognition",
+      "primary_theme": "Neural population geometry & dynamics",
       "secondary_topics": [
-        "Neural population geometry & dynamics",
+        "Decision-making and metacognition",
         "RL, motor control & planning",
         "Naturalistic encoding/decoding"
       ],
       "assigned_topics": [
-        "Decision-making and metacognition",
         "Neural population geometry & dynamics",
+        "Decision-making and metacognition",
         "RL, motor control & planning",
         "Naturalistic encoding/decoding"
       ]
@@ -48118,13 +48128,13 @@
       "poster_number": "",
       "source_url": "https://2022.ccneuro.org/view_paper3147.html?PaperNum=1058",
       "submission_type": "poster",
-      "primary_theme": "Methods, theory & everything else",
+      "primary_theme": "Neural population geometry & dynamics",
       "secondary_topics": [
-        "Neural population geometry & dynamics"
+        "Methods, theory & everything else"
       ],
       "assigned_topics": [
-        "Methods, theory & everything else",
-        "Neural population geometry & dynamics"
+        "Neural population geometry & dynamics",
+        "Methods, theory & everything else"
       ]
     },
     {
@@ -50761,16 +50771,12 @@
       "primary_theme": "Neural population geometry & dynamics",
       "secondary_topics": [
         "Vision",
-        "RL, motor control & planning",
-        "Decision-making and metacognition",
-        "Methods, theory & everything else"
+        "RL, motor control & planning"
       ],
       "assigned_topics": [
         "Neural population geometry & dynamics",
         "Vision",
-        "RL, motor control & planning",
-        "Decision-making and metacognition",
-        "Methods, theory & everything else"
+        "RL, motor control & planning"
       ]
     },
     {
@@ -51101,9 +51107,12 @@
       "source_url": "https://2022.ccneuro.org/view_paper1470.html?PaperNum=1307",
       "submission_type": "poster",
       "primary_theme": "Decision-making and metacognition",
-      "secondary_topics": [],
+      "secondary_topics": [
+        "Naturalistic encoding/decoding"
+      ],
       "assigned_topics": [
-        "Decision-making and metacognition"
+        "Decision-making and metacognition",
+        "Naturalistic encoding/decoding"
       ]
     },
     {
@@ -51349,13 +51358,13 @@
       "submission_type": "poster",
       "primary_theme": "Language/auditory neuroscience",
       "secondary_topics": [
-        "Naturalistic encoding/decoding",
-        "Neural population geometry & dynamics"
+        "Neural population geometry & dynamics",
+        "Naturalistic encoding/decoding"
       ],
       "assigned_topics": [
         "Language/auditory neuroscience",
-        "Naturalistic encoding/decoding",
-        "Neural population geometry & dynamics"
+        "Neural population geometry & dynamics",
+        "Naturalistic encoding/decoding"
       ]
     },
     {
@@ -52695,14 +52704,14 @@
       "primary_theme": "Decision-making and metacognition",
       "secondary_topics": [
         "Naturalistic encoding/decoding",
-        "Methods, theory & everything else",
-        "RL, motor control & planning"
+        "RL, motor control & planning",
+        "Methods, theory & everything else"
       ],
       "assigned_topics": [
         "Decision-making and metacognition",
         "Naturalistic encoding/decoding",
-        "Methods, theory & everything else",
-        "RL, motor control & planning"
+        "RL, motor control & planning",
+        "Methods, theory & everything else"
       ]
     },
     {
@@ -53846,13 +53855,13 @@
       "poster_number": "",
       "source_url": "https://2022.ccneuro.org/view_papera52f.html?PaperNum=1144",
       "submission_type": "poster",
-      "primary_theme": "Naturalistic encoding/decoding",
+      "primary_theme": "Neural population geometry & dynamics",
       "secondary_topics": [
-        "Neural population geometry & dynamics"
+        "Naturalistic encoding/decoding"
       ],
       "assigned_topics": [
-        "Naturalistic encoding/decoding",
-        "Neural population geometry & dynamics"
+        "Neural population geometry & dynamics",
+        "Naturalistic encoding/decoding"
       ]
     },
     {
@@ -54229,13 +54238,13 @@
       "poster_number": "",
       "source_url": "https://2022.ccneuro.org/view_paper986e.html?PaperNum=1114",
       "submission_type": "poster",
-      "primary_theme": "Naturalistic encoding/decoding",
+      "primary_theme": "Neural population geometry & dynamics",
       "secondary_topics": [
-        "Neural population geometry & dynamics"
+        "Naturalistic encoding/decoding"
       ],
       "assigned_topics": [
-        "Naturalistic encoding/decoding",
-        "Neural population geometry & dynamics"
+        "Neural population geometry & dynamics",
+        "Naturalistic encoding/decoding"
       ]
     },
     {
@@ -55663,15 +55672,15 @@
       "primary_theme": "Decision-making and metacognition",
       "secondary_topics": [
         "Vision",
-        "Naturalistic encoding/decoding",
         "Neural population geometry & dynamics",
+        "Naturalistic encoding/decoding",
         "Methods, theory & everything else"
       ],
       "assigned_topics": [
         "Decision-making and metacognition",
         "Vision",
-        "Naturalistic encoding/decoding",
         "Neural population geometry & dynamics",
+        "Naturalistic encoding/decoding",
         "Methods, theory & everything else"
       ]
     },
@@ -57463,15 +57472,15 @@
       "primary_theme": "Methods, theory & everything else",
       "secondary_topics": [
         "Attention & cognitive control / executive function",
-        "Naturalistic encoding/decoding",
         "Neural population geometry & dynamics",
+        "Naturalistic encoding/decoding",
         "Decision-making and metacognition"
       ],
       "assigned_topics": [
         "Methods, theory & everything else",
         "Attention & cognitive control / executive function",
-        "Naturalistic encoding/decoding",
         "Neural population geometry & dynamics",
+        "Naturalistic encoding/decoding",
         "Decision-making and metacognition"
       ]
     },
@@ -57846,9 +57855,12 @@
       "source_url": "https://2023.ccneuro.org/view_paper2bfc.html?PaperNum=1178",
       "submission_type": "poster",
       "primary_theme": "Naturalistic encoding/decoding",
-      "secondary_topics": [],
+      "secondary_topics": [
+        "Neural population geometry & dynamics"
+      ],
       "assigned_topics": [
-        "Naturalistic encoding/decoding"
+        "Naturalistic encoding/decoding",
+        "Neural population geometry & dynamics"
       ]
     },
     {
@@ -58953,9 +58965,12 @@
       "source_url": "https://2023.ccneuro.org/view_paperde47.html?PaperNum=1088",
       "submission_type": "poster",
       "primary_theme": "Methods, theory & everything else",
-      "secondary_topics": [],
+      "secondary_topics": [
+        "Neural population geometry & dynamics"
+      ],
       "assigned_topics": [
-        "Methods, theory & everything else"
+        "Methods, theory & everything else",
+        "Neural population geometry & dynamics"
       ]
     },
     {
@@ -63629,15 +63644,15 @@
       "poster_number": "",
       "source_url": "https://2023.ccneuro.org/view_paper8358.html?PaperNum=1188",
       "submission_type": "poster",
-      "primary_theme": "Naturalistic encoding/decoding",
+      "primary_theme": "Neural population geometry & dynamics",
       "secondary_topics": [
-        "Neural population geometry & dynamics",
+        "Naturalistic encoding/decoding",
         "Methods, theory & everything else",
         "Decision-making and metacognition"
       ],
       "assigned_topics": [
-        "Naturalistic encoding/decoding",
         "Neural population geometry & dynamics",
+        "Naturalistic encoding/decoding",
         "Methods, theory & everything else",
         "Decision-making and metacognition"
       ]
@@ -66983,16 +66998,16 @@
       "primary_theme": "Decision-making and metacognition",
       "secondary_topics": [
         "Memory",
+        "Neural population geometry & dynamics",
         "Methods, theory & everything else",
-        "Naturalistic encoding/decoding",
-        "Neural population geometry & dynamics"
+        "Naturalistic encoding/decoding"
       ],
       "assigned_topics": [
         "Decision-making and metacognition",
         "Memory",
+        "Neural population geometry & dynamics",
         "Methods, theory & everything else",
-        "Naturalistic encoding/decoding",
-        "Neural population geometry & dynamics"
+        "Naturalistic encoding/decoding"
       ]
     },
     {
@@ -68372,14 +68387,14 @@
       "primary_theme": "Decision-making and metacognition",
       "secondary_topics": [
         "Methods, theory & everything else",
-        "Naturalistic encoding/decoding",
-        "Neural population geometry & dynamics"
+        "Neural population geometry & dynamics",
+        "Naturalistic encoding/decoding"
       ],
       "assigned_topics": [
         "Decision-making and metacognition",
         "Methods, theory & everything else",
-        "Naturalistic encoding/decoding",
-        "Neural population geometry & dynamics"
+        "Neural population geometry & dynamics",
+        "Naturalistic encoding/decoding"
       ]
     },
     {
@@ -70141,16 +70156,16 @@
       "poster_number": "",
       "source_url": "https://2023.ccneuro.org/view_paper4efa.html?PaperNum=1373",
       "submission_type": "poster",
-      "primary_theme": "Decision-making and metacognition",
+      "primary_theme": "Neural population geometry & dynamics",
       "secondary_topics": [
-        "Neural population geometry & dynamics",
+        "Decision-making and metacognition",
         "Methods, theory & everything else",
         "LLMs, reasoning, interpretability",
         "Naturalistic encoding/decoding"
       ],
       "assigned_topics": [
-        "Decision-making and metacognition",
         "Neural population geometry & dynamics",
+        "Decision-making and metacognition",
         "Methods, theory & everything else",
         "LLMs, reasoning, interpretability",
         "Naturalistic encoding/decoding"
@@ -71576,9 +71591,12 @@
       "source_url": "https://2023.ccneuro.org/view_paper230d.html?PaperNum=1264",
       "submission_type": "poster",
       "primary_theme": "Naturalistic encoding/decoding",
-      "secondary_topics": [],
+      "secondary_topics": [
+        "Neural population geometry & dynamics"
+      ],
       "assigned_topics": [
-        "Naturalistic encoding/decoding"
+        "Naturalistic encoding/decoding",
+        "Neural population geometry & dynamics"
       ]
     },
     {
@@ -74325,14 +74343,14 @@
       "submission_type": "poster",
       "primary_theme": "Methods, theory & everything else",
       "secondary_topics": [
-        "Naturalistic encoding/decoding",
         "Neural population geometry & dynamics",
+        "Naturalistic encoding/decoding",
         "RL, motor control & planning"
       ],
       "assigned_topics": [
         "Methods, theory & everything else",
-        "Naturalistic encoding/decoding",
         "Neural population geometry & dynamics",
+        "Naturalistic encoding/decoding",
         "RL, motor control & planning"
       ]
     },
@@ -75394,13 +75412,13 @@
       "submission_type": "poster",
       "primary_theme": "Decision-making and metacognition",
       "secondary_topics": [
-        "RL, motor control & planning",
-        "Neural population geometry & dynamics"
+        "Neural population geometry & dynamics",
+        "RL, motor control & planning"
       ],
       "assigned_topics": [
         "Decision-making and metacognition",
-        "RL, motor control & planning",
-        "Neural population geometry & dynamics"
+        "Neural population geometry & dynamics",
+        "RL, motor control & planning"
       ]
     },
     {
@@ -76634,13 +76652,13 @@
       "poster_number": "",
       "source_url": "https://2023.ccneuro.org/view_paper3088.html?PaperNum=1113",
       "submission_type": "poster",
-      "primary_theme": "Methods, theory & everything else",
+      "primary_theme": "Neural population geometry & dynamics",
       "secondary_topics": [
-        "Neural population geometry & dynamics"
+        "Methods, theory & everything else"
       ],
       "assigned_topics": [
-        "Methods, theory & everything else",
-        "Neural population geometry & dynamics"
+        "Neural population geometry & dynamics",
+        "Methods, theory & everything else"
       ]
     },
     {
@@ -82624,12 +82642,14 @@
       "primary_theme": "Memory",
       "secondary_topics": [
         "Methods, theory & everything else",
-        "Attention & cognitive control / executive function"
+        "Attention & cognitive control / executive function",
+        "Neural population geometry & dynamics"
       ],
       "assigned_topics": [
         "Memory",
         "Methods, theory & everything else",
-        "Attention & cognitive control / executive function"
+        "Attention & cognitive control / executive function",
+        "Neural population geometry & dynamics"
       ]
     },
     {
@@ -86096,13 +86116,11 @@
       "submission_type": "poster",
       "primary_theme": "LLMs, reasoning, interpretability",
       "secondary_topics": [
-        "Memory",
-        "Language/auditory neuroscience"
+        "Memory"
       ],
       "assigned_topics": [
         "LLMs, reasoning, interpretability",
-        "Memory",
-        "Language/auditory neuroscience"
+        "Memory"
       ]
     },
     {
@@ -91866,13 +91884,13 @@
       "poster_number": "C167",
       "source_url": "https://2024.ccneuro.org/poster/?id=85",
       "submission_type": "poster",
-      "primary_theme": "Methods, theory & everything else",
+      "primary_theme": "Neural population geometry & dynamics",
       "secondary_topics": [
-        "Neural population geometry & dynamics"
+        "Methods, theory & everything else"
       ],
       "assigned_topics": [
-        "Methods, theory & everything else",
-        "Neural population geometry & dynamics"
+        "Neural population geometry & dynamics",
+        "Methods, theory & everything else"
       ]
     },
     {
@@ -95720,10 +95738,10 @@
       "poster_number": "A157",
       "source_url": "https://2025.ccneuro.org/poster/?id=VQ31hJQ4O4",
       "submission_type": "poster",
-      "primary_theme": "Methods, theory & everything else",
+      "primary_theme": "Neural population geometry & dynamics",
       "secondary_topics": [],
       "assigned_topics": [
-        "Methods, theory & everything else"
+        "Neural population geometry & dynamics"
       ]
     },
     {
@@ -97156,10 +97174,10 @@
       "poster_number": "A46",
       "source_url": "https://2025.ccneuro.org/poster/?id=zHcVfSZ41z",
       "submission_type": "poster",
-      "primary_theme": "Language/auditory neuroscience",
+      "primary_theme": "Methods, theory & everything else",
       "secondary_topics": [],
       "assigned_topics": [
-        "Language/auditory neuroscience"
+        "Methods, theory & everything else"
       ]
     },
     {
@@ -101533,10 +101551,10 @@
       "poster_number": "B71",
       "source_url": "https://2025.ccneuro.org/poster/?id=8soHbaXXDp",
       "submission_type": "poster",
-      "primary_theme": "Methods, theory & everything else",
+      "primary_theme": "Neural population geometry & dynamics",
       "secondary_topics": [],
       "assigned_topics": [
-        "Methods, theory & everything else"
+        "Neural population geometry & dynamics"
       ]
     },
     {
@@ -102844,12 +102862,9 @@
       "poster_number": "C133",
       "source_url": "https://2025.ccneuro.org/poster/?id=bra729zCMm",
       "submission_type": "poster",
-      "primary_theme": "Neural population geometry & dynamics",
-      "secondary_topics": [
-        "Methods, theory & everything else"
-      ],
+      "primary_theme": "Methods, theory & everything else",
+      "secondary_topics": [],
       "assigned_topics": [
-        "Neural population geometry & dynamics",
         "Methods, theory & everything else"
       ]
     },
@@ -107598,13 +107613,13 @@
       "submission_type": "poster",
       "primary_theme": "Memory",
       "secondary_topics": [
-        "Decision-making and metacognition",
-        "Neural population geometry & dynamics"
+        "Neural population geometry & dynamics",
+        "Decision-making and metacognition"
       ],
       "assigned_topics": [
         "Memory",
-        "Decision-making and metacognition",
-        "Neural population geometry & dynamics"
+        "Neural population geometry & dynamics",
+        "Decision-making and metacognition"
       ]
     },
     {
@@ -108420,15 +108435,15 @@
       "poster_number": "124",
       "source_url": "https://2026.ccneuro.org/",
       "submission_type": "poster",
-      "primary_theme": "Language/auditory neuroscience",
+      "primary_theme": "Neural population geometry & dynamics",
       "secondary_topics": [
-        "Neural population geometry & dynamics",
+        "Language/auditory neuroscience",
         "LLMs, reasoning, interpretability",
         "RL, motor control & planning"
       ],
       "assigned_topics": [
-        "Language/auditory neuroscience",
         "Neural population geometry & dynamics",
+        "Language/auditory neuroscience",
         "LLMs, reasoning, interpretability",
         "RL, motor control & planning"
       ]
@@ -109175,15 +109190,15 @@
       "secondary_topics": [
         "Vision",
         "RL, motor control & planning",
-        "Attention & cognitive control / executive function",
-        "Neural population geometry & dynamics"
+        "Neural population geometry & dynamics",
+        "Attention & cognitive control / executive function"
       ],
       "assigned_topics": [
         "Memory",
         "Vision",
         "RL, motor control & planning",
-        "Attention & cognitive control / executive function",
-        "Neural population geometry & dynamics"
+        "Neural population geometry & dynamics",
+        "Attention & cognitive control / executive function"
       ]
     },
     {
@@ -109680,12 +109695,9 @@
       "source_url": "https://2026.ccneuro.org/",
       "submission_type": "poster",
       "primary_theme": "Neural population geometry & dynamics",
-      "secondary_topics": [
-        "Memory"
-      ],
+      "secondary_topics": [],
       "assigned_topics": [
-        "Neural population geometry & dynamics",
-        "Memory"
+        "Neural population geometry & dynamics"
       ]
     },
     {
@@ -112623,12 +112635,9 @@
       "source_url": "https://2026.ccneuro.org/",
       "submission_type": "poster",
       "primary_theme": "Neural population geometry & dynamics",
-      "secondary_topics": [
-        "Methods, theory & everything else"
-      ],
+      "secondary_topics": [],
       "assigned_topics": [
-        "Neural population geometry & dynamics",
-        "Methods, theory & everything else"
+        "Neural population geometry & dynamics"
       ]
     },
     {
@@ -113703,12 +113712,9 @@
       "source_url": "https://2026.ccneuro.org/",
       "submission_type": "poster",
       "primary_theme": "LLMs, reasoning, interpretability",
-      "secondary_topics": [
-        "Methods, theory & everything else"
-      ],
+      "secondary_topics": [],
       "assigned_topics": [
-        "LLMs, reasoning, interpretability",
-        "Methods, theory & everything else"
+        "LLMs, reasoning, interpretability"
       ]
     },
     {
@@ -114279,13 +114285,13 @@
       "poster_number": "392",
       "source_url": "https://2026.ccneuro.org/",
       "submission_type": "poster",
-      "primary_theme": "LLMs, reasoning, interpretability",
+      "primary_theme": "Neural population geometry & dynamics",
       "secondary_topics": [
-        "Neural population geometry & dynamics"
+        "LLMs, reasoning, interpretability"
       ],
       "assigned_topics": [
-        "LLMs, reasoning, interpretability",
-        "Neural population geometry & dynamics"
+        "Neural population geometry & dynamics",
+        "LLMs, reasoning, interpretability"
       ]
     },
     {
@@ -115932,9 +115938,12 @@
       "source_url": "https://2026.ccneuro.org/",
       "submission_type": "poster",
       "primary_theme": "RL, motor control & planning",
-      "secondary_topics": [],
+      "secondary_topics": [
+        "Neural population geometry & dynamics"
+      ],
       "assigned_topics": [
-        "RL, motor control & planning"
+        "RL, motor control & planning",
+        "Neural population geometry & dynamics"
       ]
     },
     {
@@ -116864,9 +116873,12 @@
       "poster_number": "510",
       "source_url": "https://2026.ccneuro.org/",
       "submission_type": "poster",
-      "primary_theme": "LLMs, reasoning, interpretability",
-      "secondary_topics": [],
+      "primary_theme": "Neural population geometry & dynamics",
+      "secondary_topics": [
+        "LLMs, reasoning, interpretability"
+      ],
       "assigned_topics": [
+        "Neural population geometry & dynamics",
         "LLMs, reasoning, interpretability"
       ]
     },
@@ -122015,7 +122027,7 @@
         "2017": [
           [
             "Methods, theory & everything else",
-            97
+            96
           ],
           [
             "Decision-making and metacognition",
@@ -122023,19 +122035,19 @@
           ],
           [
             "Naturalistic encoding/decoding",
-            29
+            28
           ],
           [
             "Memory",
             20
           ],
           [
-            "RL, motor control & planning",
+            "Neural population geometry & dynamics",
             15
           ],
           [
-            "Neural population geometry & dynamics",
-            14
+            "RL, motor control & planning",
+            15
           ],
           [
             "Language/auditory neuroscience",
@@ -122050,11 +122062,11 @@
             4
           ],
           [
-            "Clinical / computational psychiatry",
-            2
+            "LLMs, reasoning, interpretability",
+            3
           ],
           [
-            "LLMs, reasoning, interpretability",
+            "Clinical / computational psychiatry",
             2
           ],
           [
@@ -122065,7 +122077,7 @@
         "2018": [
           [
             "Methods, theory & everything else",
-            109
+            107
           ],
           [
             "Decision-making and metacognition",
@@ -122073,11 +122085,11 @@
           ],
           [
             "Naturalistic encoding/decoding",
-            14
+            15
           ],
           [
             "RL, motor control & planning",
-            14
+            15
           ],
           [
             "Memory",
@@ -122111,7 +122123,7 @@
         "2019": [
           [
             "Methods, theory & everything else",
-            159
+            158
           ],
           [
             "Decision-making and metacognition",
@@ -122135,14 +122147,14 @@
           ],
           [
             "Vision",
-            11
-          ],
-          [
-            "Neural population geometry & dynamics",
-            6
+            12
           ],
           [
             "Attention & cognitive control / executive function",
+            6
+          ],
+          [
+            "Neural population geometry & dynamics",
             6
           ],
           [
@@ -122161,19 +122173,19 @@
         "2022": [
           [
             "Methods, theory & everything else",
-            66
+            65
           ],
           [
             "Naturalistic encoding/decoding",
-            54
+            52
           ],
           [
             "Decision-making and metacognition",
-            41
+            40
           ],
           [
             "Neural population geometry & dynamics",
-            28
+            32
           ],
           [
             "Vision",
@@ -122207,19 +122219,19 @@
         "2023": [
           [
             "Methods, theory & everything else",
-            96
+            95
           ],
           [
             "Decision-making and metacognition",
-            85
+            84
           ],
           [
             "Neural population geometry & dynamics",
-            50
+            53
           ],
           [
             "Naturalistic encoding/decoding",
-            49
+            48
           ],
           [
             "Memory",
@@ -122257,7 +122269,7 @@
         "2024": [
           [
             "Methods, theory & everything else",
-            236
+            235
           ],
           [
             "Decision-making and metacognition",
@@ -122285,7 +122297,7 @@
           ],
           [
             "Neural population geometry & dynamics",
-            15
+            16
           ],
           [
             "Vision",
@@ -122323,7 +122335,7 @@
           ],
           [
             "Language/auditory neuroscience",
-            36
+            35
           ],
           [
             "LLMs, reasoning, interpretability",
@@ -122335,7 +122347,7 @@
           ],
           [
             "Neural population geometry & dynamics",
-            16
+            17
           ],
           [
             "Vision",
@@ -122377,11 +122389,11 @@
           ],
           [
             "LLMs, reasoning, interpretability",
-            41
+            39
           ],
           [
             "Language/auditory neuroscience",
-            36
+            35
           ],
           [
             "Memory",
@@ -122389,7 +122401,7 @@
           ],
           [
             "Neural population geometry & dynamics",
-            28
+            31
           ],
           [
             "Attention & cognitive control / executive function",
@@ -122408,15 +122420,15 @@
       "primary_totals": [
         [
           "Methods, theory & everything else",
-          1108
+          1101
         ],
         [
           "Decision-making and metacognition",
-          430
+          428
         ],
         [
           "Naturalistic encoding/decoding",
-          306
+          303
         ],
         [
           "Memory",
@@ -122424,23 +122436,23 @@
         ],
         [
           "RL, motor control & planning",
-          186
+          187
         ],
         [
           "Neural population geometry & dynamics",
-          164
+          177
         ],
         [
           "Vision",
-          152
+          153
         ],
         [
           "Language/auditory neuroscience",
-          144
+          142
         ],
         [
           "LLMs, reasoning, interpretability",
-          110
+          109
         ],
         [
           "Attention & cognitive control / executive function",
@@ -122458,19 +122470,19 @@
       "secondary_totals": [
         [
           "Methods, theory & everything else",
-          318
+          316
         ],
         [
           "Naturalistic encoding/decoding",
-          261
+          266
         ],
         [
           "Neural population geometry & dynamics",
-          220
+          218
         ],
         [
           "Decision-making and metacognition",
-          178
+          180
         ],
         [
           "Attention & cognitive control / executive function",
@@ -122482,11 +122494,11 @@
         ],
         [
           "Vision",
-          116
+          115
         ],
         [
           "Memory",
-          81
+          80
         ],
         [
           "Language/auditory neuroscience",
@@ -122494,7 +122506,7 @@
         ],
         [
           "LLMs, reasoning, interpretability",
-          67
+          69
         ],
         [
           "Clinical / computational psychiatry",
