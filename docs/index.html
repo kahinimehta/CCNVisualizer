@@ -78,9 +78,21 @@
         </section>
 
         <section class="card card-full">
-          <div class="card-header">
-            <h2>Year-over-year change</h2>
-            <p class="card-sub" id="theme-delta-sub">Largest shifts between consecutive years</p>
+          <div class="card-header card-header-with-controls">
+            <div>
+              <h2>Year-over-year change</h2>
+              <p class="card-sub" id="theme-delta-sub">Compare theme counts between two years</p>
+            </div>
+            <div class="delta-year-controls">
+              <label class="filter-field compact">
+                <span>From</span>
+                <select id="delta-from-year" aria-label="Compare from year"></select>
+              </label>
+              <label class="filter-field compact">
+                <span>To</span>
+                <select id="delta-to-year" aria-label="Compare to year"></select>
+              </label>
+            </div>
           </div>
           <div id="theme-delta-chart"></div>
         </section>

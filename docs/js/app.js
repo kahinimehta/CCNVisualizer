@@ -327,6 +327,8 @@ const state = {
   selectedYear: "all",
   search: "",
   selectedTheme: "",
+  deltaFromYear: "",
+  deltaToYear: "",
 };
 
 let tooltip = null;
@@ -363,7 +365,7 @@ function showError(message) {
 function splitField(value) {
   if (!value) return [];
   return String(value)
-    .split(LIST_DELIMITER)
+    .split(/\s*\|\s*/)
     .map((part) => part.trim())
     .filter(Boolean);
 }
@@ -537,6 +539,20 @@ function researchThemeNames() {
     .sort((a, b) => a.localeCompare(b));
 }
 
+function themeColor(theme) {
+  const themes = researchThemeNames();
+  const index = themes.indexOf(theme);
+  return CHART_PALETTE[(index >= 0 ? index : 0) % CHART_PALETTE.length];
+}
+
+function themesPresentOnEmbedding() {
+  if (!state.embeddings?.points?.length) return [];
+  const present = new Set(
+    state.embeddings.points.map((point) => embeddingPointTheme(point)).filter(Boolean)
+  );
+  return researchThemeNames().filter((theme) => present.has(theme));
+}
+
 function embeddingClusterMap() {
   return state.googleTopics?.embedding_cluster_map || {};
 }
@@ -588,8 +604,14 @@ function embeddingPointForSubmission(submission) {
 
 function embeddingPointTheme(point) {
   const submission = submissionForEmbeddingPoint(point);
-  if (submission) return primaryTheme(submission);
-  return mapClusterToTheme(point.cluster_name);
+  const clusterName = submission?.cluster_track || point.cluster_name;
+  const mapped = mapClusterToTheme(clusterName);
+  if (mapped && researchThemeNames().includes(mapped)) return mapped;
+  if (submission) {
+    const primary = primaryTheme(submission);
+    if (primary && researchThemeNames().includes(primary)) return primary;
+  }
+  return mapped || primaryTheme(submission) || null;
 }
 
 function submissionResearchTheme(submission) {
@@ -647,13 +669,19 @@ function latestComparableYearPair(years, byYear, themes) {
   return null;
 }
 
-function researchThemeDeltas(submissions) {
+function researchThemeDeltas(submissions, fromYear, toYear) {
   const themes = researchThemeNames();
   if (!themes.length) return { pair: null, rows: [] };
 
   const years = [...state.data.metadata.years].sort((a, b) => a - b);
   const byYear = themeCountsByYear(submissions);
-  const pair = latestComparableYearPair(years, byYear, themes);
+  let pair = null;
+
+  if (fromYear && toYear && String(fromYear) !== String(toYear)) {
+    pair = { fromYear: String(fromYear), toYear: String(toYear) };
+  } else {
+    pair = latestComparableYearPair(years, byYear, themes);
+  }
   if (!pair) return { pair: null, rows: [] };
 
   const rows = themes
@@ -675,13 +703,47 @@ function researchThemeDeltas(submissions) {
   return { pair, rows };
 }
 
+function defaultDeltaYearPair() {
+  const themes = researchThemeNames();
+  if (!themes.length || !state.data?.metadata?.years?.length) return null;
+  const years = [...state.data.metadata.years].sort((a, b) => a - b);
+  const byYear = themeCountsByYear(submissionsForThemeTrends());
+  return latestComparableYearPair(years, byYear, themes);
+}
+
+function syncDeltaYearState() {
+  const pair = defaultDeltaYearPair();
+  if (!state.deltaFromYear && pair) state.deltaFromYear = pair.fromYear;
+  if (!state.deltaToYear && pair) state.deltaToYear = pair.toYear;
+}
+
+function renderDeltaYearControls() {
+  const years = state.data.metadata.years;
+  const fromSelect = d3.select("#delta-from-year");
+  const toSelect = d3.select("#delta-to-year");
+  if (fromSelect.empty() || toSelect.empty()) return;
+
+  fromSelect.selectAll("option").data(years).join("option").attr("value", String).text(String);
+  toSelect.selectAll("option").data(years).join("option").attr("value", String).text(String);
+
+  syncDeltaYearState();
+  fromSelect.property("value", state.deltaFromYear);
+  toSelect.property("value", state.deltaToYear);
+}
+
 function truncateLabel(text, max = s(28)) {
   if (!text) return "";
   return text.length > max ? `${text.slice(0, max)}…` : text;
 }
 
 function themeEmbeddingPoints(themeName) {
-  return state.embeddings?.points?.filter((p) => embeddingPointTheme(p) === themeName) || [];
+  return (
+    state.embeddings?.points?.filter((point) => {
+      const submission = submissionForEmbeddingPoint(point);
+      if (submission && assignedTopics(submission).includes(themeName)) return true;
+      return embeddingPointTheme(point) === themeName;
+    }) || []
+  );
 }
 
 function displaySubmissions() {
@@ -806,10 +868,7 @@ function renderThemeBars(counts) {
       data: counts,
       getLabel: (d) => d.text,
       getValue: (d) => d.count,
-      getBarFill: (d) => {
-        const i = counts.findIndex((row) => row.text === d.text);
-        return CHART_PALETTE[i % CHART_PALETTE.length];
-      },
+      getBarFill: (d) => themeColor(d.text),
       onBarTooltip: (event, d) => showTooltip(`<strong>${d.text}</strong><br/>${d.count} submissions`, event),
     });
     return;
@@ -840,7 +899,7 @@ function renderThemeBars(counts) {
     .attr("y", (d) => y(d.text))
     .attr("height", y.bandwidth())
     .attr("width", (d) => x(d.count))
-    .attr("fill", (_, i) => CHART_PALETTE[i % CHART_PALETTE.length])
+    .attr("fill", (d) => themeColor(d.text))
     .attr("rx", s(4))
     .on("mousemove", (event, d) => showTooltip(`<strong>${d.text}</strong><br/>${d.count} submissions`, event))
     .on("mouseleave", hideTooltip);
@@ -955,16 +1014,21 @@ function renderResearchThemeDeltas(submissions) {
   const container = d3.select("#theme-delta-chart");
   container.selectAll("*").remove();
 
-  const { pair, rows } = researchThemeDeltas(submissions);
+  renderDeltaYearControls();
+  const { pair, rows } = researchThemeDeltas(submissions, state.deltaFromYear, state.deltaToYear);
   const sub = d3.select("#theme-delta-sub");
 
   if (!pair || !rows.length) {
-    sub.text("Not enough theme history for year-over-year comparison.");
-    container.append("p").style("color", CCN_COLORS.muted).text("No comparable years with theme data.");
+    sub.text("Pick two different years to compare theme counts.");
+    container.append("p").style("color", CCN_COLORS.muted).text("No theme data for the selected years.");
     return;
   }
 
-  sub.text(`${pair.fromYear} → ${pair.toYear} · one bar per research theme`);
+  state.deltaFromYear = pair.fromYear;
+  state.deltaToYear = pair.toYear;
+  d3.select("#delta-from-year").property("value", pair.fromYear);
+  d3.select("#delta-to-year").property("value", pair.toYear);
+  sub.text(`${pair.fromYear} → ${pair.toYear} · change in theme assignments`);
 
   if (isPhoneLayout()) {
     renderPhoneThemeBarChart(container, {
@@ -1052,9 +1116,7 @@ function renderEmbeddingCluster() {
   const mobileLegend = useStackedChartLegend(width) || isPhoneLayout();
   const legendFont = isPhoneLayout() ? chartThemePx(7) : themeLabelPx(10);
   const legendItemHeight = isPhoneLayout() ? legendFont * 2.2 : legendFont * 1.5;
-  const legendThemes = [...new Set(points.map((d) => embeddingPointTheme(d)).filter(Boolean))].sort((a, b) =>
-    a.localeCompare(b)
-  );
+  const legendThemes = themesPresentOnEmbedding();
   const legendCols = isPhoneLayout() ? 1 : mobileLegend ? (width < 520 ? 1 : 2) : 1;
   const legendRows = mobileLegend ? Math.ceil(legendThemes.length / legendCols) : legendThemes.length;
   const legendBlock = mobileLegend ? legendRows * legendItemHeight + (isPhoneLayout() ? gs(10) : s(16)) : 0;
@@ -1071,7 +1133,7 @@ function renderEmbeddingCluster() {
   const plotHeight = mobileLegend ? margin.top + plotSide + margin.bottom : plotSide;
   const height = mobileLegend ? plotHeight + legendBlock : plotHeight;
   const svg = appendChartSvg(container, width, height);
-  const color = d3.scaleOrdinal(CHART_PALETTE).domain(legendThemes);
+  const color = (theme) => themeColor(theme);
   const plotBottom = mobileLegend ? plotHeight - margin.bottom : height - margin.bottom;
   const pointRadius = isPhoneLayout() ? { base: 2.2, selected: 3 } : { base: 5.5, selected: 7 };
 
@@ -1321,6 +1383,7 @@ async function init() {
   buildThemeClassifier();
 
   renderYearControls();
+  renderDeltaYearControls();
 
   d3.select("#year-select").on("change", (event) => {
     state.selectedYear = event.target.value;
@@ -1335,6 +1398,16 @@ async function init() {
   d3.select("#theme-select").on("change", (event) => {
     state.selectedTheme = event.target.value;
     renderAll();
+  });
+
+  d3.select("#delta-from-year").on("change", (event) => {
+    state.deltaFromYear = event.target.value;
+    renderResearchThemeDeltas(submissionsForThemeTrends());
+  });
+
+  d3.select("#delta-to-year").on("change", (event) => {
+    state.deltaToYear = event.target.value;
+    renderResearchThemeDeltas(submissionsForThemeTrends());
   });
 
   renderAll();

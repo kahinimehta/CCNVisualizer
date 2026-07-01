@@ -470,6 +470,24 @@ a {
   margin-bottom: 0.75rem;
 }
 
+.card-header-with-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+}
+
+.delta-year-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.filter-field.compact {
+  min-width: calc(92px * var(--ui-scale));
+}
+
 .card-header h2 {
   margin: 0;
   font-size: 1rem;
