@@ -56,6 +56,14 @@ CCN_TOPIC_MAP: dict[str, str] = {
     "brain networks & neural dynamics": "Neural population geometry & dynamics",
     "methods & computational tools": "Methods, theory & everything else",
     # 2022–2023 legacy track / topic column — handled via BROAD_TOPIC_HINTS
+    # 2017 proceedings PDF topic labels
+    "artificial intelligence": "LLMs, reasoning, interpretability",
+    "neuroscience": "Neural population geometry & dynamics",
+    "psychology": "Decision-making and metacognition",
+    "linguistics": "Language/auditory neuroscience",
+    "philosophy": "Methods, theory & everything else",
+    "engineering": "Methods, theory & everything else",
+    "mathematics": "Methods, theory & everything else",
     # 2026 pending-poster CSV primary_area (stored lowercased in topic_area)
     "computational cognitive science / cognitive modeling": "Decision-making and metacognition",
     "theoretical / computational neuroscience": "Methods, theory & everything else",
@@ -120,6 +128,7 @@ TOPIC_KEYWORDS: dict[str, list[str]] = {
 }
 
 IGNORED_TOPIC_LABELS = {"view pdf", "view paper pdf", ""}
+GENERIC_KEYWORD_LABELS = {"cognitive science", "cognitive"}
 
 CLUSTER_BOOST_FACTOR = 0.35
 
@@ -176,16 +185,40 @@ def apply_label_hints(label: str, scores: dict[str, float], topics: list[str]) -
             scores[theme] = scores.get(theme, 0) + BROAD_HINT_BOOST
 
 
+def conference_label(submission: dict) -> str:
+    for field in ("topic_area", "track"):
+        normalized = normalize_topic_label(submission.get(field, ""))
+        if normalized and normalized not in IGNORED_TOPIC_LABELS:
+            return normalized
+    return ""
+
+
+def is_weak_keyword_set(keywords: list[str]) -> bool:
+    if not keywords:
+        return True
+    normalized = {kw.lower().strip() for kw in keywords if kw}
+    if not normalized:
+        return True
+    return normalized.issubset(GENERIC_KEYWORD_LABELS)
+
+
+def scoring_blob(submission: dict) -> str:
+    parts = [submission.get("title", ""), submission.get("abstract", "")]
+    keywords = list(submission.get("keywords") or [])
+    if not is_weak_keyword_set(keywords):
+        parts.append(" ".join(keywords))
+    parts.extend(submission.get("author_keywords") or [])
+    parts.extend(submission.get("extracted_keywords") or [])
+    return " ".join(part for part in parts if part)
+
+
 def author_keyword_text(submission: dict) -> str:
-    return " ".join(submission.get("keywords", []))
+    return scoring_blob(submission)
 
 
 def score_submission(submission: dict, topics: list[str]) -> dict[str, float]:
-    keywords = submission.get("keywords", [])
-    text_lower = author_keyword_text(submission).lower()
-    tokens: list[str] = []
-    for kw in keywords:
-        tokens.extend(tokenize(kw))
+    text_lower = scoring_blob(submission).lower()
+    tokens = tokenize(scoring_blob(submission))
     token_set = set(tokens)
     scores: dict[str, float] = {}
     for theme in topics:
@@ -214,10 +247,10 @@ def assign_themes(
     cluster = embedding_lookup.get(sub_id) or embedding_lookup.get(f"2026-{poster}")
     cluster_theme = cluster_map.get(cluster) if cluster else None
 
-    official = official_theme_from_label(submission.get("topic_area", ""), topics)
+    official = official_theme_from_label(conference_label(submission), topics)
 
     scores = score_submission(submission, topics)
-    apply_label_hints(submission.get("topic_area", ""), scores, topics)
+    apply_label_hints(conference_label(submission), scores, topics)
     if cluster_theme:
         boost = max(max(scores.values(), default=0) * CLUSTER_BOOST_FACTOR, 4.0)
         scores[cluster_theme] = scores.get(cluster_theme, 0) + boost

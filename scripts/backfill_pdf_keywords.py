@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Backfill 2018-2019 author keywords from proceedings PDFs."""
+"""Backfill author keywords from proceedings PDFs and refresh theme assignments."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from pathlib import Path
 
 from assign_research_themes import apply_assignments, write_payload
 from build_abstracts_csv import build_from_payload
-from pdf_keywords import PDF_KEYWORD_YEARS, keywords_from_detail_html
+from pdf_keywords import PDF_KEYWORD_YEARS, keywords_from_detail_html, keywords_from_pdf_url
 from scrape_ccn import ROOT, fetch, resolve_keyword_fields
 
 DATA_PATH = ROOT / "data" / "submissions.json"
@@ -22,14 +22,15 @@ def update_submission(submission: dict) -> tuple[str, bool, int]:
     if year not in PDF_KEYWORD_YEARS:
         return submission.get("id", ""), False, 0
 
+    pdf_keywords: list[str] = []
     source_url = submission.get("source_url", "")
-    if not source_url:
-        return submission.get("id", ""), False, 0
-
-    base_url = f"https://{year}.ccneuro.org/"
     try:
-        detail_html = fetch(source_url)
-        pdf_keywords = keywords_from_detail_html(detail_html, base_url)
+        if year == 2017 and source_url.lower().endswith(".pdf"):
+            pdf_keywords = keywords_from_pdf_url(source_url)
+        elif source_url:
+            base_url = f"https://{year}.ccneuro.org/"
+            detail_html = fetch(source_url)
+            pdf_keywords = keywords_from_detail_html(detail_html, base_url)
     except Exception:
         pdf_keywords = []
 
@@ -66,14 +67,14 @@ def main() -> None:
     with ThreadPoolExecutor(max_workers=6) as executor:
         futures = {executor.submit(update_submission, sub): sub for sub in targets}
         for index, future in enumerate(as_completed(futures), start=1):
-            sub_id, from_pdf, count = future.result()
+            _, from_pdf, _ = future.result()
             if from_pdf:
                 updated += 1
-            if index % 25 == 0 or index == len(targets):
+            if index % 50 == 0 or index == len(targets):
                 print(f"  processed {index}/{len(targets)} ({updated} from PDF)")
 
     payload["metadata"]["keyword_source"] = (
-        "author_keywords from poster pages, proceedings PDFs (2018-2019), or 2026 CSV; "
+        "author_keywords from poster pages, proceedings PDFs (2017-2019, 2022-2023), or 2026 CSV; "
         "else official topic/track labels; else title/abstract tokens only when PDF/HTML keywords missing"
     )
 

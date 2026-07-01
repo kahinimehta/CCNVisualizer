@@ -452,11 +452,6 @@ function primaryTheme(submission) {
   return assignedTopics(submission)[0] || null;
 }
 
-function secondaryTopics(submission) {
-  const topics = assignedTopics(submission);
-  return topics.length > 1 ? topics.slice(1) : [];
-}
-
 function submissionMatchesSearch(item, search) {
   const haystack = [
     item.title,
@@ -498,16 +493,168 @@ function primaryThemeCounts(submissions) {
     .sort((a, b) => b.count - a.count);
 }
 
-function secondaryTopicCounts(submissions) {
-  const counts = new Map();
-  submissions.forEach((item) => {
-    assignedTopics(item).forEach((topic) => {
-      counts.set(topic, (counts.get(topic) || 0) + 1);
+function submissionsForYearMix() {
+  const { submissions } = state.data;
+  const search = state.search.trim().toLowerCase();
+  return submissions.filter((item) => {
+    const themeOk = !state.selectedTheme || assignedTopics(item).includes(state.selectedTheme);
+    const clusterOk = !state.selectedCluster || item.cluster_track === state.selectedCluster;
+    const searchOk = !search || submissionMatchesSearch(item, search);
+    return themeOk && clusterOk && searchOk;
+  });
+}
+
+function topThemesForMix(themes, byYear, years, limit) {
+  const totals = new Map(themes.map((theme) => [theme, 0]));
+  years.forEach((year) => {
+    const yearMap = byYear.get(String(year)) || new Map();
+    themes.forEach((theme) => {
+      totals.set(theme, totals.get(theme) + (yearMap.get(theme) || 0));
     });
   });
-  return [...counts.entries()]
-    .map(([text, count]) => ({ text, count }))
-    .sort((a, b) => b.count - a.count);
+  return [...totals.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([theme]) => theme);
+}
+
+function renderThemeMixChart() {
+  const container = d3.select("#themes-over-time-chart");
+  container.selectAll("*").remove();
+
+  const themes = researchThemeNames();
+  if (!themes.length) {
+    container.append("p").style("color", CCN_COLORS.muted).text("Research theme data not loaded.");
+    return;
+  }
+
+  const submissions = submissionsForYearMix();
+  const years = [...state.data.metadata.years].sort((a, b) => a - b);
+  const byYear = themeCountsByYear(submissions);
+  const activeYears = years.filter((year) => {
+    const yearMap = byYear.get(String(year));
+    return yearMap && d3.sum([...yearMap.values()]) > 0;
+  });
+
+  if (!activeYears.length) {
+    container.append("p").style("color", CCN_COLORS.muted).text("No theme history for the current filter.");
+    return;
+  }
+
+  const topThemes = topThemesForMix(themes, byYear, activeYears, isPhoneLayout() ? 6 : 10);
+  const stackKeys = [...topThemes, "Other"];
+  const rows = activeYears.map((year) => {
+    const yearMap = byYear.get(String(year)) || new Map();
+    const row = { year };
+    let other = 0;
+    themes.forEach((theme) => {
+      const count = yearMap.get(theme) || 0;
+      if (topThemes.includes(theme)) row[theme] = count;
+      else other += count;
+    });
+    row.Other = other;
+    return row;
+  });
+
+  const usedKeys = stackKeys.filter((key) => rows.some((row) => row[key] > 0));
+  const width = chartContainerWidth(container);
+  const margin = isPhoneLayout()
+    ? { top: gs(12), right: gs(8), bottom: gs(52), left: gs(34) }
+    : { top: s(24), right: s(24), bottom: s(64), left: s(48) };
+  const barHeight = isPhoneLayout() ? gs(22) : s(34);
+  const barGap = isPhoneLayout() ? gs(6) : s(10);
+  const legendRows = Math.ceil(usedKeys.length / (isPhoneLayout() ? 2 : 3));
+  const legendRowHeight = isPhoneLayout() ? gs(14) : s(18);
+  const legendGap = isPhoneLayout() ? gs(10) : s(18);
+  const height =
+    margin.top + margin.bottom + activeYears.length * (barHeight + barGap) + legendGap + legendRows * legendRowHeight;
+  const svg = appendChartSvg(container, width, height);
+  const innerW = width - margin.left - margin.right;
+  const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+  const y = d3
+    .scaleBand()
+    .domain(activeYears)
+    .range([0, activeYears.length * (barHeight + barGap)])
+    .paddingInner(barGap / (barHeight + barGap));
+  const x = d3.scaleLinear().domain([0, 1]).range([0, innerW]);
+  const color = d3.scaleOrdinal(CHART_PALETTE).domain(usedKeys);
+  const stack = d3.stack().keys(usedKeys);
+  const stacked = stack(rows);
+
+  g.selectAll("g.year-bar")
+    .data(stacked)
+    .join("g")
+    .attr("class", "year-bar")
+    .attr("fill", (series) => color(series.key))
+    .each(function drawYearSegments(series) {
+      d3.select(this)
+        .selectAll("rect")
+        .data(series)
+        .join("rect")
+        .attr("y", (d) => y(d.data.year))
+        .attr("x", (d) => x(d[0]))
+        .attr("width", (d) => Math.max(0, x(d[1]) - x(d[0])))
+        .attr("height", barHeight)
+        .attr("rx", isPhoneLayout() ? gs(2) : s(3))
+        .style("cursor", series.key === "Other" ? "default" : "pointer")
+        .on("click", () => {
+          if (series.key !== "Other") setThemeFilter(series.key);
+        })
+        .on("mousemove", (event, d) => {
+          const total = usedKeys.reduce((sum, key) => sum + (d.data[key] || 0), 0) || 1;
+          const count = d.data[series.key] || 0;
+          const pct = ((count / total) * 100).toFixed(1);
+          showTooltip(`<strong>${d.data.year}</strong><br/>${series.key}<br/>${count} tags (${pct}%)`, event);
+        })
+        .on("mouseleave", hideTooltip);
+    });
+
+  g.append("g")
+    .attr("transform", `translate(0,${activeYears.length * (barHeight + barGap)})`)
+    .call(
+      d3
+        .axisBottom(x)
+        .ticks(isPhoneLayout() ? 4 : 5)
+        .tickFormat(d3.format(".0%"))
+        .tickSizeOuter(0)
+    )
+    .call(styleThemeAxisLabels)
+    .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
+
+  g.append("g")
+    .call(d3.axisLeft(y).tickFormat(d3.format("d")).tickSizeOuter(0))
+    .call(styleThemeAxisLabels)
+    .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
+
+  const legendTop = activeYears.length * (barHeight + barGap) + legendGap;
+  const legendCols = isPhoneLayout() ? 2 : 3;
+  const legend = svg.append("g").attr("transform", `translate(${margin.left}, ${margin.top + legendTop})`);
+  const legendItemWidth = innerW / legendCols;
+  const legendItems = legend
+    .selectAll("g")
+    .data(usedKeys)
+    .join("g")
+    .attr("transform", (_, i) => {
+      const col = i % legendCols;
+      const row = Math.floor(i / legendCols);
+      return `translate(${col * legendItemWidth}, ${row * legendRowHeight})`;
+    });
+
+  legendItems
+    .append("rect")
+    .attr("width", isPhoneLayout() ? gs(8) : s(10))
+    .attr("height", isPhoneLayout() ? gs(8) : s(10))
+    .attr("rx", isPhoneLayout() ? gs(2) : s(2))
+    .attr("y", isPhoneLayout() ? gs(1) : s(2))
+    .attr("fill", (d) => color(d));
+
+  legendItems
+    .append("text")
+    .attr("x", isPhoneLayout() ? gs(12) : s(16))
+    .attr("y", isPhoneLayout() ? gs(8) : s(11))
+    .attr("fill", CCN_COLORS.muted)
+    .style("font-size", isPhoneLayout() ? chartThemeFs(7) : themeFs(9))
+    .text((d) => fitLegendLabel(d, legendItemWidth - (isPhoneLayout() ? gs(14) : s(18)), isPhoneLayout() ? chartThemePx(7) : themeLabelPx(9)));
 }
 
 function primaryThemeDistribution(submissions) {
@@ -629,22 +776,6 @@ function themeTotals(submissions) {
     });
   });
   return totals;
-}
-
-function themeCumulativeByYear(years, byYear, themes) {
-  const cumulative = new Map();
-  const running = new Map(themes.map((theme) => [theme, 0]));
-
-  years.forEach((year) => {
-    const yearKey = String(year);
-    const yearCounts = byYear.get(yearKey) || new Map();
-    themes.forEach((theme) => {
-      running.set(theme, running.get(theme) + (yearCounts.get(theme) || 0));
-    });
-    cumulative.set(yearKey, new Map(running));
-  });
-
-  return cumulative;
 }
 
 function latestComparableYearPair(years, byYear, themes) {
@@ -872,68 +1003,6 @@ function renderThemeSelect(counts) {
   select.property("value", state.selectedTheme);
 }
 
-function renderWordCloud(counts) {
-  const container = d3.select("#word-cloud");
-  container.selectAll("*").remove();
-
-  const width = container.node().clientWidth || s(800);
-  const height = isPhoneLayout() ? gs(220) : s(300);
-  const svg = container
-    .append("svg")
-    .attr("viewBox", `0 0 ${width} ${height}`)
-    .attr("width", "100%")
-    .style("height", `${height}px`);
-  const top = counts.slice(0, 40);
-
-  if (!top.length) {
-    svg.append("text").attr("x", s(20)).attr("y", s(40)).attr("fill", CCN_COLORS.muted).text("No secondary topics for current filter.");
-    return;
-  }
-
-  if (typeof d3.layout === "undefined" || typeof d3.layout.cloud !== "function") {
-    svg
-      .append("text")
-      .attr("x", s(20))
-      .attr("y", s(40))
-      .attr("fill", CCN_COLORS.muted)
-      .text("Keyword cloud unavailable (d3-cloud failed to load).");
-    return;
-  }
-
-  const max = d3.max(top, (d) => d.count) || 1;
-  const fontSize = (d) => s(12) + (d.count / max) * s(32);
-  const colorScale = d3.scaleOrdinal(CHART_PALETTE);
-  const scrollSnapshot = { x: window.scrollX, y: window.scrollY };
-
-  d3.layout
-    .cloud()
-    .size([width, height])
-    .words(top.map((d) => ({ text: d.text, size: fontSize(d), count: d.count })))
-    .padding(s(5))
-    .rotate((_, i) => (i % 2 === 0 ? 0 : 90))
-    .font("Open Sans")
-    .fontSize((d) => d.size)
-    .on("end", (words) => {
-      const g = svg.append("g").attr("transform", `translate(${width / 2},${height / 2})`);
-      g.selectAll("text")
-        .data(words)
-        .join("text")
-        .style("font-size", (d) => `${d.size}px`)
-        .style("font-family", "Open Sans")
-        .style("fill", (d) =>
-          d.text === state.selectedTheme ? CCN_COLORS.pink : colorScale(d.text)
-        )
-        .style("cursor", "default")
-        .attr("text-anchor", "middle")
-        .attr("transform", (d) => `translate(${d.x},${d.y})rotate(${d.rotate})`)
-        .text((d) => d.text)
-        .on("mousemove", (event, d) => showTooltip(`<strong>${d.text}</strong><br/>${d.count} secondary tags`, event))
-        .on("mouseleave", hideTooltip);
-      restorePageScroll(scrollSnapshot.x, scrollSnapshot.y);
-    })
-    .start();
-}
-
 function renderThemeBars(counts) {
   const container = d3.select("#theme-bars");
   if (isPhoneLayout()) {
@@ -1148,230 +1217,6 @@ function renderTopicChart(submissions) {
     .style("font-size", themeFs(9))
     .style("font-weight", "600")
     .text((d) => (d.data.count / total > 0.08 ? `${Math.round((d.data.count / total) * 100)}%` : ""));
-}
-
-function renderResearchThemesOverTime(submissions) {
-  const container = d3.select("#themes-over-time-chart");
-  container.selectAll("*").remove();
-
-  const themes = researchThemeNames();
-  if (!themes.length) {
-    container.append("p").style("color", CCN_COLORS.muted).text("Research theme data not loaded.");
-    return;
-  }
-
-  const years = [...state.data.metadata.years].sort((a, b) => a - b);
-  const byYear = themeCountsByYear(submissions);
-  const cumulative = themeCumulativeByYear(years, byYear, themes);
-  const annualMax =
-    d3.max(themes, (theme) => d3.max(years, (year) => byYear.get(String(year))?.get(theme) || 0)) || 1;
-  const cumulativeMax =
-    d3.max(themes, (theme) => d3.max(years, (year) => cumulative.get(String(year))?.get(theme) || 0)) ||
-    1;
-  const yMax = Math.max(annualMax, cumulativeMax);
-
-  const width = chartContainerWidth(container);
-  const legendCols = legendColumnCount(width);
-  const legendFont = isPhoneLayout() ? chartThemePx(7) : themeLabelPx(9);
-  const legendRowHeight = isPhoneLayout() ? legendFont * 2.05 : legendFont * 1.75;
-  const legendRows = Math.ceil(themes.length / legendCols);
-  const legendGap = isPhoneLayout() ? gs(12) : s(40);
-  const legendBlock = legendRows * legendRowHeight + (isPhoneLayout() ? gs(8) : s(20));
-  const chartHeight = isPhoneLayout() ? gs(210) : s(400);
-  const footnoteHeight = (isPhoneLayout() ? chartThemePx(8) : themeLabelPx(9)) + (isPhoneLayout() ? gs(10) : s(16));
-  const marginTop = isPhoneLayout() ? gs(12) : s(24);
-  const marginBottom = isPhoneLayout() ? gs(36) : s(52);
-  const yTitleText = "Submissions per year";
-  let marginLeftForYTitle;
-  let yTitleCenterX;
-  let yTitleFontPx;
-  let margin;
-  if (isPhoneLayout()) {
-    const boxInset = 2;
-    const gapTitleToTicks = 4;
-    yTitleFontPx = chartThemePx(8);
-    const yTitleHorizontalSpan = Math.ceil(yTitleFontPx * 1.2) + 2;
-    const yTickFontPx = chartThemePx(7);
-    const yTickLabelWidth = Math.ceil(
-      d3.max(d3.scaleLinear().domain([0, yMax]).nice().ticks(4), (t) =>
-        measureTextWidth(String(t), yTickFontPx, '"Open Sans", sans-serif')
-      ) + 6
-    );
-    marginLeftForYTitle = boxInset + yTitleHorizontalSpan + gapTitleToTicks + yTickLabelWidth;
-    yTitleCenterX = boxInset + yTitleHorizontalSpan / 2 - 1;
-    margin = {
-      top: gs(12),
-      right: gs(4),
-      bottom: gs(36),
-      left: marginLeftForYTitle,
-    };
-  } else {
-    yTitleFontPx = themeLabelPx(10);
-    const yTitleTextWidth = measureTextWidth(yTitleText, yTitleFontPx);
-    const yTickLabelWidth = s(42);
-    const yTitleGapFromTicks = s(3);
-    const yTitleShiftTowardAxis = s(52);
-    const yTitleEdgePad = s(4);
-    marginLeftForYTitle = Math.ceil(
-      yTitleEdgePad + yTitleTextWidth + yTitleGapFromTicks + yTickLabelWidth
-    );
-    yTitleCenterX =
-      marginLeftForYTitle -
-      yTickLabelWidth -
-      yTitleGapFromTicks -
-      yTitleTextWidth / 2 +
-      yTitleShiftTowardAxis;
-    margin = {
-      top: marginTop,
-      right: s(24),
-      bottom: marginBottom,
-      left: marginLeftForYTitle,
-    };
-  }
-  const height = chartHeight + legendGap + legendBlock + footnoteHeight;
-  const svg = appendChartSvg(container, width, height);
-  const innerW = width - margin.left - margin.right;
-  const innerH = chartHeight - margin.top - margin.bottom;
-  const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
-
-  const x = d3
-    .scalePoint()
-    .domain(years)
-    .range([0, innerW])
-    .padding(isPhoneLayout() ? 0 : 0.45);
-  const y = d3.scaleLinear().domain([0, yMax]).nice().range([innerH, 0]);
-  const color = d3.scaleOrdinal(CHART_PALETTE).domain(themes);
-
-  const annualLine = d3
-    .line()
-    .x((d) => x(d.year))
-    .y((d) => y(d.count))
-    .curve(d3.curveMonotoneX);
-
-  const cumulativeLine = d3
-    .line()
-    .x((d) => x(d.year))
-    .y((d) => y(d.count))
-    .curve(d3.curveMonotoneX);
-
-  themes.forEach((theme) => {
-    const annualSeries = years.map((year) => ({
-      year,
-      count: byYear.get(String(year))?.get(theme) || 0,
-      theme,
-    }));
-    const cumulativeSeries = years.map((year) => ({
-      year,
-      count: cumulative.get(String(year))?.get(theme) || 0,
-      theme,
-    }));
-
-    g.append("path")
-      .datum(cumulativeSeries)
-      .attr("fill", "none")
-      .attr("stroke", color(theme))
-      .attr("stroke-width", isPhoneLayout() ? gs(1) : s(1.5))
-      .attr("stroke-dasharray", isPhoneLayout() ? `${gs(4)} ${gs(3)}` : `${s(5)} ${s(4)}`)
-      .attr("opacity", 0.45)
-      .attr("d", cumulativeLine);
-
-    g.append("path")
-      .datum(annualSeries)
-      .attr("fill", "none")
-      .attr("stroke", color(theme))
-      .attr("stroke-width", isPhoneLayout() ? gs(1.5) : s(2.5))
-      .attr("opacity", 0.95)
-      .attr("d", annualLine);
-
-    g.selectAll(`.annual-dot-${theme.replace(/[^a-z0-9]/gi, "")}`)
-      .data(annualSeries)
-      .join("circle")
-      .attr("cx", (d) => x(d.year))
-      .attr("cy", (d) => y(d.count))
-      .attr("r", (d) => (d.count > 0 ? (isPhoneLayout() ? gs(2.5) : s(4)) : 0))
-      .attr("fill", color(theme))
-      .attr("stroke", CCN_COLORS.navy)
-      .attr("stroke-width", isPhoneLayout() ? gs(1) : s(1.5))
-      .on("mousemove", (event, d) => {
-        const cum = cumulative.get(String(d.year))?.get(theme) || 0;
-        showTooltip(
-          `<strong>${d.theme}</strong><br/>${d.year}: ${d.count} submissions<br/>Cumulative: ${cum}`,
-          event
-        );
-      })
-      .on("mouseleave", hideTooltip);
-  });
-
-  g.append("g")
-    .attr("transform", `translate(0,${innerH})`)
-    .call((sel) => {
-      const axis = d3
-        .axisBottom(x)
-        .tickFormat(d3.format("d"))
-        .tickSizeOuter(0)
-        .tickPadding(isPhoneLayout() ? gs(8) : s(16));
-      if (isPhoneLayout()) axis.tickValues(years);
-      sel.call(axis);
-    })
-    .call(styleThemeAxisLabels)
-    .call((sel) => sel.selectAll("text").attr("dy", isPhoneLayout() ? gs(8) : s(14)))
-    .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
-
-  g.append("g")
-    .call(d3.axisLeft(y).ticks(isPhoneLayout() ? 4 : 5).tickPadding(isPhoneLayout() ? gs(2) : s(8)))
-    .call(styleThemeAxisLabels)
-    .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
-
-  svg
-    .append("text")
-    .attr("class", "y-axis-title")
-    .attr("transform", `translate(${yTitleCenterX}, ${margin.top + innerH / 2}) rotate(-90)`)
-    .attr("text-anchor", "middle")
-    .attr("dominant-baseline", "middle")
-    .attr("fill", CCN_COLORS.muted)
-    .style("font-size", isPhoneLayout() ? `${yTitleFontPx}px` : themeFs(10))
-    .text(yTitleText);
-
-  const legendLeft = isPhoneLayout() ? 6 : margin.left;
-  const legendWidth = isPhoneLayout() ? width - 12 : width - margin.left - margin.right;
-  const legend = svg.append("g").attr("transform", `translate(${legendLeft}, ${chartHeight + legendGap})`);
-  const colWidth = legendWidth / legendCols;
-  const legendLineWidth = isPhoneLayout() ? gs(8) : s(14);
-  const legendTextX = isPhoneLayout() ? gs(11) : s(18);
-  const legendItems = legend
-    .selectAll("g")
-    .data(themes)
-    .join("g")
-    .attr("transform", (_, i) => {
-      const col = i % legendCols;
-      const row = Math.floor(i / legendCols);
-      return `translate(${col * colWidth}, ${row * legendRowHeight})`;
-    });
-
-  legendItems
-    .append("line")
-    .attr("x1", 0)
-    .attr("x2", legendLineWidth)
-    .attr("y1", legendFont * 0.6)
-    .attr("y2", legendFont * 0.6)
-    .attr("stroke", (d) => color(d))
-    .attr("stroke-width", isPhoneLayout() ? gs(1.5) : s(2.5));
-
-  legendItems
-    .append("text")
-    .attr("x", legendTextX)
-    .attr("y", legendFont * 0.72)
-    .attr("fill", CCN_COLORS.muted)
-    .style("font-size", isPhoneLayout() ? chartThemeFs(7) : themeFs(9))
-    .text((d) => fitLegendLabel(d, colWidth - legendTextX, legendFont));
-
-  svg
-    .append("text")
-    .attr("x", legendLeft)
-    .attr("y", chartHeight + legendGap + legendBlock + (isPhoneLayout() ? gs(6) : s(12)))
-    .attr("fill", CCN_COLORS.muted)
-    .style("font-size", isPhoneLayout() ? chartThemeFs(7) : themeFs(9))
-    .text("Solid = annual count · dashed = cumulative total");
 }
 
 function renderResearchThemeTotals(submissions) {
@@ -1851,15 +1696,13 @@ function renderAll() {
   removeChartScrollWrappers();
   const submissions = filteredSubmissions();
   const primaryCounts = primaryThemeCounts(submissions);
-  const secondaryCounts = secondaryTopicCounts(submissions);
 
   renderKpis(submissions);
   renderThemeSelect(primaryCounts);
   renderYearChart();
   renderThemeBars(primaryCounts);
   renderTopicChart(submissions);
-  renderWordCloud(secondaryCounts);
-  renderResearchThemesOverTime(submissions);
+  renderThemeMixChart();
   renderResearchThemeTotals(submissions);
   renderResearchThemeDeltas(submissions);
   renderClusterBars();

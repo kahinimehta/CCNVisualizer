@@ -1,6 +1,6 @@
 # CCN Submission Visualizer
 
-Interactive exploration of CCN poster and paper archives (2018–2026).
+Interactive exploration of CCN poster and paper archives (2017–2026).
 
 ## Data
 
@@ -27,8 +27,7 @@ The live dashboard reads **`data/abstracts.csv`** — one row per submission wit
 
 | Panel | What it counts |
 |-------|----------------|
-| Theme ranking / donut / over time | Each assigned topic separately (multi-tagged submissions count in every matching theme) |
-| Word cloud | Frequency of assigned topics in the current filter |
+| Theme ranking / donut / theme mix | Each assigned topic separately; theme mix shows % share within each year |
 | Embedding map | 2026 UMAP layout colored by `cluster_track` |
 | Paper list | All assigned topics + cluster track when present |
 
@@ -37,7 +36,8 @@ The live dashboard reads **`data/abstracts.csv`** — one row per submission wit
 ```bash
 pip install -r scripts/requirements.txt
 python scripts/scrape_ccn.py              # rebuild JSON from ccneuro.org
-python scripts/backfill_pdf_keywords.py # 2018-2019 keywords from proceedings PDFs
+python scripts/add_2017_archive.py       # scrape 2017 proceedings PDFs
+python scripts/backfill_pdf_keywords.py  # PDF keywords for 2017-2019, 2022-2023
 python scripts/build_abstracts_csv.py     # regenerate abstracts.csv from JSON
 ```
 

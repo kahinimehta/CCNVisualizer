@@ -9,7 +9,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
   <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/d3-cloud@1.2.7/build/d3.layout.cloud.min.js"></script>
 </head>
 <body>
   <div class="app-shell">
@@ -33,7 +32,7 @@
         <div class="brand">
           <div class="brand-text">
             <h1>Submission Visualizer</h1>
-            <p class="brand-subtitle">Cognitive Computational Neuroscience · Submission Archives 2018–2026</p>
+            <p class="brand-subtitle">Cognitive Computational Neuroscience · Submission Archives 2017–2026</p>
           </div>
           <div class="header-divider" aria-hidden="true"></div>
         </div>
@@ -81,8 +80,8 @@
 
         <section class="card card-full theme-analytics">
           <div class="card-header">
-            <h2>Research themes over time</h2>
-            <p class="card-sub" id="themes-over-time-sub">Annual counts per assigned research theme</p>
+            <h2>Theme mix by year</h2>
+            <p class="card-sub" id="themes-over-time-sub">Share of assigned research themes within each conference year</p>
           </div>
           <div id="themes-over-time-chart"></div>
 
@@ -127,14 +126,6 @@
                 <p class="card-sub">Share of submissions by primary theme</p>
               </div>
               <div id="topic-chart"></div>
-            </section>
-
-            <section class="card" id="word-cloud-section">
-              <div class="card-header">
-                <h2>Secondary topics</h2>
-                <p class="card-sub">Additional theme tags assigned to submissions</p>
-              </div>
-              <div id="word-cloud"></div>
             </section>
 
             <section class="card">

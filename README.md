@@ -1,6 +1,6 @@
 # Submission Visualizer
 
-Interactive dashboard for poster and paper submissions across the [Cognitive Computational Neuroscience (CCN)](https://ccneuro.org) conference archives (2018–2026).
+Interactive dashboard for poster and paper submissions across the [Cognitive Computational Neuroscience (CCN)](https://ccneuro.org) conference archives (2017–2026).
 
 **Live site:** https://ccn-visualizer.vercel.app/
 
@@ -10,7 +10,7 @@ Interactive dashboard for poster and paper submissions across the [Cognitive Com
 
 ## Overview
 
-- Archive data (`2018`–`2025`) was scraped once from ccneuro.org and is treated as static
+- Archive data (`2017`–`2025`) was scraped once from ccneuro.org and is treated as static
 - **2026** posters are merged from `data/ccn-2026-pending-posters.csv` — this is the only data that gets updated going forward
 - Research themes are the 12 meetup topics from the [Google Form](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform); submissions can carry **multiple assigned topics** plus a **cluster track** for 2026 audit
 - The live dashboard reads **`docs/data/abstracts.csv`** (built from JSON) — one row per submission with author keywords, extracted keywords, abstract, assigned topics, and cluster track
@@ -22,12 +22,11 @@ Interactive dashboard for poster and paper submissions across the [Cognitive Com
 | Research theme filter | Dropdown of all 12 Google Form topics with counts |
 | Submissions over time | Line chart by conference year |
 | Research theme ranking | Horizontal bars, full theme names |
-| Themes over time | Annual (solid) + cumulative (dashed) lines per theme |
+| Theme mix by year | Stacked share of assigned themes within each conference year |
 | Theme totals & YoY change | All-time bars + year-pair delta |
 | Abstract embedding map | 2026 UMAP scatter, colored by cluster track; click to filter |
 | Matching submissions | Searchable list with assigned topic tags and cluster track |
 | Primary themes donut | Share of submissions by primary theme |
-| Secondary topics cloud | Frequency of secondary theme tags |
 
 ## Research themes
 
@@ -36,7 +35,7 @@ The 12 primary topics come from [**CCN 2026 Activity Preferences**](https://docs
 | Years | Assignment method |
 |-------|-------------------|
 | 2025, 2026 | Official CCN topic label → Google theme (`CCN_TOPIC_MAP`) |
-| 2018–2019 | Proceedings PDF keyword line → `author_keywords` (algo fallback if PDF missing) |
+| 2017–2019, 2022–2023 | Proceedings PDF keyword line → `author_keywords` |
 | 2018–2024 (other) | Keyword + text scoring; 2026 papers also get a soft embedding-cluster boost |
 
 See [docs/DASHBOARD.md](docs/DASHBOARD.md) for the full topic list, label map, and why Vision skew was fixed.
@@ -45,6 +44,7 @@ See [docs/DASHBOARD.md](docs/DASHBOARD.md) for the full topic list, label map, a
 
 | Years | Source | Updates? |
 |-------|--------|----------|
+| 2017 | `index.html@p=618.html` proceedings PDFs | Static |
 | 2018–2019 | `Papers/AcceptedPapers.html` | Static |
 | 2022–2023 | `accepted_papers.html` | Static |
 | 2024–2025 | MeetingTrakr poster sessions | Static |
@@ -112,7 +112,8 @@ scripts/
   scrape_ccn.py                 # One-time archive scraper
   merge_2026_csv.py             # Merge/replace 2026 CSV (primary update path)
   build_cluster_viz.py          # UMAP export for dashboard
-  backfill_pdf_keywords.py      # 2018-2019 author keywords from proceedings PDFs
+  add_2017_archive.py           # Scrape 2017 proceedings PDFs
+  backfill_pdf_keywords.py      # PDF author keywords for legacy years
   build_abstracts_csv.py        # Export audit CSV for the dashboard
   assign_research_themes.py     # Google topic assignment + CSV export
   ccn_abstract_clustering.ipynb # Collaborator embedding notebook

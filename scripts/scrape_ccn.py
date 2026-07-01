@@ -177,7 +177,7 @@ def resolve_keyword_fields(
     return [], extracted, extracted
 
 
-PDF_KEYWORD_YEARS = (2018, 2019)
+PDF_KEYWORD_YEARS = (2018, 2019)  # legacy backfill fallback only
 
 
 def backfill_keyword_fields(payload: dict) -> dict:
@@ -196,7 +196,7 @@ def backfill_keyword_fields(payload: dict) -> dict:
             abstract=submission.get("abstract", ""),
         )
 
-        if year in PDF_KEYWORD_YEARS and not author_keywords and not extracted_keywords:
+        if year in (2018, 2019) and not author_keywords and not extracted_keywords:
             legacy = list(submission.get("keywords") or [])
             if legacy:
                 extracted_keywords = legacy
@@ -485,7 +485,7 @@ def scrape_legacy_year(year: int, listing_path: str, link_pattern: str) -> list[
         track = detail.get("track", "")
 
         pdf_keywords: list[str] = []
-        if year in PDF_KEYWORD_YEARS:
+        if year in (2018, 2019, 2022, 2023):
             try:
                 from pdf_keywords import keywords_from_detail_html
 
@@ -548,7 +548,108 @@ def scrape_legacy_year(year: int, listing_path: str, link_pattern: str) -> list[
     return submissions
 
 
+def parse_2017_listing(html: str, base_url: str) -> list[dict]:
+    soup = BeautifulSoup(html, "lxml")
+    rows: list[dict] = []
+    for tr in soup.select("table tr"):
+        link = tr.find("a", href=re.compile(r"abstract_(\d+)\.pdf"))
+        if not link:
+            continue
+        match = re.search(r"abstract_(\d+)\.pdf", link.get("href", ""))
+        if not match:
+            continue
+        cells = [clean_text(td.get_text(" ", strip=True)) for td in tr.find_all("td")]
+        if len(cells) < 4:
+            continue
+        paper_id = match.group(1)
+        pdf_href = link.get("href", "")
+        rows.append(
+            {
+                "id": paper_id,
+                "year": 2017,
+                "title": cells[2],
+                "authors": cells[3],
+                "pdf_url": urljoin(base_url, pdf_href),
+            }
+        )
+    deduped = {row["id"]: row for row in rows}
+    return list(deduped.values())
+
+
+def scrape_2017_year() -> list[Submission]:
+    from pdf_keywords import fetch_pdf_bytes, extract_pdf_text, parse_2017_pdf_fields
+
+    base_url = "https://2017.ccneuro.org/"
+    listing_url = urljoin(base_url, "index.html@p=618.html")
+    print(f"Fetching {listing_url}")
+    listing_html = fetch(listing_url)
+    listings = parse_2017_listing(listing_html, base_url)
+    print(f"  Found {len(listings)} papers for 2017")
+
+    submissions: list[Submission] = []
+
+    def fetch_paper(item: dict) -> Submission:
+        pdf_bytes = fetch_pdf_bytes(item["pdf_url"])
+        pdf_fields = parse_2017_pdf_fields(extract_pdf_text(pdf_bytes))
+        topic_area = pdf_fields.get("topic_area", "") or ""
+        title = item.get("title", "")
+        abstract = pdf_fields.get("abstract", "")
+        pdf_keywords = list(pdf_fields.get("keywords") or [])
+        author_keywords, extracted_keywords, keywords = resolve_keyword_fields(
+            author_keywords=pdf_keywords,
+            topic_area=topic_area,
+            title=title,
+            abstract=abstract,
+        )
+        return Submission(
+            id=item["id"],
+            year=2017,
+            title=title,
+            authors=item.get("authors", ""),
+            abstract=abstract,
+            author_keywords=author_keywords,
+            extracted_keywords=extracted_keywords,
+            keywords=keywords,
+            topic_area=topic_area,
+            track=topic_area,
+            source_url=item["pdf_url"],
+            submission_type="poster",
+        )
+
+    with ThreadPoolExecutor(max_workers=6) as executor:
+        futures = {executor.submit(fetch_paper, item): item for item in listings}
+        for future in as_completed(futures):
+            item = futures[future]
+            try:
+                submissions.append(future.result())
+            except Exception as exc:  # noqa: BLE001
+                print(f"  Warning: failed 2017 paper {item.get('id')}: {exc}")
+                author_keywords, extracted_keywords, keywords = resolve_keyword_fields(
+                    author_keywords=[],
+                    topic_area="",
+                    title=item.get("title", ""),
+                )
+                submissions.append(
+                    Submission(
+                        id=item["id"],
+                        year=2017,
+                        title=item.get("title", ""),
+                        authors=item.get("authors", ""),
+                        abstract="",
+                        author_keywords=author_keywords,
+                        extracted_keywords=extracted_keywords,
+                        keywords=keywords,
+                        source_url=item.get("pdf_url", ""),
+                        submission_type="poster",
+                    )
+                )
+
+    submissions.sort(key=lambda s: s.title.lower())
+    return submissions
+
+
 YEAR_CONFIGS = [
+    {"year": 2017, "kind": "ccn2017"},
     {"year": 2018, "kind": "legacy", "listing_path": "Papers/AcceptedPapers.html", "link_pattern": r"ViewPaper"},
     {"year": 2019, "kind": "legacy", "listing_path": "Papers/AcceptedPapers.html", "link_pattern": r"ViewPaper"},
     {"year": 2022, "kind": "legacy", "listing_path": "accepted_papers.html", "link_pattern": r"view_paper"},
@@ -612,6 +713,8 @@ def scrape_all(years: Iterable[int] | None = None) -> dict:
         try:
             if config["kind"] == "meetingtrakr":
                 submissions = scrape_meetingtrakr_year(year)
+            elif config["kind"] == "ccn2017":
+                submissions = scrape_2017_year()
             else:
                 submissions = scrape_legacy_year(
                     year,
@@ -626,7 +729,7 @@ def scrape_all(years: Iterable[int] | None = None) -> dict:
     payload = {
         "metadata": {
             "scraped_at": datetime.now(timezone.utc).isoformat(),
-            "source": "https://ccneuro.org archives (2018-2025)",
+            "source": "https://ccneuro.org archives (2017-2025)",
             "years": sorted({s.year for s in all_submissions}),
             "total_count": len(all_submissions),
         },

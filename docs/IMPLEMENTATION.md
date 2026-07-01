@@ -16,7 +16,7 @@ ccneuro.org archives  →  submissions.json  →  abstracts.csv  →  dashboard 
 
 | Source | Years | Field |
 |--------|-------|-------|
-| Proceedings PDF keyword line | 2018–2019 | `author_keywords` |
+| Proceedings PDF keyword line | 2017–2019, 2022–2023 | `author_keywords` |
 | Author Keywords on poster page | 2024–2025 | `author_keywords` |
 | 2026 CSV primary/secondary areas | 2026 | `author_keywords` |
 | Official topic / track label | 2025, 2022–2023 | used for theme matching when author keywords missing |
