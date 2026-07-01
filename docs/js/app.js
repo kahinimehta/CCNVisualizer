@@ -824,6 +824,7 @@ function researchThemeDeltas(submissions) {
         delta: toCount - fromCount,
       };
     })
+    .filter((row) => row.fromCount > 0 || row.toCount > 0)
     .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
 
   return { pair, rows };
