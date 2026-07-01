@@ -673,15 +673,27 @@ function tokenize(text) {
     ?.filter((t) => !THEME_STOPWORDS.has(t)) || [];
 }
 
-function researchThemeNames() {
-  if (state.googleTopics?.enabled && state.googleTopics.topics?.length) {
-    return state.googleTopics.topics;
-  }
-  const discovered = new Set();
+function globalThemeTotals() {
+  const totals = new Map();
   state.data?.submissions?.forEach((submission) => {
-    assignedTopics(submission).forEach((topic) => discovered.add(topic));
+    [...new Set(assignedTopics(submission))].forEach((topic) => {
+      totals.set(topic, (totals.get(topic) || 0) + 1);
+    });
   });
-  return [...discovered].sort((a, b) => a.localeCompare(b));
+  return totals;
+}
+
+function researchThemeNames() {
+  const totals = globalThemeTotals();
+  const hasAssignments = (theme) => (totals.get(theme) || 0) > 0;
+
+  if (state.googleTopics?.enabled && state.googleTopics.topics?.length) {
+    return state.googleTopics.topics.filter(hasAssignments);
+  }
+
+  return [...totals.keys()]
+    .filter(hasAssignments)
+    .sort((a, b) => a.localeCompare(b));
 }
 
 function embeddingClusterMap() {
@@ -1227,6 +1239,7 @@ function renderResearchThemeTotals(submissions) {
   const totals = themeTotals(submissions);
   const data = themes
     .map((theme) => ({ theme, count: totals.get(theme) || 0 }))
+    .filter((item) => item.count > 0)
     .sort((a, b) => b.count - a.count);
 
   if (!data.length) {
@@ -1380,7 +1393,13 @@ function renderClusterBars() {
   const countMap = new Map(counts.map((item) => [item.text, item.count]));
   const data = themes
     .map((name) => ({ name, count: countMap.get(name) || 0 }))
+    .filter((item) => item.count > 0)
     .sort((a, b) => b.count - a.count);
+
+  if (!data.length) {
+    container.append("p").style("color", CCN_COLORS.muted).text("No matching themes in current filter.");
+    return;
+  }
 
   if (isPhoneLayout()) {
     const color = d3.scaleOrdinal(CHART_PALETTE).domain(data.map((d) => d.name));
