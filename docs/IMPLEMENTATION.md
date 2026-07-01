@@ -16,10 +16,11 @@ ccneuro.org archives  →  submissions.json  →  abstracts.csv  →  dashboard 
 
 | Source | Years | Field |
 |--------|-------|-------|
+| Proceedings PDF keyword line | 2018–2019 | `author_keywords` |
 | Author Keywords on poster page | 2024–2025 | `author_keywords` |
 | 2026 CSV primary/secondary areas | 2026 | `author_keywords` |
 | Official topic / track label | 2025, 2022–2023 | used for theme matching when author keywords missing |
-| Title/abstract token fallback | 2018–2019 | `extracted_keywords` |
+| Title/abstract token fallback | 2018–2019 | `extracted_keywords` only when proceedings PDF has no keyword line |
 
 ## Theme assignment
 

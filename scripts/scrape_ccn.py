@@ -139,7 +139,7 @@ def tokenize(text: str) -> list[str]:
 
 
 def derive_archive_keywords(title: str, abstract: str, limit: int = 6) -> list[str]:
-    """Fallback for archive years that never published author keyword fields."""
+    """Fallback when proceedings PDFs and HTML pages lack a keyword line."""
     derived: list[str] = []
     derived.extend(tokenize(title)[:4])
     if abstract and abstract != title and "@" not in abstract:
@@ -177,6 +177,9 @@ def resolve_keyword_fields(
     return [], extracted, extracted
 
 
+PDF_KEYWORD_YEARS = (2018, 2019)
+
+
 def backfill_keyword_fields(payload: dict) -> dict:
     """Populate author_keywords / extracted_keywords on existing JSON without re-scraping."""
     for submission in payload.get("submissions", []):
@@ -193,7 +196,7 @@ def backfill_keyword_fields(payload: dict) -> dict:
             abstract=submission.get("abstract", ""),
         )
 
-        if year in (2018, 2019) and not author_keywords and not extracted_keywords:
+        if year in PDF_KEYWORD_YEARS and not author_keywords and not extracted_keywords:
             legacy = list(submission.get("keywords") or [])
             if legacy:
                 extracted_keywords = legacy
@@ -480,8 +483,18 @@ def scrape_legacy_year(year: int, listing_path: str, link_pattern: str) -> list[
             title = item.get("title", title)
         abstract = detail.get("abstract", "")
         track = detail.get("track", "")
+
+        pdf_keywords: list[str] = []
+        if year in PDF_KEYWORD_YEARS:
+            try:
+                from pdf_keywords import keywords_from_detail_html
+
+                pdf_keywords = keywords_from_detail_html(detail_html, base_url)
+            except Exception:  # noqa: BLE001
+                pdf_keywords = []
+
         author_keywords, extracted_keywords, keywords = resolve_keyword_fields(
-            author_keywords=detail.get("keywords", []),
+            author_keywords=pdf_keywords or detail.get("keywords", []),
             track=track,
             title=title,
             abstract=abstract,

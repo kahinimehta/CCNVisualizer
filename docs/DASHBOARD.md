@@ -10,7 +10,7 @@ The live dashboard reads **`data/abstracts.csv`** — one row per submission wit
 |--------|---------|
 | `title`, `first_author`, `year`, `authors` | Bibliographic fields |
 | `author_keywords` | Keywords authors provided (or 2026 CSV research areas) |
-| `extracted_keywords` | Algorithm tokens for 2018–2019 archives without author keyword fields |
+| `extracted_keywords` | Algorithm tokens only when author keywords are unavailable |
 | `abstract` | Full abstract text |
 | `assigned_topics` | Research themes matched from keywords (multiple allowed, ` \| ` separated) |
 | `umap_x`, `umap_y` | Map coordinates for 2026 |
@@ -36,8 +36,9 @@ The live dashboard reads **`data/abstracts.csv`** — one row per submission wit
 
 ```bash
 pip install -r scripts/requirements.txt
-python scripts/scrape_ccn.py          # rebuild JSON from ccneuro.org
-python scripts/build_abstracts_csv.py # regenerate abstracts.csv from JSON
+python scripts/scrape_ccn.py              # rebuild JSON from ccneuro.org
+python scripts/backfill_pdf_keywords.py # 2018-2019 keywords from proceedings PDFs
+python scripts/build_abstracts_csv.py     # regenerate abstracts.csv from JSON
 ```
 
 The scraper also writes `abstracts.csv` automatically after theme assignment.

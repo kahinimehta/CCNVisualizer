@@ -301,8 +301,8 @@ def apply_assignments(payload: dict, embeddings: dict) -> dict:
         "else archive text fallback for 2018-2019); 2026 embedding clusters add a soft boost only"
     )
     payload["metadata"]["keyword_source"] = (
-        "author_keywords when present; else official topic/track labels; "
-        "else title/abstract tokens for 2018-2019 archives without keyword fields"
+        "author_keywords from poster pages, proceedings PDFs (2018-2019), or 2026 CSV; "
+        "else official topic/track labels; else title/abstract tokens only when PDF/HTML keywords missing"
     )
     keyword_years = sorted({sub["year"] for sub in payload["submissions"] if sub.get("keywords")})
     payload["metadata"]["keyword_years"] = keyword_years

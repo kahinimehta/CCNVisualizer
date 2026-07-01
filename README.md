@@ -36,7 +36,8 @@ The 12 primary topics come from [**CCN 2026 Activity Preferences**](https://docs
 | Years | Assignment method |
 |-------|-------------------|
 | 2025, 2026 | Official CCN topic label → Google theme (`CCN_TOPIC_MAP`) |
-| 2018–2024 | Keyword + text scoring; 2026 papers also get a soft embedding-cluster boost |
+| 2018–2019 | Proceedings PDF keyword line → `author_keywords` (algo fallback if PDF missing) |
+| 2018–2024 (other) | Keyword + text scoring; 2026 papers also get a soft embedding-cluster boost |
 
 See [docs/DASHBOARD.md](docs/DASHBOARD.md) for the full topic list, label map, and why Vision skew was fixed.
 
@@ -111,6 +112,7 @@ scripts/
   scrape_ccn.py                 # One-time archive scraper
   merge_2026_csv.py             # Merge/replace 2026 CSV (primary update path)
   build_cluster_viz.py          # UMAP export for dashboard
+  backfill_pdf_keywords.py      # 2018-2019 author keywords from proceedings PDFs
   build_abstracts_csv.py        # Export audit CSV for the dashboard
   assign_research_themes.py     # Google topic assignment + CSV export
   ccn_abstract_clustering.ipynb # Collaborator embedding notebook
