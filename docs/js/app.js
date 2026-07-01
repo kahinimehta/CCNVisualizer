@@ -657,6 +657,24 @@ function themeCountsByYear(submissions) {
   return counts;
 }
 
+function submissionCountByYear(submissions) {
+  const totals = new Map();
+  submissions.forEach((item) => {
+    const year = String(item.year);
+    totals.set(year, (totals.get(year) || 0) + 1);
+  });
+  return totals;
+}
+
+function themeShareOfSubmissions(count, yearTotal) {
+  return yearTotal > 0 ? (count / yearTotal) * 100 : 0;
+}
+
+function formatDeltaPct(value, digits = 1) {
+  const rounded = value.toFixed(digits);
+  return `${value >= 0 ? "+" : ""}${rounded}%`;
+}
+
 function latestComparableYearPair(years, byYear, themes) {
   const sorted = [...years].sort((a, b) => a - b);
   for (let i = sorted.length - 1; i > 0; i -= 1) {
@@ -684,17 +702,27 @@ function researchThemeDeltas(submissions, fromYear, toYear) {
   }
   if (!pair) return { pair: null, rows: [] };
 
+  const yearTotals = submissionCountByYear(submissions);
+  const fromYearTotal = yearTotals.get(pair.fromYear) || 0;
+  const toYearTotal = yearTotals.get(pair.toYear) || 0;
+
   const rows = themes
     .map((theme) => {
       const fromCount = byYear.get(pair.fromYear)?.get(theme) || 0;
       const toCount = byYear.get(pair.toYear)?.get(theme) || 0;
+      const fromPct = themeShareOfSubmissions(fromCount, fromYearTotal);
+      const toPct = themeShareOfSubmissions(toCount, toYearTotal);
       return {
         theme,
         fromYear: pair.fromYear,
         toYear: pair.toYear,
         fromCount,
         toCount,
-        delta: toCount - fromCount,
+        fromYearTotal,
+        toYearTotal,
+        fromPct,
+        toPct,
+        delta: toPct - fromPct,
       };
     })
     .filter((row) => row.fromCount > 0 || row.toCount > 0)
@@ -1028,7 +1056,15 @@ function renderResearchThemeDeltas(submissions) {
   state.deltaToYear = pair.toYear;
   d3.select("#delta-from-year").property("value", pair.fromYear);
   d3.select("#delta-to-year").property("value", pair.toYear);
-  sub.text(`${pair.fromYear} → ${pair.toYear} · change in theme assignments`);
+  sub.text(`${pair.fromYear} → ${pair.toYear} · change in share of submissions (percentage points)`);
+
+  const deltaTooltip = (d) =>
+    [
+      `<strong>${d.theme}</strong>`,
+      `${d.fromYear}: ${d.fromCount} / ${d.fromYearTotal} (${d.fromPct.toFixed(1)}%)`,
+      `${d.toYear}: ${d.toCount} / ${d.toYearTotal} (${d.toPct.toFixed(1)}%)`,
+      `Change: ${formatDeltaPct(d.delta)}`,
+    ].join("<br/>");
 
   if (isPhoneLayout()) {
     renderPhoneThemeBarChart(container, {
@@ -1036,12 +1072,8 @@ function renderResearchThemeDeltas(submissions) {
       getLabel: (d) => d.theme,
       getValue: (d) => Math.abs(d.delta),
       getBarFill: (d) => (d.delta >= 0 ? CCN_COLORS.green : CCN_COLORS.pink),
-      onBarTooltip: (event, d) =>
-        showTooltip(
-          `<strong>${d.theme}</strong><br/>${d.fromYear}: ${d.fromCount}<br/>${d.toYear}: ${d.toCount}<br/>Change: ${d.delta >= 0 ? "+" : ""}${d.delta}`,
-          event
-        ),
-      valueFormat: (_, d) => `${d.delta >= 0 ? "+" : ""}${d.delta}`,
+      onBarTooltip: (event, d) => showTooltip(deltaTooltip(d), event),
+      valueFormat: (_, d) => formatDeltaPct(d.delta),
     });
     return;
   }
@@ -1071,12 +1103,7 @@ function renderResearchThemeDeltas(submissions) {
     .attr("width", (d) => x(Math.abs(d.delta)))
     .attr("fill", (d) => (d.delta >= 0 ? CCN_COLORS.green : CCN_COLORS.pink))
     .attr("rx", s(4))
-    .on("mousemove", (event, d) =>
-      showTooltip(
-        `<strong>${d.theme}</strong><br/>${d.fromYear}: ${d.fromCount}<br/>${d.toYear}: ${d.toCount}<br/>Change: ${d.delta >= 0 ? "+" : ""}${d.delta}`,
-        event
-      )
-    )
+    .on("mousemove", (event, d) => showTooltip(deltaTooltip(d), event))
     .on("mouseleave", hideTooltip);
 
   drawThemeBarLabels(g, rows, y, (d) => d.theme);
@@ -1090,7 +1117,7 @@ function renderResearchThemeDeltas(submissions) {
     .attr("dy", "0.35em")
     .attr("fill", CCN_COLORS.white)
     .style("font-size", themeFs(10))
-    .text((d) => `${d.delta >= 0 ? "+" : ""}${d.delta}`);
+    .text((d) => formatDeltaPct(d.delta));
 }
 
 function pointMatchesThemeFilter(point) {
