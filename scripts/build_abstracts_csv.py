@@ -7,6 +7,7 @@ import re
 from pathlib import Path
 
 from text_encoding import repair_mojibake
+from topic_features import content_keywords, sanitize_keyword_list
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_PATH = ROOT / "data" / "submissions.json"
@@ -102,14 +103,8 @@ def keyword_fields(submission: dict) -> tuple[list[str], list[str]]:
 
 
 def dashboard_keywords(submission: dict) -> list[str]:
-    """Keywords column: extracted tokens first, author-provided fallback."""
-    _author, extracted = keyword_fields(submission)
-    if extracted:
-        return extracted
-    author = list(submission.get("author_keywords") or [])
-    if author:
-        return author
-    return list(submission.get("keywords") or [])
+    """Keywords column: cleaned content keywords (metadata/citation fragments removed)."""
+    return content_keywords(submission) or sanitize_keyword_list(list(submission.get("keywords") or []))
 
 
 def assigned_topics(submission: dict) -> list[str]:

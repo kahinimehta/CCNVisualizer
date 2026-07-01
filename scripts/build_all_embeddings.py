@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build 2D UMAP coordinates for all submissions (TF-IDF on title + abstract)."""
+"""Build 2D UMAP coordinates for all submissions (weighted TF-IDF on title + abstract)."""
 
 from __future__ import annotations
 
@@ -7,9 +7,11 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
-import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from umap import UMAP
+
+from text_encoding import repair_submission_text
+from topic_features import submission_embedding_text, vectorizer_stop_words
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_PATH = ROOT / "data" / "submissions.json"
@@ -24,13 +26,6 @@ UMAP_PARAMS = {
 }
 
 
-def submission_text(submission: dict) -> str:
-    title = (submission.get("title") or "").strip()
-    abstract = (submission.get("abstract") or "").strip()
-    blob = f"{title}. {abstract}".strip()
-    return blob or title or "empty"
-
-
 def build_payload(submissions: list[dict] | None = None) -> dict:
     if submissions is None:
         if not DATA_PATH.exists():
@@ -41,13 +36,17 @@ def build_payload(submissions: list[dict] | None = None) -> dict:
     if not submissions:
         raise SystemExit("No submissions found.")
 
-    texts = [submission_text(sub) for sub in submissions]
+    for submission in submissions:
+        repair_submission_text(submission)
+
+    texts = [submission_embedding_text(sub) for sub in submissions]
     vectorizer = TfidfVectorizer(
         max_features=8000,
-        stop_words="english",
+        stop_words=vectorizer_stop_words(),
         min_df=2,
         max_df=0.95,
         ngram_range=(1, 2),
+        sublinear_tf=True,
     )
     matrix = vectorizer.fit_transform(texts)
     coords = UMAP(**UMAP_PARAMS).fit_transform(matrix)
@@ -71,7 +70,10 @@ def build_payload(submissions: list[dict] | None = None) -> dict:
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "count": len(points),
             "years": years,
-            "method": "TF-IDF (title + abstract) + UMAP 2D, cosine metric",
+            "method": (
+                "Weighted TF-IDF (title x2, abstract x3, cleaned keywords x1; metadata keywords "
+                "excluded) + UMAP 2D, cosine metric"
+            ),
         },
         "points": points,
     }

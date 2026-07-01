@@ -22,9 +22,11 @@ ccneuro.org archives  →  submissions.json  →  abstracts.csv
 
 1. **`scrape_ccn.py`** — fetches submissions, resolves keywords, merges 2026 CSV.  
 2. **`pdf_keywords.py`** — keyword resolution: HTML → PDF → token fallback.  
-3. **`assign_research_themes.py`** — scores each submission against the 12 Google Form themes; writes `assigned_topics` in priority order (primary first, then secondaries).  
-4. **`build_all_embeddings.py`** — TF-IDF on title + abstract, UMAP 2D for every row.  
+3. **`assign_research_themes.py`** — TF-IDF cosine similarity to topic prototype anchors; relevance-threshold multi-label assignment; also rebuilds UMAP + CSV.  
+4. **`build_all_embeddings.py`** — weighted TF-IDF (title ×2, abstract ×3, cleaned keywords ×1) + UMAP 2D; metadata keywords excluded.  
 5. **`build_abstracts_csv.py`** — exports the dashboard CSV with core columns plus precomputed map coords and links.
+
+Shared helpers live in **`topic_features.py`** (metadata keyword stoplist, citation cleanup, anchor sets) and **`text_encoding.py`** (UTF-8 mojibake repair).
 
 ## CSV schema
 
@@ -42,30 +44,33 @@ The CSV is exported as **UTF-8 with BOM** (`utf-8-sig`). `text_encoding.repair_m
 
 ## Keyword column
 
-`keywords` in the CSV stores extraction-pipeline output:
+`keywords` in the CSV stores **cleaned content keywords** (citation fragments and conference metadata area labels removed):
 
-1. `extracted_keywords` when present (title/abstract token fallback)  
-2. otherwise `author_keywords` (HTML, PDF, or 2026 CSV areas)  
+1. `author_keywords` when present (HTML, PDF, or substantive author text)  
+2. otherwise `extracted_keywords` (title/abstract token fallback)  
 3. otherwise legacy `keywords` on the submission record  
 
 ## Theme assignment
 
+`topic_features.py` defines prototype anchor sets per theme. Scoring uses **weighted TF-IDF cosine similarity**:
+
+- **Input text:** title ×2, abstract ×3, cleaned keywords ×1  
+- **Excluded:** metadata area labels (`psychological / behavioral research`, `fmri`, `eeg`, etc.) and citation fragments (`et al.`, `p.`, DOIs)
+
 Priority when building `assigned_topics`:
 
 1. Official CCN topic/track label → mapped Google Form theme (specific labels only)  
-2. Keyword scoring against the theme lexicon — **title matches count double** (phrases like `conscious vision` beat generic area keywords)  
-3. Soft boost from broad area labels such as `psychological / behavioral research` (nudge only; never override title/abstract)  
-4. Optional soft boost from 2026 Gemma embedding cluster mapped to the same 12 themes (internal to `assign_research_themes.py` only)
+2. Cosine similarity to topic prototypes — primary = highest score  
+3. **Multi-label threshold:** keep topics scoring ≥ `max_score × 0.5` (floor 0.05), capped at 5  
+4. Soft boost from broad area labels such as `psychological / behavioral research` (nudge only; never override title/abstract)  
+5. Optional soft boost from 2026 Gemma embedding cluster
+
+**LLMs, reasoning, interpretability** uses a strict LLM-specific anchor set (transformer, GPT, prompting, RLHF, chain-of-thought, etc.). General interpretability / RNN / symbolic-reasoning terms anchor **Methods, theory & everything else**.
 
 There is no separate cluster label in the CSV — only the 12 research themes.
 
 ## Embedding map
 
-- Coordinates come from `umap_x` / `umap_y` in the CSV  
+- Coordinates come from `umap_x` / `umap_y` in the CSV (same weighted TF-IDF input as theme scoring, metadata keywords excluded)  
 - Each dot is colored by its **primary** assigned topic (fixed 12-color palette); click/tap to jump to the submission and view all topics in the list
 - Map respects the same year / search / topic filters as the paper list  
-
-## Frontend notes
-
-- Pie-slice colors index into `GOOGLE_FORM_TOPICS` in `app.js`  
-- Year-over-year theme chart ignores the year filter so cross-year trends stay visible  

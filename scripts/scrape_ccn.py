@@ -105,6 +105,9 @@ def clean_text(text: str) -> str:
 def parse_keyword_field(raw: str) -> list[str]:
     if not raw:
         return []
+    from topic_features import normalize_keyword_phrase, strip_citation_fragments
+
+    raw = strip_citation_fragments(raw)
     normalized = (
         raw.replace("\u2003", "\u0001")
         .replace("\u00a0", " ")
@@ -114,22 +117,26 @@ def parse_keyword_field(raw: str) -> list[str]:
     keywords = []
     for part in parts:
         kw = clean_text(part)
+        kw = normalize_keyword_phrase(kw)
         if kw and len(kw) > 2:
-            keywords.append(kw.lower())
+            keywords.append(kw)
     return keywords
 
 
 def normalize_author_keywords(keywords: list[str]) -> list[str]:
+    from topic_features import is_metadata_keyword, normalize_keyword_phrase
+
     blocked = {"view pdf", "view paper pdf", "extended abstract", "search papers"}
     seen: set[str] = set()
     normalized: list[str] = []
     for kw in keywords:
-        cleaned = clean_text(kw).lower()
+        cleaned = normalize_keyword_phrase(clean_text(kw))
         if (
             cleaned
             and cleaned not in seen
             and cleaned not in blocked
             and cleaned not in NOISE_KEYWORDS
+            and not is_metadata_keyword(cleaned)
         ):
             seen.add(cleaned)
             normalized.append(cleaned)
