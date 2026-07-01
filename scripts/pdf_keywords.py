@@ -12,6 +12,7 @@ from urllib.parse import urljoin
 from pypdf import PdfReader
 
 from scrape_ccn import SESSION, clean_text, normalize_author_keywords, parse_keyword_field, resolve_keyword_fields
+from topic_features import sanitize_keyword_list, strip_citation_fragments
 
 ROOT = Path(__file__).resolve().parents[1]
 CACHE_DIR = ROOT / "data" / "pdf_cache"

@@ -69,9 +69,7 @@ Pipeline scripts produce `submissions.json`; the CSV export is the dashboard art
 pip install -r scripts/requirements.txt
 python scripts/scrape_ccn.py              # rebuild submissions.json
 python scripts/backfill_pdf_keywords.py   # refresh keywords
-python scripts/assign_research_themes.py  # assign the 12 topics (ordered)
-python scripts/build_all_embeddings.py    # UMAP coordinates → embeddings_all.json
-python scripts/build_abstracts_csv.py     # write data/abstracts.csv + docs/data/abstracts.csv
+python scripts/assign_research_themes.py  # themes + UMAP + abstracts.csv
 ```
 
-`build_abstracts_csv.py` can compute UMAP on the fly if `embeddings_all.json` is missing, but running `build_all_embeddings.py` first is recommended.
+`assign_research_themes.py` runs theme assignment, rebuilds `embeddings_all.json`, and writes both copies of `abstracts.csv`. You can also run `build_all_embeddings.py` or `build_abstracts_csv.py` individually.
