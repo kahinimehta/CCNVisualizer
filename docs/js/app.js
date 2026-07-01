@@ -393,6 +393,15 @@ function csvRowToSubmission(row) {
   };
 }
 
+function buildStatsFromSubmissions(submissions) {
+  const countsByYear = {};
+  submissions.forEach((item) => {
+    const year = String(item.year);
+    countsByYear[year] = (countsByYear[year] || 0) + 1;
+  });
+  return { counts_by_year: countsByYear };
+}
+
 function buildStateFromCsv(rows) {
   const submissions = rows.map(csvRowToSubmission);
   const years = [...new Set(submissions.map((item) => item.year))].sort((a, b) => a - b);
@@ -403,6 +412,7 @@ function buildStateFromCsv(rows) {
       total_count: submissions.length,
       source: "abstracts.csv",
     },
+    stats: buildStatsFromSubmissions(submissions),
   };
 }
 
@@ -802,7 +812,7 @@ function themeLegendTooltip(themeName) {
 }
 
 function renderKpis(filtered) {
-  const { metadata, stats } = state.data;
+  const { metadata } = state.data;
   const cards = [
     { label: "Total submissions", value: metadata.total_count.toLocaleString(), icon: "submissions", tone: "blue" },
     { label: "Matching filter", value: filtered.length.toLocaleString(), icon: "filter", tone: "pink" },
