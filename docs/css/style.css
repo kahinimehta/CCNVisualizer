@@ -606,6 +606,16 @@ svg {
   border: 1px solid var(--border);
   border-radius: calc(12px * var(--ui-scale));
   padding: 0.8rem 0.9rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.paper-item.highlighted {
+  border-color: var(--ccn-pink);
+  box-shadow: 0 0 0 1px rgba(244, 199, 195, 0.35);
+}
+
+.embedding-theme-field {
+  min-width: min(100%, calc(220px * var(--ui-scale)));
 }
 
 .paper-item h3 {
