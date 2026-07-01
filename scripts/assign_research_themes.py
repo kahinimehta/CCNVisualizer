@@ -208,7 +208,7 @@ def assign_themes(
     topics: list[str],
     embedding_lookup: dict[str, str],
     cluster_map: dict[str, str],
-) -> tuple[str, list[str]]:
+) -> tuple[str, list[str], list[str], str]:
     sub_id = submission.get("id", "")
     poster = str(submission.get("poster_number") or "")
     cluster = embedding_lookup.get(sub_id) or embedding_lookup.get(f"2026-{poster}")
@@ -242,7 +242,9 @@ def assign_themes(
             secondary.append(theme)
         if len(secondary) >= 3:
             break
-    return primary, secondary[:3]
+    google_secondaries = [theme for theme in secondary if theme in topics]
+    assigned_topics = list(dict.fromkeys([primary, *google_secondaries]))
+    return primary, secondary[:3], assigned_topics, cluster or ""
 
 
 def compute_theme_stats(submissions: list[dict], topics: list[str]) -> dict:
@@ -251,14 +253,15 @@ def compute_theme_stats(submissions: list[dict], topics: list[str]) -> dict:
     secondary_totals: Counter = Counter()
 
     for sub in submissions:
-        primary = sub.get("primary_theme")
-        if not primary:
-            continue
-        year = str(sub["year"])
-        by_year[year][primary] += 1
-        totals[primary] += 1
-        for topic in sub.get("secondary_topics", []):
-            secondary_totals[topic] += 1
+        for topic in sub.get("assigned_topics") or []:
+            if not topic:
+                continue
+            year = str(sub["year"])
+            by_year[year][topic] += 1
+            totals[topic] += 1
+        for topic in sub.get("secondary_topics") or []:
+            if topic in topics:
+                secondary_totals[topic] += 1
 
     return {
         "research_themes": topics,
@@ -281,11 +284,13 @@ def apply_assignments(payload: dict, embeddings: dict) -> dict:
             embedding_lookup[f"2026-{point['poster_number']}"] = point["cluster_name"]
 
     for submission in payload["submissions"]:
-        primary, secondary = assign_themes(
+        primary, secondary, assigned_topics, cluster_track = assign_themes(
             submission, topics, embedding_lookup, cluster_map
         )
         submission["primary_theme"] = primary
         submission["secondary_topics"] = secondary
+        submission["assigned_topics"] = assigned_topics
+        submission["cluster_track"] = cluster_track
 
     payload.setdefault("stats", {})
     payload["stats"]["research_themes"] = compute_theme_stats(payload["submissions"], topics)
@@ -325,6 +330,14 @@ def main() -> None:
 
     payload = apply_assignments(payload, embeddings)
     write_payload(payload)
+
+    try:
+        from build_abstracts_csv import build_from_payload
+
+        build_from_payload(payload, embeddings)
+    except Exception as exc:  # noqa: BLE001
+        print(f"Warning: abstracts.csv export skipped: {exc}")
+
     print(f"Assigned themes to {len(payload['submissions'])} submissions.")
 
 

@@ -318,6 +318,8 @@ const KPI_ICONS = {
     '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M4 10h16"/><path d="M8 14h3"/><path d="M13 14h3"/></svg>',
 };
 
+const LIST_DELIMITER = " | ";
+
 const state = {
   data: null,
   embeddings: null,
@@ -325,6 +327,7 @@ const state = {
   selectedYear: "all",
   search: "",
   selectedTheme: "",
+  selectedCluster: "",
 };
 
 let tooltip = null;
@@ -358,25 +361,105 @@ function showError(message) {
   grid.innerHTML = `<section class="card card-full"><p style="color:#f4c7c3;margin:0;">${message}</p></section>`;
 }
 
+function splitField(value) {
+  if (!value) return [];
+  return String(value)
+    .split(LIST_DELIMITER)
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+function csvRowToSubmission(row) {
+  const umapX = row.umap_x === "" || row.umap_x == null ? null : Number(row.umap_x);
+  const umapY = row.umap_y === "" || row.umap_y == null ? null : Number(row.umap_y);
+  const authorKeywords = splitField(row.author_keywords);
+  const extractedKeywords = splitField(row.extracted_keywords);
+  return {
+    id: row.id,
+    year: Number(row.year),
+    title: row.title || "",
+    authors: row.authors || "",
+    first_author: row.first_author || "",
+    abstract: row.abstract || "",
+    author_keywords: authorKeywords,
+    extracted_keywords: extractedKeywords,
+    keywords: [...authorKeywords, ...extractedKeywords],
+    assigned_topics: splitField(row.assigned_topics),
+    cluster_track: row.cluster_track || "",
+    umap_x: Number.isFinite(umapX) ? umapX : null,
+    umap_y: Number.isFinite(umapY) ? umapY : null,
+    source_url: row.source_url || "",
+    poster_number: row.poster_number || "",
+  };
+}
+
+function buildStateFromCsv(rows) {
+  const submissions = rows.map(csvRowToSubmission);
+  const years = [...new Set(submissions.map((item) => item.year))].sort((a, b) => a - b);
+  return {
+    submissions,
+    metadata: {
+      years,
+      total_count: submissions.length,
+      source: "abstracts.csv",
+    },
+  };
+}
+
+function buildEmbeddingsFromSubmissions(submissions, embeddingsJson) {
+  if (embeddingsJson?.points?.length) return embeddingsJson;
+  const points = submissions
+    .filter((item) => item.umap_x != null && item.umap_y != null)
+    .map((item) => ({
+      id: item.id,
+      poster_number: item.poster_number,
+      x: item.umap_x,
+      y: item.umap_y,
+      title: item.title,
+      abstract: item.abstract,
+      cluster_name: item.cluster_track,
+      year: item.year,
+    }));
+  if (!points.length) return null;
+  const clusterCounts = new Map();
+  points.forEach((point) => {
+    if (!point.cluster_name) return;
+    clusterCounts.set(point.cluster_name, (clusterCounts.get(point.cluster_name) || 0) + 1);
+  });
+  return {
+    points,
+    clusters: [...clusterCounts.entries()].map(([name, count], id) => ({ id, name, count })),
+  };
+}
+
+function assignedTopics(submission) {
+  if (submission.assigned_topics?.length) return submission.assigned_topics;
+  const fallback = [submission.primary_theme, ...(submission.secondary_topics || [])].filter(Boolean);
+  return [...new Set(fallback)];
+}
+
 function primaryTheme(submission) {
-  if (submission.primary_theme) return submission.primary_theme;
-  return submissionResearchTheme(submission);
+  return assignedTopics(submission)[0] || null;
 }
 
 function secondaryTopics(submission) {
-  return submission.secondary_topics || [];
+  const topics = assignedTopics(submission);
+  return topics.length > 1 ? topics.slice(1) : [];
 }
 
 function submissionMatchesSearch(item, search) {
-  const theme = primaryTheme(item);
-  const secondaries = secondaryTopics(item);
-  return (
-    item.title.toLowerCase().includes(search) ||
-    item.authors.toLowerCase().includes(search) ||
-    (theme || "").toLowerCase().includes(search) ||
-    secondaries.some((topic) => topic.toLowerCase().includes(search)) ||
-    (item.topic_area || "").toLowerCase().includes(search)
-  );
+  const haystack = [
+    item.title,
+    item.authors,
+    item.abstract,
+    item.cluster_track,
+    ...assignedTopics(item),
+    ...(item.author_keywords || []),
+    ...(item.extracted_keywords || []),
+  ]
+    .join(" ")
+    .toLowerCase();
+  return haystack.includes(search);
 }
 
 function filteredSubmissions() {
@@ -385,19 +468,20 @@ function filteredSubmissions() {
 
   return submissions.filter((item) => {
     const yearOk = state.selectedYear === "all" || String(item.year) === state.selectedYear;
-    const theme = primaryTheme(item);
     const searchOk = !search || submissionMatchesSearch(item, search);
-    const themeOk = !state.selectedTheme || theme === state.selectedTheme;
-    return yearOk && searchOk && themeOk;
+    const themeOk =
+      !state.selectedTheme || assignedTopics(item).includes(state.selectedTheme);
+    const clusterOk = !state.selectedCluster || item.cluster_track === state.selectedCluster;
+    return yearOk && searchOk && themeOk && clusterOk;
   });
 }
 
 function primaryThemeCounts(submissions) {
   const counts = new Map();
   submissions.forEach((item) => {
-    const theme = primaryTheme(item);
-    if (!theme) return;
-    counts.set(theme, (counts.get(theme) || 0) + 1);
+    [...new Set(assignedTopics(item))].forEach((theme) => {
+      counts.set(theme, (counts.get(theme) || 0) + 1);
+    });
   });
   return [...counts.entries()]
     .map(([text, count]) => ({ text, count }))
@@ -407,7 +491,7 @@ function primaryThemeCounts(submissions) {
 function secondaryTopicCounts(submissions) {
   const counts = new Map();
   submissions.forEach((item) => {
-    secondaryTopics(item).forEach((topic) => {
+    assignedTopics(item).forEach((topic) => {
       counts.set(topic, (counts.get(topic) || 0) + 1);
     });
   });
@@ -436,10 +520,11 @@ function researchThemeNames() {
   if (state.googleTopics?.enabled && state.googleTopics.topics?.length) {
     return state.googleTopics.topics;
   }
-  if (state.embeddings?.clusters?.length) {
-    return state.embeddings.clusters.map((c) => c.name);
-  }
-  return [];
+  const discovered = new Set();
+  state.data?.submissions?.forEach((submission) => {
+    assignedTopics(submission).forEach((topic) => discovered.add(topic));
+  });
+  return [...discovered].sort((a, b) => a.localeCompare(b));
 }
 
 function embeddingClusterMap() {
@@ -516,12 +601,12 @@ function submissionResearchTheme(submission) {
 function themeCountsByYear(submissions) {
   const counts = new Map();
   submissions.forEach((item) => {
-    const theme = primaryTheme(item);
-    if (!theme) return;
     const year = String(item.year);
     if (!counts.has(year)) counts.set(year, new Map());
     const yearMap = counts.get(year);
-    yearMap.set(theme, (yearMap.get(theme) || 0) + 1);
+    [...new Set(assignedTopics(item))].forEach((theme) => {
+      yearMap.set(theme, (yearMap.get(theme) || 0) + 1);
+    });
   });
   return counts;
 }
@@ -529,9 +614,9 @@ function themeCountsByYear(submissions) {
 function themeTotals(submissions) {
   const totals = new Map();
   submissions.forEach((item) => {
-    const theme = primaryTheme(item);
-    if (!theme) return;
-    totals.set(theme, (totals.get(theme) || 0) + 1);
+    [...new Set(assignedTopics(item))].forEach((theme) => {
+      totals.set(theme, (totals.get(theme) || 0) + 1);
+    });
   });
   return totals;
 }
@@ -617,7 +702,16 @@ function displaySubmissions() {
 function setThemeFilter(themeName) {
   const nextTheme = state.selectedTheme === themeName ? "" : themeName;
   state.selectedTheme = nextTheme;
+  state.selectedCluster = "";
   d3.select("#theme-select").property("value", state.selectedTheme);
+  renderAll();
+}
+
+function setClusterFilter(clusterName) {
+  const nextCluster = state.selectedCluster === clusterName ? "" : clusterName;
+  state.selectedCluster = nextCluster;
+  state.selectedTheme = "";
+  d3.select("#theme-select").property("value", "");
   renderAll();
 }
 
@@ -629,13 +723,17 @@ function embeddingActionHint(kind) {
 }
 
 function embeddingDefaultNote() {
+  if (state.selectedCluster) {
+    const clearHint = isTouchLike() ? "tap again to clear" : "click again to clear";
+    return `Showing submissions in cluster “${state.selectedCluster}” · ${clearHint}`;
+  }
   if (state.selectedTheme) {
     const clearHint = isTouchLike() ? "tap again to clear" : "click again to clear";
-    return `Showing submissions with primary theme “${state.selectedTheme}” · ${clearHint}`;
+    return `Showing submissions tagged with “${state.selectedTheme}” · ${clearHint}`;
   }
   return isTouchLike()
-    ? "Tap a point or legend to filter by primary research theme"
-    : "Click a point or legend to filter by primary research theme.";
+    ? "Tap a point or legend to filter by embedding cluster track"
+    : "Click a point or legend to filter by embedding cluster track.";
 }
 
 function renderEmbeddingNote(note) {
@@ -643,17 +741,19 @@ function renderEmbeddingNote(note) {
 }
 
 function embeddingPointTooltip(point) {
-  const primary = mapClusterToTheme(point.cluster_name);
+  const submission = state.data?.submissions?.find(
+    (item) =>
+      item.id === point.id ||
+      (item.year === 2026 && String(item.poster_number) === String(point.poster_number))
+  );
+  const assigned = submission ? assignedTopics(submission).join("; ") : "";
   const parts = [
     `<strong>${truncateLabel(point.title, s(72))}</strong>`,
-    point.poster_number ? `Poster #${point.poster_number} · 2026 pending` : "2026 pending",
-    `<strong>Primary theme:</strong> ${primary || "—"}`,
-    point.cluster_name && point.cluster_name !== primary
-      ? `<strong>Embedding cluster:</strong> ${point.cluster_name}`
-      : "",
+    point.poster_number ? `Poster #${point.poster_number} · 2026` : "2026",
+    `<strong>Cluster track:</strong> ${point.cluster_name || "—"}`,
+    assigned ? `<strong>Assigned topics:</strong> ${truncateLabel(assigned, s(72))}` : "",
   ];
-  if (point.primary_area) parts.push(`<strong>Area:</strong> ${truncateLabel(point.primary_area, s(48))}`);
-  parts.push(embeddingActionHint("point"));
+  parts.push(embeddingActionHint("cluster"));
   return parts.filter(Boolean).join("<br/>");
 }
 
@@ -1506,9 +1606,9 @@ function renderEmbeddingCluster() {
   const mobileLegend = useStackedChartLegend(width) || isPhoneLayout();
   const legendFont = isPhoneLayout() ? chartThemePx(7) : themeLabelPx(10);
   const legendItemHeight = isPhoneLayout() ? legendFont * 2.2 : legendFont * 1.5;
-  const themes = [...new Set(state.embeddings.points.map((d) => mapClusterToTheme(d.cluster_name)))];
+  const clusterTracks = [...new Set(points.map((d) => d.cluster_name).filter(Boolean))];
   const legendCols = isPhoneLayout() ? 1 : mobileLegend ? (width < 520 ? 1 : 2) : 1;
-  const legendRows = mobileLegend ? Math.ceil(themes.length / legendCols) : themes.length;
+  const legendRows = mobileLegend ? Math.ceil(clusterTracks.length / legendCols) : clusterTracks.length;
   const legendBlock = mobileLegend ? legendRows * legendItemHeight + (isPhoneLayout() ? gs(10) : s(16)) : 0;
   const margin = mobileLegend
     ? isPhoneLayout()
@@ -1523,7 +1623,7 @@ function renderEmbeddingCluster() {
   const plotHeight = mobileLegend ? margin.top + plotSide + margin.bottom : plotSide;
   const height = mobileLegend ? plotHeight + legendBlock : plotHeight;
   const svg = appendChartSvg(container, width, height);
-  const color = d3.scaleOrdinal(CHART_PALETTE).domain(themes);
+  const color = d3.scaleOrdinal(CHART_PALETTE).domain(clusterTracks);
   const plotBottom = mobileLegend ? plotHeight - margin.bottom : height - margin.bottom;
   const pointRadius = isPhoneLayout() ? { base: 2.2, selected: 3 } : { base: 5.5, selected: 7 };
 
@@ -1554,31 +1654,27 @@ function renderEmbeddingCluster() {
     .attr("class", "embedding-point")
     .attr("cx", (d) => x(d.x))
     .attr("cy", (d) => y(d.y))
-    .attr("r", (d) => {
-      const theme = mapClusterToTheme(d.cluster_name);
-      return state.selectedTheme && theme === state.selectedTheme
+    .attr("r", (d) =>
+      state.selectedCluster && d.cluster_name === state.selectedCluster
         ? (isPhoneLayout() ? gs(pointRadius.selected) : s(pointRadius.selected))
         : isPhoneLayout()
           ? gs(pointRadius.base)
-          : s(pointRadius.base);
-    })
-    .attr("fill", (d) => color(mapClusterToTheme(d.cluster_name)))
-    .attr("stroke", (d) => {
-      const theme = mapClusterToTheme(d.cluster_name);
-      return state.selectedTheme && theme === state.selectedTheme ? CCN_COLORS.pink : CCN_COLORS.navy;
-    })
-    .attr("stroke-width", (d) => {
-      const theme = mapClusterToTheme(d.cluster_name);
-      return state.selectedTheme && theme === state.selectedTheme
+          : s(pointRadius.base)
+    )
+    .attr("fill", (d) => color(d.cluster_name))
+    .attr("stroke", (d) =>
+      state.selectedCluster && d.cluster_name === state.selectedCluster ? CCN_COLORS.pink : CCN_COLORS.navy
+    )
+    .attr("stroke-width", (d) =>
+      state.selectedCluster && d.cluster_name === state.selectedCluster
         ? (isPhoneLayout() ? gs(1.5) : s(2))
         : isPhoneLayout()
           ? gs(0.75)
-          : s(1);
-    })
-    .attr("opacity", (d) => {
-      const theme = mapClusterToTheme(d.cluster_name);
-      return !state.selectedTheme || theme === state.selectedTheme ? 0.9 : 0.18;
-    })
+          : s(1)
+    )
+    .attr("opacity", (d) =>
+      !state.selectedCluster || d.cluster_name === state.selectedCluster ? 0.9 : 0.18
+    )
     .style("cursor", "pointer")
     .style("pointer-events", isTouchLike() ? "none" : "auto");
 
@@ -1595,14 +1691,14 @@ function renderEmbeddingCluster() {
       .style("cursor", "pointer")
       .on("click", (event, d) => {
         event.stopPropagation();
-        setThemeFilter(mapClusterToTheme(d.cluster_name));
+        setClusterFilter(d.cluster_name);
       });
   } else {
     svg
       .selectAll("circle.embedding-point")
       .on("mousemove", (event, d) => showTooltip(embeddingPointTooltip(d), event))
       .on("mouseleave", hideTooltip)
-      .on("click", (_, d) => setThemeFilter(mapClusterToTheme(d.cluster_name)));
+      .on("click", (_, d) => setClusterFilter(d.cluster_name));
   }
 
   const legend = svg.append("g");
@@ -1613,7 +1709,7 @@ function renderEmbeddingCluster() {
     legend.attr("transform", `translate(${margin.left}, ${plotHeight + (isPhoneLayout() ? gs(6) : s(8))})`);
     legend
       .selectAll("g")
-      .data(themes)
+      .data(clusterTracks)
       .join("g")
       .attr("transform", (_, i) => {
         const col = i % legendCols;
@@ -1621,8 +1717,8 @@ function renderEmbeddingCluster() {
         return `translate(${col * colWidth}, ${row * legendItemHeight})`;
       })
       .style("cursor", "pointer")
-      .on("click", (_, theme) => setThemeFilter(theme))
-      .on("mousemove", isTouchLike() ? null : (event, theme) => showTooltip(themeLegendTooltip(theme), event))
+      .on("click", (_, clusterName) => setClusterFilter(clusterName))
+      .on("mousemove", isTouchLike() ? null : (event, clusterName) => showTooltip(clusterLegendTooltip(clusterName), event))
       .on("mouseleave", isTouchLike() ? null : hideTooltip)
       .each(function appendMobileLegendItem() {
         const item = d3.select(this);
@@ -1633,13 +1729,13 @@ function renderEmbeddingCluster() {
           .attr("rx", isPhoneLayout() ? gs(2) : s(3))
           .attr("y", legendFont * 0.15)
           .attr("fill", (d) => color(d))
-          .attr("stroke", (d) => (d === state.selectedTheme ? CCN_COLORS.pink : "transparent"))
+          .attr("stroke", (d) => (d === state.selectedCluster ? CCN_COLORS.pink : "transparent"))
           .attr("stroke-width", isPhoneLayout() ? gs(1.5) : s(2));
         item
           .append("text")
           .attr("x", legendTextX)
           .attr("y", legendFont * 0.85)
-          .attr("fill", (d) => (d === state.selectedTheme ? CCN_COLORS.white : CCN_COLORS.muted))
+          .attr("fill", (d) => (d === state.selectedCluster ? CCN_COLORS.white : CCN_COLORS.muted))
           .style("font-size", isPhoneLayout() ? chartThemeFs(7) : themeFs(10))
           .text((d) => fitLegendLabel(d, colWidth - legendTextX, legendFont));
       });
@@ -1647,12 +1743,12 @@ function renderEmbeddingCluster() {
     const legendItems = legend
       .attr("transform", `translate(${width - margin.right + s(12)}, ${margin.top})`)
       .selectAll("g")
-      .data(themes)
+      .data(clusterTracks)
       .join("g")
       .attr("transform", (_, i) => `translate(0, ${i * legendItemHeight})`)
       .style("cursor", "pointer")
-      .on("click", (_, theme) => setThemeFilter(theme))
-      .on("mousemove", isTouchLike() ? null : (event, theme) => showTooltip(themeLegendTooltip(theme), event))
+      .on("click", (_, clusterName) => setClusterFilter(clusterName))
+      .on("mousemove", isTouchLike() ? null : (event, clusterName) => showTooltip(clusterLegendTooltip(clusterName), event))
       .on("mouseleave", isTouchLike() ? null : hideTooltip);
 
     legendItems
@@ -1662,14 +1758,14 @@ function renderEmbeddingCluster() {
       .attr("rx", s(3))
       .attr("y", legendFont * 0.15)
       .attr("fill", (d) => color(d))
-      .attr("stroke", (d) => (d === state.selectedTheme ? CCN_COLORS.pink : "transparent"))
+      .attr("stroke", (d) => (d === state.selectedCluster ? CCN_COLORS.pink : "transparent"))
       .attr("stroke-width", s(2));
 
     legendItems
       .append("text")
       .attr("x", s(18))
       .attr("y", legendFont * 0.85)
-      .attr("fill", (d) => (d === state.selectedTheme ? CCN_COLORS.white : CCN_COLORS.muted))
+      .attr("fill", (d) => (d === state.selectedCluster ? CCN_COLORS.white : CCN_COLORS.muted))
       .style("font-size", themeFs(10))
       .text((d) => d);
   }
@@ -1683,9 +1779,11 @@ function renderPaperList() {
   const countEl = d3.select("#results-count");
   countEl.selectAll("*").remove();
 
-  const countLabel = state.selectedTheme
-    ? `${submissions.length} submissions with primary theme “${state.selectedTheme}”`
-    : `${submissions.length} matching submissions`;
+  const countLabel = state.selectedCluster
+    ? `${submissions.length} submissions in cluster “${state.selectedCluster}”`
+    : state.selectedTheme
+      ? `${submissions.length} submissions tagged with “${state.selectedTheme}”`
+      : `${submissions.length} matching submissions`;
   countEl.append("span").text(countLabel);
 
   if (state.selectedTheme) {
@@ -1694,6 +1792,14 @@ function renderPaperList() {
       .attr("class", "cluster-filter-pill")
       .text("Clear theme filter ×")
       .on("click", () => setThemeFilter(state.selectedTheme));
+  }
+
+  if (state.selectedCluster) {
+    countEl
+      .append("span")
+      .attr("class", "cluster-filter-pill")
+      .text("Clear cluster filter ×")
+      .on("click", () => setClusterFilter(state.selectedCluster));
   }
 
   const items = list.selectAll(".paper-item").data(submissions).join("div").attr("class", "paper-item");
@@ -1711,14 +1817,14 @@ function renderPaperList() {
     .append("div")
     .attr("class", "meta")
     .text((d) => {
-      const primary = primaryTheme(d);
-      const secondaries = secondaryTopics(d);
-      const secondaryText = secondaries.length ? ` · also: ${secondaries.join(", ")}` : "";
-      return `${d.year}${d.poster_number ? ` · Poster ${d.poster_number}` : ""}${d.authors ? ` · ${d.authors}` : ""}${primary ? ` · ${primary}` : ""}${secondaryText}`;
+      const topics = assignedTopics(d);
+      const topicText = topics.length ? ` · topics: ${topics.join("; ")}` : "";
+      const clusterText = d.cluster_track ? ` · cluster: ${d.cluster_track}` : "";
+      return `${d.year}${d.poster_number ? ` · Poster ${d.poster_number}` : ""}${d.authors ? ` · ${d.authors}` : ""}${topicText}${clusterText}`;
     });
 
   items.each(function renderTags(d) {
-    const tagData = [primaryTheme(d), ...secondaryTopics(d)].filter(Boolean);
+    const tagData = assignedTopics(d);
     const tags = d3.select(this).append("div").attr("class", "keyword-tags");
     tags
       .selectAll(".keyword-tag")
@@ -1770,18 +1876,18 @@ async function loadOptionalJson(path) {
 async function init() {
   ensureD3();
 
-  const [submissionsRes, embeddings, googleTopics] = await Promise.all([
-    fetch("data/submissions.json"),
+  const [csvRows, embeddings, googleTopics] = await Promise.all([
+    d3.csv("data/abstracts.csv"),
     loadOptionalJson("data/embeddings_2026.json"),
     loadOptionalJson("data/google_topics.json"),
   ]);
 
-  if (!submissionsRes.ok) {
-    throw new Error(`Could not load data/submissions.json (${submissionsRes.status})`);
+  if (!csvRows?.length) {
+    throw new Error("Could not load data/abstracts.csv");
   }
 
-  state.data = await submissionsRes.json();
-  state.embeddings = embeddings;
+  state.data = buildStateFromCsv(csvRows);
+  state.embeddings = buildEmbeddingsFromSubmissions(state.data.submissions, embeddings);
   state.googleTopics = googleTopics;
   buildThemeClassifier();
 
@@ -1799,6 +1905,7 @@ async function init() {
 
   d3.select("#theme-select").on("change", (event) => {
     state.selectedTheme = event.target.value;
+    state.selectedCluster = "";
     renderAll();
   });
 

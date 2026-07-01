@@ -9,15 +9,20 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 
-from dataclasses import asdict
+from dataclasses import asdict, fields
 
-from scrape_ccn import Submission, compute_stats, resolve_submission_keywords, serialize_stats
+from scrape_ccn import Submission, compute_stats, resolve_keyword_fields, serialize_stats
 
 ROOT = Path(__file__).resolve().parents[1]
 CSV_PATH = ROOT / "data" / "ccn-2026-pending-posters.csv"
 DATA_PATH = ROOT / "data" / "submissions.json"
 DOCS_PATH = ROOT / "docs" / "data" / "submissions.json"
 YEAR = 2026
+SUBMISSION_FIELDS = {field.name for field in fields(Submission)}
+
+
+def submission_from_dict(item: dict) -> Submission:
+    return Submission(**{key: value for key, value in item.items() if key in SUBMISSION_FIELDS})
 
 
 def normalize_topic_area(primary: str, secondary: str = "") -> str:
@@ -48,7 +53,7 @@ def csv_row_to_submission(row: dict[str, str]) -> Submission:
     secondary = (row.get("secondary_area") or "").strip()
     topic_area = normalize_topic_area(primary, secondary)
     track = (row.get("track") or "").strip()
-    keywords = resolve_submission_keywords(
+    author_keywords, extracted_keywords, keywords = resolve_keyword_fields(
         author_keywords=author_keywords_from_csv(row),
         topic_area=topic_area,
     )
@@ -59,6 +64,8 @@ def csv_row_to_submission(row: dict[str, str]) -> Submission:
         title=title,
         authors="",
         abstract=abstract,
+        author_keywords=author_keywords,
+        extracted_keywords=extracted_keywords,
         keywords=keywords,
         topic_area=topic_area,
         track=track,
@@ -86,7 +93,7 @@ def merge_into_payload(payload: dict) -> dict:
         return payload
 
     kept_dicts = [s for s in payload.get("submissions", []) if s.get("year") != YEAR]
-    submission_objs = [Submission(**item) for item in kept_dicts] + csv_submissions
+    submission_objs = [submission_from_dict(item) for item in kept_dicts] + csv_submissions
 
     stats = compute_stats(submission_objs)
     years = sorted({s.year for s in submission_objs})

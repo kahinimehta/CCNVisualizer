@@ -70,6 +70,8 @@ class Submission:
     title: str
     authors: str = ""
     abstract: str = ""
+    author_keywords: list[str] = field(default_factory=list)
+    extracted_keywords: list[str] = field(default_factory=list)
     keywords: list[str] = field(default_factory=list)
     topic_area: str = ""
     track: str = ""
@@ -148,25 +150,59 @@ def derive_archive_keywords(title: str, abstract: str, limit: int = 6) -> list[s
     return derived[:limit]
 
 
-def resolve_submission_keywords(
+def resolve_keyword_fields(
     *,
     author_keywords: list[str],
     topic_area: str = "",
     track: str = "",
     title: str = "",
     abstract: str = "",
-) -> list[str]:
-    """Prefer author keywords, then official topic labels, then archive text fallback."""
+) -> tuple[list[str], list[str], list[str]]:
+    """Return author keywords, extracted keywords, and combined keywords for theme scoring."""
     author = normalize_author_keywords(author_keywords)
-    if author:
-        return author
+    extracted: list[str] = []
 
+    conference_label = ""
     for label in (topic_area, track):
         normalized = clean_text(label).lower()
         if normalized and normalized not in IGNORED_TOPIC_LABELS:
-            return [normalized]
+            conference_label = normalized
+            break
 
-    return normalize_author_keywords(derive_archive_keywords(title, abstract))
+    if author:
+        return author, extracted, author
+    if conference_label:
+        return [], extracted, [conference_label]
+    extracted = normalize_author_keywords(derive_archive_keywords(title, abstract))
+    return [], extracted, extracted
+
+
+def backfill_keyword_fields(payload: dict) -> dict:
+    """Populate author_keywords / extracted_keywords on existing JSON without re-scraping."""
+    for submission in payload.get("submissions", []):
+        year = submission.get("year")
+        raw_author = list(submission.get("author_keywords") or [])
+        if not raw_author and year in (2024, 2025, 2026):
+            raw_author = list(submission.get("keywords") or [])
+
+        author_keywords, extracted_keywords, keywords = resolve_keyword_fields(
+            author_keywords=raw_author,
+            topic_area=submission.get("topic_area", ""),
+            track=submission.get("track", ""),
+            title=submission.get("title", ""),
+            abstract=submission.get("abstract", ""),
+        )
+
+        if year in (2018, 2019) and not author_keywords and not extracted_keywords:
+            legacy = list(submission.get("keywords") or [])
+            if legacy:
+                extracted_keywords = legacy
+                keywords = legacy
+
+        submission["author_keywords"] = author_keywords
+        submission["extracted_keywords"] = extracted_keywords
+        submission["keywords"] = keywords
+    return payload
 
 
 def parse_meetingtrakr_listing(html: str, base_url: str, year: int) -> list[dict]:
@@ -371,7 +407,7 @@ def scrape_meetingtrakr_year(year: int) -> list[Submission]:
         topic_area = detail.get("topic_area") or item.get("topic_area", "")
         title = detail.get("title") or item.get("title", "")
         abstract = detail.get("abstract", "")
-        keywords = resolve_submission_keywords(
+        author_keywords, extracted_keywords, keywords = resolve_keyword_fields(
             author_keywords=detail.get("keywords", []),
             topic_area=topic_area,
             title=title,
@@ -383,6 +419,8 @@ def scrape_meetingtrakr_year(year: int) -> list[Submission]:
             title=title,
             authors=detail.get("authors") or item.get("authors", ""),
             abstract=abstract,
+            author_keywords=author_keywords,
+            extracted_keywords=extracted_keywords,
             keywords=keywords,
             topic_area=topic_area,
             poster_number=detail.get("poster_number") or item.get("poster_number", ""),
@@ -398,6 +436,11 @@ def scrape_meetingtrakr_year(year: int) -> list[Submission]:
                 submissions.append(future.result())
             except Exception as exc:  # noqa: BLE001
                 print(f"  Warning: failed {year} poster {item.get('id')}: {exc}")
+                author_keywords, extracted_keywords, keywords = resolve_keyword_fields(
+                    author_keywords=[],
+                    topic_area=item.get("topic_area", ""),
+                    title=item.get("title", ""),
+                )
                 submissions.append(
                     Submission(
                         id=item["id"],
@@ -405,11 +448,9 @@ def scrape_meetingtrakr_year(year: int) -> list[Submission]:
                         title=item.get("title", ""),
                         authors=item.get("authors", ""),
                         abstract="",
-                        keywords=resolve_submission_keywords(
-                            author_keywords=[],
-                            topic_area=item.get("topic_area", ""),
-                            title=item.get("title", ""),
-                        ),
+                        author_keywords=author_keywords,
+                        extracted_keywords=extracted_keywords,
+                        keywords=keywords,
                         topic_area=item.get("topic_area", ""),
                         poster_number=item.get("poster_number", ""),
                         source_url=item.get("detail_url", ""),
@@ -439,7 +480,7 @@ def scrape_legacy_year(year: int, listing_path: str, link_pattern: str) -> list[
             title = item.get("title", title)
         abstract = detail.get("abstract", "")
         track = detail.get("track", "")
-        keywords = resolve_submission_keywords(
+        author_keywords, extracted_keywords, keywords = resolve_keyword_fields(
             author_keywords=detail.get("keywords", []),
             track=track,
             title=title,
@@ -451,6 +492,8 @@ def scrape_legacy_year(year: int, listing_path: str, link_pattern: str) -> list[
             title=title,
             authors=detail.get("authors", ""),
             abstract=abstract,
+            author_keywords=author_keywords,
+            extracted_keywords=extracted_keywords,
             keywords=keywords,
             topic_area=track,
             track=track,
@@ -466,6 +509,11 @@ def scrape_legacy_year(year: int, listing_path: str, link_pattern: str) -> list[
                 submissions.append(future.result())
             except Exception as exc:  # noqa: BLE001
                 print(f"  Warning: failed {year} poster {item.get('id')}: {exc}")
+                author_keywords, extracted_keywords, keywords = resolve_keyword_fields(
+                    author_keywords=[],
+                    topic_area=item.get("topic_area", ""),
+                    title=item.get("title", ""),
+                )
                 submissions.append(
                     Submission(
                         id=item["id"],
@@ -473,11 +521,9 @@ def scrape_legacy_year(year: int, listing_path: str, link_pattern: str) -> list[
                         title=item.get("title", ""),
                         authors=item.get("authors", ""),
                         abstract="",
-                        keywords=resolve_submission_keywords(
-                            author_keywords=[],
-                            topic_area=item.get("topic_area", ""),
-                            title=item.get("title", ""),
-                        ),
+                        author_keywords=author_keywords,
+                        extracted_keywords=extracted_keywords,
+                        keywords=keywords,
                         topic_area=item.get("topic_area", ""),
                         poster_number=item.get("poster_number", ""),
                         source_url=item.get("detail_url", ""),
@@ -609,7 +655,22 @@ def assign_research_themes(payload: dict) -> dict:
 
 def write_outputs(payload: dict) -> dict:
     payload = merge_2026_csv(payload)
+    payload = backfill_keyword_fields(payload)
     payload = assign_research_themes(payload)
+    try:
+        from build_abstracts_csv import build_from_payload
+        import json
+        from pathlib import Path
+
+        embeddings_path = ROOT / "docs" / "data" / "embeddings_2026.json"
+        embeddings = None
+        if embeddings_path.exists():
+            with embeddings_path.open(encoding="utf-8") as fh:
+                embeddings = json.load(fh)
+        build_from_payload(payload, embeddings)
+    except Exception as exc:  # noqa: BLE001
+        print(f"Warning: abstracts.csv export skipped: {exc}")
+
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     DOCS_DATA_DIR.mkdir(parents=True, exist_ok=True)
 

@@ -12,8 +12,8 @@ Interactive dashboard for poster and paper submissions across the [Cognitive Com
 
 - Archive data (`2018`–`2025`) was scraped once from ccneuro.org and is treated as static
 - **2026** posters are merged from `data/ccn-2026-pending-posters.csv` — this is the only data that gets updated going forward
-- Research themes are the 12 meetup topics from the [Google Form](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform); every submission is classified with a **primary theme** plus optional **secondary topics**
-- Responsive single-column dashboard (3× UI scale, wide centered app shell) where all charts and filters use primary themes
+- Research themes are the 12 meetup topics from the [Google Form](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform); submissions can carry **multiple assigned topics** plus a **cluster track** for 2026 audit
+- The live dashboard reads **`docs/data/abstracts.csv`** (built from JSON) — one row per submission with author keywords, extracted keywords, abstract, assigned topics, and cluster track
 
 ## Dashboard features
 
@@ -24,8 +24,8 @@ Interactive dashboard for poster and paper submissions across the [Cognitive Com
 | Research theme ranking | Horizontal bars, full theme names |
 | Themes over time | Annual (solid) + cumulative (dashed) lines per theme |
 | Theme totals & YoY change | All-time bars + year-pair delta |
-| Abstract embedding map | 2026 UMAP scatter, colored by Google topic; click to filter |
-| Matching submissions | Searchable list with primary/secondary theme tags |
+| Abstract embedding map | 2026 UMAP scatter, colored by cluster track; click to filter |
+| Matching submissions | Searchable list with assigned topic tags and cluster track |
 | Primary themes donut | Share of submissions by primary theme |
 | Secondary topics cloud | Frequency of secondary theme tags |
 
@@ -65,7 +65,7 @@ python scripts/assign_research_themes.py
 
 Or trigger the **Update 2026 Data** GitHub Action (Actions → Update 2026 Data → Run workflow).
 
-This refreshes `submissions.json`, `embeddings_2026.json`, and theme assignments. Commit and push to deploy.
+This refreshes `submissions.json`, `abstracts.csv`, `embeddings_2026.json`, and theme assignments. Commit and push to deploy.
 
 ## Initial / full rebuild
 
@@ -111,7 +111,8 @@ scripts/
   scrape_ccn.py                 # One-time archive scraper
   merge_2026_csv.py             # Merge/replace 2026 CSV (primary update path)
   build_cluster_viz.py          # UMAP export for dashboard
-  assign_research_themes.py     # Google topic assignment
+  build_abstracts_csv.py        # Export audit CSV for the dashboard
+  assign_research_themes.py     # Google topic assignment + CSV export
   ccn_abstract_clustering.ipynb # Collaborator embedding notebook
 data/
   ccn-2026-pending-posters.csv  # Updated when new 2026 data arrives
@@ -122,6 +123,7 @@ docs/
   IMPLEMENTATION.md             # Data sources, algorithms, per-chart reference
   js/app.js
   css/style.css
+  data/abstracts.csv            # Dashboard source of truth (also in docs/data/)
   data/submissions.json
   data/embeddings_2026.json
   data/google_topics.json
