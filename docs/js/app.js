@@ -273,6 +273,10 @@ function themeBarPlotWidth(innerW, rows, formatValue) {
   return Math.max(s(48), innerW - reserve);
 }
 
+function themeBarLabelX(gap = 8) {
+  return -s(gap);
+}
+
 function drawThemeBarLabels(g, data, y, getLabel, options = {}) {
   const baseFont = options.baseFont ?? 10;
   const fill = options.fill ?? CCN_COLORS.muted;
