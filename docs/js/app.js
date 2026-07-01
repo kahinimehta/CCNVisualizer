@@ -265,8 +265,12 @@ function themeBarRowHeight() {
   return Math.max(s(36), themeLabelPx(10) * 1.3);
 }
 
-function themeBarLabelX(gap = 8) {
-  return -s(gap);
+function themeBarPlotWidth(innerW, rows, formatValue) {
+  const valueFont = themeLabelPx(10);
+  const maxLabelWidth =
+    d3.max(rows, (row) => measureTextWidth(formatValue(row), valueFont)) || measureTextWidth("+0.0%", valueFont);
+  const reserve = Math.max(maxLabelWidth + s(12), s(40));
+  return Math.max(s(48), innerW - reserve);
 }
 
 function drawThemeBarLabels(g, data, y, getLabel, options = {}) {
@@ -969,11 +973,12 @@ function renderThemeBars(counts) {
   const data = counts;
   const leftMargin = themeBarLabelWidth(width);
   const rowHeight = themeBarRowHeight();
-  const margin = { top: s(8), right: s(56), bottom: s(8), left: leftMargin };
+  const margin = { top: s(8), right: s(12), bottom: s(8), left: leftMargin };
   const height = margin.top + margin.bottom + data.length * rowHeight;
   const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`).attr("width", "100%").style("height", `${height}px`);
   const innerW = width - margin.left - margin.right;
-  const x = d3.scaleLinear().domain([0, d3.max(data, (d) => d.count) || 1]).range([0, innerW]);
+  const plotW = themeBarPlotWidth(innerW, data, (d) => String(d.count));
+  const x = d3.scaleLinear().domain([0, d3.max(data, (d) => d.count) || 1]).range([0, plotW]);
   const y = d3
     .scaleBand()
     .domain(data.map((d) => d.text))
@@ -1142,13 +1147,14 @@ function renderResearchThemeDeltas(submissions) {
   const width = container.node().clientWidth || s(480);
   const leftMargin = themeBarLabelWidth(width);
   const rowHeight = themeBarRowHeight();
-  const margin = { top: s(8), right: s(60), bottom: s(8), left: leftMargin };
+  const margin = { top: s(8), right: s(12), bottom: s(8), left: leftMargin };
   const height = margin.top + margin.bottom + rows.length * rowHeight;
   const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`).attr("width", "100%").style("height", `${height}px`);
   const innerW = width - margin.left - margin.right;
   const maxAbs = d3.max(rows, (d) => Math.abs(d.delta)) || 1;
+  const plotW = themeBarPlotWidth(innerW, rows, (d) => formatDeltaPct(d.delta));
   const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
-  const x = d3.scaleLinear().domain([0, maxAbs]).range([0, innerW]);
+  const x = d3.scaleLinear().domain([0, maxAbs]).range([0, plotW]);
   const y = d3
     .scaleBand()
     .domain(rows.map((d) => d.theme))
