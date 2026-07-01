@@ -90,6 +90,7 @@ def join_list(values: list[str]) -> str:
 
 
 def keyword_fields(submission: dict) -> tuple[list[str], list[str]]:
+    """Split stored author vs extracted keywords, with legacy fallbacks for older JSON."""
     author = list(submission.get("author_keywords") or [])
     extracted = list(submission.get("extracted_keywords") or [])
     if author or extracted:

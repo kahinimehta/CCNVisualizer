@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract author keywords from CCN legacy proceedings PDFs."""
+"""Extract and resolve author keywords from HTML pages and proceedings PDFs."""
 
 from __future__ import annotations
 
@@ -11,18 +11,25 @@ from urllib.parse import urljoin
 
 from pypdf import PdfReader
 
-from scrape_ccn import SESSION, clean_text, normalize_author_keywords, parse_keyword_field
+from scrape_ccn import SESSION, clean_text, normalize_author_keywords, parse_keyword_field, resolve_keyword_fields
 
 ROOT = Path(__file__).resolve().parents[1]
 CACHE_DIR = ROOT / "data" / "pdf_cache"
 
-PDF_KEYWORD_YEARS = (2017, 2018, 2019, 2022, 2023)
+# Years where proceedings / authored PDFs may contain a keyword line.
+YEARS_WITH_PDF = (2017, 2018, 2019, 2022, 2023, 2024, 2025)
+
+KEYWORD_SOURCE_NOTE = (
+    "author_keywords prefer author-provided fields (poster HTML, proceedings PDF, 2026 CSV); "
+    "extracted_keywords only when no author keywords or conference label is available"
+)
 
 
-def parse_legacy_pdf_url(html: str, base_url: str) -> str:
+def parse_pdf_url_from_html(html: str, base_url: str) -> str:
     for match in re.finditer(r'href=["\']([^"\']+\.pdf(?:\?[^"\']*)?)["\']', html, re.I):
         url = match.group(1)
-        if "proceedings" in url.lower() or "abstracts/" in url.lower() or url.lower().endswith(".pdf"):
+        lowered = url.lower()
+        if any(token in lowered for token in ("proceedings", "abstracts/", "/pdf/")) or lowered.endswith(".pdf"):
             return urljoin(base_url, url)
 
     onclick = re.search(r"window\.open\(['\"]([^'\"]+\.pdf[^'\"]*)['\"]", html, re.I)
@@ -43,7 +50,7 @@ def parse_proceedings_keywords(text: str) -> list[str]:
 
     normalized = normalize_pdf_text(text)
     match = re.search(
-        r"\bKeywords?\s*:\s*(.+?)(?:\bIntroduction\b|\b1\s+Introduction\b|\bBackground\b|\Z)",
+        r"\bKeywords?\s*:\s*(.+?)(?:\bIntroduction\b|\b1\s+Introduction\b|\bBackground\b|\bAbstract\b|\Z)",
         normalized,
         re.I | re.S,
     )
@@ -146,7 +153,124 @@ def keywords_from_pdf_url(url: str) -> list[str]:
 
 
 def keywords_from_detail_html(html: str, base_url: str) -> list[str]:
-    pdf_url = parse_legacy_pdf_url(html, base_url)
+    pdf_url = parse_pdf_url_from_html(html, base_url)
     if not pdf_url:
         return []
     return keywords_from_pdf_url(pdf_url)
+
+
+def author_keywords_from_pdf(
+    *,
+    year: int,
+    source_url: str,
+    detail_html: str | None = None,
+    fetch_html: bool = True,
+) -> list[str]:
+    if year not in YEARS_WITH_PDF:
+        return []
+
+    if year == 2017 and source_url.lower().endswith(".pdf"):
+        return keywords_from_pdf_url(source_url)
+
+    base_url = f"https://{year}.ccneuro.org/"
+    html = detail_html
+    if html is None and fetch_html and source_url and not source_url.lower().endswith(".pdf"):
+        html = SESSION.get(source_url, timeout=45).text
+
+    if html:
+        pdf_url = parse_pdf_url_from_html(html, base_url)
+        if pdf_url:
+            return keywords_from_pdf_url(pdf_url)
+    return []
+
+
+def initial_html_keywords(submission: dict) -> list[str]:
+    author = list(submission.get("author_keywords") or [])
+    if author:
+        return author
+
+    year = submission.get("year")
+    merged = list(submission.get("keywords") or [])
+    if merged and year in (2024, 2025, 2026):
+        return merged
+    return merged if merged and year not in YEARS_WITH_PDF else []
+
+
+def finalize_submission_keywords(
+    *,
+    year: int,
+    title: str,
+    abstract: str,
+    topic_area: str = "",
+    track: str = "",
+    source_url: str = "",
+    html_keywords: list[str] | None = None,
+    detail_html: str | None = None,
+    try_pdf: bool = True,
+) -> tuple[list[str], list[str], list[str]]:
+    """Prefer author keywords from HTML, then PDF; algorithmic tokens are last resort."""
+    author = normalize_author_keywords(html_keywords or [])
+
+    if not author and try_pdf:
+        pdf_keywords = author_keywords_from_pdf(
+            year=year,
+            source_url=source_url,
+            detail_html=detail_html,
+            fetch_html=detail_html is None,
+        )
+        if pdf_keywords:
+            author = pdf_keywords
+
+    if author:
+        return author, [], author
+
+    return resolve_keyword_fields(
+        author_keywords=[],
+        topic_area=topic_area,
+        track=track,
+        title=title,
+        abstract=abstract,
+    )
+
+
+def enrich_submission_keywords(
+    submission: dict,
+    *,
+    detail_html: str | None = None,
+    try_pdf: bool = True,
+) -> dict:
+    html_keywords = initial_html_keywords(submission)
+    if not html_keywords and detail_html:
+        from scrape_ccn import parse_meetingtrakr_detail
+
+        if "Keywords:" in detail_html or "fl-rich-text" in detail_html:
+            html_keywords = parse_meetingtrakr_detail(detail_html).get("keywords", [])
+
+    author_keywords, extracted_keywords, keywords = finalize_submission_keywords(
+        year=submission.get("year", 0),
+        title=submission.get("title", ""),
+        abstract=submission.get("abstract", ""),
+        topic_area=submission.get("topic_area", ""),
+        track=submission.get("track", ""),
+        source_url=submission.get("source_url", ""),
+        html_keywords=html_keywords,
+        detail_html=detail_html,
+        try_pdf=try_pdf,
+    )
+    submission["author_keywords"] = author_keywords
+    submission["extracted_keywords"] = extracted_keywords
+    submission["keywords"] = keywords
+    return submission
+
+
+def needs_pdf_keyword_refresh(submission: dict) -> bool:
+    if submission.get("author_keywords"):
+        return False
+    year = submission.get("year")
+    if year not in YEARS_WITH_PDF:
+        return False
+    return bool(submission.get("source_url"))
+
+
+# Backwards-compatible alias used by older scripts.
+PDF_KEYWORD_YEARS = YEARS_WITH_PDF

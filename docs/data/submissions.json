@@ -19,9 +19,9 @@
       "count": 617,
       "note": "Provisional — replace CSV and re-run merge when updated data is available."
     },
-    "research_themes_assigned_at": "2026-07-01T20:48:48.477716+00:00",
+    "research_themes_assigned_at": "2026-07-01T20:51:40.834845+00:00",
     "research_theme_method": "Google Form Q1 topics; official CCN topic labels mapped first; submission keywords matched to themes (author keywords, else topic/track, else archive text fallback for 2018-2019); 2026 embedding clusters add a soft boost only",
-    "keyword_source": "author_keywords from poster pages, proceedings PDFs (2018-2019), or 2026 CSV; else official topic/track labels; else title/abstract tokens only when PDF/HTML keywords missing",
+    "keyword_source": "author_keywords prefer poster HTML, proceedings/authored PDFs (2017-2025), or 2026 CSV; extracted_keywords only when no author keywords are available",
     "keyword_years": [
       2017,
       2018,

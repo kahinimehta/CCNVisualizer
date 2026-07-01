@@ -139,7 +139,7 @@ def tokenize(text: str) -> list[str]:
 
 
 def derive_archive_keywords(title: str, abstract: str, limit: int = 6) -> list[str]:
-    """Fallback when proceedings PDFs and HTML pages lack a keyword line."""
+    """Last-resort token fallback when author keywords are unavailable in HTML or PDF."""
     derived: list[str] = []
     derived.extend(tokenize(title)[:4])
     if abstract and abstract != title and "@" not in abstract:
@@ -158,7 +158,12 @@ def resolve_keyword_fields(
     title: str = "",
     abstract: str = "",
 ) -> tuple[list[str], list[str], list[str]]:
-    """Return author keywords, extracted keywords, and combined keywords for theme scoring."""
+    """Return author keywords, extracted keywords, and combined keywords for theme scoring.
+
+    Author keywords should be supplied from HTML or PDF before calling this helper.
+    Conference track/topic labels and title/abstract tokens are only used when author
+    keywords are missing.
+    """
     author = normalize_author_keywords(author_keywords)
     extracted: list[str] = []
 
@@ -177,34 +182,17 @@ def resolve_keyword_fields(
     return [], extracted, extracted
 
 
-PDF_KEYWORD_YEARS = (2018, 2019)  # legacy backfill fallback only
-
-
 def backfill_keyword_fields(payload: dict) -> dict:
     """Populate author_keywords / extracted_keywords on existing JSON without re-scraping."""
+    from pdf_keywords import KEYWORD_SOURCE_NOTE, enrich_submission_keywords, needs_pdf_keyword_refresh
+
     for submission in payload.get("submissions", []):
-        year = submission.get("year")
-        raw_author = list(submission.get("author_keywords") or [])
-        if not raw_author and year in (2024, 2025, 2026):
-            raw_author = list(submission.get("keywords") or [])
+        if needs_pdf_keyword_refresh(submission):
+            enrich_submission_keywords(submission, try_pdf=True)
+        else:
+            enrich_submission_keywords(submission, try_pdf=False)
 
-        author_keywords, extracted_keywords, keywords = resolve_keyword_fields(
-            author_keywords=raw_author,
-            topic_area=submission.get("topic_area", ""),
-            track=submission.get("track", ""),
-            title=submission.get("title", ""),
-            abstract=submission.get("abstract", ""),
-        )
-
-        if year in (2018, 2019) and not author_keywords and not extracted_keywords:
-            legacy = list(submission.get("keywords") or [])
-            if legacy:
-                extracted_keywords = legacy
-                keywords = legacy
-
-        submission["author_keywords"] = author_keywords
-        submission["extracted_keywords"] = extracted_keywords
-        submission["keywords"] = keywords
+    payload.setdefault("metadata", {})["keyword_source"] = KEYWORD_SOURCE_NOTE
     return payload
 
 
@@ -405,16 +393,21 @@ def scrape_meetingtrakr_year(year: int) -> list[Submission]:
     submissions: list[Submission] = []
 
     def fetch_detail(item: dict) -> Submission:
+        from pdf_keywords import finalize_submission_keywords
+
         detail_html = fetch(item["detail_url"])
         detail = parse_meetingtrakr_detail(detail_html)
         topic_area = detail.get("topic_area") or item.get("topic_area", "")
         title = detail.get("title") or item.get("title", "")
         abstract = detail.get("abstract", "")
-        author_keywords, extracted_keywords, keywords = resolve_keyword_fields(
-            author_keywords=detail.get("keywords", []),
-            topic_area=topic_area,
+        author_keywords, extracted_keywords, keywords = finalize_submission_keywords(
+            year=year,
             title=title,
             abstract=abstract,
+            topic_area=topic_area,
+            html_keywords=detail.get("keywords", []),
+            source_url=item["detail_url"],
+            detail_html=detail_html,
         )
         return Submission(
             id=item["id"],
@@ -476,6 +469,8 @@ def scrape_legacy_year(year: int, listing_path: str, link_pattern: str) -> list[
     submissions: list[Submission] = []
 
     def fetch_detail(item: dict) -> Submission:
+        from pdf_keywords import finalize_submission_keywords
+
         detail_html = fetch(item["detail_url"])
         detail = parse_legacy_detail(detail_html)
         title = detail.get("title") or item.get("title", "")
@@ -483,21 +478,13 @@ def scrape_legacy_year(year: int, listing_path: str, link_pattern: str) -> list[
             title = item.get("title", title)
         abstract = detail.get("abstract", "")
         track = detail.get("track", "")
-
-        pdf_keywords: list[str] = []
-        if year in (2018, 2019, 2022, 2023):
-            try:
-                from pdf_keywords import keywords_from_detail_html
-
-                pdf_keywords = keywords_from_detail_html(detail_html, base_url)
-            except Exception:  # noqa: BLE001
-                pdf_keywords = []
-
-        author_keywords, extracted_keywords, keywords = resolve_keyword_fields(
-            author_keywords=pdf_keywords or detail.get("keywords", []),
-            track=track,
+        author_keywords, extracted_keywords, keywords = finalize_submission_keywords(
+            year=year,
             title=title,
             abstract=abstract,
+            track=track,
+            source_url=item["detail_url"],
+            detail_html=detail_html,
         )
         return Submission(
             id=item["id"],
@@ -577,7 +564,7 @@ def parse_2017_listing(html: str, base_url: str) -> list[dict]:
 
 
 def scrape_2017_year() -> list[Submission]:
-    from pdf_keywords import fetch_pdf_bytes, extract_pdf_text, parse_2017_pdf_fields
+    from pdf_keywords import fetch_pdf_bytes, extract_pdf_text, finalize_submission_keywords, parse_2017_pdf_fields
 
     base_url = "https://2017.ccneuro.org/"
     listing_url = urljoin(base_url, "index.html@p=618.html")
@@ -594,12 +581,14 @@ def scrape_2017_year() -> list[Submission]:
         topic_area = pdf_fields.get("topic_area", "") or ""
         title = item.get("title", "")
         abstract = pdf_fields.get("abstract", "")
-        pdf_keywords = list(pdf_fields.get("keywords") or [])
-        author_keywords, extracted_keywords, keywords = resolve_keyword_fields(
-            author_keywords=pdf_keywords,
-            topic_area=topic_area,
+        author_keywords, extracted_keywords, keywords = finalize_submission_keywords(
+            year=2017,
             title=title,
             abstract=abstract,
+            topic_area=topic_area,
+            html_keywords=list(pdf_fields.get("keywords") or []),
+            source_url=item["pdf_url"],
+            try_pdf=True,
         )
         return Submission(
             id=item["id"],

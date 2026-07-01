@@ -1,56 +1,33 @@
 #!/usr/bin/env python3
-"""Backfill author keywords from proceedings PDFs and refresh theme assignments."""
+"""Refresh author keywords from HTML pages and proceedings PDFs."""
 
 from __future__ import annotations
 
 import json
-import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 from assign_research_themes import apply_assignments, write_payload
 from build_abstracts_csv import build_from_payload
-from pdf_keywords import PDF_KEYWORD_YEARS, keywords_from_detail_html, keywords_from_pdf_url
-from scrape_ccn import ROOT, fetch, resolve_keyword_fields
+from pdf_keywords import KEYWORD_SOURCE_NOTE, enrich_submission_keywords, needs_pdf_keyword_refresh
+from scrape_ccn import ROOT, fetch
 
 DATA_PATH = ROOT / "data" / "submissions.json"
 EMBEDDINGS_PATH = ROOT / "docs" / "data" / "embeddings_2026.json"
 
 
-def update_submission(submission: dict) -> tuple[str, bool, int]:
-    year = submission.get("year")
-    if year not in PDF_KEYWORD_YEARS:
-        return submission.get("id", ""), False, 0
-
-    pdf_keywords: list[str] = []
-    source_url = submission.get("source_url", "")
-    try:
-        if year == 2017 and source_url.lower().endswith(".pdf"):
-            pdf_keywords = keywords_from_pdf_url(source_url)
-        elif source_url:
-            base_url = f"https://{year}.ccneuro.org/"
-            detail_html = fetch(source_url)
-            pdf_keywords = keywords_from_detail_html(detail_html, base_url)
-    except Exception:
-        pdf_keywords = []
-
-    if pdf_keywords:
-        submission["author_keywords"] = pdf_keywords
-        submission["extracted_keywords"] = []
-        submission["keywords"] = pdf_keywords
-        return submission.get("id", ""), True, len(pdf_keywords)
-
-    author_keywords, extracted_keywords, keywords = resolve_keyword_fields(
-        author_keywords=[],
-        topic_area=submission.get("topic_area", ""),
-        track=submission.get("track", ""),
-        title=submission.get("title", ""),
-        abstract=submission.get("abstract", ""),
-    )
-    submission["author_keywords"] = author_keywords
-    submission["extracted_keywords"] = extracted_keywords
-    submission["keywords"] = keywords
-    return submission.get("id", ""), False, 0
+def refresh_submission(submission: dict) -> tuple[str, bool]:
+    had_author = bool(submission.get("author_keywords"))
+    if needs_pdf_keyword_refresh(submission):
+        try:
+            detail_html = fetch(submission["source_url"])
+        except Exception:
+            detail_html = None
+        enrich_submission_keywords(submission, detail_html=detail_html, try_pdf=True)
+    else:
+        enrich_submission_keywords(submission, try_pdf=False)
+    gained_author = bool(submission.get("author_keywords")) and not had_author
+    return submission.get("id", ""), gained_author
 
 
 def main() -> None:
@@ -60,23 +37,21 @@ def main() -> None:
     with DATA_PATH.open(encoding="utf-8") as fh:
         payload = json.load(fh)
 
-    targets = [sub for sub in payload["submissions"] if sub.get("year") in PDF_KEYWORD_YEARS]
-    print(f"Fetching PDF keywords for {len(targets)} submissions ({PDF_KEYWORD_YEARS})")
+    submissions = payload.get("submissions", [])
+    pdf_targets = [sub for sub in submissions if needs_pdf_keyword_refresh(sub)]
+    print(f"Refreshing keywords for {len(submissions)} submissions ({len(pdf_targets)} need PDF lookup)")
 
     updated = 0
     with ThreadPoolExecutor(max_workers=6) as executor:
-        futures = {executor.submit(update_submission, sub): sub for sub in targets}
+        futures = {executor.submit(refresh_submission, sub): sub for sub in submissions}
         for index, future in enumerate(as_completed(futures), start=1):
-            _, from_pdf, _ = future.result()
-            if from_pdf:
+            _, gained_author = future.result()
+            if gained_author:
                 updated += 1
-            if index % 50 == 0 or index == len(targets):
-                print(f"  processed {index}/{len(targets)} ({updated} from PDF)")
+            if index % 100 == 0 or index == len(submissions):
+                print(f"  processed {index}/{len(submissions)} ({updated} gained author keywords)")
 
-    payload["metadata"]["keyword_source"] = (
-        "author_keywords from poster pages, proceedings PDFs (2017-2019, 2022-2023), or 2026 CSV; "
-        "else official topic/track labels; else title/abstract tokens only when PDF/HTML keywords missing"
-    )
+    payload["metadata"]["keyword_source"] = KEYWORD_SOURCE_NOTE
 
     embeddings = None
     if EMBEDDINGS_PATH.exists():
@@ -86,7 +61,7 @@ def main() -> None:
 
     write_payload(payload)
     build_from_payload(payload, embeddings)
-    print(f"Done. PDF keywords for {updated}/{len(targets)} submissions.")
+    print(f"Done. {updated} submissions now have author keywords from HTML/PDF.")
 
 
 if __name__ == "__main__":

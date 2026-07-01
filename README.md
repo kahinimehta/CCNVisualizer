@@ -32,13 +32,13 @@ Interactive dashboard for poster and paper submissions across the [Cognitive Com
 
 The 12 primary topics come from [**CCN 2026 Activity Preferences**](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform), question 1. They are stored in `data/google_topics.json` and `docs/data/google_topics.json`.
 
-| Years | Assignment method |
-|-------|-------------------|
-| 2025, 2026 | Official CCN topic label → Google theme (`CCN_TOPIC_MAP`) |
-| 2017–2019, 2022–2023 | Proceedings PDF keyword line → `author_keywords` |
-| 2018–2024 (other) | Keyword + text scoring; 2026 papers also get a soft embedding-cluster boost |
+| Years | Keyword source |
+|-------|----------------|
+| 2017–2025 | Poster HTML `Keywords:` field and/or proceedings/authored PDF keyword line → `author_keywords` |
+| 2026 | CSV `primary_area` / `secondary_area` → `author_keywords` |
+| Any year (fallback) | Title/abstract tokens → `extracted_keywords` only when author keywords unavailable |
 
-See [docs/DASHBOARD.md](docs/DASHBOARD.md) for the full topic list, label map, and why Vision skew was fixed.
+Theme assignment also uses official CCN topic labels and (for 2026) embedding-cluster boosts. See [docs/DASHBOARD.md](docs/DASHBOARD.md).
 
 ## Data sources
 
@@ -60,8 +60,8 @@ When an updated 2026 poster list is available:
 ```bash
 pip install -r scripts/requirements.txt
 python scripts/merge_2026_csv.py
+python scripts/backfill_pdf_keywords.py
 python scripts/build_cluster_viz.py
-python scripts/assign_research_themes.py
 ```
 
 Or trigger the **Update 2026 Data** GitHub Action (Actions → Update 2026 Data → Run workflow).
@@ -73,9 +73,9 @@ This refreshes `submissions.json`, `abstracts.csv`, `embeddings_2026.json`, and 
 To re-scrape the full archive (rarely needed):
 
 ```bash
-python scripts/scrape_ccn.py              # scrape 2018–2025 + merge 2026 CSV + assign themes
+python scripts/scrape_ccn.py              # scrape 2017–2025 + merge 2026 CSV
+python scripts/backfill_pdf_keywords.py  # refresh author keywords from HTML + PDFs
 python scripts/build_cluster_viz.py       # 2026 UMAP JSON
-python scripts/assign_research_themes.py  # re-assign themes only
 ```
 
 ## Local development
@@ -112,8 +112,9 @@ scripts/
   scrape_ccn.py                 # One-time archive scraper
   merge_2026_csv.py             # Merge/replace 2026 CSV (primary update path)
   build_cluster_viz.py          # UMAP export for dashboard
-  add_2017_archive.py           # Scrape 2017 proceedings PDFs
-  backfill_pdf_keywords.py      # PDF author keywords for legacy years
+  add_2017_archive.py           # Scrape 2017 proceedings PDFs into existing JSON
+  pdf_keywords.py               # Author keyword resolution (HTML → PDF → fallback)
+  backfill_pdf_keywords.py      # Refresh author keywords from HTML + PDFs for all years
   build_abstracts_csv.py        # Export audit CSV for the dashboard
   assign_research_themes.py     # Google topic assignment + CSV export
   ccn_abstract_clustering.ipynb # Collaborator embedding notebook
