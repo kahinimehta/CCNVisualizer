@@ -4,34 +4,36 @@
 from __future__ import annotations
 
 import json
-import re
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.preprocessing import normalize
+
 from text_encoding import repair_submission_text
+from topic_features import (
+    ABSOLUTE_COSINE_FLOOR,
+    BROAD_HINT_BOOST,
+    CLUSTER_BOOST,
+    MAX_ASSIGNED_TOPICS,
+    RELEVANCE_RATIO,
+    TOPIC_ANCHORS,
+    is_metadata_keyword,
+    normalize_keyword_phrase,
+    sanitize_submission_keywords,
+    submission_embedding_text,
+    topic_prototype_text,
+    vectorizer_stop_words,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_PATH = ROOT / "data" / "submissions.json"
 DOCS_PATH = ROOT / "docs" / "data" / "submissions.json"
-EMBEDDINGS_ALL_PATH = ROOT / "docs" / "data" / "embeddings_all.json"
 EMBEDDINGS_2026_PATH = ROOT / "docs" / "data" / "embeddings_2026.json"
 GOOGLE_TOPICS_PATH = ROOT / "data" / "google_topics.json"
 
-GOOGLE_FORM_TOPICS = [
-    "RL, motor control & planning",
-    "Naturalistic encoding/decoding",
-    "Neural population geometry & dynamics",
-    "Decision-making and metacognition",
-    "Vision",
-    "Language/auditory neuroscience",
-    "LLMs, reasoning, interpretability",
-    "Memory",
-    "Social cognition & theory of mind",
-    "Attention & cognitive control / executive function",
-    "Clinical / computational psychiatry",
-    "Methods, theory & everything else",
-]
+GOOGLE_FORM_TOPICS = list(TOPIC_ANCHORS.keys())
 
 EMBEDDING_TO_GOOGLE = {
     "Reinforcement Learning": "RL, motor control & planning",
@@ -46,10 +48,7 @@ EMBEDDING_TO_GOOGLE = {
     "Neural Network Theory": "Methods, theory & everything else",
 }
 
-# Official CCN topic labels → Google Form meetup themes.
-# Keys are lowercased; values must match GOOGLE_FORM_TOPICS exactly.
 CCN_TOPIC_MAP: dict[str, str] = {
-    # 2025 MeetingTrakr taxonomy
     "visual processing & computational vision": "Vision",
     "object recognition & visual attention": "Vision",
     "reward, value & social decision making": "Decision-making and metacognition",
@@ -58,8 +57,6 @@ CCN_TOPIC_MAP: dict[str, str] = {
     "language & communication": "Language/auditory neuroscience",
     "brain networks & neural dynamics": "Neural population geometry & dynamics",
     "methods & computational tools": "Methods, theory & everything else",
-    # 2022–2023 legacy track / topic column — handled via BROAD_TOPIC_HINTS
-    # 2017 proceedings PDF topic labels
     "artificial intelligence": "LLMs, reasoning, interpretability",
     "neuroscience": "Neural population geometry & dynamics",
     "psychology": "Decision-making and metacognition",
@@ -67,13 +64,11 @@ CCN_TOPIC_MAP: dict[str, str] = {
     "philosophy": "Methods, theory & everything else",
     "engineering": "Methods, theory & everything else",
     "mathematics": "Methods, theory & everything else",
-    # 2026 pending-poster CSV primary_area (stored lowercased in topic_area)
     "theoretical / computational neuroscience": "Methods, theory & everything else",
     "experimental neuroscience (systems / cognitive)": "Neural population geometry & dynamics",
     "artificial intelligence / machine learning": "LLMs, reasoning, interpretability",
 }
 
-# Coarse archive labels: nudge several themes instead of forcing one primary.
 BROAD_TOPIC_HINTS: dict[str, list[str]] = {
     "cognitive science": [
         "Decision-making and metacognition",
@@ -91,65 +86,35 @@ BROAD_TOPIC_HINTS: dict[str, list[str]] = {
     ],
 }
 
-BROAD_HINT_BOOST = 3.0
-TITLE_MATCH_MULTIPLIER = 2.0
-PHRASE_MATCH_BOOST = 12.0
-KEYWORD_TOKEN_BOOST = 8.0
-
-TOPIC_KEYWORDS: dict[str, list[str]] = {
-    "RL, motor control & planning": [
-        "reinforcement", "reward", "motor", "planning", "policy", "navigation", "action", "skill",
-    ],
-    "Naturalistic encoding/decoding": [
-        "naturalistic", "encoding", "decoding", "fmri", "eeg", "movie", "stimulus", "resting",
-        "neuroimaging", "meg", "ecog", "bold", "narrative", "video",
-    ],
-    "Neural population geometry & dynamics": [
-        "population", "dynamics", "geometry", "manifold", "latent", "trajectory", "oscillation",
-        "network", "connectivity",
-    ],
-    "Decision-making and metacognition": [
-        "decision", "metacognition", "confidence", "choice", "judgment", "belief", "inference",
-        "cognitive", "behavioral", "psychology",
-    ],
-    "Vision": [
-        "visual", "vision", "retina", "v1", "v2", "retinotopic", "scene", "optic", "gaze", "saccade",
-        "conscious vision", "visual awareness", "perceptual",
-    ],
-    "Language/auditory neuroscience": [
-        "language", "auditory", "speech", "semantic", "syntax", "word", "listening", "voice", "reading",
-    ],
-    "LLMs, reasoning, interpretability": [
-        "llm", "language model", "reasoning", "interpretability", "transformer", "gpt", "prompt",
-        "foundation model",
-    ],
-    "Memory": ["memory", "hippocampus", "recall", "working memory", "episodic", "retrieval", "spatial"],
-    "Social cognition & theory of mind": [
-        "social", "theory mind", "mentalizing", "interaction", "communication", "empathy", "tom",
-    ],
-    "Attention & cognitive control / executive function": [
-        "attention", "executive", "cognitive control", "switching", "inhibition", "predictive",
-    ],
-    "Clinical / computational psychiatry": [
-        "clinical", "psychiatry", "depression", "schizophrenia", "patient", "disorder", "mental health",
-    ],
-    "Methods, theory & everything else": [
-        "theory", "method", "benchmark", "framework", "analysis", "toolkit", "simulation",
-    ],
-}
-
 IGNORED_TOPIC_LABELS = {"view pdf", "view paper pdf", ""}
-GENERIC_KEYWORD_LABELS = {"cognitive science", "cognitive"}
+METHODS_FALLBACK = "Methods, theory & everything else"
 
-CLUSTER_BOOST_FACTOR = 0.35
 
-THEME_STOPWORDS = {
-    "the", "and", "for", "with", "from", "that", "this", "using", "based", "study", "results",
-    "show", "human", "brain", "neural", "model", "models", "data", "analysis", "abstract",
-    "computational", "control", "learning", "perception", "image", "cortex",
-}
+class ThemeScorer:
+    """TF-IDF cosine similarity between submissions and topic prototype anchors."""
 
-TOKEN_RE = re.compile(r"[a-z][a-z0-9\-]{2,}")
+    def __init__(self, submissions: list[dict], topics: list[str]) -> None:
+        self.topics = topics
+        self.submission_texts = [submission_embedding_text(submission) for submission in submissions]
+        prototype_texts = [topic_prototype_text(topic) for topic in topics]
+        corpus = self.submission_texts + prototype_texts
+        self.vectorizer = TfidfVectorizer(
+            max_features=10000,
+            stop_words=vectorizer_stop_words(),
+            min_df=2,
+            max_df=0.95,
+            ngram_range=(1, 2),
+            sublinear_tf=True,
+        )
+        matrix = self.vectorizer.fit_transform(corpus)
+        submission_count = len(submissions)
+        self.submission_vectors = normalize(matrix[:submission_count], norm="l2", axis=1)
+        self.prototype_vectors = normalize(matrix[submission_count:], norm="l2", axis=1)
+
+    def score_index(self, index: int) -> dict[str, float]:
+        vector = self.submission_vectors[index]
+        similarities = (vector @ self.prototype_vectors.T).toarray().ravel()
+        return {theme: float(similarities[idx]) for idx, theme in enumerate(self.topics)}
 
 
 def load_google_config() -> dict:
@@ -169,17 +134,13 @@ def embedding_map(config: dict) -> dict[str, str]:
     return config.get("embedding_cluster_map") or EMBEDDING_TO_GOOGLE
 
 
-def tokenize(text: str) -> list[str]:
-    return [t for t in TOKEN_RE.findall((text or "").lower()) if t not in THEME_STOPWORDS]
-
-
 def normalize_topic_label(label: str) -> str:
-    return (label or "").strip().lower()
+    return normalize_keyword_phrase(label)
 
 
 def official_theme_from_label(label: str, topics: list[str]) -> str | None:
     normalized = normalize_topic_label(label)
-    if normalized in IGNORED_TOPIC_LABELS:
+    if normalized in IGNORED_TOPIC_LABELS or is_metadata_keyword(normalized):
         return None
     if normalized in BROAD_TOPIC_HINTS:
         return None
@@ -193,7 +154,7 @@ def apply_label_hints(label: str, scores: dict[str, float], topics: list[str]) -
     normalized = normalize_topic_label(label)
     for theme in BROAD_TOPIC_HINTS.get(normalized, []):
         if theme in topics:
-            scores[theme] = scores.get(theme, 0) + BROAD_HINT_BOOST
+            scores[theme] = scores.get(theme, 0.0) + BROAD_HINT_BOOST
 
 
 def conference_label(submission: dict) -> str:
@@ -204,61 +165,11 @@ def conference_label(submission: dict) -> str:
     return ""
 
 
-def is_weak_keyword_set(keywords: list[str]) -> bool:
-    if not keywords:
-        return True
-    normalized = {kw.lower().strip() for kw in keywords if kw}
-    if not normalized:
-        return True
-    return normalized.issubset(GENERIC_KEYWORD_LABELS)
-
-
-def scoring_blob(submission: dict) -> str:
-    parts = [submission.get("title", ""), submission.get("abstract", "")]
-    keywords = list(submission.get("keywords") or [])
-    if not is_weak_keyword_set(keywords):
-        parts.append(" ".join(keywords))
-    parts.extend(submission.get("author_keywords") or [])
-    parts.extend(submission.get("extracted_keywords") or [])
-    return " ".join(part for part in parts if part)
-
-
-def author_keyword_text(submission: dict) -> str:
-    return scoring_blob(submission)
-
-
-def score_submission(submission: dict, topics: list[str]) -> dict[str, float]:
-    title = submission.get("title", "")
-    title_lower = title.lower()
-    title_tokens = set(tokenize(title))
-    text_lower = scoring_blob(submission).lower()
-    tokens = tokenize(scoring_blob(submission))
-    token_set = set(tokens)
-    scores: dict[str, float] = {}
-    for theme in topics:
-        score = 0.0
-        for phrase in TOPIC_KEYWORDS.get(theme, []):
-            if " " in phrase:
-                if phrase in title_lower:
-                    score += PHRASE_MATCH_BOOST * TITLE_MATCH_MULTIPLIER
-                elif phrase in text_lower:
-                    score += PHRASE_MATCH_BOOST
-            elif phrase in title_tokens:
-                score += KEYWORD_TOKEN_BOOST * TITLE_MATCH_MULTIPLIER
-            elif phrase in token_set:
-                score += KEYWORD_TOKEN_BOOST
-        for term in tokenize(theme):
-            if term in title_tokens:
-                score += 2 * TITLE_MATCH_MULTIPLIER
-            elif term in token_set:
-                score += 2
-        scores[theme] = float(score)
-    return scores
-
-
 def assign_themes(
     submission: dict,
     topics: list[str],
+    scorer: ThemeScorer,
+    submission_index: int,
     embedding_lookup: dict[str, str],
     cluster_map: dict[str, str],
 ) -> tuple[str, list[str], list[str]]:
@@ -268,36 +179,39 @@ def assign_themes(
     cluster_theme = cluster_map.get(cluster) if cluster else None
 
     official = official_theme_from_label(conference_label(submission), topics)
-
-    scores = score_submission(submission, topics)
+    scores = scorer.score_index(submission_index)
     apply_label_hints(conference_label(submission), scores, topics)
-    if cluster_theme:
-        boost = max(max(scores.values(), default=0) * CLUSTER_BOOST_FACTOR, 4.0)
-        scores[cluster_theme] = scores.get(cluster_theme, 0) + boost
 
-    ranked = sorted(scores.items(), key=lambda item: -item[1])
+    if cluster_theme and cluster_theme in topics:
+        scores[cluster_theme] = scores.get(cluster_theme, 0.0) + CLUSTER_BOOST
+
+    ranked = sorted(scores.items(), key=lambda item: (-item[1], item[0]))
+    max_score = ranked[0][1] if ranked else 0.0
 
     if official:
         primary = official
+    elif max_score >= ABSOLUTE_COSINE_FLOOR:
+        primary = ranked[0][0]
     else:
-        primary, top_score = ranked[0]
-        if top_score <= 0:
-            primary = "Methods, theory & everything else"
+        primary = METHODS_FALLBACK
 
-    threshold = (scores.get(primary, 0) or ranked[0][1]) * 0.35
-    secondary: list[str] = []
-    if cluster_theme and cluster_theme != primary and cluster_theme not in secondary:
-        secondary.append(cluster_theme)
+    threshold = max(max_score * RELEVANCE_RATIO, ABSOLUTE_COSINE_FLOOR)
+    assigned: list[str] = []
     for theme, score in ranked:
-        if theme == primary or score < threshold:
+        if score < threshold:
             continue
-        if theme not in secondary:
-            secondary.append(theme)
-        if len(secondary) >= 3:
+        if theme not in assigned:
+            assigned.append(theme)
+        if len(assigned) >= MAX_ASSIGNED_TOPICS:
             break
-    google_secondaries = [theme for theme in secondary if theme in topics]
-    assigned_topics = list(dict.fromkeys([primary, *google_secondaries]))
-    return primary, secondary[:3], assigned_topics
+
+    if primary not in assigned:
+        assigned.insert(0, primary)
+    else:
+        assigned = [primary, *[theme for theme in assigned if theme != primary]]
+
+    secondary = assigned[1:]
+    return primary, secondary, assigned
 
 
 def compute_theme_stats(submissions: list[dict], topics: list[str]) -> dict:
@@ -306,13 +220,14 @@ def compute_theme_stats(submissions: list[dict], topics: list[str]) -> dict:
     secondary_totals: Counter = Counter()
 
     for sub in submissions:
-        for topic in sub.get("assigned_topics") or []:
-            if not topic:
-                continue
-            year = str(sub["year"])
-            by_year[year][topic] += 1
-            totals[topic] += 1
-        for topic in sub.get("secondary_topics") or []:
+        assigned = sub.get("assigned_topics") or []
+        if not assigned:
+            continue
+        primary = assigned[0]
+        year = str(sub["year"])
+        by_year[year][primary] += 1
+        totals[primary] += 1
+        for topic in assigned[1:]:
             if topic in topics:
                 secondary_totals[topic] += 1
 
@@ -324,26 +239,36 @@ def compute_theme_stats(submissions: list[dict], topics: list[str]) -> dict:
     }
 
 
-def apply_assignments(payload: dict, embeddings: dict) -> dict:
+def apply_assignments(payload: dict, embeddings: dict | None = None) -> dict:
     config = load_google_config()
     topics = active_topics(config)
     cluster_map = embedding_map(config)
 
-    points = embeddings.get("points", [])
     embedding_lookup: dict[str, str] = {}
-    for point in points:
-        cluster_name = point.get("cluster_name")
-        if not cluster_name:
-            continue
-        mapped = cluster_map.get(cluster_name, cluster_name)
-        embedding_lookup[point["id"]] = cluster_name
-        if point.get("poster_number"):
-            embedding_lookup[f"2026-{point['poster_number']}"] = cluster_name
+    if embeddings:
+        for point in embeddings.get("points", []):
+            cluster_name = point.get("cluster_name")
+            if not cluster_name:
+                continue
+            embedding_lookup[point["id"]] = cluster_name
+            if point.get("poster_number"):
+                embedding_lookup[f"2026-{point['poster_number']}"] = cluster_name
 
-    for submission in payload["submissions"]:
+    submissions = payload["submissions"]
+    for submission in submissions:
         repair_submission_text(submission)
+        sanitize_submission_keywords(submission)
+
+    scorer = ThemeScorer(submissions, topics)
+
+    for index, submission in enumerate(submissions):
         primary, secondary, assigned_topics = assign_themes(
-            submission, topics, embedding_lookup, cluster_map
+            submission,
+            topics,
+            scorer,
+            index,
+            embedding_lookup,
+            cluster_map,
         )
         submission["primary_theme"] = primary
         submission["secondary_topics"] = secondary
@@ -351,19 +276,21 @@ def apply_assignments(payload: dict, embeddings: dict) -> dict:
         submission.pop("cluster_track", None)
 
     payload.setdefault("stats", {})
-    payload["stats"]["research_themes"] = compute_theme_stats(payload["submissions"], topics)
+    payload["stats"]["research_themes"] = compute_theme_stats(submissions, topics)
     payload["metadata"]["research_themes_assigned_at"] = datetime.now(timezone.utc).isoformat()
     payload["metadata"]["research_theme_method"] = (
-        "Google Form Q1 topics; official CCN topic labels mapped first; "
-        "submission keywords matched to themes (author keywords, else topic/track, "
-        "else archive text fallback for 2018-2019); optional soft boost from "
-        "2026 embedding cluster mapped to the same Google topic set"
+        "Google Form Q1 topics; weighted TF-IDF cosine similarity to topic prototype anchors "
+        "(title x2, abstract x3, cleaned keywords x1; metadata keywords excluded); "
+        f"multi-label threshold max_score * {RELEVANCE_RATIO} (floor {ABSOLUTE_COSINE_FLOOR}), "
+        f"cap {MAX_ASSIGNED_TOPICS}; official CCN labels override primary when specific; "
+        "optional soft boost from 2026 embedding cluster"
     )
     payload["metadata"]["keyword_source"] = (
         "author_keywords prefer poster HTML, proceedings/authored PDFs (2017-2025), or 2026 CSV; "
-        "extracted_keywords only when no author keywords are available"
+        "extracted_keywords only when no author keywords are available; citation fragments and "
+        "metadata area labels stripped before scoring"
     )
-    keyword_years = sorted({sub["year"] for sub in payload["submissions"] if sub.get("keywords")})
+    keyword_years = sorted({sub["year"] for sub in submissions if sub.get("keywords")})
     payload["metadata"]["keyword_years"] = keyword_years
     payload["metadata"]["google_topics_source"] = config.get("source")
     return payload
@@ -377,10 +304,9 @@ def write_payload(payload: dict) -> None:
 
 
 def load_embeddings() -> dict | None:
-    for path in (EMBEDDINGS_2026_PATH,):
-        if path.exists():
-            with path.open(encoding="utf-8") as fh:
-                return json.load(fh)
+    if EMBEDDINGS_2026_PATH.exists():
+        with EMBEDDINGS_2026_PATH.open(encoding="utf-8") as fh:
+            return json.load(fh)
     return None
 
 
@@ -390,13 +316,21 @@ def main() -> None:
 
     with DATA_PATH.open(encoding="utf-8") as fh:
         payload = json.load(fh)
-    embeddings = load_embeddings()
-    if embeddings:
-        payload = apply_assignments(payload, embeddings)
-    else:
-        print("Warning: no 2026 embedding clusters found; assigning themes from keywords only.")
 
+    embeddings = load_embeddings()
+    if not embeddings:
+        print("Warning: no 2026 embedding clusters found; assigning themes from text similarity only.")
+
+    payload = apply_assignments(payload, embeddings)
     write_payload(payload)
+
+    try:
+        from build_all_embeddings import build_payload, write_outputs as write_embedding_outputs
+
+        embedding_payload = build_payload(payload["submissions"])
+        write_embedding_outputs(embedding_payload)
+    except Exception as exc:  # noqa: BLE001
+        print(f"Warning: embeddings_all.json export skipped: {exc}")
 
     try:
         from build_abstracts_csv import build_from_payload

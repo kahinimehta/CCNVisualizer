@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import re
 
-# Typical signs of UTF-8 bytes interpreted as Latin-1 (e.g. Ã¶ → ö).
 _MOJIBAKE_MARKERS = re.compile(r"[ÃÄÅÆÇÐÑØÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ\u0080-\u009f]")
 
 
@@ -30,6 +29,5 @@ def repair_submission_text(submission: dict) -> None:
             continue
         submission[field] = [repair_mojibake(str(value)) for value in values if value]
 
-    for field in ("primary_theme",):
-        if submission.get(field):
-            submission[field] = repair_mojibake(str(submission[field]))
+    if submission.get("primary_theme"):
+        submission["primary_theme"] = repair_mojibake(str(submission["primary_theme"]))
