@@ -51,7 +51,7 @@ Topics in `assigned_topics` are always drawn from this fixed list (CCN 2026 Acti
 - **Year** — all years or a single conference year  
 - **Research theme** — matches any value in `assigned_topics`  
 - **Search** — title, author(s), abstract, keywords, assigned topics  
-- **Embedding map** — shows filtered rows; pie-slice dots encode every assigned topic  
+- **Embedding map** — shows filtered rows; dot color = primary topic; click a dot to see all assigned topics in the list below  
 
 ## Charts
 

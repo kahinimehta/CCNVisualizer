@@ -62,7 +62,7 @@ There is no separate cluster label in the CSV — only the 12 research themes.
 ## Embedding map
 
 - Coordinates come from `umap_x` / `umap_y` in the CSV  
-- Each dot is a **pie slice per assigned topic** (equal arcs, fixed 12-color palette)  
+- Each dot is colored by its **primary** assigned topic (fixed 12-color palette); click/tap to jump to the submission and view all topics in the list
 - Map respects the same year / search / topic filters as the paper list  
 
 ## Frontend notes

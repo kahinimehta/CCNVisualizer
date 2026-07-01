@@ -569,45 +569,23 @@ function themeLegendThemes() {
   return googleTopicNames();
 }
 
-function embeddingPointTopics(point) {
+function embeddingPointPrimaryTheme(point) {
   const submission = submissionForEmbeddingPoint(point);
-  return submission ? assignedTopics(submission) : [];
+  return submission ? primaryTheme(submission) : null;
 }
 
-function appendTopicPieDot(parent, radius, topics, options = {}) {
+function appendPrimaryTopicDot(parent, radius, primaryTopic, options = {}) {
   const { opacity = 0.92, stroke = CCN_COLORS.navy, strokeWidth = 1 } = options;
-  const topicList = topics.length ? topics : ["Methods, theory & everything else"];
-
-  if (topicList.length === 1) {
-    parent
-      .append("circle")
-      .attr("r", radius)
-      .attr("fill", themeColor(topicList[0]))
-      .attr("stroke", stroke)
-      .attr("stroke-width", strokeWidth)
-      .attr("opacity", opacity);
-    return;
-  }
-
-  const pie = d3.pie().sort(null).value(1);
-  const arc = d3.arc().innerRadius(0).outerRadius(radius);
-  parent
-    .selectAll("path.topic-slice")
-    .data(pie(topicList))
-    .join("path")
-    .attr("class", "topic-slice")
-    .attr("d", arc)
-    .attr("fill", (d) => themeColor(d.data))
-    .attr("stroke", "rgba(15,34,56,0.35)")
-    .attr("stroke-width", Math.max(strokeWidth * 0.45, 0.5))
-    .attr("opacity", opacity);
+  const topic = primaryTopic || "Methods, theory & everything else";
 
   parent
     .append("circle")
+    .attr("class", "embedding-point")
     .attr("r", radius)
-    .attr("fill", "none")
+    .attr("fill", themeColor(topic))
     .attr("stroke", stroke)
-    .attr("stroke-width", strokeWidth);
+    .attr("stroke-width", strokeWidth)
+    .attr("opacity", opacity);
 }
 
 function buildThemeClassifier() {
@@ -858,15 +836,15 @@ function embeddingActionHint() {
 function embeddingDefaultNote() {
   const count = embeddingDisplayPoints().length;
   if (state.highlightedSubmissionId) {
-    return "Jumped to highlighted submission in the list below";
+    return "Jumped to highlighted submission below — all assigned topics are shown on the card";
   }
   if (state.selectedTheme) {
     const clearHint = isTouchLike() ? "choose “All topics” to clear" : "choose “All topics” to clear";
-    return `Showing ${count} submissions with “${state.selectedTheme}” in any assigned topic · ${clearHint}`;
+    return `Showing ${count} submissions with “${state.selectedTheme}” in any assigned topic · dots stay colored by primary topic · ${clearHint}`;
   }
   return isTouchLike()
-    ? `${count} submissions on map · each dot is a pie slice per assigned topic · tap to jump · use dropdown to filter`
-    : `${count} submissions on map · each dot is a pie slice per assigned topic · click to jump · use dropdown to filter`;
+    ? `${count} submissions · dots colored by primary topic · tap a dot to view all assigned topics below · use dropdown to filter by any topic`
+    : `${count} submissions · dots colored by primary topic · click a dot to view all assigned topics below · use dropdown to filter by any topic`;
 }
 
 function renderEmbeddingNote(note) {
@@ -876,26 +854,31 @@ function renderEmbeddingNote(note) {
 function embeddingPointTooltip(point) {
   const submission = submissionForEmbeddingPoint(point);
   const topics = submission ? assignedTopics(submission) : [];
+  const primary = topics[0];
   const topicLines = topics
-    .map((topic) => `<span style="color:${themeColor(topic)}">■</span> ${topic}`)
+    .map((topic, index) => {
+      const label = index === 0 ? `${topic} (primary)` : topic;
+      return `<span style="color:${themeColor(topic)}">■</span> ${label}`;
+    })
     .join("<br/>");
   const parts = [
     `<strong>${truncateLabel(point.title, s(72))}</strong>`,
     `${point.year}${point.poster_number ? ` · Poster #${point.poster_number}` : ""}`,
     topicLines ? `<strong>Assigned topics:</strong><br/>${topicLines}` : "",
+    primary ? `<span style="color:${themeColor(primary)}">Dot color = primary topic</span>` : "",
   ];
   parts.push(embeddingActionHint());
   return parts.filter(Boolean).join("<br/>");
 }
 
 function themeLegendTooltip(themeName) {
-  const count = embeddingDisplayPoints().filter((point) =>
-    assignedTopics(submissionForEmbeddingPoint(point)).includes(themeName)
+  const count = embeddingDisplayPoints().filter(
+    (point) => embeddingPointPrimaryTheme(point) === themeName
   ).length;
   return [
     `<strong>${themeName}</strong>`,
-    `${count} visible on the map with this topic`,
-    "Pie-slice fill shows every assigned topic on each dot",
+    `${count} visible with this primary topic`,
+    "Dropdown filter matches any assigned topic on a submission",
   ].join("<br/>");
 }
 
@@ -965,14 +948,19 @@ function renderEmbeddingThemeSelect() {
 
 function renderThemeSelect(counts) {
   const select = d3.select("#theme-select");
+  const countMap = new Map(counts.map((d) => [d.text, d.count]));
+  const topics = googleTopicNames();
   select.selectAll("option:not(:first-child)").remove();
   select
     .selectAll("option.theme")
-    .data(counts)
+    .data(topics)
     .join("option")
     .attr("class", "theme")
-    .attr("value", (d) => d.text)
-    .text((d) => `${d.text} (${d.count})`);
+    .attr("value", String)
+    .text((theme) => {
+      const count = countMap.get(theme) || 0;
+      return count ? `${theme} (${count})` : theme;
+    });
   select.property("value", state.selectedTheme);
 }
 
@@ -1313,11 +1301,11 @@ function renderEmbeddingCluster() {
     .style("cursor", "pointer")
     .style("pointer-events", isTouchLike() ? "none" : "auto");
 
-  pointGroups.each(function renderPiePoint(point) {
+  pointGroups.each(function renderPrimaryPoint(point) {
     const group = d3.select(this);
     group.selectAll("*").remove();
     const style = pointStyle(point);
-    appendTopicPieDot(group, style.radius, embeddingPointTopics(point), {
+    appendPrimaryTopicDot(group, style.radius, embeddingPointPrimaryTheme(point), {
       opacity: style.opacity,
       stroke: style.stroke,
       strokeWidth: style.strokeWidth,
@@ -1360,7 +1348,7 @@ function renderEmbeddingCluster() {
       .attr("fill", CCN_COLORS.muted)
       .style("font-size", isPhoneLayout() ? chartThemeFs(7) : themeFs(10))
       .style("font-weight", 600)
-      .text("Research topics (pie-slice fill)");
+      .text("Primary topic (dot color)");
     legend
       .selectAll("g.legend-item")
       .data(legendThemes)
@@ -1402,7 +1390,7 @@ function renderEmbeddingCluster() {
       .attr("fill", CCN_COLORS.muted)
       .style("font-size", themeFs(10))
       .style("font-weight", 600)
-      .text("Research topics (pie-slice fill)");
+      .text("Primary topic (dot color)");
 
     const legendItems = legendRoot
       .selectAll("g.legend-item")
@@ -1476,9 +1464,11 @@ function renderPaperList() {
       .selectAll(".keyword-tag")
       .data(tagData)
       .join("span")
-      .attr("class", (theme) => `keyword-tag topic-tag${theme === state.selectedTheme ? " active" : ""}`)
+      .attr("class", (theme, index) =>
+        `keyword-tag topic-tag${index === 0 ? " topic-tag-primary" : ""}${theme === state.selectedTheme ? " active" : ""}`
+      )
       .style("--topic-color", (theme) => themeColor(theme))
-      .text((theme) => theme);
+      .text((theme, index) => (index === 0 ? `${theme} (primary)` : theme));
   });
 }
 
