@@ -55,7 +55,6 @@
           </label>
         </div>
       </header>
-      <!-- <div class="header-divider" aria-hidden="true"></div> -->
 
       <section class="kpi-row" id="kpi-row" aria-label="Summary statistics"></section>
 
@@ -65,7 +64,7 @@
         <section class="card card-full">
           <div class="card-header">
             <h2>Submissions over time</h2>
-            <p class="card-sub">Poster &amp; paper counts by conference year</p>
+            <p class="card-sub">Poster &amp; paper counts by conference year · click a year to filter</p>
           </div>
           <div id="year-chart"></div>
         </section>
@@ -78,25 +77,12 @@
           <div id="theme-bars"></div>
         </section>
 
-        <section class="card card-full theme-analytics">
+        <section class="card card-full">
           <div class="card-header">
-            <h2>Theme mix by year</h2>
-            <p class="card-sub" id="themes-over-time-sub">Share of assigned research themes within each conference year</p>
+            <h2>Year-over-year change</h2>
+            <p class="card-sub" id="theme-delta-sub">Largest shifts between consecutive years</p>
           </div>
-          <div id="themes-over-time-chart"></div>
-
-          <div class="theme-analytics-row">
-            <div class="theme-panel">
-              <h3 class="theme-panel-title">Total by research theme</h3>
-              <p class="theme-panel-sub">All years combined in current filter</p>
-              <div id="theme-totals-chart"></div>
-            </div>
-            <div class="theme-panel">
-              <h3 class="theme-panel-title">Year-over-year change</h3>
-              <p class="theme-panel-sub" id="theme-delta-sub">Largest shifts between consecutive years</p>
-              <div id="theme-delta-chart"></div>
-            </div>
-          </div>
+          <div id="theme-delta-chart"></div>
         </section>
 
         <div class="embedding-layout">
@@ -104,7 +90,7 @@
             <section class="card" id="embedding-panel">
               <div class="card-header">
                 <h2>Abstract embedding map</h2>
-                <p class="card-sub">UMAP projection of 2026 abstracts · click a cluster track to audit assignments</p>
+                <p class="card-sub">UMAP projection of 2026 abstracts · click a point or legend topic to filter</p>
               </div>
               <div id="embedding-chart"></div>
               <p class="chart-note" id="embedding-note"></p>
@@ -118,24 +104,6 @@
               <div class="paper-list" id="paper-list"></div>
             </section>
           </div>
-
-          <aside class="viz-sidebar">
-            <section class="card">
-              <div class="card-header">
-                <h2>Primary research themes</h2>
-                <p class="card-sub">Share of submissions by primary theme</p>
-              </div>
-              <div id="topic-chart"></div>
-            </section>
-
-            <section class="card">
-              <div class="card-header">
-                <h2>Research theme breakdown</h2>
-                <p class="card-sub">Click a theme to filter map &amp; submissions</p>
-              </div>
-              <div id="cluster-bars-chart"></div>
-            </section>
-          </aside>
         </div>
       </main>
 

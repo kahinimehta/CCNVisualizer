@@ -406,16 +406,10 @@ a {
   scroll-margin-top: 1.5rem;
 }
 
-#themes-over-time-chart {
-  min-height: calc(520px * var(--ui-scale));
-}
-
 #year-chart,
 #theme-bars,
-#topic-chart,
-#word-cloud,
-#theme-totals-chart,
-#theme-delta-chart {
+#theme-delta-chart,
+#embedding-chart {
   min-height: calc(280px * var(--ui-scale));
 }
 
