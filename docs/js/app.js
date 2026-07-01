@@ -299,16 +299,18 @@ function styleThemeAxisLabels(selection) {
 }
 
 const CHART_PALETTE = [
-  CCN_COLORS.pink,
-  CCN_COLORS.blue,
-  CCN_COLORS.green,
-  "#9ecae1",
-  "#fdae9f",
-  "#a8ddb5",
-  "#c7e9c0",
-  "#fdd0a2",
-  "#bcbddc",
-  "#ffed6f",
+  "#f4c7c3", // pink
+  "#5eb8ff", // blue
+  "#6ee7a0", // green
+  "#ffb347", // orange
+  "#b794f6", // purple
+  "#ffe066", // yellow
+  "#ff8a80", // coral
+  "#4dd0c8", // teal
+  "#f48fb1", // rose
+  "#dce775", // lime
+  "#9fa8ff", // periwinkle
+  "#ffcc80", // amber
 ];
 
 const KPI_ICONS = {
