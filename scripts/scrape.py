@@ -184,10 +184,10 @@ TOPIC_ANCHORS: dict[str, list[str]] = {
         "perception",
         "perceptual",
         "psychophysics",
-        "sensory",
+        "sensory processing",
         "multisensory",
-        "crossmodal",
-        "cross-modal",
+        "multisensory integration",
+        "crossmodal binding",
         "tactile",
         "haptic",
         "somatosensory",
@@ -288,6 +288,10 @@ TOPIC_ANCHORS: dict[str, list[str]] = {
         "autism",
         "anxiety",
         "bipolar",
+        "ptsd",
+        "post traumatic",
+        "trauma",
+        "neuroimaging",
     ],
     "Methods and theory": [
         "method",
@@ -322,6 +326,7 @@ KEYWORD_WEIGHT = 1
 
 RELEVANCE_RATIO = 0.5
 PRIMARY_FALLBACK_FLOOR = 0.04
+PRIMARY_MIN_LEAD = 0.01
 SECONDARY_COSINE_FLOOR = 0.05
 MAX_ASSIGNED_TOPICS = 5
 BROAD_HINT_BOOST = 0.04
