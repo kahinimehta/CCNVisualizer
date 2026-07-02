@@ -171,7 +171,7 @@ TOPIC_ANCHORS: dict[str, list[str]] = {
         "reading",
         "phonology",
     ],
-    "LLMs, reasoning, interpretability": [
+    "AI, LLM, & Neural Networks": [
         "large language model",
         "language model",
         "llm",
@@ -189,6 +189,20 @@ TOPIC_ANCHORS: dict[str, list[str]] = {
         "fine-tuning",
         "generative model",
         "pretrained",
+        "neural network",
+        "deep learning",
+        "machine learning",
+        "artificial intelligence",
+        "cnn",
+        "convnet",
+        "recurrent neural network",
+        "rnn",
+        "lstm",
+        "interpretability",
+        "explainability",
+        "attention mechanism",
+        "symbolic reasoning",
+        "backpropagation",
     ],
     "Memory": [
         "memory",
@@ -233,22 +247,30 @@ TOPIC_ANCHORS: dict[str, list[str]] = {
         "anxiety",
         "bipolar",
     ],
-    "Methods, theory & everything else": [
+    "Methods and theory": [
         "method",
         "benchmark",
         "framework",
         "simulation",
         "theory",
         "analysis toolkit",
-        "interpretability",
-        "explainability",
-        "attention mechanism",
-        "recurrent neural network",
-        "rnn",
-        "lstm",
-        "symbolic reasoning",
         "generalization",
         "statistical",
+        "algorithm",
+        "computational model",
+        "validation",
+        "formal model",
+    ],
+    "Everything else": [
+        "interdisciplinary",
+        "overview",
+        "tutorial",
+        "symposium",
+        "education",
+        "commentary",
+        "perspective",
+        "general",
+        "miscellaneous",
     ],
 }
 
@@ -398,17 +420,17 @@ CCN_TOPIC_MAP: dict[str, str] = {
     "predictive processing & cognitive control": "Attention & cognitive control / executive function",
     "language & communication": "Language/auditory neuroscience",
     "brain networks & neural dynamics": "Neural population geometry & dynamics",
-    "methods & computational tools": "Methods, theory & everything else",
-    "artificial intelligence": "LLMs, reasoning, interpretability",
+    "methods & computational tools": "Methods and theory",
+    "artificial intelligence": "AI, LLM, & Neural Networks",
     "neuroscience": "Neural population geometry & dynamics",
     "psychology": "Decision-making and metacognition",
     "linguistics": "Language/auditory neuroscience",
-    "philosophy": "Methods, theory & everything else",
-    "engineering": "Methods, theory & everything else",
-    "mathematics": "Methods, theory & everything else",
-    "theoretical / computational neuroscience": "Methods, theory & everything else",
+    "philosophy": "Methods and theory",
+    "engineering": "Methods and theory",
+    "mathematics": "Methods and theory",
+    "theoretical / computational neuroscience": "Methods and theory",
     "experimental neuroscience (systems / cognitive)": "Neural population geometry & dynamics",
-    "artificial intelligence / machine learning": "LLMs, reasoning, interpretability",
+    "artificial intelligence / machine learning": "AI, LLM, & Neural Networks",
 }
 
 BROAD_TOPIC_HINTS: dict[str, list[str]] = {
@@ -416,7 +438,7 @@ BROAD_TOPIC_HINTS: dict[str, list[str]] = {
         "Decision-making and metacognition",
         "Naturalistic encoding/decoding",
         "Neural population geometry & dynamics",
-        "Methods, theory & everything else",
+        "Methods and theory",
     ],
     "psychological / behavioral research": [
         "Decision-making and metacognition",
@@ -424,12 +446,12 @@ BROAD_TOPIC_HINTS: dict[str, list[str]] = {
     ],
     "computational cognitive science / cognitive modeling": [
         "Decision-making and metacognition",
-        "Methods, theory & everything else",
+        "Methods and theory",
     ],
 }
 
 IGNORED_TOPIC_LABELS = {"view pdf", "view paper pdf", ""}
-METHODS_FALLBACK = "Methods, theory & everything else"
+METHODS_FALLBACK = "Everything else"
 
 
 class ThemeScorer:

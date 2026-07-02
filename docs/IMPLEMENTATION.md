@@ -51,7 +51,7 @@ Both scripts are self-contained (shared helpers are inlined). Optional flags:
 - `scrape.py --add-2017` — re-scrape 2017 proceedings and merge
 - `build.py --merge-2026` — merge 2026 CSV before building (for 2026-only updates)
 
-Shared config: **`data/google_topics.json`** — optional override for the 12 theme names at build time (defaults to anchors in `build.py`).
+Shared config: **`data/google_topics.json`** — optional override for the 13 theme names at build time (defaults to anchors in `build.py`).
 
 CI workflows (`.github/workflows/`): **Update 2026 Data**, **Scrape CCN Data**, **Deploy GitHub Pages**.
 
@@ -110,7 +110,7 @@ Themes are **not** discovered by clustering submissions. Each of the 12 CCN rese
 1. **Official CCN label** — specific conference topic/track strings map directly to a theme (broad labels like `psychological / behavioral research` do *not* force a primary; they only nudge scores by +0.04).
 2. **Broad area hints** — coarse archive labels nudge several themes without overriding title/abstract signal.
 
-**LLM vs Methods split:** the theme **LLMs, reasoning, interpretability** uses a strict anchor set (transformer, GPT, prompting, RLHF, chain-of-thought, in-context learning, …). General interpretability / RNN / symbolic-reasoning terms anchor **Methods, theory & everything else**.
+**AI vs Methods split:** the theme **AI, LLM, & Neural Networks** uses anchors for LLMs, transformers, neural networks, deep learning, and model interpretability. Methods-oriented terms (benchmarks, frameworks, theory, statistical analysis) anchor **Methods and theory**. Low-confidence assignments fall back to **Everything else**.
 
 ### 4. UMAP map coordinates
 
@@ -123,7 +123,7 @@ After themes are assigned, `build.py` projects every submission into 2D for the 
    - `random_state=42` (reproducible layout)
 3. Output: `{ id, x, y, year, title, poster_number }` per point in `embeddings_all.json`.
 
-These `x`/`y` values are copied into `abstracts.csv` as `umap_x` and `umap_y`. The map shows **semantic neighborhoods** — papers with similar title/abstract language land near each other — independent of the 12 theme labels.
+These `x`/`y` values are copied into `abstracts.csv` as `umap_x` and `umap_y`. The map shows **semantic neighborhoods** — papers with similar title/abstract language land near each other — independent of the 13 theme labels.
 
 ### 5. CSV export
 
@@ -160,7 +160,7 @@ Citation fragments and metadata area labels are stripped before export.
 - Coordinates from `umap_x` / `umap_y` in the CSV (all years, 2017–2026)
 - Dot **color** = primary topic (`assigned_topics[0]`)
 - Click/tap a dot → scrolls to that submission in **Matching submissions** and shows **all** assigned topics (primary labeled)
-- Map topic dropdown lists all 12 themes; filter matches any assigned topic; non-matches are dimmed
+- Map topic dropdown lists all 13 themes; filter matches any assigned topic; non-matches are dimmed
 - Legend: “Primary topic (dot color)”
 - Map respects year / search / topic filters
 

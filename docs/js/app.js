@@ -309,12 +309,13 @@ const CHART_PALETTE = [
   "#85F019", // chartreuse — Decision-making and metacognition
   "#49F349", // green — Vision
   "#19F085", // teal — Language/auditory neuroscience
-  "#49F3F3", // cyan — LLMs, reasoning, interpretability
+  "#49F3F3", // cyan — AI, LLM, & Neural Networks
   "#1985F0", // blue — Memory
   "#4949F3", // indigo — Social cognition & theory of mind
   "#8519F0", // violet — Attention & cognitive control
   "#F349F3", // magenta — Clinical / computational psychiatry
-  "#F01985", // rose — Methods, theory & everything else
+  "#F01985", // rose — Methods and theory
+  "#F680B0", // light rose — Everything else
 ];
 
 const KPI_ICONS = {
@@ -337,12 +338,13 @@ const GOOGLE_FORM_TOPICS = [
   "Decision-making and metacognition",
   "Vision",
   "Language/auditory neuroscience",
-  "LLMs, reasoning, interpretability",
+  "AI, LLM, & Neural Networks",
   "Memory",
   "Social cognition & theory of mind",
   "Attention & cognitive control / executive function",
   "Clinical / computational psychiatry",
-  "Methods, theory & everything else",
+  "Methods and theory",
+  "Everything else",
 ];
 
 const state = {
@@ -576,7 +578,7 @@ function embeddingPointPrimaryTheme(point) {
 
 function appendPrimaryTopicDot(parent, radius, primaryTopic, options = {}) {
   const { opacity = 0.92, stroke = CCN_COLORS.navy, strokeWidth = 1 } = options;
-  const topic = primaryTopic || "Methods, theory & everything else";
+  const topic = primaryTopic || "Everything else";
 
   parent
     .append("circle")

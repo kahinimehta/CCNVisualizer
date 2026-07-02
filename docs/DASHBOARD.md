@@ -83,7 +83,7 @@ The dashboard loads **only** `data/abstracts.csv`. No JSON or API calls at runti
 
 List-valued fields use ` | ` as the delimiter.
 
-## The 12 research themes
+## The 13 research themes
 
 Topics in `assigned_topics` are drawn from this fixed list ([CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform), question 1):
 
@@ -93,19 +93,20 @@ Topics in `assigned_topics` are drawn from this fixed list ([CCN 2026 Activity P
 4. Decision-making and metacognition  
 5. Vision  
 6. Language/auditory neuroscience  
-7. LLMs, reasoning, interpretability  
+7. AI, LLM, & Neural Networks  
 8. Memory  
 9. Social cognition & theory of mind  
 10. Attention & cognitive control / executive function  
 11. Clinical / computational psychiatry  
-12. Methods, theory & everything else  
+12. Methods and theory  
+13. Everything else  
 
 Theme names and colors in the UI are defined in `docs/js/app.js`. To change names at build time, edit `data/google_topics.json` and re-run `build.py`.
 
 ## Filters
 
 - **Year** — all years or a single conference year (header dropdown + year chips)  
-- **Research theme** — header dropdown lists all 12 themes; matches any value in `assigned_topics`  
+- **Research theme** — header dropdown lists all 13 themes; matches any value in `assigned_topics`  
 - **Search** — title, author(s), abstract, keywords, assigned topics  
 - **Embedding map topic dropdown** — same theme filter, scoped to the map panel; default shows all topics with dots colored by **primary** topic only  
 
