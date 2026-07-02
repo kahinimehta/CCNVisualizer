@@ -1,202 +1,107 @@
-# How the visualizer works
+# Dashboard implementation
 
-## Runtime
+Technical reference for the CCN Visualizer data pipeline and dashboard.
 
-```
-docs/data/abstracts.csv  →  docs/js/app.js (d3.csv)  →  dashboard
-```
+## Architecture
 
-The browser loads **one file**: `abstracts.csv`. The 15 research theme names and colors are hardcoded in `app.js` as `GOOGLE_FORM_TOPICS`. No JSON, no live API calls.
-
----
-
-## End-to-end workflow
+The browser loads **one file**: `abstracts.csv`. Theme names and colors are hardcoded in `app.js` as `GOOGLE_FORM_TOPICS`.
 
 ```
-ccneuro.org archives
+CCN archives + 2026 CSV
         │
         ▼  scrape.py
-        │
-  submissions.json          data/submissions.json + docs/data/submissions.json
+  submissions.json
         │
         ▼  build.py
+        ├── Anthropic Claude → primary + secondary assigned_topics
+        ├── UMAP (TF-IDF text → 2D coordinates)
+        └── abstracts.csv
         │
-        ├── ThemeScorer: TF-IDF cosine → assigned_topics on each row
-        ├── UMAP projection → embeddings_all.json
-        └── CSV export → abstracts.csv
-        │
-        ▼
-  docs/data/abstracts.csv  →  dashboard
+        ▼  dashboard (docs/)
+   reads abstracts.csv only
 ```
 
-| Stage | Script | Output |
-|-------|--------|--------|
-| Scrape | `scrape.py` | `submissions.json` — titles, abstracts, authors, keywords |
-| 2026 merge | `scrape.py --merge-2026` or `build.py --merge-2026` | Replaces 2026 rows from `ccn-2026-pending-posters.csv` |
-| Keyword refresh | `scrape.py --refresh-keywords` | Author keywords from PDFs when HTML lacks them |
-| Themes + map + CSV | `build.py` | Updated JSON, `embeddings_all.json`, `abstracts.csv` |
-| Dashboard | `docs/js/app.js` | Reads CSV only |
+## Scripts
 
-### Script inventory
+| Script | Role |
+|--------|------|
+| `scrape.py` | Scrape CCN archives, merge 2026 CSV, refresh keywords → `submissions.json` |
+| `build.py` | Anthropic theme classification, UMAP, CSV export |
+| `shared.py` | Shared keyword cleanup, mojibake repair, embedding text (used by scrape + build) |
 
-| Script | Purpose |
-|--------|---------|
-| `scrape.py` | **Step 1** — scrape CCN archives, merge 2026 CSV, refresh keywords; writes `submissions.json` |
-| `build.py` | **Step 2** — theme assignment, UMAP coordinates, CSV export |
+### scrape.py flags
 
-Both scripts are self-contained (shared helpers are inlined). Optional flags:
+- `--merge-2026` — merge provisional 2026 poster CSV
+- `--refresh-keywords` — re-extract keywords from HTML/PDF on existing JSON
+- `--add-2017` — re-scrape 2017 proceedings and merge
+- `--years` / `--quick` — limit scrape scope
 
-- `scrape.py --merge-2026` — merge provisional 2026 poster CSV
-- `scrape.py --refresh-keywords` — re-extract keywords from HTML/PDF on existing JSON
-- `scrape.py --add-2017` — re-scrape 2017 proceedings and merge
-- `build.py --merge-2026` — merge 2026 CSV before building (for 2026-only updates)
+### build.py flags
 
-Shared config: **`data/google_topics.json`** — optional override for the 15 theme names at build time (defaults to anchors in `build.py`).
+- `--merge-2026` — merge 2026 CSV before building
+- `--classify-limit N` — only call Anthropic for first N uncached submissions
+- `--classify-refresh` — ignore LLM cache
+- `--skip-classify` — skip Anthropic; reuse existing `assigned_topics` in JSON (UMAP + CSV only)
 
-CI workflows (`.github/workflows/`): **Update 2026 Data**, **Scrape CCN Data**, **Deploy GitHub Pages**.
+Shared config: **`data/google_topics.json`** — optional override for the 15 theme names at build time.
 
----
+## Theme assignment (Anthropic Claude)
 
-## Clustering algorithm
+Default model: **`claude-opus-4-6`** (override with `ANTHROPIC_MODEL`).
 
-The pipeline uses one shared text representation for both **theme assignment** and **UMAP map coordinates**. There is no separate cluster label in the CSV — only the 15 research themes and 2D coordinates.
+For each submission, Claude receives title, abstract, keywords, and optional conference track. It returns JSON:
 
-### 1. Text preparation
-
-Before any vectorization, each submission is cleaned:
-
-- **Mojibake repair** — UTF-8 bytes mis-read as Latin-1 are fixed (`repair_mojibake()` in `build.py`).
-- **Keyword sanitization** — citation fragments removed (`et al.`, `p. 12`, DOIs, URLs); conference metadata labels dropped (`psychological / behavioral research`, `fmri`, `eeg`, etc.).
-- **Weighted document** — fields are concatenated with explicit weights so abstract content dominates noisy keywords:
-
-  | Field | Weight |
-  |-------|--------|
-  | Title | ×2 |
-  | Abstract | ×3 |
-  | Cleaned content keywords | ×1 |
-
-  Metadata area labels never enter the embedding text. Method tokens like `fmri`/`eeg` are stripped from keyword fields but can still appear naturally in abstracts.
-
-Implementation: `submission_embedding_text()` in `build.py`.
-
-### 2. TF-IDF vectorization
-
-Both theme scoring and UMAP use scikit-learn `TfidfVectorizer`:
-
-- **Features:** up to 8,000 (UMAP) / 10,000 (theme scorer) unigrams and bigrams
-- **Stop words:** English + metadata token stoplist (`fmri`, `eeg`, `cognitive`, …)
-- **Filters:** `min_df=2`, `max_df=0.95`, `sublinear_tf=True`
-
-Each submission becomes a sparse TF-IDF vector in a vocabulary learned from the full corpus (~2,967 submissions).
-
-### 3. Theme assignment (cosine similarity to prototypes)
-
-Themes are **not** discovered by clustering submissions. Each of the 15 CCN research themes has a **prototype anchor document** built from curated terms in `TOPIC_ANCHORS` (e.g. Vision: `retinotopic`, `scene perception`; Perception: `psychophysics`, `multisensory`; Clinical: `schizophrenia`, `depression`, …).
-
-`ThemeScorer` in `build.py`:
-
-1. Builds TF-IDF vectors for all submissions **and** all 15 prototype documents in one fit.
-2. L2-normalizes vectors so dot product = **cosine similarity**.
-3. Scores each submission against every prototype; highest similarity → primary topic. Close scores between two themes still assign the top scorer — not Everything else.
-
-**Multi-label assignment:**
-
-- Keep all themes with similarity ≥ `max_score × 0.5` (secondary floor **0.05**)
-- **Everything else** is fallback-only (never competes in ranking). It is used only when no real category clears **0.04** on cosine similarity.
-- Cap at **5** topics per submission
-- Primary topic is always first in `assigned_topics`
-
-**Overrides and soft boosts:**
-
-1. **Official CCN label** — specific conference topic/track strings map directly to a theme (broad labels like `psychological / behavioral research` do *not* force a primary; they only nudge scores by +0.04).
-2. **Broad area hints** — coarse archive labels nudge several themes without overriding title/abstract signal.
-
-**Vision vs Perception split:** **Vision** anchors retinotopic, scene, and gaze-related terms; **Perception** anchors psychophysics, multisensory, and non-visual sensory modalities (tactile, auditory integration, interoception, etc.).
-
-**AI vs Methods split:** the theme **AI, LLM, & Neural Networks** uses anchors for LLMs, transformers, neural networks, deep learning, and model interpretability. Methods-oriented terms (benchmarks, frameworks, theory, statistical analysis) anchor **Methods and theory**.
-
-#### Optional: LLM theme assignment (`--llm-themes`)
-
-`scripts/llm_themes.py` calls **Anthropic Claude** (default `claude-opus-4-6`) with title, abstract, keywords, and optional conference track. The model returns JSON:
-
-- `primary_theme` — exactly one best category
-- `secondary_topics` — all other clearly applicable categories (0–4)
-
-**API key:** copy `.env.example` → `.env`, set `ANTHROPIC_API_KEY` (gitignored). Never commit the key; use repository secrets in CI.
-
-```bash
-pip install -r requirements-llm.txt
-python scripts/build.py --llm-themes
+```json
+{"primary_theme": "...", "secondary_topics": ["...", "..."]}
 ```
 
-Assignments are cached in `data/llm_theme_cache.json` (gitignored). Re-runs only API-call uncached submission IDs.
+Rules encoded in the system prompt:
 
-### 4. UMAP map coordinates
+- Exactly **one primary** — best-fit category
+- **0–4 secondaries** — all other clearly applicable categories
+- Prefer a specific category over **Everything else** whenever there is any topical fit
+- **Everything else** only when nothing else matches
 
-After themes are assigned, `build.py` projects every submission into 2D for the dashboard map:
+Results are cached in **`data/llm_theme_cache.json`** (gitignored). Re-runs only API-call submission IDs not in cache.
 
-1. Same weighted TF-IDF text as above (via `submission_embedding_text`).
-2. **UMAP** (`umap-learn`) with:
-   - `n_neighbors=15`, `min_dist=0.12`
-   - `metric=cosine`
-   - `random_state=42` (reproducible layout)
-3. Output: `{ id, x, y, year, title, poster_number }` per point in `embeddings_all.json`.
+### API key
 
-These `x`/`y` values are copied into `abstracts.csv` as `umap_x` and `umap_y`. The map shows **semantic neighborhoods** — papers with similar title/abstract language land near each other — independent of the 15 theme labels.
+Never commit keys. Use `.env` locally (`ANTHROPIC_API_KEY`) or a repository secret in CI.
 
-### 5. CSV export
+## UMAP map coordinates
 
-`build.py` joins:
+Independent of theme labels. `build.py` projects submissions into 2D for the dashboard map:
 
-- Core fields from `submissions.json` (title, author, keywords, `assigned_topics`, …)
-- UMAP coordinates from `embeddings_all.json`
-- Mojibake-repaired text, UTF-8 BOM encoding for Excel
+1. Weighted text via `submission_embedding_text()` in `shared.py` (title ×2, abstract ×3, keywords ×1)
+2. TF-IDF vectorization + **UMAP** (`n_neighbors=15`, `min_dist=0.12`, cosine metric)
+3. Coordinates written to `embeddings_all.json` and merged into `abstracts.csv` as `umap_x`, `umap_y`
 
-The dashboard never reads `submissions.json` or `embeddings_all.json` at runtime.
-
----
+The map shows semantic neighborhoods — similar language clusters together regardless of assigned theme.
 
 ## CSV schema
 
-**Core fields:** `year`, `title`, `author`, `keywords`, `assigned_topics`
+`abstracts.csv` columns:
 
-**Support fields:** `id`, `authors`, `abstract`, `umap_x`, `umap_y`, `source_url`, `poster_number`
+| Column | Description |
+|--------|-------------|
+| `id`, `year`, `title`, `author`, `authors` | Identity |
+| `keywords` | Cleaned author/content keywords |
+| `assigned_topics` | Primary first, then secondaries (` \| ` delimiter) |
+| `abstract` | Full abstract text |
+| `umap_x`, `umap_y` | Map coordinates |
+| `source_url`, `poster_number` | Links / poster IDs |
 
-List-valued fields use ` | ` as the delimiter. Topics in `assigned_topics` are ordered by importance (primary first).
+## Dashboard behavior
 
-## Keyword column
-
-`keywords` in the CSV stores **cleaned content keywords**:
-
-1. `author_keywords` when present (HTML, PDF, or substantive author text)
-2. otherwise `extracted_keywords` (title/abstract token fallback)
-3. otherwise legacy `keywords` on the submission record
-
-Citation fragments and metadata area labels are stripped before export.
-
-## Embedding map (UI)
-
-- Coordinates from `umap_x` / `umap_y` in the CSV (all years, 2017–2026)
 - Dot **color** = primary topic (`assigned_topics[0]`)
-- Click/tap a dot → scrolls to that submission in **Matching submissions** and shows **all** assigned topics (primary labeled)
-- Map topic dropdown lists all 15 themes; filter matches any assigned topic; non-matches are dimmed
-- Legend: “Primary topic (dot color)”
-- Map respects year / search / topic filters
+- Click a dot → scroll to submission, show all assigned topics
+- Theme filter matches any value in `assigned_topics`
 
-## Frontend notes
+## Dependencies
 
-- Theme colors index into `GOOGLE_FORM_TOPICS` in `app.js`
-- Year-over-year theme chart ignores the year filter so cross-year trends stay visible
-- Header theme dropdown and map topic dropdown stay in sync
-- KPI row shows total submissions, filtered count, theme count, and year span
-
-## Python dependencies
-
-Build pipeline only (not loaded by the static dashboard):
-
-| Step | Packages |
-|------|----------|
+| Script | Packages |
+|--------|----------|
 | `scrape.py` | `requests`, `beautifulsoup4`, `lxml`, `pypdf` |
-| `build.py` | `numpy`, `scikit-learn`, `umap-learn` |
+| `build.py` | `numpy`, `scikit-learn`, `umap-learn`, `anthropic`, `python-dotenv` |
 
-Install for both steps: `pip install requests beautifulsoup4 lxml pypdf numpy scikit-learn umap-learn`
+Install all: `pip install -r requirements.txt`

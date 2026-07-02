@@ -19,8 +19,8 @@
       "count": 617,
       "note": "Provisional — replace CSV and re-run merge when updated data is available."
     },
-    "research_themes_assigned_at": "2026-07-02T01:22:53.401573+00:00",
-    "research_theme_method": "Google Form Q1 topics; weighted TF-IDF cosine similarity to topic prototype anchors (title x2, abstract x3, cleaned keywords x1; metadata keywords excluded); multi-label threshold max_score * 0.5 (secondary floor 0.05), primary: official CCN label, else top competitive score (ties favor #1); 'Everything else' only when max competitive score < 0.04; cap 5; official CCN labels override primary when specific",
+    "research_themes_assigned_at": "2026-07-02T18:32:53.027231+00:00",
+    "research_theme_method": "Skipped classification; reused assigned_topics from submissions.json",
     "keyword_source": "author_keywords prefer poster HTML, proceedings/authored PDFs (2017-2025), or 2026 CSV; extracted_keywords only when no author keywords are available; citation fragments and metadata area labels stripped before scoring",
     "keyword_years": [
       2017,

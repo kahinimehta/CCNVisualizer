@@ -15,7 +15,7 @@ ccneuro.org archives
         ▼  build.py
   ┌─────────────────────────────────────┐
   │ 1. Clean keywords & repair encoding │
-  │ 2. Assign 15 research themes        │
+  │ 2. Assign 15 themes (Anthropic)     │
   │ 3. Build UMAP map (embeddings_all)  │
   │ 4. Export abstracts.csv             │
   └─────────────────────────────────────┘
@@ -26,22 +26,23 @@ ccneuro.org archives
 
 **Step 1 — Scrape to JSON.** `scrape.py` pulls poster/paper records from CCN archives (2017–2026) into `data/submissions.json`. Keywords come from poster HTML, proceedings PDFs, or a token fallback. Citation fragments (`et al.`, page numbers, DOIs) and conference metadata labels are stripped at this stage.
 
-**Step 2 — Clustering & themes.** `build.py` reads the JSON, runs the clustering/theme algorithm (see [IMPLEMENTATION.md](IMPLEMENTATION.md) for details), writes updated topics back to `submissions.json`, saves 2D map coordinates to `embeddings_all.json`, and exports `abstracts.csv`.
+**Step 2 — Themes, map, CSV.** `build.py` reads the JSON, classifies each submission with **Anthropic Claude** (primary + secondary themes), computes UMAP coordinates for the embedding map, writes topics back to `submissions.json`, saves 2D coordinates to `embeddings_all.json`, and exports `abstracts.csv`. See [IMPLEMENTATION.md](IMPLEMENTATION.md) for details.
 
 **Step 3 — Dashboard.** The browser loads only `docs/data/abstracts.csv`. Map coordinates (`umap_x`, `umap_y`), assigned topics, and all display fields are already in that file.
 
 ### Rebuild commands
 
 ```bash
-pip install requests beautifulsoup4 lxml pypdf numpy scikit-learn umap-learn
+pip install -r requirements.txt
+cp .env.example .env   # set ANTHROPIC_API_KEY
 python scripts/scrape.py --merge-2026        # rebuild submissions.json
 python scripts/scrape.py --refresh-keywords  # refresh keywords (optional)
-python scripts/build.py                      # themes + UMAP + abstracts.csv
+python scripts/build.py                      # Anthropic themes + UMAP + abstracts.csv
 ```
 
-`build.py` is the single command that regenerates themes, the embedding map, and both copies of the CSV.
+`build.py` is the single command that regenerates themes, the embedding map, and both copies of the CSV. Use `--skip-classify` to rebuild UMAP/CSV without API calls (reuses existing topics in JSON).
 
-For **2026-only updates**, replace `data/ccn-2026-pending-posters.csv` and run `python scripts/build.py --merge-2026`. GitHub Actions: **Update 2026 Data** or **Scrape CCN Data** (full archive).
+For **2026-only updates**, replace `data/ccn-2026-pending-posters.csv` and run `python scripts/build.py --merge-2026`. GitHub Actions: **Update 2026 Data** or **Scrape CCN Data** (full archive). Both require the `ANTHROPIC_API_KEY` repository secret.
 
 The CSV is written as **UTF-8 with BOM** (`utf-8-sig`) so Excel displays non-English characters correctly. Text fields pass through `repair_mojibake()` to fix UTF-8 bytes mis-read as Latin-1 during scraping.
 
@@ -53,6 +54,7 @@ The CSV is written as **UTF-8 with BOM** (`utf-8-sig`) so Excel displays non-Eng
 | `data/submissions.json`, `docs/data/submissions.json` | No — intermediate build artifact |
 | `embeddings_all.json` | No — UMAP coords are copied into the CSV |
 | `google_topics.json` | No — optional theme-name override at build time only |
+| `llm_theme_cache.json` | No — Anthropic cache (gitignored) |
 
 ---
 

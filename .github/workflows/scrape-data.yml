@@ -24,7 +24,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install requests beautifulsoup4 lxml pypdf numpy scikit-learn umap-learn
+        run: pip install -r requirements.txt
 
       - name: Scrape CCN archives
         run: |
@@ -37,6 +37,8 @@ jobs:
           fi
 
       - name: Build dashboard data
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: python scripts/build.py
 
       - name: Commit updated data

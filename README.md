@@ -1,122 +1,84 @@
-# Submission Visualizer
+# CCN Visualizer
 
 Interactive dashboard for poster and paper submissions across the [Cognitive Computational Neuroscience (CCN)](https://ccneuro.org) conference archives (2017–2026).
 
 **Live site:** https://ccn-visualizer.vercel.app/
 
-**Documentation:** [docs/DASHBOARD.md](docs/DASHBOARD.md) (user guide) · [docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md) (workflow & algorithms)
+**Documentation:** [docs/DASHBOARD.md](docs/DASHBOARD.md) · [docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md)
 
-**Research themes source:** [CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform) (Google Form question 1)
-
-## Overview
-
-- Archive data (`2017`–`2025`) was scraped once from ccneuro.org and is treated as static
-- **2026** posters are merged from `data/ccn-2026-pending-posters.csv` — the main data that gets updated going forward
-- Research themes are the 15 meetup topics from the [Google Form](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform); submissions can carry **multiple assigned topics**
-- The live dashboard reads **`docs/data/abstracts.csv` only** — one row per submission with keywords, assigned topics, UMAP coordinates, and links
-
-## Data pipeline
+## Pipeline
 
 ```
-scrape.py → submissions.json → build.py → abstracts.csv → dashboard
-                                  ├── embeddings_all.json (UMAP coords → merged into CSV)
-                                  └── submissions.json (updated with assigned_topics)
+scrape.py  →  submissions.json  →  build.py  →  abstracts.csv  →  dashboard
+   │                                    │
+   scrape CCN archives                  ├─ Anthropic Claude (themes)
+                                        ├─ UMAP (map coordinates)
+                                        └─ abstracts.csv export
 ```
 
-See [docs/DASHBOARD.md](docs/DASHBOARD.md) and [docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md) for the full workflow and clustering algorithm.
+1. **`scripts/scrape.py`** — scrape CCN archives → `data/submissions.json`
+2. **`scripts/build.py`** — classify themes with **Anthropic Claude**, compute UMAP, write `abstracts.csv`
+3. **Dashboard** — reads `docs/data/abstracts.csv` only (static site in `docs/`)
 
-## Dashboard features
-
-| Feature | Description |
-|---------|-------------|
-| KPI summary | Total submissions, filtered count, theme count, years covered |
-| Research theme filter | Header dropdown — all 15 Google Form topics |
-| Submissions over time | Line chart by conference year |
-| Research theme ranking | Horizontal bars; multi-label counts |
-| Year-over-year change | Theme share delta between two selected years |
-| Abstract embedding map | All-years UMAP scatter; dot color = primary topic; click for all topics |
-| Matching submissions | Searchable list with assigned topic tags |
-
-## Research themes
-
-The 15 topics come from [**CCN 2026 Activity Preferences**](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform), question 1. Optional build-time override: `data/google_topics.json`.
-
-| Years | Keyword source |
-|-------|----------------|
-| 2017–2025 | Poster HTML `Keywords:` field and/or proceedings PDF keyword line |
-| 2026 | CSV `primary_area` / `secondary_area` |
-| Any year (fallback) | Title/abstract tokens when author keywords unavailable |
-
-## Updating data
-
-### 2026-only update
-
-1. Replace `data/ccn-2026-pending-posters.csv`
-2. Run:
+## Setup
 
 ```bash
-pip install numpy scikit-learn umap-learn
-python scripts/build.py --merge-2026
+pip install -r requirements.txt
+cp .env.example .env   # add ANTHROPIC_API_KEY (never commit .env)
 ```
 
-Or trigger the **Update 2026 Data** GitHub Action.
+## Updating data
 
 ### Full rebuild
 
 ```bash
-pip install requests beautifulsoup4 lxml pypdf numpy scikit-learn umap-learn
 python scripts/scrape.py --merge-2026
-python scripts/scrape.py --refresh-keywords   # optional keyword refresh
+python scripts/scrape.py --refresh-keywords   # optional
 python scripts/build.py
 ```
 
-Or trigger **Scrape CCN Data** (workflow dispatch).
+### 2026-only update
 
-Both paths refresh `submissions.json`, `embeddings_all.json`, `abstracts.csv`, and theme assignments.
-
-### LLM theme classification (Claude Opus 4.6)
-
-By default, themes are assigned with TF-IDF cosine similarity (`build.py` with no flags). To use **Anthropic Claude** instead:
-
-1. **Install extra dependencies**
+Replace `data/ccn-2026-pending-posters.csv`, then:
 
 ```bash
-pip install -r requirements-llm.txt
+python scripts/build.py --merge-2026
 ```
 
-2. **Add your API key safely** (never commit it)
+### Anthropic API key (required for `build.py`)
 
-```bash
-cp .env.example .env
-# Edit .env and set ANTHROPIC_API_KEY=sk-ant-...
-```
+| Where | How |
+|-------|-----|
+| **Local** | `cp .env.example .env` → set `ANTHROPIC_API_KEY` (`.env` is gitignored) |
+| **GitHub Actions** | Repository secret `ANTHROPIC_API_KEY` |
+| **Cloud agent** | Environment secret / `.env` on the machine |
 
-The `.env` file is listed in `.gitignore`. For GitHub Actions or cloud agents, add `ANTHROPIC_API_KEY` as a **repository/environment secret** — do not put the key in workflow YAML or commit it.
-
-Optional env vars (in `.env` or your shell):
+Optional env vars:
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `ANTHROPIC_API_KEY` | *(required)* | Your Anthropic API key |
-| `ANTHROPIC_MODEL` | `claude-opus-4-6` | Model ID for classification |
-| `LLM_THEME_STRICT` | off | Exit on first API failure |
+| `ANTHROPIC_API_KEY` | *(required)* | Anthropic API key |
+| `ANTHROPIC_MODEL` | `claude-opus-4-6` | Model for theme classification |
+| `LLM_THEME_STRICT` | off | Exit on first classification failure |
 
-3. **Run classification**
+Build flags:
 
 ```bash
-# Smoke test (first 5 uncached submissions)
-python scripts/build.py --llm-themes --llm-limit 5
-
-# Full run (~3k submissions; cached in data/llm_theme_cache.json)
-python scripts/build.py --llm-themes
-
-# Re-classify everything (still respects cache unless --llm-refresh)
-python scripts/build.py --llm-themes --llm-refresh
+python scripts/build.py                          # classify + UMAP + CSV
+python scripts/build.py --classify-limit 5       # smoke test (5 API calls)
+python scripts/build.py --classify-refresh       # ignore cache, re-classify
+python scripts/build.py --skip-classify          # UMAP + CSV only (reuse existing topics)
 ```
 
-Results are cached in `data/llm_theme_cache.json` (gitignored) so re-runs only call the API for new/changed submissions. Claude assigns **one primary** theme plus **all other applicable** secondaries from the 15-topic list.
+Classifications are cached in `data/llm_theme_cache.json` (gitignored). Re-runs only API-call new submission IDs.
 
-**Cost note:** a full pass is roughly one API call per submission (~title + abstract). Check [Anthropic pricing](https://www.anthropic.com/pricing) before running all ~3k rows.
+**Cost note:** ~3k submissions ≈ one API call each. Check [Anthropic pricing](https://www.anthropic.com/pricing) before a full run.
+
+## Research themes
+
+15 topics from [CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform), question 1. Names in `data/google_topics.json`; colors in `docs/js/app.js`.
+
+Claude assigns **one primary** theme plus **all other applicable** secondaries per submission.
 
 ## Local development
 
@@ -126,43 +88,24 @@ python -m http.server 8080 --directory docs
 
 Open http://localhost:8080
 
-## Deployment
-
-Pushes to `main` deploy the static `docs/` folder (GitHub Pages / Vercel).
-
-| Setting | Value |
-|---------|--------|
-| Framework Preset | Other |
-| Build Command | *(empty)* |
-| Output Directory | `docs` |
-
 ## Repository layout
 
 ```
 scripts/
-  scrape.py                     # Step 1: scrape archives → submissions.json
-  build.py                      # Step 2: themes + UMAP + abstracts.csv (--llm-themes for Claude)
-  llm_themes.py                 # Claude Opus theme classifier (optional)
+  scrape.py          # Step 1: scrape → submissions.json
+  build.py           # Step 2: Anthropic themes + UMAP + abstracts.csv
+  shared.py          # Text cleanup helpers (scrape + build)
 data/
-  ccn-2026-pending-posters.csv  # Provisional 2026 poster list
-  google_topics.json            # Optional theme name override (build time)
-  llm_theme_cache.json          # LLM classification cache (gitignored; local only)
-  submissions.json              # Build artifact (not loaded by dashboard)
-  embeddings_all.json           # UMAP coords (merged into CSV)
+  submissions.json   # Scraped records (intermediate)
+  llm_theme_cache.json  # Anthropic cache (gitignored)
   abstracts.csv
 docs/
-  data/abstracts.csv            # Dashboard runtime source of truth
-  js/app.js                       # Dashboard logic; GOOGLE_FORM_TOPICS + colors
-  DASHBOARD.md                    # User guide
-  IMPLEMENTATION.md               # Workflow & algorithm reference
-.github/workflows/
-  update-2026-data.yml            # 2026 CSV merge + theme/CSV rebuild
-  scrape-data.yml                 # Full archive scrape
-  scrape-and-deploy.yml           # GitHub Pages deploy
+  data/abstracts.csv # Dashboard runtime source of truth
+  js/app.js          # GOOGLE_FORM_TOPICS + colors
+.env.example         # Template for ANTHROPIC_API_KEY
+requirements.txt
 ```
 
-## Licenses
+## Deployment
 
-- **Project code:** [MIT License](LICENSE)
-- **Dependencies:** [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md)
-- **In-app attributions:** [docs/licenses.html](docs/licenses.html)
+Pushes to `main` deploy the static `docs/` folder (GitHub Pages / Vercel). Build pipeline runs separately (locally or in CI with `ANTHROPIC_API_KEY`).

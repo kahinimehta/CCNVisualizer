@@ -31,15 +31,19 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install scraper dependencies
+      - name: Install dependencies
         if: github.event_name == 'workflow_dispatch' && inputs.scrape
-        run: pip install requests beautifulsoup4 lxml pypdf numpy scikit-learn umap-learn
+        run: pip install -r requirements.txt
 
       - name: Scrape CCN archives
         if: github.event_name == 'workflow_dispatch' && inputs.scrape
-        run: |
-          python scripts/scrape.py --merge-2026
-          python scripts/build.py
+        run: python scripts/scrape.py --merge-2026
+
+      - name: Build dashboard data
+        if: github.event_name == 'workflow_dispatch' && inputs.scrape
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python scripts/build.py
 
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3

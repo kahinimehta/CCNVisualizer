@@ -16,7 +16,7 @@ This project uses the following open-source libraries and services.
 
 ## Python dependencies (build pipeline only)
 
-Used by scripts in `scripts/` to scrape archives, assign themes, and build the CSV. Not loaded by the static dashboard.
+Used by scripts in `scripts/` to scrape archives, classify themes (Anthropic API), compute UMAP coordinates, and build the CSV. Not loaded by the static dashboard.
 
 | Package | License | Source |
 |---------|---------|--------|
@@ -27,8 +27,14 @@ Used by scripts in `scripts/` to scrape archives, assign themes, and build the C
 | scikit-learn | BSD 3-Clause License | https://scikit-learn.org/ |
 | umap-learn | BSD 3-Clause License | https://github.com/lmcinnes/umap |
 | pypdf | BSD 3-Clause License | https://github.com/py-pdf/pypdf |
+| anthropic | MIT License | https://github.com/anthropics/anthropic-sdk-python |
+| python-dotenv | BSD 3-Clause License | https://github.com/theskumar/python-dotenv |
 
-Install for the pipeline: `pip install requests beautifulsoup4 lxml pypdf numpy scikit-learn umap-learn`
+Install for the pipeline: `pip install -r requirements.txt`
+
+### Anthropic API (theme classification)
+
+Theme labels are assigned at build time via the [Anthropic API](https://www.anthropic.com/) (Claude). Usage is subject to [Anthropic's terms of service](https://www.anthropic.com/legal/consumer-terms). API keys are never committed to the repository.
 
 ## Data
 

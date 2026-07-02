@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_at": "2026-07-02T01:23:05.376435+00:00",
+    "generated_at": "2026-07-02T18:33:04.808936+00:00",
     "count": 2967,
     "years": [
       2017,
@@ -12,7 +12,7 @@
       2025,
       2026
     ],
-    "method": "Weighted TF-IDF (title x2, abstract x3, cleaned keywords x1; metadata keywords excluded) + UMAP 2D, cosine metric"
+    "method": "Weighted TF-IDF (title x2, abstract x3, cleaned keywords x1) + UMAP 2D, cosine metric"
   },
   "points": [
     {
