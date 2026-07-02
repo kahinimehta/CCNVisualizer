@@ -1253,7 +1253,7 @@ function renderEmbeddingCluster() {
   const svg = appendChartSvg(container, width, height);
   const color = (theme) => themeColor(theme);
   const plotBottom = mobileLegend ? plotHeight - margin.bottom : height - margin.bottom;
-  const pointRadius = isPhoneLayout() ? { base: 4, selected: 5.5, highlighted: 6 } : { base: 7, selected: 8.5, highlighted: 10 };
+  const pointRadius = isPhoneLayout() ? { base: 1, selected: 1.375, highlighted: 1.5 } : { base: 7, selected: 8.5, highlighted: 10 };
 
   const x = d3.scaleLinear().domain(d3.extent(points, (d) => d.x)).nice().range([margin.left, width - margin.right]);
   const y = d3.scaleLinear().domain(d3.extent(points, (d) => d.y)).nice().range([plotBottom, margin.top]);
