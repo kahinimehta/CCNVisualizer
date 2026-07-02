@@ -39,7 +39,7 @@ Install for the pipeline: `pip install requests beautifulsoup4 lxml pypdf numpy 
 
 ### CCN 2026 Activity Preferences (Google Form)
 - **Source:** https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform
-- **Usage:** Canonical list of 12 primary research theme names (`data/google_topics.json` at build time; hardcoded in `docs/js/app.js` for UI colors)
+- **Usage:** Canonical list of 15 primary research theme names (`data/google_topics.json` at build time; hardcoded in `docs/js/app.js` for UI colors)
 - **Note:** Only the published form question 1 topic options are used — no response or analytics data.
 
 ## Trademarks

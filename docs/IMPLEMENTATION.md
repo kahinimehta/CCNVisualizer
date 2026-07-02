@@ -6,7 +6,7 @@
 docs/data/abstracts.csv  →  docs/js/app.js (d3.csv)  →  dashboard
 ```
 
-The browser loads **one file**: `abstracts.csv`. The 12 research theme names and colors are hardcoded in `app.js` as `GOOGLE_FORM_TOPICS`. No JSON, no live API calls.
+The browser loads **one file**: `abstracts.csv`. The 15 research theme names and colors are hardcoded in `app.js` as `GOOGLE_FORM_TOPICS`. No JSON, no live API calls.
 
 ---
 
@@ -59,7 +59,7 @@ CI workflows (`.github/workflows/`): **Update 2026 Data**, **Scrape CCN Data**, 
 
 ## Clustering algorithm
 
-The pipeline uses one shared text representation for both **theme assignment** and **UMAP map coordinates**. There is no separate cluster label in the CSV — only the 12 research themes and 2D coordinates.
+The pipeline uses one shared text representation for both **theme assignment** and **UMAP map coordinates**. There is no separate cluster label in the CSV — only the 15 research themes and 2D coordinates.
 
 ### 1. Text preparation
 
@@ -91,11 +91,11 @@ Each submission becomes a sparse TF-IDF vector in a vocabulary learned from the 
 
 ### 3. Theme assignment (cosine similarity to prototypes)
 
-Themes are **not** discovered by clustering submissions. Each of the 12 CCN research themes has a **prototype anchor document** built from curated terms in `TOPIC_ANCHORS` (e.g. Vision: `visual`, `conscious vision`, `retinotopic`; Clinical: `schizophrenia`, `depression`, …).
+Themes are **not** discovered by clustering submissions. Each of the 15 CCN research themes has a **prototype anchor document** built from curated terms in `TOPIC_ANCHORS` (e.g. Vision: `retinotopic`, `scene perception`; Perception: `psychophysics`, `multisensory`; Clinical: `schizophrenia`, `depression`, …).
 
 `ThemeScorer` in `build.py`:
 
-1. Builds TF-IDF vectors for all submissions **and** all 12 prototype documents in one fit.
+1. Builds TF-IDF vectors for all submissions **and** all 15 prototype documents in one fit.
 2. L2-normalizes vectors so dot product = **cosine similarity**.
 3. Scores each submission against every prototype; highest similarity → primary topic.
 
@@ -109,6 +109,8 @@ Themes are **not** discovered by clustering submissions. Each of the 12 CCN rese
 
 1. **Official CCN label** — specific conference topic/track strings map directly to a theme (broad labels like `psychological / behavioral research` do *not* force a primary; they only nudge scores by +0.04).
 2. **Broad area hints** — coarse archive labels nudge several themes without overriding title/abstract signal.
+
+**Vision vs Perception split:** **Vision** anchors retinotopic, scene, and gaze-related terms; **Perception** anchors psychophysics, multisensory, and non-visual sensory modalities (tactile, auditory integration, interoception, etc.).
 
 **AI vs Methods split:** the theme **AI, LLM, & Neural Networks** uses anchors for LLMs, transformers, neural networks, deep learning, and model interpretability. Methods-oriented terms (benchmarks, frameworks, theory, statistical analysis) anchor **Methods and theory**. Low-confidence assignments fall back to **Everything else**.
 

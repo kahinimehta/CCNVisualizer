@@ -15,7 +15,7 @@ ccneuro.org archives
         ▼  build.py
   ┌─────────────────────────────────────┐
   │ 1. Clean keywords & repair encoding │
-  │ 2. Assign 12 research themes        │
+  │ 2. Assign 15 research themes        │
   │ 3. Build UMAP map (embeddings_all)  │
   │ 4. Export abstracts.csv             │
   └─────────────────────────────────────┘
@@ -68,7 +68,7 @@ The dashboard loads **only** `data/abstracts.csv`. No JSON or API calls at runti
 | `title` | Submission title |
 | `author` | First author |
 | `keywords` | Cleaned content keywords (metadata area labels and citation fragments removed) |
-| `assigned_topics` | One or more of the **12 CCN research themes**, pipe-separated (` \| `), **ordered by importance** (primary first) |
+| `assigned_topics` | One or more of the **15 CCN research themes**, pipe-separated (` \| `), **ordered by importance** (primary first) |
 
 ### Additional columns (precomputed at build time)
 

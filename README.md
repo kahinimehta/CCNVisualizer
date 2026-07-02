@@ -12,7 +12,7 @@ Interactive dashboard for poster and paper submissions across the [Cognitive Com
 
 - Archive data (`2017`–`2025`) was scraped once from ccneuro.org and is treated as static
 - **2026** posters are merged from `data/ccn-2026-pending-posters.csv` — the main data that gets updated going forward
-- Research themes are the 12 meetup topics from the [Google Form](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform); submissions can carry **multiple assigned topics**
+- Research themes are the 15 meetup topics from the [Google Form](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform); submissions can carry **multiple assigned topics**
 - The live dashboard reads **`docs/data/abstracts.csv` only** — one row per submission with keywords, assigned topics, UMAP coordinates, and links
 
 ## Data pipeline
@@ -30,7 +30,7 @@ See [docs/DASHBOARD.md](docs/DASHBOARD.md) and [docs/IMPLEMENTATION.md](docs/IMP
 | Feature | Description |
 |---------|-------------|
 | KPI summary | Total submissions, filtered count, theme count, years covered |
-| Research theme filter | Header dropdown — all 12 Google Form topics |
+| Research theme filter | Header dropdown — all 15 Google Form topics |
 | Submissions over time | Line chart by conference year |
 | Research theme ranking | Horizontal bars; multi-label counts |
 | Year-over-year change | Theme share delta between two selected years |
