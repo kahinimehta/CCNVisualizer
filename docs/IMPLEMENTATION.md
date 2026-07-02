@@ -74,7 +74,7 @@ Independent of theme labels. `build.py` projects submissions into 2D for the das
 
 1. Weighted text via `submission_embedding_text()` in `shared.py` (title ×2, abstract ×3, keywords ×1)
 2. TF-IDF vectorization + **UMAP** (`n_neighbors=15`, `min_dist=0.12`, cosine metric)
-3. Coordinates written to `embeddings_all.json` and merged into `abstracts.csv` as `umap_x`, `umap_y`
+3. Coordinates written to `data/embeddings_all.json` and merged into `abstracts.csv` as `umap_x`, `umap_y`
 
 The map shows semantic neighborhoods — similar language clusters together regardless of assigned theme.
 

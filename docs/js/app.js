@@ -353,7 +353,6 @@ const GOOGLE_FORM_TOPICS = [
 
 const state = {
   data: null,
-  embeddings: null,
   selectedYear: "all",
   search: "",
   selectedTheme: "",
@@ -409,7 +408,7 @@ function csvRowToSubmission(row) {
     id: row.id,
     year: Number(row.year),
     title: row.title || "",
-    author: row.author || row.first_author || "",
+    author: row.author || "",
     authors: row.authors || row.author || "",
     abstract: row.abstract || "",
     keywords,
@@ -444,22 +443,6 @@ function buildStateFromCsv(rows) {
   };
 }
 
-function buildEmbeddingsFromSubmissions(submissions) {
-  const points = submissions
-    .filter((item) => item.umap_x != null && item.umap_y != null)
-    .map((item) => ({
-      id: item.id,
-      poster_number: item.poster_number,
-      x: item.umap_x,
-      y: item.umap_y,
-      title: item.title,
-      abstract: item.abstract,
-      year: item.year,
-    }));
-  if (!points.length) return null;
-  return { points };
-}
-
 function embeddingDisplayPoints() {
   return filteredSubmissions()
     .filter((item) => item.umap_x != null && item.umap_y != null)
@@ -475,9 +458,7 @@ function embeddingDisplayPoints() {
 }
 
 function assignedTopics(submission) {
-  if (submission.assigned_topics?.length) return submission.assigned_topics;
-  const fallback = [submission.primary_theme, ...(submission.secondary_topics || [])].filter(Boolean);
-  return [...new Set(fallback)];
+  return submission.assigned_topics?.length ? submission.assigned_topics : [];
 }
 
 function primaryTheme(submission) {
@@ -533,18 +514,6 @@ function primaryThemeCounts(submissions) {
     .sort((a, b) => b.count - a.count);
 }
 
-const THEME_STOPWORDS = new Set([
-  "the", "and", "for", "with", "from", "that", "this", "using", "based", "study", "results",
-  "show", "human", "brain", "neural", "model", "models", "data", "analysis", "abstract",
-]);
-
-function tokenize(text) {
-  return (text || "")
-    .toLowerCase()
-    .match(/[a-z][a-z0-9\-]{2,}/g)
-    ?.filter((t) => !THEME_STOPWORDS.has(t)) || [];
-}
-
 function globalThemeTotals() {
   const totals = new Map();
   state.data?.submissions?.forEach((submission) => {
@@ -594,64 +563,8 @@ function appendPrimaryTopicDot(parent, radius, primaryTopic, options = {}) {
     .attr("opacity", opacity);
 }
 
-function buildThemeClassifier() {
-  const profiles = new Map();
-  researchThemeNames().forEach((name) => profiles.set(name, new Map()));
-
-  state.data?.submissions?.forEach((submission) => {
-    assignedTopics(submission).forEach((theme) => {
-      if (!profiles.has(theme)) return;
-      const weights = profiles.get(theme);
-      tokenize(submission.title).forEach((term) => weights.set(term, (weights.get(term) || 0) + 1));
-      tokenize(submission.abstract).forEach((term) => weights.set(term, (weights.get(term) || 0) + 1));
-    });
-  });
-
-  state.themeProfiles = profiles;
-}
-
 function submissionForEmbeddingPoint(point) {
   return state.data?.submissions?.find((item) => item.id === point.id);
-}
-
-function embeddingPointForSubmission(submission) {
-  if (submission.umap_x == null || submission.umap_y == null) return null;
-  return {
-    id: submission.id,
-    x: submission.umap_x,
-    y: submission.umap_y,
-    year: submission.year,
-    title: submission.title,
-    poster_number: submission.poster_number,
-  };
-}
-
-function submissionResearchTheme(submission) {
-  const assigned = primaryTheme(submission);
-  if (assigned) return assigned;
-
-  const profiles = state.themeProfiles;
-  if (!profiles?.size) return null;
-
-  const tokens = tokenize(
-    [submission.title, submission.abstract, submission.topic_area, ...submission.keywords].join(" ")
-  );
-  if (!tokens.length) return null;
-
-  let bestTheme = null;
-  let bestScore = 0;
-  profiles.forEach((weights, theme) => {
-    let score = 0;
-    tokens.forEach((term) => {
-      if (weights.has(term)) score += weights.get(term);
-    });
-    if (score > bestScore) {
-      bestScore = score;
-      bestTheme = theme;
-    }
-  });
-
-  return bestScore > 0 ? bestTheme : null;
 }
 
 function themeCountsByYear(submissions) {
@@ -781,14 +694,6 @@ function displaySubmissions() {
 function syncThemeSelects() {
   d3.select("#theme-select").property("value", state.selectedTheme);
   d3.select("#embedding-theme-select").property("value", state.selectedTheme);
-}
-
-function setThemeFilter(themeName) {
-  const nextTheme = state.selectedTheme === themeName ? "" : themeName;
-  state.selectedTheme = nextTheme;
-  state.highlightedSubmissionId = "";
-  syncThemeSelects();
-  renderAll();
 }
 
 function ensureSubmissionVisible(submission) {
@@ -1510,8 +1415,6 @@ async function init() {
   }
 
   state.data = buildStateFromCsv(csvRows);
-  state.embeddings = buildEmbeddingsFromSubmissions(state.data.submissions);
-  buildThemeClassifier();
 
   renderYearControls();
   renderDeltaYearControls();

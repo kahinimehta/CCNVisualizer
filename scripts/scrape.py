@@ -32,13 +32,14 @@ from pypdf import PdfReader
 
 from shared import (
     is_metadata_keyword,
+    normalize_keyword_phrase,
     repair_mojibake,
-    sanitize_keyword_list,
+    strip_citation_fragments,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "data"
-DOCS_DATA_DIR = ROOT / "docs" / "data"
+CSV_PATH_2026 = ROOT / "data" / "ccn-2026-pending-posters.csv"
 
 SESSION = requests.Session()
 SESSION.headers.update(
@@ -183,7 +184,7 @@ def resolve_keyword_fields(
     title: str = "",
     abstract: str = "",
 ) -> tuple[list[str], list[str], list[str]]:
-    """Return author keywords, extracted keywords, and combined keywords for theme scoring.
+    """Return author keywords, extracted keywords, and combined keywords.
 
     Author keywords should be supplied from HTML or PDF before calling this helper.
     Conference track/topic labels and title/abstract tokens are only used when author
@@ -751,25 +752,13 @@ def scrape_all(years: Iterable[int] | None = None) -> dict:
 
 def write_outputs(payload: dict) -> dict:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
-    DOCS_DATA_DIR.mkdir(parents=True, exist_ok=True)
-    for path in (DATA_DIR / "submissions.json", DOCS_DATA_DIR / "submissions.json"):
-        with path.open("w", encoding="utf-8") as fh:
-            json.dump(payload, fh, indent=2, ensure_ascii=False)
-        print(f"Wrote {path}")
+    path = DATA_DIR / "submissions.json"
+    with path.open("w", encoding="utf-8") as fh:
+        json.dump(payload, fh, indent=2, ensure_ascii=False)
+    print(f"Wrote {path}")
     return payload
 
 
-
-
-import hashlib
-import re
-from io import BytesIO
-from pathlib import Path
-from urllib.parse import urljoin
-
-
-
-ROOT = Path(__file__).resolve().parents[1]
 CACHE_DIR = ROOT / "data" / "pdf_cache"
 
 # Years where proceedings / authored PDFs may contain a keyword line.
@@ -1025,10 +1014,6 @@ def needs_pdf_keyword_refresh(submission: dict) -> bool:
     if year not in YEARS_WITH_PDF:
         return False
     return bool(submission.get("source_url"))
-
-
-# Backwards-compatible alias used by older scripts.
-PDF_KEYWORD_YEARS = YEARS_WITH_PDF
 
 
 SUBMISSION_FIELDS = {f.name for f in fields(Submission)}

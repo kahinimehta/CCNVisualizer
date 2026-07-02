@@ -51,16 +51,16 @@ The CSV is written as **UTF-8 with BOM** (`utf-8-sig`) so Excel displays non-Eng
 | File | Used by dashboard? |
 |------|-------------------|
 | `docs/data/abstracts.csv` | **Yes** — sole runtime data source |
-| `data/submissions.json`, `docs/data/submissions.json` | No — intermediate build artifact |
-| `embeddings_all.json` | No — UMAP coords are copied into the CSV |
-| `google_topics.json` | No — optional theme-name override at build time only |
-| `llm_theme_cache.json` | No — Anthropic cache (gitignored) |
+| `data/submissions.json` | No — intermediate scrape/build artifact |
+| `data/embeddings_all.json` | No — optional debug artifact; UMAP coords are in the CSV |
+| `data/google_topics.json` | No — optional theme-name override at build time only |
+| `data/llm_theme_cache.json` | No — Anthropic cache (gitignored) |
 
 ---
 
 ## Data source
 
-The dashboard loads **only** `data/abstracts.csv`. No JSON or API calls at runtime.
+The dashboard loads **only** `docs/data/abstracts.csv` (relative to the `docs/` site root). No JSON or API calls at runtime.
 
 ### Core columns
 

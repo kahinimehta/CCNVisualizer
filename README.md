@@ -96,11 +96,12 @@ scripts/
   build.py           # Step 2: Anthropic themes + UMAP + abstracts.csv
   shared.py          # Text cleanup helpers (scrape + build)
 data/
-  submissions.json   # Scraped records (intermediate)
+  submissions.json      # Scraped records (intermediate)
+  embeddings_all.json   # Optional UMAP debug artifact (not used by dashboard)
   llm_theme_cache.json  # Anthropic cache (gitignored)
-  abstracts.csv
+  abstracts.csv           # Local mirror of dashboard CSV
 docs/
-  data/abstracts.csv # Dashboard runtime source of truth
+  data/abstracts.csv    # Dashboard runtime source of truth
   js/app.js          # GOOGLE_FORM_TOPICS + colors
 .env.example         # Template for ANTHROPIC_API_KEY
 requirements.txt

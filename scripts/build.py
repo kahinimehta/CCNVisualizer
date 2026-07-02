@@ -38,14 +38,9 @@ from shared import (
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_PATH = ROOT / "data" / "submissions.json"
-DOCS_PATH = ROOT / "docs" / "data" / "submissions.json"
 GOOGLE_TOPICS_PATH = ROOT / "data" / "google_topics.json"
 LLM_CACHE_PATH = ROOT / "data" / "llm_theme_cache.json"
-EMBEDDINGS_ALL_PATH = ROOT / "docs" / "data" / "embeddings_all.json"
-EMBEDDING_OUT_PATHS = (
-    ROOT / "docs" / "data" / "embeddings_all.json",
-    ROOT / "data" / "embeddings_all.json",
-)
+EMBEDDING_PATH = ROOT / "data" / "embeddings_all.json"
 CSV_OUTPUT_PATHS = (ROOT / "data" / "abstracts.csv", ROOT / "docs" / "data" / "abstracts.csv")
 CSV_PATH_2026 = ROOT / "data" / "ccn-2026-pending-posters.csv"
 LIST_DELIMITER = " | "
@@ -423,7 +418,7 @@ def apply_assignments(
     payload["metadata"]["keyword_source"] = (
         "author_keywords prefer poster HTML, proceedings/authored PDFs (2017-2025), or 2026 CSV; "
         "extracted_keywords only when no author keywords are available; citation fragments and "
-        "metadata area labels stripped before scoring"
+        "metadata area labels stripped before export"
     )
     payload["metadata"]["keyword_years"] = sorted({sub["year"] for sub in submissions if sub.get("keywords")})
     payload["metadata"]["google_topics_source"] = config.get("source")
@@ -431,10 +426,9 @@ def apply_assignments(
 
 
 def write_payload(payload: dict) -> None:
-    for path in (DATA_PATH, DOCS_PATH):
-        with path.open("w", encoding="utf-8") as fh:
-            json.dump(payload, fh, indent=2, ensure_ascii=False)
-        print(f"Wrote {path}")
+    with DATA_PATH.open("w", encoding="utf-8") as fh:
+        json.dump(payload, fh, indent=2, ensure_ascii=False)
+    print(f"Wrote {DATA_PATH}")
 
 
 def build_umap(submissions: list[dict]) -> dict:
@@ -484,11 +478,10 @@ def build_umap(submissions: list[dict]) -> dict:
 
 
 def write_embedding_outputs(payload: dict) -> None:
-    for path in EMBEDDING_OUT_PATHS:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        with path.open("w", encoding="utf-8") as fh:
-            json.dump(payload, fh, indent=2, ensure_ascii=False)
-        print(f"Wrote {path}")
+    EMBEDDING_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with EMBEDDING_PATH.open("w", encoding="utf-8") as fh:
+        json.dump(payload, fh, indent=2, ensure_ascii=False)
+    print(f"Wrote {EMBEDDING_PATH}")
 
 
 def first_author(authors: str) -> str:

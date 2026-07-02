@@ -6,4 +6,5 @@ __pycache__/
 venv/
 data/raw/
 data/llm_theme_cache.json
+scripts/ccn_embeddings.npy
 .DS_Store
