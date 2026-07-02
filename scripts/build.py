@@ -323,7 +323,6 @@ KEYWORD_WEIGHT = 1
 
 RELEVANCE_RATIO = 0.5
 PRIMARY_FALLBACK_FLOOR = 0.04
-PRIMARY_MIN_LEAD = 0.01
 SECONDARY_COSINE_FLOOR = 0.05
 MAX_ASSIGNED_TOPICS = 5
 BROAD_HINT_BOOST = 0.04
@@ -587,12 +586,7 @@ def assign_themes(
     if official:
         primary = official
     elif max_score >= PRIMARY_FALLBACK_FLOOR:
-        runner_up = ranked[1][1] if len(ranked) > 1 else 0.0
-        in_promotion_band = max_score < SECONDARY_COSINE_FLOOR
-        if in_promotion_band and max_score - runner_up < PRIMARY_MIN_LEAD:
-            primary = METHODS_FALLBACK
-        else:
-            primary = ranked[0][0]
+        primary = ranked[0][0]
     else:
         primary = METHODS_FALLBACK
 
@@ -670,7 +664,7 @@ def apply_assignments(payload: dict) -> dict:
         "Google Form Q1 topics; weighted TF-IDF cosine similarity to topic prototype anchors "
         "(title x2, abstract x3, cleaned keywords x1; metadata keywords excluded); "
         f"multi-label threshold max_score * {RELEVANCE_RATIO} (secondary floor {SECONDARY_COSINE_FLOOR}), "
-        f"primary fallback floor {PRIMARY_FALLBACK_FLOOR}, min lead {PRIMARY_MIN_LEAD}; "
+        f"primary fallback floor {PRIMARY_FALLBACK_FLOOR}; "
         f"{METHODS_FALLBACK!r} excluded from competitive ranking; "
         f"cap {MAX_ASSIGNED_TOPICS}; official CCN labels override primary when specific"
     )
