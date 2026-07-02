@@ -1,6 +1,6 @@
 name: Scrape CCN Data
 
-# Full archive rebuild (2018–2025 scrape + 2026 merge). For routine 2026-only updates, use "Update 2026 Data" instead.
+# Full archive rebuild (2017–2025 scrape + 2026 merge). For routine 2026-only updates, use "Update 2026 Data" instead.
 
 on:
   workflow_dispatch:
@@ -24,20 +24,20 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install -r scripts/requirements.txt
+        run: pip install requests beautifulsoup4 lxml pypdf numpy scikit-learn umap-learn
 
       - name: Scrape CCN archives
         run: |
           if [ -n "${{ inputs.years }}" ]; then
             YEAR_ARGS="${{ inputs.years }}"
             YEAR_ARGS="${YEAR_ARGS//,/ }"
-            python scripts/scrape_ccn.py --years $YEAR_ARGS
+            python scripts/scrape.py --years $YEAR_ARGS --merge-2026
           else
-            python scripts/scrape_ccn.py
+            python scripts/scrape.py --merge-2026
           fi
 
-      - name: Assign research themes to all submissions
-        run: python scripts/assign_research_themes.py
+      - name: Build dashboard data
+        run: python scripts/build.py
 
       - name: Commit updated data
         run: |

@@ -9,10 +9,10 @@ The dashboard never talks to ccneuro.org directly. Everything is precomputed off
 ```
 ccneuro.org archives
         │
-        ▼  scrape_ccn.py (+ pdf_keywords.py, merge_2026_csv.py)
+        ▼  scrape.py
   submissions.json          ← raw archive: titles, abstracts, authors, keywords
         │
-        ▼  assign_research_themes.py
+        ▼  build.py
   ┌─────────────────────────────────────┐
   │ 1. Clean keywords & repair encoding │
   │ 2. Assign 12 research themes        │
@@ -24,24 +24,24 @@ ccneuro.org archives
   abstracts.csv  ──→  dashboard (docs/js/app.js)
 ```
 
-**Step 1 — Scrape to JSON.** `scrape_ccn.py` pulls poster/paper records from CCN archives (2017–2026) into `data/submissions.json`. Keywords come from poster HTML, proceedings PDFs, or a token fallback. Citation fragments (`et al.`, page numbers, DOIs) and conference metadata labels are stripped at this stage.
+**Step 1 — Scrape to JSON.** `scrape.py` pulls poster/paper records from CCN archives (2017–2026) into `data/submissions.json`. Keywords come from poster HTML, proceedings PDFs, or a token fallback. Citation fragments (`et al.`, page numbers, DOIs) and conference metadata labels are stripped at this stage.
 
-**Step 2 — Clustering & themes.** `assign_research_themes.py` reads the JSON, runs the clustering/theme algorithm (see [IMPLEMENTATION.md](IMPLEMENTATION.md) for details), writes updated topics back to `submissions.json`, saves 2D map coordinates to `embeddings_all.json`, and exports `abstracts.csv`.
+**Step 2 — Clustering & themes.** `build.py` reads the JSON, runs the clustering/theme algorithm (see [IMPLEMENTATION.md](IMPLEMENTATION.md) for details), writes updated topics back to `submissions.json`, saves 2D map coordinates to `embeddings_all.json`, and exports `abstracts.csv`.
 
 **Step 3 — Dashboard.** The browser loads only `docs/data/abstracts.csv`. Map coordinates (`umap_x`, `umap_y`), assigned topics, and all display fields are already in that file.
 
 ### Rebuild commands
 
 ```bash
-pip install -r scripts/requirements.txt
-python scripts/scrape_ccn.py              # rebuild submissions.json
-python scripts/backfill_pdf_keywords.py   # refresh keywords (optional)
-python scripts/assign_research_themes.py  # themes + UMAP + abstracts.csv
+pip install requests beautifulsoup4 lxml pypdf numpy scikit-learn umap-learn
+python scripts/scrape.py --merge-2026        # rebuild submissions.json
+python scripts/scrape.py --refresh-keywords  # refresh keywords (optional)
+python scripts/build.py                      # themes + UMAP + abstracts.csv
 ```
 
-`assign_research_themes.py` is the single command that regenerates themes, the embedding map, and both copies of the CSV. You can also run `build_all_embeddings.py` or `build_abstracts_csv.py` individually.
+`build.py` is the single command that regenerates themes, the embedding map, and both copies of the CSV.
 
-For **2026-only updates**, replace `data/ccn-2026-pending-posters.csv` and run `merge_2026_csv.py` followed by `assign_research_themes.py`. GitHub Actions: **Update 2026 Data** or **Scrape CCN Data** (full archive).
+For **2026-only updates**, replace `data/ccn-2026-pending-posters.csv` and run `python scripts/build.py --merge-2026`. GitHub Actions: **Update 2026 Data** or **Scrape CCN Data** (full archive).
 
 The CSV is written as **UTF-8 with BOM** (`utf-8-sig`) so Excel displays non-English characters correctly. Text fields pass through `repair_mojibake()` to fix UTF-8 bytes mis-read as Latin-1 during scraping.
 
@@ -100,7 +100,7 @@ Topics in `assigned_topics` are drawn from this fixed list ([CCN 2026 Activity P
 11. Clinical / computational psychiatry  
 12. Methods, theory & everything else  
 
-Theme names and colors in the UI are defined in `docs/js/app.js`. To change names at build time, edit `data/google_topics.json` and re-run `assign_research_themes.py`.
+Theme names and colors in the UI are defined in `docs/js/app.js`. To change names at build time, edit `data/google_topics.json` and re-run `build.py`.
 
 ## Filters
 
@@ -123,7 +123,6 @@ Theme names and colors in the UI are defined in `docs/js/app.js`. To change name
 ## Local preview
 
 ```bash
-pip install -r scripts/requirements.txt
 python -m http.server 8080 --directory docs
 ```
 

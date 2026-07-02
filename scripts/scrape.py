@@ -1,7 +1,391 @@
 #!/usr/bin/env python3
-"""Scrape CCN conference poster/paper submissions from ccneuro.org archives."""
+"""Step 1: Scrape CCN archives and write submissions.json.
+
+Dependencies (install once):
+  pip install requests beautifulsoup4 lxml pypdf
+"""
 
 from __future__ import annotations
+
+import csv
+import hashlib
+import json
+import re
+import time
+from collections import Counter, defaultdict
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import asdict, dataclass, field, fields
+from datetime import datetime, timezone
+from html import unescape
+from io import BytesIO
+from pathlib import Path
+from typing import Iterable
+from urllib.parse import urljoin
+
+import requests
+from bs4 import BeautifulSoup
+from pypdf import PdfReader
+
+ROOT = Path(__file__).resolve().parents[1]
+DATA_DIR = ROOT / "data"
+DOCS_DATA_DIR = ROOT / "docs" / "data"
+CSV_PATH_2026 = ROOT / "data" / "ccn-2026-pending-posters.csv"
+
+import re
+
+from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
+
+# Conference area labels and method/format tags — not topical content.
+METADATA_KEYWORD_PHRASES = frozenset(
+    {
+        "psychological / behavioral research",
+        "computational cognitive science / cognitive modeling",
+        "theoretical / computational neuroscience",
+        "experimental neuroscience (systems / cognitive)",
+        "artificial intelligence / machine learning",
+        "methods & computational tools",
+        "brain networks & neural dynamics",
+        "visual processing & computational vision",
+        "object recognition & visual attention",
+        "reward, value & social decision making",
+        "memory, spatial cognition & skill learning",
+        "predictive processing & cognitive control",
+        "language & communication",
+        "extended abstract",
+        "extended abstracts",
+        "cognitive science",
+        "neuroscience",
+        "psychology",
+        "engineering",
+        "mathematics",
+        "philosophy",
+        "artificial intelligence",
+        "linguistics",
+    }
+)
+
+METADATA_KEYWORD_TOKENS = frozenset(
+    {
+        "fmri",
+        "eeg",
+        "meg",
+        "ecog",
+        "bold",
+        "neuroimaging",
+        "psychological",
+        "behavioral",
+        "computational",
+        "modeling",
+        "experimental",
+        "systems",
+        "cognitive",
+        "abstract",
+        "poster",
+        "paper",
+        "proceedings",
+    }
+)
+
+GENERIC_KEYWORD_LABELS = frozenset({"cognitive science", "cognitive"})
+
+CITATION_FRAGMENT_RES = (
+    re.compile(r"\bet\s+al\.?", re.I),
+    re.compile(r"\bp\.?\s*\d+(?:\s*[-–—]\s*\d+)?", re.I),
+    re.compile(r"\bpp\.?\s*\d+", re.I),
+    re.compile(r"\bdoi\s*[:.]?\s*\S+", re.I),
+    re.compile(r"https?://\S+", re.I),
+    re.compile(r"\bvol\.?\s*\d+", re.I),
+    re.compile(r"\bno\.?\s*\d+", re.I),
+    re.compile(r"\(\s*\d{4}[a-z]?\s*\)", re.I),
+)
+
+# Topic prototype anchors — used for TF-IDF cosine scoring.
+TOPIC_ANCHORS: dict[str, list[str]] = {
+    "RL, motor control & planning": [
+        "reinforcement learning",
+        "reward",
+        "motor control",
+        "planning",
+        "policy",
+        "navigation",
+        "action selection",
+        "skill learning",
+        "habit",
+        "basal ganglia",
+    ],
+    "Naturalistic encoding/decoding": [
+        "naturalistic",
+        "encoding model",
+        "decoding",
+        "voxel-wise",
+        "stimulus reconstruction",
+        "movie",
+        "narrative",
+        "resting state",
+        "natural scenes",
+        "video",
+    ],
+    "Neural population geometry & dynamics": [
+        "neural population",
+        "population dynamics",
+        "geometry",
+        "manifold",
+        "latent dynamics",
+        "trajectory",
+        "oscillation",
+        "connectivity",
+        "state space",
+    ],
+    "Decision-making and metacognition": [
+        "decision making",
+        "decision-making",
+        "metacognition",
+        "confidence",
+        "choice",
+        "judgment",
+        "belief updating",
+        "inference",
+        "evidence accumulation",
+    ],
+    "Vision": [
+        "visual",
+        "vision",
+        "retina",
+        "v1",
+        "v2",
+        "retinotopic",
+        "scene perception",
+        "optic flow",
+        "gaze",
+        "saccade",
+        "conscious vision",
+        "visual awareness",
+        "perceptual",
+    ],
+    "Language/auditory neuroscience": [
+        "language",
+        "auditory",
+        "speech",
+        "semantic",
+        "syntax",
+        "word",
+        "listening",
+        "voice",
+        "reading",
+        "phonology",
+    ],
+    "LLMs, reasoning, interpretability": [
+        "large language model",
+        "language model",
+        "llm",
+        "transformer",
+        "gpt",
+        "chatgpt",
+        "prompt",
+        "prompting",
+        "in-context learning",
+        "rlhf",
+        "chain-of-thought",
+        "chain of thought",
+        "foundation model",
+        "instruction tuning",
+        "fine-tuning",
+        "generative model",
+        "pretrained",
+    ],
+    "Memory": [
+        "memory",
+        "hippocampus",
+        "recall",
+        "working memory",
+        "episodic",
+        "retrieval",
+        "spatial memory",
+        "consolidation",
+    ],
+    "Social cognition & theory of mind": [
+        "social cognition",
+        "theory of mind",
+        "mentalizing",
+        "social interaction",
+        "empathy",
+        "tom",
+        "agent",
+        "cooperation",
+        "mental state",
+    ],
+    "Attention & cognitive control / executive function": [
+        "attention",
+        "executive function",
+        "cognitive control",
+        "task switching",
+        "inhibition",
+        "working memory control",
+        "predictive processing",
+        "conflict monitoring",
+    ],
+    "Clinical / computational psychiatry": [
+        "clinical",
+        "psychiatry",
+        "depression",
+        "schizophrenia",
+        "patient",
+        "disorder",
+        "mental health",
+        "autism",
+        "anxiety",
+        "bipolar",
+    ],
+    "Methods, theory & everything else": [
+        "method",
+        "benchmark",
+        "framework",
+        "simulation",
+        "theory",
+        "analysis toolkit",
+        "interpretability",
+        "explainability",
+        "attention mechanism",
+        "recurrent neural network",
+        "rnn",
+        "lstm",
+        "symbolic reasoning",
+        "generalization",
+        "statistical",
+    ],
+}
+
+TITLE_WEIGHT = 2
+ABSTRACT_WEIGHT = 3
+KEYWORD_WEIGHT = 1
+
+RELEVANCE_RATIO = 0.5
+ABSOLUTE_COSINE_FLOOR = 0.05
+MAX_ASSIGNED_TOPICS = 5
+BROAD_HINT_BOOST = 0.04
+
+
+def strip_citation_fragments(text: str) -> str:
+    if not text:
+        return ""
+    cleaned = text
+    for pattern in CITATION_FRAGMENT_RES:
+        cleaned = pattern.sub(" ", cleaned)
+    cleaned = re.sub(r"\s+", " ", cleaned).strip(" ,.;")
+    return cleaned.strip()
+
+
+def normalize_keyword_phrase(keyword: str) -> str:
+    return strip_citation_fragments(re.sub(r"\s+", " ", (keyword or "").strip().lower()))
+
+
+def is_metadata_keyword(keyword: str) -> bool:
+    normalized = normalize_keyword_phrase(keyword)
+    if not normalized:
+        return True
+    if normalized in METADATA_KEYWORD_PHRASES:
+        return True
+    if normalized in GENERIC_KEYWORD_LABELS:
+        return True
+    tokens = re.findall(r"[a-z][a-z0-9\-]{2,}", normalized)
+    if tokens and all(token in METADATA_KEYWORD_TOKENS for token in tokens):
+        return True
+    return False
+
+
+def sanitize_keyword_list(keywords: list[str]) -> list[str]:
+    seen: set[str] = set()
+    cleaned: list[str] = []
+    for keyword in keywords or []:
+        normalized = normalize_keyword_phrase(str(keyword))
+        if not normalized or len(normalized) <= 2:
+            continue
+        if is_metadata_keyword(normalized):
+            continue
+        if normalized in seen:
+            continue
+        seen.add(normalized)
+        cleaned.append(normalized)
+    return cleaned
+
+
+def sanitize_submission_keywords(submission: dict) -> None:
+    for field in ("author_keywords", "extracted_keywords", "keywords"):
+        submission[field] = sanitize_keyword_list(list(submission.get(field) or []))
+
+
+def content_keywords(submission: dict) -> list[str]:
+    for field in ("author_keywords", "extracted_keywords", "keywords"):
+        values = sanitize_keyword_list(list(submission.get(field) or []))
+        if values:
+            return values
+    return []
+
+
+def is_weak_keyword_set(keywords: list[str]) -> bool:
+    cleaned = sanitize_keyword_list(keywords)
+    return not cleaned
+
+
+def submission_embedding_text(submission: dict) -> str:
+    """Build weighted embedding text: abstract-heavy, metadata keywords excluded."""
+    title = (submission.get("title") or "").strip()
+    abstract = (submission.get("abstract") or "").strip()
+    chunks: list[str] = []
+    if title:
+        chunks.extend([title] * TITLE_WEIGHT)
+    if abstract:
+        chunks.extend([abstract] * ABSTRACT_WEIGHT)
+    keywords = content_keywords(submission)
+    if keywords:
+        keyword_blob = " ".join(keywords)
+        chunks.extend([keyword_blob] * KEYWORD_WEIGHT)
+    blob = ". ".join(chunks).strip()
+    return blob or title or "empty"
+
+
+def topic_prototype_text(theme: str) -> str:
+    anchors = TOPIC_ANCHORS.get(theme, [])
+    parts: list[str] = []
+    for anchor in anchors:
+        repeat = 3 if " " in anchor else 2
+        parts.extend([anchor] * repeat)
+    return " ".join(parts) or theme.lower()
+
+
+def vectorizer_stop_words() -> list[str]:
+    return sorted(ENGLISH_STOP_WORDS | METADATA_KEYWORD_TOKENS)
+
+import re
+
+# Typical signs of UTF-8 bytes interpreted as Latin-1 (e.g. Ã¶ → ö).
+_MOJIBAKE_MARKERS = re.compile(r"[ÃÄÅÆÇÐÑØÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ\u0080-\u009f]")
+
+
+def repair_mojibake(text: str) -> str:
+    """Fix UTF-8-as-Latin-1 mojibake when possible; otherwise return unchanged."""
+    if not text or not _MOJIBAKE_MARKERS.search(text):
+        return text
+    try:
+        return text.encode("latin-1").decode("utf-8")
+    except (UnicodeDecodeError, UnicodeEncodeError):
+        return text
+
+
+def repair_submission_text(submission: dict) -> None:
+    """Normalize text fields on a submission dict in place."""
+    for field in ("title", "authors", "abstract", "topic_area", "track"):
+        if field in submission and submission[field]:
+            submission[field] = repair_mojibake(str(submission[field]))
+
+    for field in ("author_keywords", "extracted_keywords", "keywords", "secondary_topics", "assigned_topics"):
+        values = submission.get(field)
+        if not values:
+            continue
+        submission[field] = [repair_mojibake(str(value)) for value in values if value]
+
+    if submission.get("primary_theme"):
+        submission["primary_theme"] = repair_mojibake(str(submission["primary_theme"]))
 
 import json
 import re
@@ -94,7 +478,6 @@ def fetch(url: str, retries: int = 3) -> str:
 
 
 def clean_text(text: str) -> str:
-    from text_encoding import repair_mojibake
 
     text = unescape(text or "")
     text = repair_mojibake(text)
@@ -105,7 +488,6 @@ def clean_text(text: str) -> str:
 def parse_keyword_field(raw: str) -> list[str]:
     if not raw:
         return []
-    from topic_features import normalize_keyword_phrase, strip_citation_fragments
 
     raw = strip_citation_fragments(raw)
     normalized = (
@@ -124,7 +506,6 @@ def parse_keyword_field(raw: str) -> list[str]:
 
 
 def normalize_author_keywords(keywords: list[str]) -> list[str]:
-    from topic_features import is_metadata_keyword, normalize_keyword_phrase
 
     blocked = {"view pdf", "view paper pdf", "extended abstract", "search papers"}
     seen: set[str] = set()
@@ -194,7 +575,6 @@ def resolve_keyword_fields(
 
 def backfill_keyword_fields(payload: dict) -> dict:
     """Populate author_keywords / extracted_keywords on existing JSON without re-scraping."""
-    from pdf_keywords import KEYWORD_SOURCE_NOTE, enrich_submission_keywords, needs_pdf_keyword_refresh
 
     for submission in payload.get("submissions", []):
         if needs_pdf_keyword_refresh(submission):
@@ -403,7 +783,6 @@ def scrape_meetingtrakr_year(year: int) -> list[Submission]:
     submissions: list[Submission] = []
 
     def fetch_detail(item: dict) -> Submission:
-        from pdf_keywords import finalize_submission_keywords
 
         detail_html = fetch(item["detail_url"])
         detail = parse_meetingtrakr_detail(detail_html)
@@ -479,7 +858,6 @@ def scrape_legacy_year(year: int, listing_path: str, link_pattern: str) -> list[
     submissions: list[Submission] = []
 
     def fetch_detail(item: dict) -> Submission:
-        from pdf_keywords import finalize_submission_keywords
 
         detail_html = fetch(item["detail_url"])
         detail = parse_legacy_detail(detail_html)
@@ -574,7 +952,6 @@ def parse_2017_listing(html: str, base_url: str) -> list[dict]:
 
 
 def scrape_2017_year() -> list[Submission]:
-    from pdf_keywords import fetch_pdf_bytes, extract_pdf_text, finalize_submission_keywords, parse_2017_pdf_fields
 
     base_url = "https://2017.ccneuro.org/"
     listing_url = urljoin(base_url, "index.html@p=618.html")
@@ -738,68 +1115,424 @@ def scrape_all(years: Iterable[int] | None = None) -> dict:
     return payload
 
 
-def merge_2026_csv(payload: dict) -> dict:
-    """Merge provisional 2026 CSV if present (replaces any prior 2026 rows)."""
-    try:
-        from merge_2026_csv import merge_into_payload
-
-        return merge_into_payload(payload)
-    except Exception as exc:  # noqa: BLE001
-        print(f"Warning: 2026 CSV merge skipped: {exc}")
-        return payload
-
-
-def assign_research_themes(payload: dict) -> dict:
-    """Assign primary_theme and secondary_topics on every submission."""
-    try:
-        from assign_research_themes import apply_assignments
-
-        return apply_assignments(payload)
-    except Exception as exc:  # noqa: BLE001
-        print(f"Warning: research theme assignment skipped: {exc}")
-        return payload
-
-
 def write_outputs(payload: dict) -> dict:
-    payload = merge_2026_csv(payload)
-    payload = backfill_keyword_fields(payload)
-    payload = assign_research_themes(payload)
-    try:
-        from build_abstracts_csv import build_from_payload
-
-        build_from_payload(payload)
-    except Exception as exc:  # noqa: BLE001
-        print(f"Warning: abstracts.csv export skipped: {exc}")
-
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     DOCS_DATA_DIR.mkdir(parents=True, exist_ok=True)
-
-    full_path = DATA_DIR / "submissions.json"
-    docs_path = DOCS_DATA_DIR / "submissions.json"
-
-    for path in (full_path, docs_path):
+    for path in (DATA_DIR / "submissions.json", DOCS_DATA_DIR / "submissions.json"):
         with path.open("w", encoding="utf-8") as fh:
             json.dump(payload, fh, indent=2, ensure_ascii=False)
         print(f"Wrote {path}")
     return payload
 
 
+
+
+import hashlib
+import re
+from io import BytesIO
+from pathlib import Path
+from urllib.parse import urljoin
+
+
+
+ROOT = Path(__file__).resolve().parents[1]
+CACHE_DIR = ROOT / "data" / "pdf_cache"
+
+# Years where proceedings / authored PDFs may contain a keyword line.
+YEARS_WITH_PDF = (2017, 2018, 2019, 2022, 2023, 2024, 2025)
+
+KEYWORD_SOURCE_NOTE = (
+    "author_keywords prefer author-provided fields (poster HTML, proceedings PDF, 2026 CSV); "
+    "extracted_keywords only when no author keywords or conference label is available"
+)
+
+
+def parse_pdf_url_from_html(html: str, base_url: str) -> str:
+    for match in re.finditer(r'href=["\']([^"\']+\.pdf(?:\?[^"\']*)?)["\']', html, re.I):
+        url = match.group(1)
+        lowered = url.lower()
+        if any(token in lowered for token in ("proceedings", "abstracts/", "/pdf/")) or lowered.endswith(".pdf"):
+            return urljoin(base_url, url)
+
+    onclick = re.search(r"window\.open\(['\"]([^'\"]+\.pdf[^'\"]*)['\"]", html, re.I)
+    if onclick:
+        return urljoin(base_url, onclick.group(1))
+    return ""
+
+
+def normalize_pdf_text(text: str) -> str:
+    text = re.sub(r"-\s*\n\s*", "", text)
+    text = text.replace("\n", " ")
+    return re.sub(r"\s+", " ", text)
+
+
+def parse_proceedings_keywords(text: str) -> list[str]:
+    if not text:
+        return []
+
+    normalized = normalize_pdf_text(text)
+    match = re.search(
+        r"\bKeywords?\s*:\s*(.+?)(?:\bIntroduction\b|\b1\s+Introduction\b|\bBackground\b|\bAbstract\b|\Z)",
+        normalized,
+        re.I | re.S,
+    )
+    if not match:
+        return []
+
+    raw = clean_text(match.group(1))
+    if not raw:
+        return []
+    return normalize_author_keywords(parse_keyword_field(raw))
+
+
+def parse_2017_keywords(text: str) -> list[str]:
+    match = re.search(
+        r"Keywords\s*\n(?:Keywords\s*\n)?(?:\d+Conference[^\n]*\n)?(.+?)(?:\n\d+\s*$|\nCo-author|\n\* Presenting|\Z)",
+        text,
+        re.S,
+    )
+    if not match:
+        return []
+
+    keywords: list[str] = []
+    for line in match.group(1).splitlines():
+        cleaned = clean_text(line)
+        if not cleaned:
+            continue
+        lowered = cleaned.lower()
+        if "conference on cognitive" in lowered:
+            continue
+        if re.fullmatch(r"\d+", cleaned):
+            continue
+        if lowered == "keywords":
+            continue
+        if ";" in cleaned:
+            keywords.extend(parse_keyword_field(cleaned))
+        else:
+            keywords.append(lowered)
+    return normalize_author_keywords(keywords)
+
+
+def parse_keywords_from_pdf_text(text: str) -> list[str]:
+    keywords = parse_proceedings_keywords(text)
+    if keywords:
+        return keywords
+    return parse_2017_keywords(text)
+
+
+def parse_2017_pdf_fields(text: str) -> dict[str, str | list[str]]:
+    abstract_match = re.search(
+        r"Presentation Abstract Summary\s+(.+?)(?:\nPaper Upload|\nCo-author|\Z)",
+        text,
+        re.S,
+    )
+    topic_match = re.search(r"Topic\s+(.+?)(?:\nStatus|\nSubmitter)", text, re.S)
+    return {
+        "abstract": clean_text(abstract_match.group(1)) if abstract_match else "",
+        "topic_area": clean_text(topic_match.group(1)).lower() if topic_match else "",
+        "keywords": parse_2017_keywords(text),
+    }
+
+
+def _cache_path(url: str, suffix: str) -> Path:
+    digest = hashlib.sha256(url.encode("utf-8")).hexdigest()[:20]
+    return CACHE_DIR / f"{digest}{suffix}"
+
+
+def fetch_pdf_bytes(url: str) -> bytes:
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    cache_file = _cache_path(url, ".pdf")
+    if cache_file.exists():
+        return cache_file.read_bytes()
+
+    response = SESSION.get(url, timeout=60)
+    response.raise_for_status()
+    content = response.content
+    if not content.startswith(b"%PDF"):
+        raise ValueError(f"Not a PDF: {url}")
+    cache_file.write_bytes(content)
+    return content
+
+
+def extract_pdf_text(pdf_bytes: bytes) -> str:
+    reader = PdfReader(BytesIO(pdf_bytes))
+    return "".join((page.extract_text() or "") for page in reader.pages)
+
+
+def pdf_text_from_url(url: str) -> str:
+    text_cache = _cache_path(url, ".txt")
+    if text_cache.exists():
+        return text_cache.read_text(encoding="utf-8")
+    text = extract_pdf_text(fetch_pdf_bytes(url))
+    text_cache.write_text(text, encoding="utf-8")
+    return text
+
+
+def keywords_from_pdf_url(url: str) -> list[str]:
+    if not url:
+        return []
+    return parse_keywords_from_pdf_text(pdf_text_from_url(url))
+
+
+def keywords_from_detail_html(html: str, base_url: str) -> list[str]:
+    pdf_url = parse_pdf_url_from_html(html, base_url)
+    if not pdf_url:
+        return []
+    return keywords_from_pdf_url(pdf_url)
+
+
+def author_keywords_from_pdf(
+    *,
+    year: int,
+    source_url: str,
+    detail_html: str | None = None,
+    fetch_html: bool = True,
+) -> list[str]:
+    if year not in YEARS_WITH_PDF:
+        return []
+
+    if year == 2017 and source_url.lower().endswith(".pdf"):
+        return keywords_from_pdf_url(source_url)
+
+    base_url = f"https://{year}.ccneuro.org/"
+    html = detail_html
+    if html is None and fetch_html and source_url and not source_url.lower().endswith(".pdf"):
+        html = SESSION.get(source_url, timeout=45).text
+
+    if html:
+        pdf_url = parse_pdf_url_from_html(html, base_url)
+        if pdf_url:
+            return keywords_from_pdf_url(pdf_url)
+    return []
+
+
+def initial_html_keywords(submission: dict) -> list[str]:
+    author = list(submission.get("author_keywords") or [])
+    if author:
+        return author
+
+    year = submission.get("year")
+    merged = list(submission.get("keywords") or [])
+    if merged and year in (2024, 2025, 2026):
+        return merged
+    return merged if merged and year not in YEARS_WITH_PDF else []
+
+
+def finalize_submission_keywords(
+    *,
+    year: int,
+    title: str,
+    abstract: str,
+    topic_area: str = "",
+    track: str = "",
+    source_url: str = "",
+    html_keywords: list[str] | None = None,
+    detail_html: str | None = None,
+    try_pdf: bool = True,
+) -> tuple[list[str], list[str], list[str]]:
+    """Prefer author keywords from HTML, then PDF; algorithmic tokens are last resort."""
+    author = normalize_author_keywords(html_keywords or [])
+
+    if not author and try_pdf:
+        pdf_keywords = author_keywords_from_pdf(
+            year=year,
+            source_url=source_url,
+            detail_html=detail_html,
+            fetch_html=detail_html is None,
+        )
+        if pdf_keywords:
+            author = pdf_keywords
+
+    if author:
+        return author, [], author
+
+    return resolve_keyword_fields(
+        author_keywords=[],
+        topic_area=topic_area,
+        track=track,
+        title=title,
+        abstract=abstract,
+    )
+
+
+def enrich_submission_keywords(
+    submission: dict,
+    *,
+    detail_html: str | None = None,
+    try_pdf: bool = True,
+) -> dict:
+    html_keywords = initial_html_keywords(submission)
+    if not html_keywords and detail_html:
+
+        if "Keywords:" in detail_html or "fl-rich-text" in detail_html:
+            html_keywords = parse_meetingtrakr_detail(detail_html).get("keywords", [])
+
+    author_keywords, extracted_keywords, keywords = finalize_submission_keywords(
+        year=submission.get("year", 0),
+        title=submission.get("title", ""),
+        abstract=submission.get("abstract", ""),
+        topic_area=submission.get("topic_area", ""),
+        track=submission.get("track", ""),
+        source_url=submission.get("source_url", ""),
+        html_keywords=html_keywords,
+        detail_html=detail_html,
+        try_pdf=try_pdf,
+    )
+    submission["author_keywords"] = author_keywords
+    submission["extracted_keywords"] = extracted_keywords
+    submission["keywords"] = keywords
+    return submission
+
+
+def needs_pdf_keyword_refresh(submission: dict) -> bool:
+    if submission.get("author_keywords"):
+        return False
+    year = submission.get("year")
+    if year not in YEARS_WITH_PDF:
+        return False
+    return bool(submission.get("source_url"))
+
+
+# Backwards-compatible alias used by older scripts.
+PDF_KEYWORD_YEARS = YEARS_WITH_PDF
+
+
+SUBMISSION_FIELDS = {f.name for f in fields(Submission)}
+
+def submission_from_dict(item: dict) -> Submission:
+    return Submission(**{key: value for key, value in item.items() if key in SUBMISSION_FIELDS})
+
+def normalize_topic_area_csv(primary: str, secondary: str = "") -> str:
+    parts = [p.strip() for p in re.split(r"[+;,]", f"{primary},{secondary}") if p.strip()]
+    return parts[0].lower() if parts else ""
+
+def author_keywords_from_csv(row: dict[str, str]) -> list[str]:
+    keywords: list[str] = []
+    for field in ("primary_area", "secondary_area"):
+        raw = (row.get(field) or "").strip()
+        if not raw:
+            continue
+        for part in re.split(r"[+;,]", raw):
+            kw = part.strip()
+            if kw:
+                keywords.append(kw)
+    return keywords
+
+def csv_row_to_submission(row: dict[str, str]) -> Submission:
+    poster = (row.get("or_number") or "").strip()
+    title = (row.get("title") or "").strip()
+    abstract = (row.get("abstract") or "").strip()
+    primary = (row.get("primary_area") or "").strip()
+    secondary = (row.get("secondary_area") or "").strip()
+    topic_area = normalize_topic_area_csv(primary, secondary)
+    author_keywords, extracted_keywords, keywords = resolve_keyword_fields(
+        author_keywords=author_keywords_from_csv(row), topic_area=topic_area,
+    )
+    return Submission(
+        id=f"2026-{poster or title[:24]}", year=2026, title=title, authors="", abstract=abstract,
+        author_keywords=author_keywords, extracted_keywords=extracted_keywords, keywords=keywords,
+        topic_area=topic_area, track=(row.get("track") or "").strip(), poster_number=poster,
+        source_url="https://2026.ccneuro.org/", submission_type="poster",
+    )
+
+def load_csv_submissions() -> list[Submission]:
+    if not CSV_PATH_2026.exists():
+        print(f"No 2026 CSV at {CSV_PATH_2026}; skipping merge.")
+        return []
+    with CSV_PATH_2026.open(encoding="utf-8") as fh:
+        rows = list(csv.DictReader(fh))
+    submissions = [csv_row_to_submission(row) for row in rows if (row.get("title") or "").strip()]
+    print(f"Loaded {len(submissions)} submissions from {CSV_PATH_2026.name}")
+    return submissions
+
+def merge_2026_into_payload(payload: dict) -> dict:
+    csv_subs = load_csv_submissions()
+    if not csv_subs:
+        return payload
+    kept = [s for s in payload.get("submissions", []) if s.get("year") != 2026]
+    submission_objs = [submission_from_dict(item) for item in kept] + csv_subs
+    stats = compute_stats(submission_objs)
+    payload["submissions"] = [asdict(s) for s in submission_objs]
+    payload["stats"] = serialize_stats(stats)
+    payload.setdefault("metadata", {})
+    payload["metadata"]["total_count"] = len(submission_objs)
+    payload["metadata"]["years"] = sorted({s.year for s in submission_objs})
+    payload["metadata"]["source"] = "https://ccneuro.org archives (2017-2025) + 2026 pending CSV"
+    payload["metadata"]["csv_2026"] = {"path": str(CSV_PATH_2026.relative_to(ROOT)), "merged_at": datetime.now(timezone.utc).isoformat(), "count": len(csv_subs)}
+    return payload
+
+def _refresh_one(submission: dict) -> tuple[str, bool]:
+    had_author = bool(submission.get("author_keywords"))
+    if needs_pdf_keyword_refresh(submission):
+        try:
+            detail_html = fetch(submission["source_url"])
+        except Exception:
+            detail_html = None
+        enrich_submission_keywords(submission, detail_html=detail_html, try_pdf=True)
+    else:
+        enrich_submission_keywords(submission, try_pdf=False)
+    return submission.get("id", ""), bool(submission.get("author_keywords")) and not had_author
+
+def refresh_keywords(payload: dict) -> dict:
+    submissions = payload.get("submissions", [])
+    print(f"Refreshing keywords for {len(submissions)} submissions")
+    updated = 0
+    with ThreadPoolExecutor(max_workers=6) as executor:
+        futures = {executor.submit(_refresh_one, sub): sub for sub in submissions}
+        for index, future in enumerate(as_completed(futures), start=1):
+            _, gained = future.result()
+            if gained:
+                updated += 1
+            if index % 100 == 0 or index == len(submissions):
+                print(f"  processed {index}/{len(submissions)} ({updated} gained author keywords)")
+    payload.setdefault("metadata", {})["keyword_source"] = KEYWORD_SOURCE_NOTE
+    print(f"Done. {updated} submissions gained author keywords.")
+    return payload
+
+def add_2017_to_payload(payload: dict) -> dict:
+    submissions_2017 = [asdict(item) for item in scrape_2017_year()]
+    kept = [sub for sub in payload.get("submissions", []) if sub.get("year") != 2017]
+    payload["submissions"] = submissions_2017 + kept
+    payload.setdefault("metadata", {})
+    payload["metadata"]["total_count"] = len(payload["submissions"])
+    payload["metadata"]["years"] = sorted({sub["year"] for sub in payload["submissions"]})
+    print(f"Merged {len(submissions_2017)} submissions from 2017.")
+    return payload
+
 def main() -> None:
     import argparse
-
-    parser = argparse.ArgumentParser(description="Scrape CCN archives")
-    parser.add_argument("--years", nargs="*", type=int, help="Specific years to scrape")
-    parser.add_argument("--quick", action="store_true", help="Scrape only 2024-2025 for a fast test")
+    parser = argparse.ArgumentParser(description="Scrape CCN archives → submissions.json")
+    parser.add_argument("--years", nargs="*", type=int)
+    parser.add_argument("--quick", action="store_true")
+    parser.add_argument("--merge-2026", action="store_true")
+    parser.add_argument("--refresh-keywords", action="store_true")
+    parser.add_argument("--add-2017", action="store_true")
     args = parser.parse_args()
-
-    years = args.years
-    if args.quick:
-        years = [2024, 2025]
-
+    if args.refresh_keywords:
+        path = DATA_DIR / "submissions.json"
+        if not path.exists():
+            raise SystemExit(f"Missing {path}")
+        with path.open(encoding="utf-8") as fh:
+            payload = json.load(fh)
+        write_outputs(refresh_keywords(payload))
+        return
+    if args.add_2017:
+        path = DATA_DIR / "submissions.json"
+        if not path.exists():
+            raise SystemExit(f"Missing {path}")
+        with path.open(encoding="utf-8") as fh:
+            payload = json.load(fh)
+        payload = add_2017_to_payload(payload)
+        if args.merge_2026:
+            payload = merge_2026_into_payload(payload)
+        write_outputs(backfill_keyword_fields(payload))
+        return
+    years = [2024, 2025] if args.quick else args.years
     payload = scrape_all(years)
-    payload = write_outputs(payload)
+    if args.merge_2026:
+        payload = merge_2026_into_payload(payload)
+    write_outputs(backfill_keyword_fields(payload))
     print(f"Done. Scraped {payload['metadata']['total_count']} submissions.")
-
 
 if __name__ == "__main__":
     main()

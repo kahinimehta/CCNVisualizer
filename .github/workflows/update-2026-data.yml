@@ -17,13 +17,10 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install -r scripts/requirements.txt
+        run: pip install numpy scikit-learn umap-learn
 
-      - name: Merge 2026 CSV
-        run: python scripts/merge_2026_csv.py
-
-      - name: Assign research themes
-        run: python scripts/assign_research_themes.py
+      - name: Build dashboard data
+        run: python scripts/build.py --merge-2026
 
       - name: Commit updated data
         run: |

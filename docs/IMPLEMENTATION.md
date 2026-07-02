@@ -15,16 +15,15 @@ The browser loads **one file**: `abstracts.csv`. The 12 research theme names and
 ```
 ccneuro.org archives
         │
-        ▼  scrape_ccn.py
-        │  (+ pdf_keywords.py, merge_2026_csv.py, backfill_pdf_keywords.py)
+        ▼  scrape.py
         │
   submissions.json          data/submissions.json + docs/data/submissions.json
         │
-        ▼  assign_research_themes.py  (orchestrates the steps below)
+        ▼  build.py
         │
         ├── ThemeScorer: TF-IDF cosine → assigned_topics on each row
-        ├── build_all_embeddings.py: TF-IDF + UMAP → embeddings_all.json
-        └── build_abstracts_csv.py: merge JSON + coords → abstracts.csv
+        ├── UMAP projection → embeddings_all.json
+        └── CSV export → abstracts.csv
         │
         ▼
   docs/data/abstracts.csv  →  dashboard
@@ -32,29 +31,27 @@ ccneuro.org archives
 
 | Stage | Script | Output |
 |-------|--------|--------|
-| Scrape | `scrape_ccn.py` | `submissions.json` — titles, abstracts, authors, keywords |
-| 2026 merge | `merge_2026_csv.py` | Replaces 2026 rows from `ccn-2026-pending-posters.csv` |
-| Keyword enrichment | `pdf_keywords.py`, `backfill_pdf_keywords.py` | Author keywords from PDFs when HTML lacks them |
-| Themes + map + CSV | `assign_research_themes.py` | Updated JSON, `embeddings_all.json`, `abstracts.csv` |
+| Scrape | `scrape.py` | `submissions.json` — titles, abstracts, authors, keywords |
+| 2026 merge | `scrape.py --merge-2026` or `build.py --merge-2026` | Replaces 2026 rows from `ccn-2026-pending-posters.csv` |
+| Keyword refresh | `scrape.py --refresh-keywords` | Author keywords from PDFs when HTML lacks them |
+| Themes + map + CSV | `build.py` | Updated JSON, `embeddings_all.json`, `abstracts.csv` |
 | Dashboard | `docs/js/app.js` | Reads CSV only |
 
 ### Script inventory
 
 | Script | Purpose |
 |--------|---------|
-| `scrape_ccn.py` | Scrape CCN archives; calls theme assignment + CSV export at end |
-| `merge_2026_csv.py` | Merge provisional 2026 poster CSV |
-| `backfill_pdf_keywords.py` | Refresh keywords from HTML/PDF for all years |
-| `rebuild_author_keywords.py` | Full rescrape + keyword rebuild wrapper |
-| `add_2017_archive.py` | One-off 2017 proceedings PDF merge |
-| `assign_research_themes.py` | **Main pipeline** — themes, UMAP, CSV |
-| `build_all_embeddings.py` | UMAP coordinates only (`embeddings_all.json`) |
-| `build_abstracts_csv.py` | CSV export only |
-| `topic_features.py` | Shared text weighting, stoplists, topic anchors |
-| `text_encoding.py` | UTF-8 mojibake repair |
-| `pdf_keywords.py` | Keyword extraction helpers (imported by scraper) |
+| `scrape.py` | **Step 1** — scrape CCN archives, merge 2026 CSV, refresh keywords; writes `submissions.json` |
+| `build.py` | **Step 2** — theme assignment, UMAP coordinates, CSV export |
 
-Shared config: **`data/google_topics.json`** — optional override for the 12 theme names at build time (defaults to anchors in `topic_features.py`).
+Both scripts are self-contained (shared helpers are inlined). Optional flags:
+
+- `scrape.py --merge-2026` — merge provisional 2026 poster CSV
+- `scrape.py --refresh-keywords` — re-extract keywords from HTML/PDF on existing JSON
+- `scrape.py --add-2017` — re-scrape 2017 proceedings and merge
+- `build.py --merge-2026` — merge 2026 CSV before building (for 2026-only updates)
+
+Shared config: **`data/google_topics.json`** — optional override for the 12 theme names at build time (defaults to anchors in `build.py`).
 
 CI workflows (`.github/workflows/`): **Update 2026 Data**, **Scrape CCN Data**, **Deploy GitHub Pages**.
 
@@ -68,7 +65,7 @@ The pipeline uses one shared text representation for both **theme assignment** a
 
 Before any vectorization, each submission is cleaned:
 
-- **Mojibake repair** — UTF-8 bytes mis-read as Latin-1 are fixed (`text_encoding.repair_mojibake`).
+- **Mojibake repair** — UTF-8 bytes mis-read as Latin-1 are fixed (`repair_mojibake()` in `build.py`).
 - **Keyword sanitization** — citation fragments removed (`et al.`, `p. 12`, DOIs, URLs); conference metadata labels dropped (`psychological / behavioral research`, `fmri`, `eeg`, etc.).
 - **Weighted document** — fields are concatenated with explicit weights so abstract content dominates noisy keywords:
 
@@ -80,7 +77,7 @@ Before any vectorization, each submission is cleaned:
 
   Metadata area labels never enter the embedding text. Method tokens like `fmri`/`eeg` are stripped from keyword fields but can still appear naturally in abstracts.
 
-Implementation: `topic_features.submission_embedding_text()`.
+Implementation: `submission_embedding_text()` in `build.py`.
 
 ### 2. TF-IDF vectorization
 
@@ -94,9 +91,9 @@ Each submission becomes a sparse TF-IDF vector in a vocabulary learned from the 
 
 ### 3. Theme assignment (cosine similarity to prototypes)
 
-Themes are **not** discovered by clustering submissions. Each of the 12 CCN research themes has a **prototype anchor document** built from curated terms in `topic_features.TOPIC_ANCHORS` (e.g. Vision: `visual`, `conscious vision`, `retinotopic`; Clinical: `schizophrenia`, `depression`, …).
+Themes are **not** discovered by clustering submissions. Each of the 12 CCN research themes has a **prototype anchor document** built from curated terms in `TOPIC_ANCHORS` (e.g. Vision: `visual`, `conscious vision`, `retinotopic`; Clinical: `schizophrenia`, `depression`, …).
 
-`ThemeScorer` in `assign_research_themes.py`:
+`ThemeScorer` in `build.py`:
 
 1. Builds TF-IDF vectors for all submissions **and** all 12 prototype documents in one fit.
 2. L2-normalizes vectors so dot product = **cosine similarity**.
@@ -117,7 +114,7 @@ Themes are **not** discovered by clustering submissions. Each of the 12 CCN rese
 
 ### 4. UMAP map coordinates
 
-After themes are assigned, `build_all_embeddings.py` projects every submission into 2D for the dashboard map:
+After themes are assigned, `build.py` projects every submission into 2D for the dashboard map:
 
 1. Same weighted TF-IDF text as above (via `submission_embedding_text`).
 2. **UMAP** (`umap-learn`) with:
@@ -130,7 +127,7 @@ These `x`/`y` values are copied into `abstracts.csv` as `umap_x` and `umap_y`. T
 
 ### 5. CSV export
 
-`build_abstracts_csv.py` joins:
+`build.py` joins:
 
 - Core fields from `submissions.json` (title, author, keywords, `assigned_topics`, …)
 - UMAP coordinates from `embeddings_all.json`
@@ -178,4 +175,9 @@ Citation fragments and metadata area labels are stripped before export.
 
 Build pipeline only (not loaded by the static dashboard):
 
-`requests`, `beautifulsoup4`, `lxml`, `numpy`, `scikit-learn`, `umap-learn`, `pypdf` — see `scripts/requirements.txt`.
+| Step | Packages |
+|------|----------|
+| `scrape.py` | `requests`, `beautifulsoup4`, `lxml`, `pypdf` |
+| `build.py` | `numpy`, `scikit-learn`, `umap-learn` |
+
+Install for both steps: `pip install requests beautifulsoup4 lxml pypdf numpy scikit-learn umap-learn`

@@ -18,9 +18,9 @@ Interactive dashboard for poster and paper submissions across the [Cognitive Com
 ## Data pipeline
 
 ```
-scrape → submissions.json → assign_research_themes.py → abstracts.csv → dashboard
-                              ├── embeddings_all.json (UMAP coords → merged into CSV)
-                              └── submissions.json (updated with assigned_topics)
+scrape.py → submissions.json → build.py → abstracts.csv → dashboard
+                                  ├── embeddings_all.json (UMAP coords → merged into CSV)
+                                  └── submissions.json (updated with assigned_topics)
 ```
 
 See [docs/DASHBOARD.md](docs/DASHBOARD.md) and [docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md) for the full workflow and clustering algorithm.
@@ -55,9 +55,8 @@ The 12 topics come from [**CCN 2026 Activity Preferences**](https://docs.google.
 2. Run:
 
 ```bash
-pip install -r scripts/requirements.txt
-python scripts/merge_2026_csv.py
-python scripts/assign_research_themes.py
+pip install numpy scikit-learn umap-learn
+python scripts/build.py --merge-2026
 ```
 
 Or trigger the **Update 2026 Data** GitHub Action.
@@ -65,9 +64,10 @@ Or trigger the **Update 2026 Data** GitHub Action.
 ### Full rebuild
 
 ```bash
-python scripts/scrape_ccn.py
-python scripts/backfill_pdf_keywords.py   # optional keyword refresh
-python scripts/assign_research_themes.py
+pip install requests beautifulsoup4 lxml pypdf numpy scikit-learn umap-learn
+python scripts/scrape.py --merge-2026
+python scripts/scrape.py --refresh-keywords   # optional keyword refresh
+python scripts/build.py
 ```
 
 Or trigger **Scrape CCN Data** (workflow dispatch).
@@ -77,7 +77,6 @@ Both paths refresh `submissions.json`, `embeddings_all.json`, `abstracts.csv`, a
 ## Local development
 
 ```bash
-pip install -r scripts/requirements.txt
 python -m http.server 8080 --directory docs
 ```
 
@@ -97,16 +96,8 @@ Pushes to `main` deploy the static `docs/` folder (GitHub Pages / Vercel).
 
 ```
 scripts/
-  scrape_ccn.py               # Archive scraper
-  merge_2026_csv.py             # Merge/replace 2026 CSV
-  pdf_keywords.py               # Keyword resolution (HTML → PDF → fallback)
-  backfill_pdf_keywords.py      # Refresh keywords for all years
-  rebuild_author_keywords.py    # Full rescrape wrapper
-  assign_research_themes.py     # Theme assignment + UMAP + CSV export
-  build_all_embeddings.py       # UMAP coordinates (embeddings_all.json)
-  build_abstracts_csv.py        # Dashboard CSV export
-  topic_features.py             # Text weighting, stoplists, topic anchors
-  text_encoding.py              # UTF-8 mojibake repair
+  scrape.py                     # Step 1: scrape archives → submissions.json
+  build.py                      # Step 2: themes + UMAP + abstracts.csv
 data/
   ccn-2026-pending-posters.csv  # Provisional 2026 poster list
   google_topics.json            # Optional theme name override (build time)

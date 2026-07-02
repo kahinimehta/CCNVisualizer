@@ -28,7 +28,7 @@ Used by scripts in `scripts/` to scrape archives, assign themes, and build the C
 | umap-learn | BSD 3-Clause License | https://github.com/lmcinnes/umap |
 | pypdf | BSD 3-Clause License | https://github.com/py-pdf/pypdf |
 
-See `scripts/requirements.txt` for pinned versions.
+Install for the pipeline: `pip install requests beautifulsoup4 lxml pypdf numpy scikit-learn umap-learn`
 
 ## Data
 
