@@ -97,12 +97,12 @@ Themes are **not** discovered by clustering submissions. Each of the 15 CCN rese
 
 1. Builds TF-IDF vectors for all submissions **and** all 15 prototype documents in one fit.
 2. L2-normalizes vectors so dot product = **cosine similarity**.
-3. Scores each submission against every prototype; highest similarity → primary topic.
+3. Scores each submission against every prototype; highest similarity → primary topic. Close scores between two themes still assign the top scorer — not Everything else.
 
 **Multi-label assignment:**
 
 - Keep all themes with similarity ≥ `max_score × 0.5` (secondary floor **0.05**)
-- Primary fallback when no competitive theme clears **0.04** → **Everything else** (excluded from ranking)
+- **Everything else** is fallback-only (never competes in ranking). It is used only when no real category clears **0.04** on cosine similarity.
 - Cap at **5** topics per submission
 - Primary topic is always first in `assigned_topics`
 
@@ -113,7 +113,7 @@ Themes are **not** discovered by clustering submissions. Each of the 15 CCN rese
 
 **Vision vs Perception split:** **Vision** anchors retinotopic, scene, and gaze-related terms; **Perception** anchors psychophysics, multisensory, and non-visual sensory modalities (tactile, auditory integration, interoception, etc.).
 
-**AI vs Methods split:** the theme **AI, LLM, & Neural Networks** uses anchors for LLMs, transformers, neural networks, deep learning, and model interpretability. Methods-oriented terms (benchmarks, frameworks, theory, statistical analysis) anchor **Methods and theory**. Low-confidence assignments fall back to **Everything else**.
+**AI vs Methods split:** the theme **AI, LLM, & Neural Networks** uses anchors for LLMs, transformers, neural networks, deep learning, and model interpretability. Methods-oriented terms (benchmarks, frameworks, theory, statistical analysis) anchor **Methods and theory**.
 
 ### 4. UMAP map coordinates
 

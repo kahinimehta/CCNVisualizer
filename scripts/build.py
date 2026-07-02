@@ -569,6 +569,26 @@ def conference_label(submission: dict) -> str:
     return ""
 
 
+def choose_primary_theme(
+    official: str | None,
+    ranked: list[tuple[str, float]],
+) -> str:
+    """Pick primary theme from scores and optional official CCN label.
+
+    Policy:
+    - Official CCN track/topic labels win when they map to a specific theme.
+    - Otherwise the highest-scoring competitive theme wins, even if the margin
+      over #2 is tiny (a toss-up still gets a real category, not Everything else).
+    - Everything else is fallback-only: used only when no competitive theme
+      clears PRIMARY_FALLBACK_FLOOR.
+    """
+    if official:
+        return official
+    if ranked and ranked[0][1] >= PRIMARY_FALLBACK_FLOOR:
+        return ranked[0][0]
+    return METHODS_FALLBACK
+
+
 def assign_themes(
     submission: dict,
     topics: list[str],
@@ -582,13 +602,7 @@ def assign_themes(
     competing_topics = [t for t in topics if t != METHODS_FALLBACK]
     ranked = sorted(((t, scores[t]) for t in competing_topics), key=lambda item: (-item[1], item[0]))
     max_score = ranked[0][1] if ranked else 0.0
-
-    if official:
-        primary = official
-    elif max_score >= PRIMARY_FALLBACK_FLOOR:
-        primary = ranked[0][0]
-    else:
-        primary = METHODS_FALLBACK
+    primary = choose_primary_theme(official, ranked)
 
     threshold = max(max_score * RELEVANCE_RATIO, SECONDARY_COSINE_FLOOR)
     assigned: list[str] = []
@@ -664,8 +678,8 @@ def apply_assignments(payload: dict) -> dict:
         "Google Form Q1 topics; weighted TF-IDF cosine similarity to topic prototype anchors "
         "(title x2, abstract x3, cleaned keywords x1; metadata keywords excluded); "
         f"multi-label threshold max_score * {RELEVANCE_RATIO} (secondary floor {SECONDARY_COSINE_FLOOR}), "
-        f"primary fallback floor {PRIMARY_FALLBACK_FLOOR}; "
-        f"{METHODS_FALLBACK!r} excluded from competitive ranking; "
+        f"primary: official CCN label, else top competitive score (ties favor #1); "
+        f"{METHODS_FALLBACK!r} only when max competitive score < {PRIMARY_FALLBACK_FLOOR}; "
         f"cap {MAX_ASSIGNED_TOPICS}; official CCN labels override primary when specific"
     )
     payload["metadata"]["keyword_source"] = (
