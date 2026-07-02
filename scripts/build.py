@@ -318,7 +318,8 @@ ABSTRACT_WEIGHT = 3
 KEYWORD_WEIGHT = 1
 
 RELEVANCE_RATIO = 0.5
-ABSOLUTE_COSINE_FLOOR = 0.05
+PRIMARY_FALLBACK_FLOOR = 0.04
+SECONDARY_COSINE_FLOOR = 0.05
 MAX_ASSIGNED_TOPICS = 5
 BROAD_HINT_BOOST = 0.04
 
@@ -574,17 +575,18 @@ def assign_themes(
     scores = scorer.score_index(submission_index)
     apply_label_hints(conference_label(submission), scores, topics)
 
-    ranked = sorted(scores.items(), key=lambda item: (-item[1], item[0]))
+    competing_topics = [t for t in topics if t != METHODS_FALLBACK]
+    ranked = sorted(((t, scores[t]) for t in competing_topics), key=lambda item: (-item[1], item[0]))
     max_score = ranked[0][1] if ranked else 0.0
 
     if official:
         primary = official
-    elif max_score >= ABSOLUTE_COSINE_FLOOR:
+    elif max_score >= PRIMARY_FALLBACK_FLOOR:
         primary = ranked[0][0]
     else:
         primary = METHODS_FALLBACK
 
-    threshold = max(max_score * RELEVANCE_RATIO, ABSOLUTE_COSINE_FLOOR)
+    threshold = max(max_score * RELEVANCE_RATIO, SECONDARY_COSINE_FLOOR)
     assigned: list[str] = []
     for theme, score in ranked:
         if score < threshold:
@@ -657,7 +659,9 @@ def apply_assignments(payload: dict) -> dict:
     payload["metadata"]["research_theme_method"] = (
         "Google Form Q1 topics; weighted TF-IDF cosine similarity to topic prototype anchors "
         "(title x2, abstract x3, cleaned keywords x1; metadata keywords excluded); "
-        f"multi-label threshold max_score * {RELEVANCE_RATIO} (floor {ABSOLUTE_COSINE_FLOOR}), "
+        f"multi-label threshold max_score * {RELEVANCE_RATIO} (secondary floor {SECONDARY_COSINE_FLOOR}), "
+        f"primary fallback floor {PRIMARY_FALLBACK_FLOOR}; "
+        f"{METHODS_FALLBACK!r} excluded from competitive ranking; "
         f"cap {MAX_ASSIGNED_TOPICS}; official CCN labels override primary when specific"
     )
     payload["metadata"]["keyword_source"] = (

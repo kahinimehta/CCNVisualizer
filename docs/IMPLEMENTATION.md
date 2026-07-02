@@ -101,7 +101,8 @@ Themes are **not** discovered by clustering submissions. Each of the 15 CCN rese
 
 **Multi-label assignment:**
 
-- Keep all themes with similarity ≥ `max_score × 0.5` (absolute floor **0.05**)
+- Keep all themes with similarity ≥ `max_score × 0.5` (secondary floor **0.05**)
+- Primary fallback when no competitive theme clears **0.04** → **Everything else** (excluded from ranking)
 - Cap at **5** topics per submission
 - Primary topic is always first in `assigned_topics`
 
