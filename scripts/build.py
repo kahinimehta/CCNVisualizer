@@ -24,7 +24,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from sklearn.feature_extraction.text import TfidfVectorizer
-from umap import UMAP
+from umap.umap_ import UMAP  # avoid umap.__init__ → parametric_umap → tensorflow
 
 from shared import (
     content_keywords,
