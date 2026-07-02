@@ -101,17 +101,36 @@ CITATION_FRAGMENT_RES = (
 
 # Topic prototype anchors — used for TF-IDF cosine scoring.
 TOPIC_ANCHORS: dict[str, list[str]] = {
-    "RL, motor control & planning": [
+    "Reinforcement learning": [
         "reinforcement learning",
         "reward",
-        "motor control",
-        "planning",
         "policy",
+        "model-based reinforcement learning",
+        "model-free",
+        "q-learning",
+        "value function",
+        "exploration",
+        "temporal difference",
+        "reward prediction error",
+        "dopamine",
+        "habit",
+        "basal ganglia",
+    ],
+    "Motor control & planning": [
+        "motor control",
+        "motor learning",
+        "planning",
         "navigation",
         "action selection",
         "skill learning",
-        "habit",
-        "basal ganglia",
+        "reaching",
+        "locomotion",
+        "movement",
+        "optimal control",
+        "visuomotor",
+        "trajectory",
+        "cerebellum",
+        "motor cortex",
     ],
     "Naturalistic encoding/decoding": [
         "naturalistic",

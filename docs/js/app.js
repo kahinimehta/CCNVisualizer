@@ -303,7 +303,8 @@ function styleThemeAxisLabels(selection) {
 }
 
 const CHART_PALETTE = [
-  "#F34949", // red — RL, motor control & planning
+  "#F34949", // red — Reinforcement learning
+  "#C03030", // dark red — Motor control & planning
   "#F08519", // orange — Naturalistic encoding/decoding
   "#F3F349", // yellow — Neural population geometry & dynamics
   "#85F019", // chartreuse — Decision-making and metacognition
@@ -332,7 +333,8 @@ const KPI_ICONS = {
 const LIST_DELIMITER = " | ";
 
 const GOOGLE_FORM_TOPICS = [
-  "RL, motor control & planning",
+  "Reinforcement learning",
+  "Motor control & planning",
   "Naturalistic encoding/decoding",
   "Neural population geometry & dynamics",
   "Decision-making and metacognition",
