@@ -51,7 +51,7 @@ Both scripts are self-contained (shared helpers are inlined). Optional flags:
 - `scrape.py --add-2017` — re-scrape 2017 proceedings and merge
 - `build.py --merge-2026` — merge 2026 CSV before building (for 2026-only updates)
 
-Shared config: **`data/google_topics.json`** — optional override for the 14 theme names at build time (defaults to anchors in `build.py`).
+Shared config: **`data/google_topics.json`** — optional override for the 15 theme names at build time (defaults to anchors in `build.py`).
 
 CI workflows (`.github/workflows/`): **Update 2026 Data**, **Scrape CCN Data**, **Deploy GitHub Pages**.
 
@@ -123,7 +123,7 @@ After themes are assigned, `build.py` projects every submission into 2D for the 
    - `random_state=42` (reproducible layout)
 3. Output: `{ id, x, y, year, title, poster_number }` per point in `embeddings_all.json`.
 
-These `x`/`y` values are copied into `abstracts.csv` as `umap_x` and `umap_y`. The map shows **semantic neighborhoods** — papers with similar title/abstract language land near each other — independent of the 14 theme labels.
+These `x`/`y` values are copied into `abstracts.csv` as `umap_x` and `umap_y`. The map shows **semantic neighborhoods** — papers with similar title/abstract language land near each other — independent of the 15 theme labels.
 
 ### 5. CSV export
 
@@ -160,7 +160,7 @@ Citation fragments and metadata area labels are stripped before export.
 - Coordinates from `umap_x` / `umap_y` in the CSV (all years, 2017–2026)
 - Dot **color** = primary topic (`assigned_topics[0]`)
 - Click/tap a dot → scrolls to that submission in **Matching submissions** and shows **all** assigned topics (primary labeled)
-- Map topic dropdown lists all 14 themes; filter matches any assigned topic; non-matches are dimmed
+- Map topic dropdown lists all 15 themes; filter matches any assigned topic; non-matches are dimmed
 - Legend: “Primary topic (dot color)”
 - Map respects year / search / topic filters
 

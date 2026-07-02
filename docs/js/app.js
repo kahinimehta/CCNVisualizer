@@ -309,6 +309,7 @@ const CHART_PALETTE = [
   "#F3F349", // yellow — Neural population geometry & dynamics
   "#85F019", // chartreuse — Decision-making and metacognition
   "#49F349", // green — Vision
+  "#84D854", // yellow-green — Perception
   "#19F085", // teal — Language/auditory neuroscience
   "#49F3F3", // cyan — AI, LLM, & Neural Networks
   "#1985F0", // blue — Memory
@@ -339,6 +340,7 @@ const GOOGLE_FORM_TOPICS = [
   "Neural population geometry & dynamics",
   "Decision-making and metacognition",
   "Vision",
+  "Perception",
   "Language/auditory neuroscience",
   "AI, LLM, & Neural Networks",
   "Memory",

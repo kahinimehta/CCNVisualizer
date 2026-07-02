@@ -19,7 +19,7 @@
       "count": 617,
       "note": "Provisional — replace CSV and re-run merge when updated data is available."
     },
-    "research_themes_assigned_at": "2026-07-02T00:35:35.641510+00:00",
+    "research_themes_assigned_at": "2026-07-02T00:39:28.142686+00:00",
     "research_theme_method": "Google Form Q1 topics; weighted TF-IDF cosine similarity to topic prototype anchors (title x2, abstract x3, cleaned keywords x1; metadata keywords excluded); multi-label threshold max_score * 0.5 (floor 0.05), cap 5; official CCN labels override primary when specific",
     "keyword_source": "author_keywords prefer poster HTML, proceedings/authored PDFs (2017-2025), or 2026 CSV; extracted_keywords only when no author keywords are available; citation fragments and metadata area labels stripped before scoring",
     "keyword_years": [
@@ -862,13 +862,11 @@
       "submission_type": "poster",
       "primary_theme": "Memory",
       "secondary_topics": [
-        "Attention & cognitive control / executive function",
-        "Methods and theory"
+        "Attention & cognitive control / executive function"
       ],
       "assigned_topics": [
         "Memory",
-        "Attention & cognitive control / executive function",
-        "Methods and theory"
+        "Attention & cognitive control / executive function"
       ]
     },
     {
@@ -2005,9 +2003,12 @@
       "source_url": "https://2017.ccneuro.org/abstracts/abstract_3000178.pdf",
       "submission_type": "poster",
       "primary_theme": "Decision-making and metacognition",
-      "secondary_topics": [],
+      "secondary_topics": [
+        "Perception"
+      ],
       "assigned_topics": [
-        "Decision-making and metacognition"
+        "Decision-making and metacognition",
+        "Perception"
       ]
     },
     {
@@ -2371,9 +2372,12 @@
       "source_url": "https://2017.ccneuro.org/abstracts/abstract_3000255.pdf",
       "submission_type": "poster",
       "primary_theme": "Decision-making and metacognition",
-      "secondary_topics": [],
+      "secondary_topics": [
+        "Perception"
+      ],
       "assigned_topics": [
-        "Decision-making and metacognition"
+        "Decision-making and metacognition",
+        "Perception"
       ]
     },
     {
@@ -3324,10 +3328,10 @@
       "poster_number": "",
       "source_url": "https://2017.ccneuro.org/abstracts/abstract_3000243.pdf",
       "submission_type": "poster",
-      "primary_theme": "Everything else",
+      "primary_theme": "Perception",
       "secondary_topics": [],
       "assigned_topics": [
-        "Everything else"
+        "Perception"
       ]
     },
     {
@@ -4778,9 +4782,12 @@
       "poster_number": "",
       "source_url": "https://2017.ccneuro.org/abstracts/abstract_3000217.pdf",
       "submission_type": "poster",
-      "primary_theme": "Naturalistic encoding/decoding",
-      "secondary_topics": [],
+      "primary_theme": "Perception",
+      "secondary_topics": [
+        "Naturalistic encoding/decoding"
+      ],
       "assigned_topics": [
+        "Perception",
         "Naturalistic encoding/decoding"
       ]
     },
@@ -5173,13 +5180,13 @@
       "poster_number": "",
       "source_url": "https://2017.ccneuro.org/abstracts/abstract_3000071.pdf",
       "submission_type": "poster",
-      "primary_theme": "Decision-making and metacognition",
+      "primary_theme": "Perception",
       "secondary_topics": [
-        "Methods and theory"
+        "Decision-making and metacognition"
       ],
       "assigned_topics": [
-        "Decision-making and metacognition",
-        "Methods and theory"
+        "Perception",
+        "Decision-making and metacognition"
       ]
     },
     {
@@ -5710,10 +5717,10 @@
       "poster_number": "",
       "source_url": "https://2017.ccneuro.org/abstracts/abstract_3000132.pdf",
       "submission_type": "poster",
-      "primary_theme": "Everything else",
+      "primary_theme": "Perception",
       "secondary_topics": [],
       "assigned_topics": [
-        "Everything else"
+        "Perception"
       ]
     },
     {
@@ -7149,13 +7156,13 @@
       "submission_type": "poster",
       "primary_theme": "Naturalistic encoding/decoding",
       "secondary_topics": [
-        "Vision",
-        "Methods and theory"
+        "Methods and theory",
+        "Vision"
       ],
       "assigned_topics": [
         "Naturalistic encoding/decoding",
-        "Vision",
-        "Methods and theory"
+        "Methods and theory",
+        "Vision"
       ]
     },
     {
@@ -10143,11 +10150,13 @@
       "submission_type": "poster",
       "primary_theme": "Motor control & planning",
       "secondary_topics": [
-        "Reinforcement learning"
+        "Reinforcement learning",
+        "Perception"
       ],
       "assigned_topics": [
         "Motor control & planning",
-        "Reinforcement learning"
+        "Reinforcement learning",
+        "Perception"
       ]
     },
     {
@@ -10806,10 +10815,10 @@
       "poster_number": "",
       "source_url": "https://2018.ccneuro.org/Papers/ViewPapersedcd.html?PaperNum=1069",
       "submission_type": "poster",
-      "primary_theme": "Everything else",
+      "primary_theme": "Perception",
       "secondary_topics": [],
       "assigned_topics": [
-        "Everything else"
+        "Perception"
       ]
     },
     {
@@ -10894,9 +10903,12 @@
       "poster_number": "",
       "source_url": "https://2018.ccneuro.org/Papers/ViewPapersa562.html?PaperNum=1236",
       "submission_type": "poster",
-      "primary_theme": "Language/auditory neuroscience",
-      "secondary_topics": [],
+      "primary_theme": "Perception",
+      "secondary_topics": [
+        "Language/auditory neuroscience"
+      ],
       "assigned_topics": [
+        "Perception",
         "Language/auditory neuroscience"
       ]
     },
@@ -12033,11 +12045,13 @@
       "poster_number": "",
       "source_url": "https://2018.ccneuro.org/Papers/ViewPapers5496.html?PaperNum=1078",
       "submission_type": "poster",
-      "primary_theme": "Decision-making and metacognition",
+      "primary_theme": "Perception",
       "secondary_topics": [
+        "Decision-making and metacognition",
         "Reinforcement learning"
       ],
       "assigned_topics": [
+        "Perception",
         "Decision-making and metacognition",
         "Reinforcement learning"
       ]
@@ -21813,10 +21827,10 @@
       "poster_number": "",
       "source_url": "https://2018.ccneuro.org/Papers/ViewPapers4618.html?PaperNum=1098",
       "submission_type": "poster",
-      "primary_theme": "Everything else",
+      "primary_theme": "Attention & cognitive control / executive function",
       "secondary_topics": [],
       "assigned_topics": [
-        "Everything else"
+        "Attention & cognitive control / executive function"
       ]
     },
     {
@@ -25565,9 +25579,12 @@
       "poster_number": "",
       "source_url": "https://2019.ccneuro.org/Papers/ViewPaperseabd.html?PaperNum=1240",
       "submission_type": "poster",
-      "primary_theme": "AI, LLM, & Neural Networks",
-      "secondary_topics": [],
+      "primary_theme": "Perception",
+      "secondary_topics": [
+        "AI, LLM, & Neural Networks"
+      ],
       "assigned_topics": [
+        "Perception",
         "AI, LLM, & Neural Networks"
       ]
     },
@@ -26417,10 +26434,10 @@
       "poster_number": "",
       "source_url": "https://2019.ccneuro.org/Papers/ViewPapersb12b.html?PaperNum=1230",
       "submission_type": "poster",
-      "primary_theme": "Everything else",
+      "primary_theme": "Perception",
       "secondary_topics": [],
       "assigned_topics": [
-        "Everything else"
+        "Perception"
       ]
     },
     {
@@ -28872,10 +28889,10 @@
       "poster_number": "",
       "source_url": "https://2019.ccneuro.org/Papers/ViewPapersfe2e.html?PaperNum=1355",
       "submission_type": "poster",
-      "primary_theme": "Everything else",
+      "primary_theme": "Perception",
       "secondary_topics": [],
       "assigned_topics": [
-        "Everything else"
+        "Perception"
       ]
     },
     {
@@ -29937,10 +29954,10 @@
       "poster_number": "",
       "source_url": "https://2019.ccneuro.org/Papers/ViewPapersa389.html?PaperNum=1386",
       "submission_type": "poster",
-      "primary_theme": "Everything else",
+      "primary_theme": "Perception",
       "secondary_topics": [],
       "assigned_topics": [
-        "Everything else"
+        "Perception"
       ]
     },
     {
@@ -31273,9 +31290,12 @@
       "source_url": "https://2019.ccneuro.org/Papers/ViewPapersd08d.html?PaperNum=1255",
       "submission_type": "poster",
       "primary_theme": "Decision-making and metacognition",
-      "secondary_topics": [],
+      "secondary_topics": [
+        "Perception"
+      ],
       "assigned_topics": [
-        "Decision-making and metacognition"
+        "Decision-making and metacognition",
+        "Perception"
       ]
     },
     {
@@ -35062,11 +35082,13 @@
       "poster_number": "",
       "source_url": "https://2019.ccneuro.org/Papers/ViewPapers69d3.html?PaperNum=1042",
       "submission_type": "poster",
-      "primary_theme": "Reinforcement learning",
+      "primary_theme": "Perception",
       "secondary_topics": [
+        "Reinforcement learning",
         "Decision-making and metacognition"
       ],
       "assigned_topics": [
+        "Perception",
         "Reinforcement learning",
         "Decision-making and metacognition"
       ]
@@ -37027,10 +37049,10 @@
       "poster_number": "",
       "source_url": "https://2019.ccneuro.org/Papers/ViewPapers707b.html?PaperNum=1277",
       "submission_type": "poster",
-      "primary_theme": "Everything else",
+      "primary_theme": "Perception",
       "secondary_topics": [],
       "assigned_topics": [
-        "Everything else"
+        "Perception"
       ]
     },
     {
@@ -38915,9 +38937,12 @@
       "source_url": "https://2019.ccneuro.org/Papers/ViewPapersc9df.html?PaperNum=1302",
       "submission_type": "poster",
       "primary_theme": "Naturalistic encoding/decoding",
-      "secondary_topics": [],
+      "secondary_topics": [
+        "Perception"
+      ],
       "assigned_topics": [
-        "Naturalistic encoding/decoding"
+        "Naturalistic encoding/decoding",
+        "Perception"
       ]
     },
     {
@@ -39489,9 +39514,12 @@
       "source_url": "https://2019.ccneuro.org/Papers/ViewPapers2fef.html?PaperNum=1329",
       "submission_type": "poster",
       "primary_theme": "Decision-making and metacognition",
-      "secondary_topics": [],
+      "secondary_topics": [
+        "Perception"
+      ],
       "assigned_topics": [
-        "Decision-making and metacognition"
+        "Decision-making and metacognition",
+        "Perception"
       ]
     },
     {
@@ -40255,10 +40283,10 @@
       "poster_number": "",
       "source_url": "https://2019.ccneuro.org/Papers/ViewPapersc62c.html?PaperNum=1219",
       "submission_type": "poster",
-      "primary_theme": "Everything else",
+      "primary_theme": "Perception",
       "secondary_topics": [],
       "assigned_topics": [
-        "Everything else"
+        "Perception"
       ]
     },
     {
@@ -42285,12 +42313,14 @@
       "submission_type": "poster",
       "primary_theme": "Decision-making and metacognition",
       "secondary_topics": [
+        "Perception",
         "AI, LLM, & Neural Networks",
         "Neural population geometry & dynamics",
         "Naturalistic encoding/decoding"
       ],
       "assigned_topics": [
         "Decision-making and metacognition",
+        "Perception",
         "AI, LLM, & Neural Networks",
         "Neural population geometry & dynamics",
         "Naturalistic encoding/decoding"
@@ -43679,12 +43709,14 @@
       "submission_type": "poster",
       "primary_theme": "Naturalistic encoding/decoding",
       "secondary_topics": [
+        "Perception",
         "Neural population geometry & dynamics",
         "Methods and theory",
         "AI, LLM, & Neural Networks"
       ],
       "assigned_topics": [
         "Naturalistic encoding/decoding",
+        "Perception",
         "Neural population geometry & dynamics",
         "Methods and theory",
         "AI, LLM, & Neural Networks"
@@ -49682,14 +49714,14 @@
       "primary_theme": "Motor control & planning",
       "secondary_topics": [
         "Neural population geometry & dynamics",
-        "Reinforcement learning",
-        "Decision-making and metacognition"
+        "Decision-making and metacognition",
+        "Reinforcement learning"
       ],
       "assigned_topics": [
         "Motor control & planning",
         "Neural population geometry & dynamics",
-        "Reinforcement learning",
-        "Decision-making and metacognition"
+        "Decision-making and metacognition",
+        "Reinforcement learning"
       ]
     },
     {
@@ -50497,11 +50529,13 @@
       "poster_number": "",
       "source_url": "https://2022.ccneuro.org/view_paper2bfc.html?PaperNum=1178",
       "submission_type": "poster",
-      "primary_theme": "Neural population geometry & dynamics",
+      "primary_theme": "Perception",
       "secondary_topics": [
+        "Neural population geometry & dynamics",
         "Naturalistic encoding/decoding"
       ],
       "assigned_topics": [
+        "Perception",
         "Neural population geometry & dynamics",
         "Naturalistic encoding/decoding"
       ]
@@ -55421,9 +55455,12 @@
       "source_url": "https://2023.ccneuro.org/view_paper0ab6.html?PaperNum=1117",
       "submission_type": "poster",
       "primary_theme": "Methods and theory",
-      "secondary_topics": [],
+      "secondary_topics": [
+        "Perception"
+      ],
       "assigned_topics": [
-        "Methods and theory"
+        "Methods and theory",
+        "Perception"
       ]
     },
     {
@@ -55755,17 +55792,17 @@
       "submission_type": "poster",
       "primary_theme": "Decision-making and metacognition",
       "secondary_topics": [
-        "Vision",
         "Naturalistic encoding/decoding",
         "Neural population geometry & dynamics",
-        "Methods and theory"
+        "Methods and theory",
+        "Vision"
       ],
       "assigned_topics": [
         "Decision-making and metacognition",
-        "Vision",
         "Naturalistic encoding/decoding",
         "Neural population geometry & dynamics",
-        "Methods and theory"
+        "Methods and theory",
+        "Vision"
       ]
     },
     {
@@ -55899,9 +55936,12 @@
       "source_url": "https://2023.ccneuro.org/view_paper7769.html?PaperNum=1100",
       "submission_type": "poster",
       "primary_theme": "Vision",
-      "secondary_topics": [],
+      "secondary_topics": [
+        "Perception"
+      ],
       "assigned_topics": [
-        "Vision"
+        "Vision",
+        "Perception"
       ]
     },
     {
@@ -56805,13 +56845,11 @@
       "primary_theme": "Naturalistic encoding/decoding",
       "secondary_topics": [
         "Neural population geometry & dynamics",
-        "Vision",
         "Memory"
       ],
       "assigned_topics": [
         "Naturalistic encoding/decoding",
         "Neural population geometry & dynamics",
-        "Vision",
         "Memory"
       ]
     },
@@ -57955,12 +57993,9 @@
       "source_url": "https://2023.ccneuro.org/view_paper2bfc.html?PaperNum=1178",
       "submission_type": "poster",
       "primary_theme": "Naturalistic encoding/decoding",
-      "secondary_topics": [
-        "Methods and theory"
-      ],
+      "secondary_topics": [],
       "assigned_topics": [
-        "Naturalistic encoding/decoding",
-        "Methods and theory"
+        "Naturalistic encoding/decoding"
       ]
     },
     {
@@ -58113,9 +58148,12 @@
       "poster_number": "",
       "source_url": "https://2023.ccneuro.org/view_paper74de.html?PaperNum=1185",
       "submission_type": "poster",
-      "primary_theme": "Decision-making and metacognition",
-      "secondary_topics": [],
+      "primary_theme": "Perception",
+      "secondary_topics": [
+        "Decision-making and metacognition"
+      ],
       "assigned_topics": [
+        "Perception",
         "Decision-making and metacognition"
       ]
     },
@@ -58256,12 +58294,14 @@
       "primary_theme": "Neural population geometry & dynamics",
       "secondary_topics": [
         "AI, LLM, & Neural Networks",
-        "Methods and theory"
+        "Methods and theory",
+        "Perception"
       ],
       "assigned_topics": [
         "Neural population geometry & dynamics",
         "AI, LLM, & Neural Networks",
-        "Methods and theory"
+        "Methods and theory",
+        "Perception"
       ]
     },
     {
@@ -60924,11 +60964,13 @@
       "poster_number": "",
       "source_url": "https://2023.ccneuro.org/view_paper14fe.html?PaperNum=1347",
       "submission_type": "poster",
-      "primary_theme": "Naturalistic encoding/decoding",
+      "primary_theme": "Perception",
       "secondary_topics": [
+        "Naturalistic encoding/decoding",
         "Methods and theory"
       ],
       "assigned_topics": [
+        "Perception",
         "Naturalistic encoding/decoding",
         "Methods and theory"
       ]
@@ -64649,13 +64691,11 @@
       "submission_type": "poster",
       "primary_theme": "Memory",
       "secondary_topics": [
-        "Naturalistic encoding/decoding",
-        "Vision"
+        "Naturalistic encoding/decoding"
       ],
       "assigned_topics": [
         "Memory",
-        "Naturalistic encoding/decoding",
-        "Vision"
+        "Naturalistic encoding/decoding"
       ]
     },
     {
@@ -65670,13 +65710,15 @@
       "secondary_topics": [
         "Methods and theory",
         "Naturalistic encoding/decoding",
-        "Motor control & planning"
+        "Motor control & planning",
+        "Neural population geometry & dynamics"
       ],
       "assigned_topics": [
         "Decision-making and metacognition",
         "Methods and theory",
         "Naturalistic encoding/decoding",
-        "Motor control & planning"
+        "Motor control & planning",
+        "Neural population geometry & dynamics"
       ]
     },
     {
@@ -69240,13 +69282,13 @@
       "poster_number": "",
       "source_url": "https://2023.ccneuro.org/view_paper9929.html?PaperNum=1519",
       "submission_type": "poster",
-      "primary_theme": "Vision",
+      "primary_theme": "Naturalistic encoding/decoding",
       "secondary_topics": [
-        "Naturalistic encoding/decoding"
+        "Vision"
       ],
       "assigned_topics": [
-        "Vision",
-        "Naturalistic encoding/decoding"
+        "Naturalistic encoding/decoding",
+        "Vision"
       ]
     },
     {
@@ -69818,11 +69860,13 @@
       "primary_theme": "Methods and theory",
       "secondary_topics": [
         "Neural population geometry & dynamics",
+        "Perception",
         "Naturalistic encoding/decoding"
       ],
       "assigned_topics": [
         "Methods and theory",
         "Neural population geometry & dynamics",
+        "Perception",
         "Naturalistic encoding/decoding"
       ]
     },
@@ -71658,10 +71702,12 @@
       "submission_type": "poster",
       "primary_theme": "Vision",
       "secondary_topics": [
+        "Perception",
         "Naturalistic encoding/decoding"
       ],
       "assigned_topics": [
         "Vision",
+        "Perception",
         "Naturalistic encoding/decoding"
       ]
     },
@@ -74428,11 +74474,13 @@
       "submission_type": "poster",
       "primary_theme": "Social cognition & theory of mind",
       "secondary_topics": [
+        "Perception",
         "Methods and theory",
         "Naturalistic encoding/decoding"
       ],
       "assigned_topics": [
         "Social cognition & theory of mind",
+        "Perception",
         "Methods and theory",
         "Naturalistic encoding/decoding"
       ]
@@ -74862,9 +74910,12 @@
       "poster_number": "",
       "source_url": "https://2023.ccneuro.org/view_paper15bd.html?PaperNum=1396&talk",
       "submission_type": "poster",
-      "primary_theme": "Reinforcement learning",
-      "secondary_topics": [],
+      "primary_theme": "Perception",
+      "secondary_topics": [
+        "Reinforcement learning"
+      ],
       "assigned_topics": [
+        "Perception",
         "Reinforcement learning"
       ]
     },
@@ -75570,9 +75621,12 @@
       "poster_number": "",
       "source_url": "https://2023.ccneuro.org/view_paper5a8c.html?PaperNum=1411",
       "submission_type": "poster",
-      "primary_theme": "Neural population geometry & dynamics",
-      "secondary_topics": [],
+      "primary_theme": "Perception",
+      "secondary_topics": [
+        "Neural population geometry & dynamics"
+      ],
       "assigned_topics": [
+        "Perception",
         "Neural population geometry & dynamics"
       ]
     },
@@ -76153,14 +76207,14 @@
       "primary_theme": "Methods and theory",
       "secondary_topics": [
         "Naturalistic encoding/decoding",
-        "Language/auditory neuroscience",
-        "Neural population geometry & dynamics"
+        "Neural population geometry & dynamics",
+        "Language/auditory neuroscience"
       ],
       "assigned_topics": [
         "Methods and theory",
         "Naturalistic encoding/decoding",
-        "Language/auditory neuroscience",
-        "Neural population geometry & dynamics"
+        "Neural population geometry & dynamics",
+        "Language/auditory neuroscience"
       ]
     },
     {
@@ -76191,11 +76245,13 @@
       "submission_type": "poster",
       "primary_theme": "Naturalistic encoding/decoding",
       "secondary_topics": [
-        "Neural population geometry & dynamics"
+        "Neural population geometry & dynamics",
+        "Perception"
       ],
       "assigned_topics": [
         "Naturalistic encoding/decoding",
-        "Neural population geometry & dynamics"
+        "Neural population geometry & dynamics",
+        "Perception"
       ]
     },
     {
@@ -76356,11 +76412,13 @@
       "submission_type": "poster",
       "primary_theme": "Decision-making and metacognition",
       "secondary_topics": [
+        "Perception",
         "Naturalistic encoding/decoding",
         "Methods and theory"
       ],
       "assigned_topics": [
         "Decision-making and metacognition",
+        "Perception",
         "Naturalistic encoding/decoding",
         "Methods and theory"
       ]
@@ -80208,13 +80266,13 @@
       "poster_number": "",
       "source_url": "https://2023.ccneuro.org/view_paper3664.html?PaperNum=1526",
       "submission_type": "poster",
-      "primary_theme": "AI, LLM, & Neural Networks",
+      "primary_theme": "Decision-making and metacognition",
       "secondary_topics": [
-        "Decision-making and metacognition"
+        "AI, LLM, & Neural Networks"
       ],
       "assigned_topics": [
-        "AI, LLM, & Neural Networks",
-        "Decision-making and metacognition"
+        "Decision-making and metacognition",
+        "AI, LLM, & Neural Networks"
       ]
     },
     {
@@ -81499,9 +81557,14 @@
       "source_url": "https://2024.ccneuro.org/poster/?id=268",
       "submission_type": "poster",
       "primary_theme": "Vision",
-      "secondary_topics": [],
+      "secondary_topics": [
+        "Perception",
+        "Clinical / computational psychiatry"
+      ],
       "assigned_topics": [
-        "Vision"
+        "Vision",
+        "Perception",
+        "Clinical / computational psychiatry"
       ]
     },
     {
@@ -81618,10 +81681,10 @@
       "poster_number": "A134",
       "source_url": "https://2024.ccneuro.org/poster/?id=187",
       "submission_type": "poster",
-      "primary_theme": "Everything else",
+      "primary_theme": "Perception",
       "secondary_topics": [],
       "assigned_topics": [
-        "Everything else"
+        "Perception"
       ]
     },
     {
@@ -82024,10 +82087,10 @@
       "poster_number": "A147",
       "source_url": "https://2024.ccneuro.org/poster/?id=215",
       "submission_type": "poster",
-      "primary_theme": "Everything else",
+      "primary_theme": "Perception",
       "secondary_topics": [],
       "assigned_topics": [
-        "Everything else"
+        "Perception"
       ]
     },
     {
@@ -82233,11 +82296,13 @@
       "poster_number": "A153",
       "source_url": "https://2024.ccneuro.org/poster/?id=349",
       "submission_type": "poster",
-      "primary_theme": "Naturalistic encoding/decoding",
+      "primary_theme": "Perception",
       "secondary_topics": [
+        "Naturalistic encoding/decoding",
         "AI, LLM, & Neural Networks"
       ],
       "assigned_topics": [
+        "Perception",
         "Naturalistic encoding/decoding",
         "AI, LLM, & Neural Networks"
       ]
@@ -87681,9 +87746,12 @@
       "poster_number": "B30",
       "source_url": "https://2024.ccneuro.org/poster/?id=468",
       "submission_type": "poster",
-      "primary_theme": "AI, LLM, & Neural Networks",
-      "secondary_topics": [],
+      "primary_theme": "Perception",
+      "secondary_topics": [
+        "AI, LLM, & Neural Networks"
+      ],
       "assigned_topics": [
+        "Perception",
         "AI, LLM, & Neural Networks"
       ]
     },
@@ -91177,9 +91245,12 @@
       "source_url": "https://2024.ccneuro.org/poster/?id=327",
       "submission_type": "poster",
       "primary_theme": "Decision-making and metacognition",
-      "secondary_topics": [],
+      "secondary_topics": [
+        "Perception"
+      ],
       "assigned_topics": [
-        "Decision-making and metacognition"
+        "Decision-making and metacognition",
+        "Perception"
       ]
     },
     {
@@ -91700,10 +91771,10 @@
       "poster_number": "C157",
       "source_url": "https://2024.ccneuro.org/poster/?id=330",
       "submission_type": "poster",
-      "primary_theme": "Everything else",
+      "primary_theme": "Perception",
       "secondary_topics": [],
       "assigned_topics": [
-        "Everything else"
+        "Perception"
       ]
     },
     {
@@ -92213,9 +92284,12 @@
       "source_url": "https://2024.ccneuro.org/poster/?id=536",
       "submission_type": "poster",
       "primary_theme": "AI, LLM, & Neural Networks",
-      "secondary_topics": [],
+      "secondary_topics": [
+        "Perception"
+      ],
       "assigned_topics": [
-        "AI, LLM, & Neural Networks"
+        "AI, LLM, & Neural Networks",
+        "Perception"
       ]
     },
     {
@@ -95585,10 +95659,10 @@
       "poster_number": "A143",
       "source_url": "https://2025.ccneuro.org/poster/?id=FijOA6b5lY",
       "submission_type": "poster",
-      "primary_theme": "Everything else",
+      "primary_theme": "Perception",
       "secondary_topics": [],
       "assigned_topics": [
-        "Everything else"
+        "Perception"
       ]
     },
     {
@@ -95850,10 +95924,10 @@
       "poster_number": "A155",
       "source_url": "https://2025.ccneuro.org/poster/?id=tLIOBNffea",
       "submission_type": "poster",
-      "primary_theme": "Everything else",
+      "primary_theme": "Perception",
       "secondary_topics": [],
       "assigned_topics": [
-        "Everything else"
+        "Perception"
       ]
     },
     {
@@ -95950,10 +96024,10 @@
       "poster_number": "A16",
       "source_url": "https://2025.ccneuro.org/poster/?id=JknxlTWneg",
       "submission_type": "poster",
-      "primary_theme": "Everything else",
+      "primary_theme": "Perception",
       "secondary_topics": [],
       "assigned_topics": [
-        "Everything else"
+        "Perception"
       ]
     },
     {
@@ -95991,9 +96065,12 @@
       "source_url": "https://2025.ccneuro.org/poster/?id=QA0P53hQRT",
       "submission_type": "poster",
       "primary_theme": "AI, LLM, & Neural Networks",
-      "secondary_topics": [],
+      "secondary_topics": [
+        "Perception"
+      ],
       "assigned_topics": [
-        "AI, LLM, & Neural Networks"
+        "AI, LLM, & Neural Networks",
+        "Perception"
       ]
     },
     {
@@ -96242,9 +96319,12 @@
       "source_url": "https://2025.ccneuro.org/poster/?id=Qp52FP3E3A",
       "submission_type": "poster",
       "primary_theme": "Decision-making and metacognition",
-      "secondary_topics": [],
+      "secondary_topics": [
+        "Perception"
+      ],
       "assigned_topics": [
-        "Decision-making and metacognition"
+        "Decision-making and metacognition",
+        "Perception"
       ]
     },
     {
@@ -97332,10 +97412,10 @@
       "poster_number": "A46",
       "source_url": "https://2025.ccneuro.org/poster/?id=zHcVfSZ41z",
       "submission_type": "poster",
-      "primary_theme": "Language/auditory neuroscience",
+      "primary_theme": "Everything else",
       "secondary_topics": [],
       "assigned_topics": [
-        "Language/auditory neuroscience"
+        "Everything else"
       ]
     },
     {
@@ -97376,9 +97456,12 @@
       "source_url": "https://2025.ccneuro.org/poster/?id=WX9tNw7EIZ",
       "submission_type": "poster",
       "primary_theme": "Language/auditory neuroscience",
-      "secondary_topics": [],
+      "secondary_topics": [
+        "Perception"
+      ],
       "assigned_topics": [
-        "Language/auditory neuroscience"
+        "Language/auditory neuroscience",
+        "Perception"
       ]
     },
     {
@@ -98569,11 +98652,13 @@
       "poster_number": "B10",
       "source_url": "https://2025.ccneuro.org/poster/?id=lBefBQhc3y",
       "submission_type": "poster",
-      "primary_theme": "Memory",
+      "primary_theme": "Perception",
       "secondary_topics": [
+        "Memory",
         "Attention & cognitive control / executive function"
       ],
       "assigned_topics": [
+        "Perception",
         "Memory",
         "Attention & cognitive control / executive function"
       ]
@@ -99402,9 +99487,12 @@
       "poster_number": "B140",
       "source_url": "https://2025.ccneuro.org/poster/?id=g6wljAED7A",
       "submission_type": "poster",
-      "primary_theme": "Vision",
-      "secondary_topics": [],
+      "primary_theme": "Perception",
+      "secondary_topics": [
+        "Vision"
+      ],
       "assigned_topics": [
+        "Perception",
         "Vision"
       ]
     },
@@ -99745,9 +99833,12 @@
       "source_url": "https://2025.ccneuro.org/poster/?id=z8tXXpNsIf",
       "submission_type": "poster",
       "primary_theme": "Memory",
-      "secondary_topics": [],
+      "secondary_topics": [
+        "Perception"
+      ],
       "assigned_topics": [
-        "Memory"
+        "Memory",
+        "Perception"
       ]
     },
     {
@@ -100027,10 +100118,10 @@
       "poster_number": "B168",
       "source_url": "https://2025.ccneuro.org/poster/?id=B3vLabLFo1",
       "submission_type": "poster",
-      "primary_theme": "Vision",
+      "primary_theme": "Perception",
       "secondary_topics": [],
       "assigned_topics": [
-        "Vision"
+        "Perception"
       ]
     },
     {
@@ -100710,10 +100801,10 @@
       "poster_number": "B26",
       "source_url": "https://2025.ccneuro.org/poster/?id=135YwHiyQX",
       "submission_type": "poster",
-      "primary_theme": "Everything else",
+      "primary_theme": "Perception",
       "secondary_topics": [],
       "assigned_topics": [
-        "Everything else"
+        "Perception"
       ]
     },
     {
@@ -101249,11 +101340,13 @@
       "submission_type": "poster",
       "primary_theme": "Vision",
       "secondary_topics": [
-        "Reinforcement learning"
+        "Reinforcement learning",
+        "Perception"
       ],
       "assigned_topics": [
         "Vision",
-        "Reinforcement learning"
+        "Reinforcement learning",
+        "Perception"
       ]
     },
     {
@@ -102543,9 +102636,12 @@
       "source_url": "https://2025.ccneuro.org/poster/?id=bZxii0GOIv",
       "submission_type": "poster",
       "primary_theme": "Vision",
-      "secondary_topics": [],
+      "secondary_topics": [
+        "Perception"
+      ],
       "assigned_topics": [
-        "Vision"
+        "Vision",
+        "Perception"
       ]
     },
     {
@@ -102745,9 +102841,12 @@
       "poster_number": "C120",
       "source_url": "https://2025.ccneuro.org/poster/?id=NYcv5XuoXe",
       "submission_type": "poster",
-      "primary_theme": "Neural population geometry & dynamics",
-      "secondary_topics": [],
+      "primary_theme": "Perception",
+      "secondary_topics": [
+        "Neural population geometry & dynamics"
+      ],
       "assigned_topics": [
+        "Perception",
         "Neural population geometry & dynamics"
       ]
     },
@@ -103827,10 +103926,10 @@
       "poster_number": "C169",
       "source_url": "https://2025.ccneuro.org/poster/?id=coBAUeIt8z",
       "submission_type": "poster",
-      "primary_theme": "Everything else",
+      "primary_theme": "Perception",
       "secondary_topics": [],
       "assigned_topics": [
-        "Everything else"
+        "Perception"
       ]
     },
     {
@@ -109328,9 +109427,12 @@
       "source_url": "https://2026.ccneuro.org/",
       "submission_type": "poster",
       "primary_theme": "Language/auditory neuroscience",
-      "secondary_topics": [],
+      "secondary_topics": [
+        "Perception"
+      ],
       "assigned_topics": [
-        "Language/auditory neuroscience"
+        "Language/auditory neuroscience",
+        "Perception"
       ]
     },
     {
@@ -111072,9 +111174,12 @@
       "source_url": "https://2026.ccneuro.org/",
       "submission_type": "poster",
       "primary_theme": "Decision-making and metacognition",
-      "secondary_topics": [],
+      "secondary_topics": [
+        "Perception"
+      ],
       "assigned_topics": [
-        "Decision-making and metacognition"
+        "Decision-making and metacognition",
+        "Perception"
       ]
     },
     {
@@ -112031,13 +112136,11 @@
       "submission_type": "poster",
       "primary_theme": "Memory",
       "secondary_topics": [
-        "Vision",
         "Attention & cognitive control / executive function",
         "AI, LLM, & Neural Networks"
       ],
       "assigned_topics": [
         "Memory",
-        "Vision",
         "Attention & cognitive control / executive function",
         "AI, LLM, & Neural Networks"
       ]
@@ -112427,10 +112530,10 @@
       "poster_number": "314",
       "source_url": "https://2026.ccneuro.org/",
       "submission_type": "poster",
-      "primary_theme": "Everything else",
+      "primary_theme": "Perception",
       "secondary_topics": [],
       "assigned_topics": [
-        "Everything else"
+        "Perception"
       ]
     },
     {
@@ -113409,9 +113512,12 @@
       "source_url": "https://2026.ccneuro.org/",
       "submission_type": "poster",
       "primary_theme": "AI, LLM, & Neural Networks",
-      "secondary_topics": [],
+      "secondary_topics": [
+        "Social cognition & theory of mind"
+      ],
       "assigned_topics": [
-        "AI, LLM, & Neural Networks"
+        "AI, LLM, & Neural Networks",
+        "Social cognition & theory of mind"
       ]
     },
     {
@@ -114966,11 +115072,13 @@
       "poster_number": "435",
       "source_url": "https://2026.ccneuro.org/",
       "submission_type": "poster",
-      "primary_theme": "Methods and theory",
+      "primary_theme": "Perception",
       "secondary_topics": [
+        "Methods and theory",
         "Naturalistic encoding/decoding"
       ],
       "assigned_topics": [
+        "Perception",
         "Methods and theory",
         "Naturalistic encoding/decoding"
       ]
@@ -115072,10 +115180,10 @@
       "poster_number": "440",
       "source_url": "https://2026.ccneuro.org/",
       "submission_type": "poster",
-      "primary_theme": "Everything else",
+      "primary_theme": "Perception",
       "secondary_topics": [],
       "assigned_topics": [
-        "Everything else"
+        "Perception"
       ]
     },
     {
@@ -118000,10 +118108,10 @@
       "poster_number": "585",
       "source_url": "https://2026.ccneuro.org/",
       "submission_type": "poster",
-      "primary_theme": "Vision",
+      "primary_theme": "Everything else",
       "secondary_topics": [],
       "assigned_topics": [
-        "Vision"
+        "Everything else"
       ]
     },
     {
@@ -121557,6 +121665,7 @@
         "Neural population geometry & dynamics",
         "Decision-making and metacognition",
         "Vision",
+        "Perception",
         "Language/auditory neuroscience",
         "AI, LLM, & Neural Networks",
         "Memory",
@@ -121570,15 +121679,15 @@
         "2017": [
           [
             "Everything else",
-            61
+            59
           ],
           [
             "Decision-making and metacognition",
-            37
+            36
           ],
           [
             "Naturalistic encoding/decoding",
-            29
+            28
           ],
           [
             "Methods and theory",
@@ -121617,6 +121726,10 @@
             4
           ],
           [
+            "Perception",
+            4
+          ],
+          [
             "Social cognition & theory of mind",
             3
           ],
@@ -121628,7 +121741,7 @@
         "2018": [
           [
             "Everything else",
-            81
+            79
           ],
           [
             "AI, LLM, & Neural Networks",
@@ -121636,7 +121749,7 @@
           ],
           [
             "Decision-making and metacognition",
-            17
+            16
           ],
           [
             "Reinforcement learning",
@@ -121656,7 +121769,7 @@
           ],
           [
             "Language/auditory neuroscience",
-            9
+            8
           ],
           [
             "Neural population geometry & dynamics",
@@ -121667,15 +121780,19 @@
             7
           ],
           [
+            "Attention & cognitive control / executive function",
+            5
+          ],
+          [
             "Vision",
             4
           ],
           [
-            "Attention & cognitive control / executive function",
-            4
+            "Methods and theory",
+            3
           ],
           [
-            "Methods and theory",
+            "Perception",
             3
           ],
           [
@@ -121686,11 +121803,11 @@
         "2019": [
           [
             "Everything else",
-            112
+            107
           ],
           [
             "Reinforcement learning",
-            31
+            30
           ],
           [
             "Decision-making and metacognition",
@@ -121702,7 +121819,7 @@
           ],
           [
             "AI, LLM, & Neural Networks",
-            22
+            21
           ],
           [
             "Naturalistic encoding/decoding",
@@ -121726,6 +121843,10 @@
           ],
           [
             "Neural population geometry & dynamics",
+            7
+          ],
+          [
+            "Perception",
             7
           ],
           [
@@ -121756,7 +121877,7 @@
           ],
           [
             "Neural population geometry & dynamics",
-            34
+            33
           ],
           [
             "Everything else",
@@ -121797,6 +121918,10 @@
           [
             "Attention & cognitive control / executive function",
             1
+          ],
+          [
+            "Perception",
+            1
           ]
         ],
         "2023": [
@@ -121806,7 +121931,7 @@
           ],
           [
             "Neural population geometry & dynamics",
-            56
+            55
           ],
           [
             "Naturalistic encoding/decoding",
@@ -121818,7 +121943,7 @@
           ],
           [
             "Reinforcement learning",
-            30
+            29
           ],
           [
             "Everything else",
@@ -121841,10 +121966,6 @@
             9
           ],
           [
-            "Vision",
-            7
-          ],
-          [
             "Attention & cognitive control / executive function",
             7
           ],
@@ -121853,18 +121974,26 @@
             7
           ],
           [
+            "Vision",
+            6
+          ],
+          [
+            "Perception",
+            4
+          ],
+          [
             "AI, LLM, & Neural Networks",
-            5
+            4
           ]
         ],
         "2024": [
           [
             "Everything else",
-            184
+            181
           ],
           [
             "AI, LLM, & Neural Networks",
-            60
+            59
           ],
           [
             "Reinforcement learning",
@@ -121880,7 +122009,7 @@
           ],
           [
             "Naturalistic encoding/decoding",
-            31
+            30
           ],
           [
             "Language/auditory neuroscience",
@@ -121907,6 +122036,10 @@
             8
           ],
           [
+            "Perception",
+            5
+          ],
+          [
             "Motor control & planning",
             4
           ],
@@ -121918,7 +122051,7 @@
         "2025": [
           [
             "Everything else",
-            212
+            208
           ],
           [
             "Decision-making and metacognition",
@@ -121934,11 +122067,11 @@
           ],
           [
             "Memory",
-            38
+            37
           ],
           [
             "Language/auditory neuroscience",
-            35
+            34
           ],
           [
             "Reinforcement learning",
@@ -121950,11 +122083,11 @@
           ],
           [
             "Vision",
-            18
+            16
           ],
           [
             "Neural population geometry & dynamics",
-            15
+            14
           ],
           [
             "Clinical / computational psychiatry",
@@ -121969,6 +122102,10 @@
             12
           ],
           [
+            "Perception",
+            9
+          ],
+          [
             "Social cognition & theory of mind",
             9
           ]
@@ -121976,7 +122113,7 @@
         "2026": [
           [
             "Everything else",
-            184
+            183
           ],
           [
             "Decision-making and metacognition",
@@ -121984,7 +122121,7 @@
           ],
           [
             "Methods and theory",
-            57
+            56
           ],
           [
             "AI, LLM, & Neural Networks",
@@ -122020,7 +122157,7 @@
           ],
           [
             "Vision",
-            14
+            13
           ],
           [
             "Social cognition & theory of mind",
@@ -122029,53 +122166,57 @@
           [
             "Clinical / computational psychiatry",
             9
+          ],
+          [
+            "Perception",
+            3
           ]
         ]
       },
       "primary_totals": [
         [
           "Everything else",
-          869
+          852
         ],
         [
           "Decision-making and metacognition",
-          369
+          367
         ],
         [
           "Naturalistic encoding/decoding",
-          273
+          271
         ],
         [
           "AI, LLM, & Neural Networks",
-          226
+          223
         ],
         [
           "Memory",
-          198
+          197
         ],
         [
           "Methods and theory",
-          195
+          194
         ],
         [
           "Reinforcement learning",
-          181
+          179
         ],
         [
           "Neural population geometry & dynamics",
-          178
+          175
         ],
         [
           "Language/auditory neuroscience",
-          147
-        ],
-        [
-          "Vision",
-          77
+          145
         ],
         [
           "Attention & cognitive control / executive function",
-          74
+          75
+        ],
+        [
+          "Vision",
+          73
         ],
         [
           "Motor control & planning",
@@ -122088,24 +122229,28 @@
         [
           "Clinical / computational psychiatry",
           51
+        ],
+        [
+          "Perception",
+          36
         ]
       ],
       "secondary_totals": [
         [
           "Methods and theory",
-          254
+          252
         ],
         [
           "Naturalistic encoding/decoding",
-          240
+          242
         ],
         [
           "Decision-making and metacognition",
-          204
+          206
         ],
         [
           "Neural population geometry & dynamics",
-          190
+          194
         ],
         [
           "Attention & cognitive control / executive function",
@@ -122113,22 +122258,22 @@
         ],
         [
           "AI, LLM, & Neural Networks",
-          120
+          123
         ],
         [
           "Reinforcement learning",
-          94
+          96
         ],
         [
           "Memory",
-          68
+          69
         ],
         [
           "Language/auditory neuroscience",
-          49
+          50
         ],
         [
-          "Vision",
+          "Clinical / computational psychiatry",
           31
         ],
         [
@@ -122136,12 +122281,16 @@
           31
         ],
         [
-          "Clinical / computational psychiatry",
+          "Vision",
           30
         ],
         [
+          "Perception",
+          27
+        ],
+        [
           "Social cognition & theory of mind",
-          22
+          23
         ],
         [
           "Everything else",

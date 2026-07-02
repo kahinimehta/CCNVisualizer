@@ -39,7 +39,7 @@ See [docs/DASHBOARD.md](docs/DASHBOARD.md) and [docs/IMPLEMENTATION.md](docs/IMP
 
 ## Research themes
 
-The 14 topics come from [**CCN 2026 Activity Preferences**](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform), question 1. Optional build-time override: `data/google_topics.json`.
+The 15 topics come from [**CCN 2026 Activity Preferences**](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform), question 1. Optional build-time override: `data/google_topics.json`.
 
 | Years | Keyword source |
 |-------|----------------|

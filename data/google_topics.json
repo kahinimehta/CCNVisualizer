@@ -1,5 +1,5 @@
 {
-  "schema_version": 5,
+  "schema_version": 6,
   "enabled": true,
   "source": "CCN 2026 Activity Preferences — Google Form question 1",
   "form_url": "https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform",
@@ -12,6 +12,7 @@
     "Neural population geometry & dynamics",
     "Decision-making and metacognition",
     "Vision",
+    "Perception",
     "Language/auditory neuroscience",
     "AI, LLM, & Neural Networks",
     "Memory",
