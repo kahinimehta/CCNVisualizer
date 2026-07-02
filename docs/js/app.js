@@ -1226,20 +1226,51 @@ function renderEmbeddingCluster() {
   });
 
   if (isTouchLike()) {
-    svg
-      .selectAll("circle.embedding-hit")
-      .data(points, (d) => d.id)
-      .join("circle")
-      .attr("class", "embedding-hit")
-      .attr("cx", (d) => x(d.x))
-      .attr("cy", (d) => y(d.y))
-      .attr("r", isPhoneLayout() ? gs(16) : s(18))
-      .attr("fill", "transparent")
-      .style("cursor", "pointer")
-      .on("click", (event, d) => {
-        event.stopPropagation();
-        handlePointNavigate(null, d);
-      });
+    if (isPhoneLayout()) {
+      // Nearest-point tap: large overlapping hit circles pick the wrong dot in dense regions.
+      const maxTapDist = gs(5);
+      svg
+        .append("rect")
+        .attr("class", "embedding-touch-layer")
+        .attr("x", margin.left)
+        .attr("y", margin.top)
+        .attr("width", width - margin.left - margin.right)
+        .attr("height", plotBottom - margin.top)
+        .attr("fill", "transparent")
+        .style("cursor", "pointer")
+        .style("touch-action", "manipulation")
+        .on("click", (event) => {
+          const [px, py] = d3.pointer(event, svg.node());
+          let nearest = null;
+          let nearestDist = Infinity;
+          points.forEach((point) => {
+            const dist = Math.hypot(px - x(point.x), py - y(point.y));
+            if (dist <= maxTapDist && dist < nearestDist) {
+              nearestDist = dist;
+              nearest = point;
+            }
+          });
+          if (nearest) {
+            event.stopPropagation();
+            handlePointNavigate(null, nearest);
+          }
+        });
+    } else {
+      svg
+        .selectAll("circle.embedding-hit")
+        .data(points, (d) => d.id)
+        .join("circle")
+        .attr("class", "embedding-hit")
+        .attr("cx", (d) => x(d.x))
+        .attr("cy", (d) => y(d.y))
+        .attr("r", s(12))
+        .attr("fill", "transparent")
+        .style("cursor", "pointer")
+        .on("click", (event, d) => {
+          event.stopPropagation();
+          handlePointNavigate(null, d);
+        });
+    }
   } else {
     pointGroups
       .on("mousemove", (event, d) => showTooltip(embeddingPointTooltip(d), event))
