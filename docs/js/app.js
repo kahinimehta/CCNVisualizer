@@ -303,18 +303,18 @@ function styleThemeAxisLabels(selection) {
 }
 
 const CHART_PALETTE = [
-  "#f4c7c3", // pink
-  "#5eb8ff", // blue
-  "#6ee7a0", // green
-  "#ffb347", // orange
-  "#b794f6", // purple
-  "#ffe066", // yellow
-  "#ff8a80", // coral
-  "#4dd0c8", // teal
-  "#f48fb1", // rose
-  "#dce775", // lime
-  "#9fa8ff", // periwinkle
-  "#ffcc80", // amber
+  "#F34949", // red — RL, motor control & planning
+  "#F08519", // orange — Naturalistic encoding/decoding
+  "#F3F349", // yellow — Neural population geometry & dynamics
+  "#85F019", // chartreuse — Decision-making and metacognition
+  "#49F349", // green — Vision
+  "#19F085", // teal — Language/auditory neuroscience
+  "#49F3F3", // cyan — LLMs, reasoning, interpretability
+  "#1985F0", // blue — Memory
+  "#4949F3", // indigo — Social cognition & theory of mind
+  "#8519F0", // violet — Attention & cognitive control
+  "#F349F3", // magenta — Clinical / computational psychiatry
+  "#F01985", // rose — Methods, theory & everything else
 ];
 
 const KPI_ICONS = {
