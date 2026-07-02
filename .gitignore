@@ -5,5 +5,5 @@ __pycache__/
 .venv/
 venv/
 data/raw/
-data/pdf_cache/
+data/llm_theme_cache.json
 .DS_Store

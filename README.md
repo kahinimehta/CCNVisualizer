@@ -74,6 +74,50 @@ Or trigger **Scrape CCN Data** (workflow dispatch).
 
 Both paths refresh `submissions.json`, `embeddings_all.json`, `abstracts.csv`, and theme assignments.
 
+### LLM theme classification (Claude Opus 4.6)
+
+By default, themes are assigned with TF-IDF cosine similarity (`build.py` with no flags). To use **Anthropic Claude** instead:
+
+1. **Install extra dependencies**
+
+```bash
+pip install -r requirements-llm.txt
+```
+
+2. **Add your API key safely** (never commit it)
+
+```bash
+cp .env.example .env
+# Edit .env and set ANTHROPIC_API_KEY=sk-ant-...
+```
+
+The `.env` file is listed in `.gitignore`. For GitHub Actions or cloud agents, add `ANTHROPIC_API_KEY` as a **repository/environment secret** — do not put the key in workflow YAML or commit it.
+
+Optional env vars (in `.env` or your shell):
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `ANTHROPIC_API_KEY` | *(required)* | Your Anthropic API key |
+| `ANTHROPIC_MODEL` | `claude-opus-4-6` | Model ID for classification |
+| `LLM_THEME_STRICT` | off | Exit on first API failure |
+
+3. **Run classification**
+
+```bash
+# Smoke test (first 5 uncached submissions)
+python scripts/build.py --llm-themes --llm-limit 5
+
+# Full run (~3k submissions; cached in data/llm_theme_cache.json)
+python scripts/build.py --llm-themes
+
+# Re-classify everything (still respects cache unless --llm-refresh)
+python scripts/build.py --llm-themes --llm-refresh
+```
+
+Results are cached in `data/llm_theme_cache.json` (gitignored) so re-runs only call the API for new/changed submissions. Claude assigns **one primary** theme plus **all other applicable** secondaries from the 15-topic list.
+
+**Cost note:** a full pass is roughly one API call per submission (~title + abstract). Check [Anthropic pricing](https://www.anthropic.com/pricing) before running all ~3k rows.
+
 ## Local development
 
 ```bash
@@ -97,10 +141,12 @@ Pushes to `main` deploy the static `docs/` folder (GitHub Pages / Vercel).
 ```
 scripts/
   scrape.py                     # Step 1: scrape archives → submissions.json
-  build.py                      # Step 2: themes + UMAP + abstracts.csv
+  build.py                      # Step 2: themes + UMAP + abstracts.csv (--llm-themes for Claude)
+  llm_themes.py                 # Claude Opus theme classifier (optional)
 data/
   ccn-2026-pending-posters.csv  # Provisional 2026 poster list
   google_topics.json            # Optional theme name override (build time)
+  llm_theme_cache.json          # LLM classification cache (gitignored; local only)
   submissions.json              # Build artifact (not loaded by dashboard)
   embeddings_all.json           # UMAP coords (merged into CSV)
   abstracts.csv

@@ -115,6 +115,22 @@ Themes are **not** discovered by clustering submissions. Each of the 15 CCN rese
 
 **AI vs Methods split:** the theme **AI, LLM, & Neural Networks** uses anchors for LLMs, transformers, neural networks, deep learning, and model interpretability. Methods-oriented terms (benchmarks, frameworks, theory, statistical analysis) anchor **Methods and theory**.
 
+#### Optional: LLM theme assignment (`--llm-themes`)
+
+`scripts/llm_themes.py` calls **Anthropic Claude** (default `claude-opus-4-6`) with title, abstract, keywords, and optional conference track. The model returns JSON:
+
+- `primary_theme` — exactly one best category
+- `secondary_topics` — all other clearly applicable categories (0–4)
+
+**API key:** copy `.env.example` → `.env`, set `ANTHROPIC_API_KEY` (gitignored). Never commit the key; use repository secrets in CI.
+
+```bash
+pip install -r requirements-llm.txt
+python scripts/build.py --llm-themes
+```
+
+Assignments are cached in `data/llm_theme_cache.json` (gitignored). Re-runs only API-call uncached submission IDs.
+
 ### 4. UMAP map coordinates
 
 After themes are assigned, `build.py` projects every submission into 2D for the dashboard map:

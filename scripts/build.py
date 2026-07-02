@@ -648,7 +648,13 @@ def compute_theme_stats(submissions: list[dict], topics: list[str]) -> dict:
     }
 
 
-def apply_assignments(payload: dict) -> dict:
+def apply_assignments(
+    payload: dict,
+    *,
+    use_llm: bool = False,
+    llm_limit: int | None = None,
+    llm_refresh: bool = False,
+) -> dict:
     config = load_google_config()
     topics = active_topics(config)
 
@@ -657,31 +663,58 @@ def apply_assignments(payload: dict) -> dict:
         repair_submission_text(submission)
         sanitize_submission_keywords(submission)
 
-    scorer = ThemeScorer(submissions, topics)
+    if use_llm:
+        from llm_themes import apply_llm_theme_assignments
 
-    for index, submission in enumerate(submissions):
-        primary, secondary, assigned_topics = assign_themes(
-            submission,
+        llm_stats = apply_llm_theme_assignments(
+            submissions,
             topics,
-            scorer,
-            index,
+            fallback=METHODS_FALLBACK,
+            limit=llm_limit,
+            refresh=llm_refresh,
         )
-        submission["primary_theme"] = primary
-        submission["secondary_topics"] = secondary
-        submission["assigned_topics"] = assigned_topics
+        pending = llm_stats.get("pending_without_cache", 0)
+        if pending:
+            print(
+                f"WARNING: {pending} submissions have no LLM assignment "
+                "(run without --llm-limit to classify all, or check cache/errors)."
+            )
+        theme_method = (
+            f"Anthropic {llm_stats['model']}; primary + secondary topics from title/abstract/keywords; "
+            f"cache {llm_stats['cache_path']}; classified_now={llm_stats['classified_now']}, "
+            f"errors={llm_stats['errors']}"
+        )
+    else:
+        scorer = ThemeScorer(submissions, topics)
+
+        for index, submission in enumerate(submissions):
+            primary, secondary, assigned_topics = assign_themes(
+                submission,
+                topics,
+                scorer,
+                index,
+            )
+            submission["primary_theme"] = primary
+            submission["secondary_topics"] = secondary
+            submission["assigned_topics"] = assigned_topics
+            submission.pop("cluster_track", None)
+
+        theme_method = (
+            "Google Form Q1 topics; weighted TF-IDF cosine similarity to topic prototype anchors "
+            "(title x2, abstract x3, cleaned keywords x1; metadata keywords excluded); "
+            f"multi-label threshold max_score * {RELEVANCE_RATIO} (secondary floor {SECONDARY_COSINE_FLOOR}), "
+            f"primary: official CCN label, else top competitive score (ties favor #1); "
+            f"{METHODS_FALLBACK!r} only when max competitive score < {PRIMARY_FALLBACK_FLOOR}; "
+            f"cap {MAX_ASSIGNED_TOPICS}; official CCN labels override primary when specific"
+        )
+
+    for submission in submissions:
         submission.pop("cluster_track", None)
 
     payload.setdefault("stats", {})
     payload["stats"]["research_themes"] = compute_theme_stats(submissions, topics)
     payload["metadata"]["research_themes_assigned_at"] = datetime.now(timezone.utc).isoformat()
-    payload["metadata"]["research_theme_method"] = (
-        "Google Form Q1 topics; weighted TF-IDF cosine similarity to topic prototype anchors "
-        "(title x2, abstract x3, cleaned keywords x1; metadata keywords excluded); "
-        f"multi-label threshold max_score * {RELEVANCE_RATIO} (secondary floor {SECONDARY_COSINE_FLOOR}), "
-        f"primary: official CCN label, else top competitive score (ties favor #1); "
-        f"{METHODS_FALLBACK!r} only when max competitive score < {PRIMARY_FALLBACK_FLOOR}; "
-        f"cap {MAX_ASSIGNED_TOPICS}; official CCN labels override primary when specific"
-    )
+    payload["metadata"]["research_theme_method"] = theme_method
     payload["metadata"]["keyword_source"] = (
         "author_keywords prefer poster HTML, proceedings/authored PDFs (2017-2025), or 2026 CSV; "
         "extracted_keywords only when no author keywords are available; citation fragments and "
@@ -1006,7 +1039,14 @@ def merge_2026_csv(payload: dict) -> dict:
     print(f"Merged {len(new_rows)} rows from {CSV_PATH_2026.name}")
     return payload
 
-def run_build(payload: dict | None = None, *, merge_2026: bool = False) -> dict:
+def run_build(
+    payload: dict | None = None,
+    *,
+    merge_2026: bool = False,
+    use_llm: bool = False,
+    llm_limit: int | None = None,
+    llm_refresh: bool = False,
+) -> dict:
     if payload is None:
         if not DATA_PATH.exists():
             raise SystemExit(f"Missing {DATA_PATH}")
@@ -1014,7 +1054,12 @@ def run_build(payload: dict | None = None, *, merge_2026: bool = False) -> dict:
             payload = json.load(fh)
     if merge_2026:
         payload = merge_2026_csv(payload)
-    payload = apply_assignments(payload)
+    payload = apply_assignments(
+        payload,
+        use_llm=use_llm,
+        llm_limit=llm_limit,
+        llm_refresh=llm_refresh,
+    )
     write_payload(payload)
     embedding_payload = build_payload(payload["submissions"])
     write_embedding_outputs(embedding_payload)
@@ -1026,8 +1071,30 @@ def main() -> None:
     import argparse
     parser = argparse.ArgumentParser(description="Build themes, UMAP map, and abstracts.csv")
     parser.add_argument("--merge-2026", action="store_true")
+    parser.add_argument(
+        "--llm-themes",
+        action="store_true",
+        help="Classify themes with Anthropic Claude (requires ANTHROPIC_API_KEY in .env or env)",
+    )
+    parser.add_argument(
+        "--llm-limit",
+        type=int,
+        default=None,
+        metavar="N",
+        help="With --llm-themes, only call the API for the first N uncached submissions",
+    )
+    parser.add_argument(
+        "--llm-refresh",
+        action="store_true",
+        help="With --llm-themes, ignore cache and re-classify (respects --llm-limit if set)",
+    )
     args = parser.parse_args()
-    run_build(merge_2026=args.merge_2026)
+    run_build(
+        merge_2026=args.merge_2026,
+        use_llm=args.llm_themes,
+        llm_limit=args.llm_limit,
+        llm_refresh=args.llm_refresh,
+    )
 
 if __name__ == "__main__":
     main()
