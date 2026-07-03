@@ -1,6 +1,8 @@
 # CCN Visualizer — guide
 
-Interactive dashboard for CCN poster and paper archives (2017–2026). The live site loads **one file**: `docs/data/abstracts.csv` (mirrored at `data/abstracts.csv` after each build).
+Technical reference for the pipeline, data, and dashboard. **Entry point:** [README](../README.md) · **Live site:** https://ccn-visualizer.vercel.app/
+
+Runtime loads one file: `docs/data/abstracts.csv` (mirrored at `data/abstracts.csv` after each build).
 
 ## Pipeline
 
@@ -23,79 +25,86 @@ ccneuro.org archives
 |--------|--------|
 | `scrape.py` | `data/submissions.json` |
 | `build.py` | themes, map coords, `data/abstracts.csv` + `docs/data/abstracts.csv` |
-| `shared.py` | keyword cleanup, GAC filter, embedding text |
+| `shared.py` | keyword cleanup, GAC filter, embedding text, `year:id` row keys |
 
-### Rebuild
+### Rebuild & flags
 
-```bash
-pip install -r requirements.txt
-cp .env.example .env          # ANTHROPIC_API_KEY (never commit)
-python scripts/scrape.py --merge-2026
-python scripts/build.py         # classify + UMAP + CSV
-```
+Basic setup: [README](../README.md). Useful `build.py` flags:
 
-Useful flags: `--skip-classify` (UMAP/CSV only), `--classify-limit N` (smoke test), `--classify-refresh` (re-classify all), `--merge-2026` (2026 CSV only). If classification stops midway, run `build.py` again to resume from `data/llm_theme_cache.json` — not `--classify-refresh`.
+| Flag | Purpose |
+|------|---------|
+| `--skip-classify` | UMAP/CSV only; keep existing `assigned_topics` |
+| `--classify-limit N` | Smoke test (first N uncached rows) |
+| `--classify-refresh` | Re-classify all (avoid after cache migration) |
+| `--merge-2026` | Merge `data/ccn-2026-pending-posters.csv` before build |
 
-CI/workflows need the `ANTHROPIC_API_KEY` repository secret.
+If classification stops midway, run `build.py` again to resume from `data/llm_theme_cache.json`.
 
-## What the dashboard uses
+**Deploy:** push to `main` → Vercel serves `docs/`. Data changes must be committed separately (local rebuild or GitHub Actions below).
 
-Runtime source: **`docs/data/abstracts.csv`** only. No API calls, no JSON at load time.
+**GitHub Actions** (require `ANTHROPIC_API_KEY` secret):
 
-| Column | Role |
-|--------|------|
-| `year`, `title`, `author`, `authors` | Identity |
-| `keywords` | Cleaned author/content keywords |
-| `assigned_topics` | 14 themes, pipe-separated (` \| `), primary first |
-| `abstract` | Search only |
-| `umap_x`, `umap_y` | Embedding map position |
+| Workflow | When to use |
+|----------|-------------|
+| **Update 2026 Data** | Routine 2026 CSV merge + build |
+| **Scrape CCN Data** | Full or partial archive re-scrape + build |
+
+## CSV columns
+
+| Column | Dashboard use |
+|--------|----------------|
+| `year`, `title`, `author`, `authors` | Identity, list, links |
+| `keywords` | Search |
+| `assigned_topics` | Theme filter & charts (pipe-separated, primary first); **not shown as tags in the list UI** |
+| `abstract` | Search |
+| `umap_x`, `umap_y` | Embedding map |
 | `source_url`, `poster_number` | Links |
 
-Build-only artifacts (not loaded by the browser): `data/submissions.json`, `data/embeddings_all.json`, `data/google_topics.json`.
+Build-only (not loaded in browser): `data/submissions.json`, `data/embeddings_all.json`, `data/google_topics.json`, `data/llm_theme_cache.json` (gitignored).
 
 ## Research themes (14)
 
-The 14 primary research themes were predetermined. They come from responses to the [CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform) Google Form, as well as manual oversight of the clustering process. **Everything else** is not used; legacy labels are migrated at build time.
+Predetermined from the [CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform) Google Form and manual clustering oversight. **Everything else** is migrated away at build time.
 
-Reinforcement learning · Motor control & planning · Naturalistic encoding/decoding · Neural population geometry & dynamics · Decision-making and metacognition · Vision · Perception · Language/auditory neuroscience · AI, LLM, & Neural Networks · Memory · Social cognition & theory of mind · Attention & cognitive control / executive function · Clinical / computational psychiatry · Methods and theory
+Names/colors: `docs/js/app.js` (`GOOGLE_FORM_TOPICS`); override names via `data/google_topics.json`.
 
-Names/colors: `docs/js/app.js` (`GOOGLE_FORM_TOPICS`). Override names at build time via `data/google_topics.json`.
+## Theme assignment (build time)
 
-## How themes are assigned
+**Anthropic Claude** (`claude-opus-4-6` default) reads title, abstract, keywords, and optional track → one primary + up to four secondaries. Cached under **`year:id`** keys in `data/llm_theme_cache.json` (CCN reuses numeric ids across years).
 
-**Anthropic Claude** (`claude-opus-4-6` by default) reads title, abstract, keywords, and optional track. Returns one **primary** and up to four **secondaries**. Cached in `data/llm_theme_cache.json` (gitignored) under **`year:id`** keys — CCN reuses numeric poster ids across years, so id-only keys would leak classifications between unrelated papers.
+Legacy id-only caches migrate automatically on the next build (~538 collision rows re-classified, not a full refresh). Separate from UMAP — themes are not from TF-IDF.
 
-If you have an older id-only cache, the next `build.py` run migrates it automatically: each reused id keeps one cached assignment (the last submission in scrape order for that id); the other year variants are re-classified on the next run (~538 API calls, not a full refresh). Do **not** use `--classify-refresh` for this — just run `python scripts/build.py` again.
+## UMAP map (build time)
 
-This is separate from the embedding map — themes are **not** from TF-IDF or cosine similarity.
+Weighted text (title ×2, abstract ×3, keywords ×1) → TF-IDF → UMAP (`n_neighbors=15`, `min_dist=0.12`, cosine distance) → `umap_x`, `umap_y`. Layout only; dot color in the UI is the primary topic.
 
-## Embedding map (UMAP)
+## Dashboard behavior
 
-Map coordinates are for visualization only:
+### Theme filter (two behaviors)
 
-1. Weighted text (title ×2, abstract ×3, keywords ×1) via `shared.py`
-2. TF-IDF → **UMAP** (`n_neighbors=15`, `min_dist=0.12`, cosine distance between TF-IDF vectors)
-3. Written to CSV as `umap_x`, `umap_y`
+| Surface | Matches |
+|---------|---------|
+| **Matching submissions list** | Theme anywhere — primary **or** secondary |
+| **UMAP map** | Dot **color** and **highlight** by **primary topic only** |
 
-Similar abstracts cluster together; dot **color** is the Claude-assigned **primary** topic.
+Click/tap a UMAP dot sets the shared theme filter to that dot’s **primary** topic. The list then shows all papers tagged with that theme anywhere; the map brightens dots whose primary matches. Topic labels are not displayed on list cards (only in CSV/search/charts).
 
-## Dashboard panels
+Other filters: year, full-text search (title, author, abstract, keywords, assigned topics).
 
-| Panel | CSV fields |
-|-------|------------|
-| KPIs | row count, years, themes |
+### Panels
+
+| Panel | Data |
+|-------|------|
+| KPIs | counts, years, themes |
 | Submissions over time | `year` |
-| Theme ranking | `assigned_topics` |
-| Year-over-year change | `assigned_topics` by year |
-| Embedding map | `umap_x`, `umap_y`, `assigned_topics` |
-| Matching submissions | `title`, `author`, `year`, `assigned_topics`, `source_url` |
+| Theme ranking / YoY change | `assigned_topics` (any occurrence) |
+| Embedding map | `umap_x`, `umap_y`, primary color from `assigned_topics[0]` |
+| Matching submissions | `title`, `year`, `authors`, `source_url` |
 
-Filters: year, theme (matches any assigned topic), full-text search. On phone, chart labels are slightly larger; UMAP taps pick the nearest dot.
+Phone: larger chart labels; UMAP uses nearest-point tap.
 
 ## Local preview
 
 ```bash
 python -m http.server 8080 --directory docs
 ```
-
-Open http://localhost:8080

@@ -2,28 +2,24 @@
 
 Interactive dashboard for [Cognitive Computational Neuroscience (CCN)](https://ccneuro.org) poster and paper archives (2017–2026).
 
-**Live site:** https://ccn-visualizer.vercel.app/
+**Live:** https://ccn-visualizer.vercel.app/
 
 ## Quick start
 
 ```bash
 pip install -r requirements.txt
-cp .env.example .env   # set ANTHROPIC_API_KEY (never commit .env)
+cp .env.example .env   # ANTHROPIC_API_KEY (never commit)
 python scripts/scrape.py --merge-2026
 python scripts/build.py
 python -m http.server 8080 --directory docs
 ```
 
-Open http://localhost:8080
+## Docs
 
-## Documentation
+**[docs/GUIDE.md](docs/GUIDE.md)** — pipeline, data, theme assignment, dashboard filters, CI workflows.
 
-All pipeline, data, theme, and build details are in one place:
-
-**[docs/GUIDE.md](docs/GUIDE.md)** · [on the live site](https://ccn-visualizer.vercel.app/GUIDE.md)
-
-Licenses: [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md)
+**[THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md)** · [licenses on site](https://ccn-visualizer.vercel.app/licenses.html)
 
 ## Deploy
 
-Pushes to `main` deploy the static `docs/` folder (Vercel). Data rebuilds run separately — locally or via GitHub Actions with the `ANTHROPIC_API_KEY` repository secret.
+Pushes to `main` deploy the static `docs/` folder on Vercel. Rebuild and commit `docs/data/abstracts.csv` locally or via GitHub Actions (`Update 2026 Data` / `Scrape CCN Data`); see the guide.

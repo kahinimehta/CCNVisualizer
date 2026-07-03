@@ -606,12 +606,6 @@ svg {
   border: 1px solid var(--border);
   border-radius: calc(12px * var(--ui-scale));
   padding: 0.8rem 0.9rem;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.paper-item.highlighted {
-  border-color: var(--ccn-pink);
-  box-shadow: 0 0 0 1px rgba(244, 199, 195, 0.35);
 }
 
 .embedding-theme-field {
@@ -637,44 +631,7 @@ svg {
 .paper-item .meta {
   color: var(--muted);
   font-size: 0.78rem;
-  margin-bottom: 0.45rem;
   line-height: 1.4;
-}
-
-.keyword-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
-
-.keyword-tag {
-  background: rgba(197, 224, 243, 0.12);
-  color: var(--ccn-blue);
-  border: 1px solid rgba(197, 224, 243, 0.28);
-  border-radius: 999px;
-  padding: 0.15rem 0.55rem;
-  font-size: 0.72rem;
-  cursor: pointer;
-}
-
-.keyword-tag.topic-tag {
-  background: color-mix(in srgb, var(--topic-color) 30%, transparent);
-  border-color: var(--topic-color);
-  color: var(--topic-color);
-}
-
-.topic-tag-primary {
-  font-weight: 600;
-}
-
-.keyword-tag.topic-tag.active {
-  box-shadow: 0 0 0 1px var(--topic-color);
-}
-
-.keyword-tag.active {
-  background: rgba(244, 199, 195, 0.25);
-  border-color: var(--ccn-pink);
-  color: var(--ccn-pink);
 }
 
 .site-footer {

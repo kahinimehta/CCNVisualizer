@@ -1112,8 +1112,8 @@ function renderEmbeddingCluster() {
   const color = (theme) => themeColor(theme);
   const plotBottom = mobileLegend ? plotHeight - margin.bottom : height - margin.bottom;
   const pointRadius = isPhoneLayout()
-    ? { base: 2, selected: 2.75, highlighted: 3 }
-    : { base: 7, selected: 8.5, highlighted: 10 };
+    ? { base: 2, selected: 2.75 }
+    : { base: 7, selected: 8.5 };
 
   const x = d3.scaleLinear().domain(d3.extent(points, (d) => d.x)).nice().range([margin.left, width - margin.right]);
   const y = d3.scaleLinear().domain(d3.extent(points, (d) => d.y)).nice().range([plotBottom, margin.top]);
