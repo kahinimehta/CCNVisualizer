@@ -78,6 +78,18 @@ _MOJIBAKE_MARKERS = re.compile(
 )
 
 GAC_UPDATE_TITLE_RE = re.compile(r"^\[\s*GAC\s+update\s*\]", re.I)
+YEAR_ID_CACHE_KEY_RE = re.compile(r"^\d{4}:")
+
+
+def submission_row_key(submission: dict) -> str:
+    """Stable per-paper key; CCN reuses numeric ids across years."""
+    year = submission.get("year", "")
+    paper_id = str(submission.get("id") or submission.get("poster_number") or submission.get("title", ""))
+    return f"{year}:{paper_id}"
+
+
+def is_year_id_cache_key(key: str) -> bool:
+    return bool(YEAR_ID_CACHE_KEY_RE.match(str(key)))
 
 
 def is_gac_update(title: str) -> bool:

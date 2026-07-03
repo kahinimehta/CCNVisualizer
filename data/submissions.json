@@ -19,7 +19,7 @@
       "count": 617,
       "note": "Provisional — replace CSV and re-run merge when updated data is available."
     },
-    "research_themes_assigned_at": "2026-07-03T00:35:28.596325+00:00",
+    "research_themes_assigned_at": "2026-07-03T00:45:29.959855+00:00",
     "research_theme_method": "Skipped classification; reused assigned_topics from submissions.json",
     "keyword_source": "author_keywords prefer poster HTML, proceedings/authored PDFs (2017-2025), or 2026 CSV; extracted_keywords only when no author keywords are available; citation fragments and metadata area labels stripped before export",
     "keyword_years": [

@@ -63,7 +63,9 @@ Names/colors: `docs/js/app.js` (`GOOGLE_FORM_TOPICS`). Override names at build t
 
 ## How themes are assigned
 
-**Anthropic Claude** (`claude-opus-4-6` by default) reads title, abstract, keywords, and optional track. Returns one **primary** and up to four **secondaries**. Cached in `data/llm_theme_cache.json` (gitignored).
+**Anthropic Claude** (`claude-opus-4-6` by default) reads title, abstract, keywords, and optional track. Returns one **primary** and up to four **secondaries**. Cached in `data/llm_theme_cache.json` (gitignored) under **`year:id`** keys — CCN reuses numeric poster ids across years, so id-only keys would leak classifications between unrelated papers.
+
+If you have an older id-only cache, the next `build.py` run migrates it automatically: each reused id keeps one cached assignment (the last submission in scrape order for that id); the other year variants are re-classified on the next run (~538 API calls, not a full refresh). Do **not** use `--classify-refresh` for this — just run `python scripts/build.py` again.
 
 This is separate from the embedding map — themes are **not** from TF-IDF or cosine similarity.
 

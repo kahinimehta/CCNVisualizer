@@ -29,11 +29,13 @@ from umap.umap_ import UMAP  # avoid umap.__init__ → parametric_umap → tenso
 from shared import (
     content_keywords,
     is_gac_update,
+    is_year_id_cache_key,
     repair_mojibake,
     repair_submission_text,
     sanitize_keyword_list,
     sanitize_submission_keywords,
     submission_embedding_text,
+    submission_row_key,
     vectorizer_stop_words,
 )
 
@@ -282,11 +284,61 @@ def classify_submission(client, submission: dict, topics: list[str]) -> tuple[st
     return normalize_assignment(parse_llm_json(text_blocks[0]), topics)
 
 
-def load_llm_cache() -> dict:
+def load_llm_cache(submissions: list[dict] | None = None) -> dict:
     if not LLM_CACHE_PATH.exists():
-        return {"version": 1, "model": anthropic_model(), "assignments": {}}
+        return {"version": 1, "model": anthropic_model(), "key_schema": "year:id", "assignments": {}}
     with LLM_CACHE_PATH.open(encoding="utf-8") as fh:
-        return json.load(fh)
+        cache = json.load(fh)
+    if submissions:
+        cache, reopened = migrate_llm_cache_assignments(cache, submissions)
+        if reopened:
+            print(
+                f"Migrated LLM cache to year:id keys; "
+                f"{reopened} collision submission(s) will be re-classified."
+            )
+            save_llm_cache(cache)
+    return cache
+
+
+def migrate_llm_cache_assignments(cache: dict, submissions: list[dict]) -> tuple[dict, int]:
+    """Convert legacy id-only cache keys to year:id (one owner per reused id)."""
+    if cache.get("key_schema") == "year:id":
+        return cache, 0
+
+    assignments: dict = cache.setdefault("assignments", {})
+    if not assignments:
+        cache["key_schema"] = "year:id"
+        return cache, 0
+
+    if any(is_year_id_cache_key(key) for key in assignments):
+        cache["key_schema"] = "year:id"
+        return cache, 0
+
+    by_id: dict[str, list[dict]] = defaultdict(list)
+    for submission in submissions:
+        paper_id = str(submission.get("id") or submission.get("poster_number") or "")
+        if paper_id:
+            by_id[paper_id].append(submission)
+
+    new_assignments: dict = {}
+    reopened = 0
+
+    for old_key, value in assignments.items():
+        group = by_id.get(str(old_key), [])
+        if not group:
+            continue
+        if len(group) == 1:
+            new_assignments[submission_row_key(group[0])] = value
+            continue
+
+        owner = group[-1]
+        new_assignments[submission_row_key(owner)] = value
+        reopened += len(group) - 1
+
+    cache["assignments"] = new_assignments
+    cache["key_schema"] = "year:id"
+    cache["migrated_from_id_only_at"] = datetime.now(timezone.utc).isoformat()
+    return cache, reopened
 
 
 def save_llm_cache(cache: dict) -> None:
@@ -298,7 +350,7 @@ def save_llm_cache(cache: dict) -> None:
 
 
 def submission_cache_key(submission: dict) -> str:
-    return str(submission.get("id") or submission.get("poster_number") or submission.get("title", ""))
+    return submission_row_key(submission)
 
 
 def classify_with_anthropic(
@@ -314,7 +366,7 @@ def classify_with_anthropic(
         raise SystemExit("Install dependencies: pip install -r requirements.txt") from exc
 
     client = anthropic.Anthropic(api_key=anthropic_api_key())
-    cache = load_llm_cache()
+    cache = load_llm_cache(submissions)
     assignments: dict = cache.setdefault("assignments", {})
     strict = os.environ.get("LLM_THEME_STRICT", "").strip().lower() in {"1", "true", "yes"}
 
@@ -562,7 +614,9 @@ def assigned_topics(submission: dict) -> list[str]:
 def embedding_index(embeddings: dict) -> dict[str, dict]:
     lookup: dict[str, dict] = {}
     for point in embeddings.get("points", []):
-        lookup[point["id"]] = point
+        year = point.get("year", "")
+        paper_id = point.get("id", "")
+        lookup[submission_row_key({"year": year, "id": paper_id})] = point
         if point.get("poster_number"):
             lookup[f"2026-{point['poster_number']}"] = point
     return lookup
@@ -579,7 +633,10 @@ def build_csv_rows(payload: dict, embeddings: dict) -> list[dict[str, str]]:
     ):
         sub_id = submission.get("id", "")
         poster = str(submission.get("poster_number") or "")
-        point = embedding_lookup.get(sub_id) or embedding_lookup.get(f"2026-{poster}")
+        point = (
+            embedding_lookup.get(submission_row_key(submission))
+            or embedding_lookup.get(f"2026-{poster}")
+        )
         authors = submission.get("authors", "")
 
         rows.append(
