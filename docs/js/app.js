@@ -910,8 +910,8 @@ function embeddingDefaultNote() {
     return "";
   }
   return isTouchLike()
-    ? `${count} submissions · colored by primary topic · tap a dot to filter`
-    : `${count} submissions · colored by primary topic · click a dot to filter`;
+    ? `${count} submissions · colored by dominant topic · tap a dot to filter`
+    : `${count} submissions · colored by dominant topic · click a dot to filter`;
 }
 
 function renderEmbeddingNote(note) {
@@ -1428,7 +1428,7 @@ function renderEmbeddingCluster() {
       .attr("fill", CCN_COLORS.muted)
       .style("font-size", isPhoneLayout() ? chartThemeFs(PHONE_LEGEND_HEADING_SIZE) : themeFs(10))
       .style("font-weight", 600)
-      .text("Primary topic (dot color)");
+      .text("Dominant topic (dot color)");
     legend
       .selectAll("g.legend-item")
       .data(legendThemes)
@@ -1470,7 +1470,7 @@ function renderEmbeddingCluster() {
       .attr("fill", CCN_COLORS.muted)
       .style("font-size", themeFs(10))
       .style("font-weight", 600)
-      .text("Primary topic (dot color)");
+      .text("Dominant topic (dot color)");
 
     const legendItems = legendRoot
       .selectAll("g.legend-item")
