@@ -460,9 +460,10 @@ a {
 .embedding-topic-pill {
   position: absolute;
   top: 0.45rem;
-  right: 0.45rem;
+  left: 50%;
+  right: auto;
   z-index: 2;
-  max-width: calc(100% - 1rem);
+  max-width: calc(100% - 0.9rem);
   padding: 0.3rem 0.55rem;
   border-radius: calc(8px * var(--ui-scale));
   border: 1px solid var(--topic-color, var(--ccn-blue));
@@ -471,6 +472,8 @@ a {
   font-size: 0.72rem;
   font-weight: 600;
   line-height: 1.25;
+  text-align: center;
+  transform: translateX(-50%);
   pointer-events: none;
   transition: opacity 0.2s ease, visibility 0.2s ease;
 }

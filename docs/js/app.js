@@ -771,9 +771,9 @@ function renderEmbeddingNote(note) {
 }
 
 function setupEmbeddingTopicPillObserver() {
-  const panel = document.getElementById("embedding-panel");
+  const chartWrap = document.querySelector(".embedding-chart-wrap");
   const pill = document.getElementById("embedding-topic-pill");
-  if (!panel || !pill) return;
+  if (!chartWrap || !pill) return;
 
   if (embeddingTopicPillObserver) {
     embeddingTopicPillObserver.disconnect();
@@ -787,11 +787,12 @@ function setupEmbeddingTopicPillObserver() {
 
   embeddingTopicPillObserver = new IntersectionObserver(
     ([entry]) => {
-      pill.classList.toggle("is-offscreen", !entry.isIntersecting);
+      const mapVisible = entry.isIntersecting && entry.intersectionRatio >= 0.08;
+      pill.classList.toggle("is-offscreen", !mapVisible);
     },
-    { threshold: 0.12, rootMargin: "-8px 0px" }
+    { threshold: [0, 0.08, 0.2], rootMargin: "0px" }
   );
-  embeddingTopicPillObserver.observe(panel);
+  embeddingTopicPillObserver.observe(chartWrap);
 }
 
 function updateEmbeddingTopicPill() {
@@ -805,7 +806,9 @@ function updateEmbeddingTopicPill() {
   }
 
   pill.hidden = false;
-  pill.textContent = fitLegendLabel(state.selectedTheme, 120, chartThemePx(PHONE_THEME_TITLE_SIZE));
+  const chartWrap = document.querySelector(".embedding-chart-wrap");
+  const labelMaxWidth = chartWrap?.clientWidth ? Math.max(120, chartWrap.clientWidth - gs(16)) : 120;
+  pill.textContent = fitLegendLabel(state.selectedTheme, labelMaxWidth, chartThemePx(PHONE_THEME_TITLE_SIZE));
   pill.style.setProperty("--topic-color", themeColor(state.selectedTheme));
   pill.title = state.selectedTheme;
 }
