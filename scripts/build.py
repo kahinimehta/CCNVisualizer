@@ -506,7 +506,7 @@ def build_umap(submissions: list[dict]) -> dict:
             "count": len(points),
             "years": years,
             "method": (
-                "Weighted TF-IDF (title x2, abstract x3, cleaned keywords x1) + UMAP 2D, cosine metric"
+                "Weighted TF-IDF (title x2, abstract x3, cleaned keywords x1) + UMAP 2D; cosine distance between TF-IDF vectors"
             ),
         },
         "points": points,

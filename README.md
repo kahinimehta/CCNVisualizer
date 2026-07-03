@@ -4,7 +4,7 @@ Interactive dashboard for poster and paper submissions across the [Cognitive Com
 
 **Live site:** https://ccn-visualizer.vercel.app/
 
-**Documentation:** [docs/DASHBOARD.md](docs/DASHBOARD.md) · [docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md)
+**Documentation:** [docs/GUIDE.md](docs/GUIDE.md)
 
 ## Pipeline
 

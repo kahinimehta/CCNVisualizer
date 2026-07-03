@@ -3,5 +3,9 @@
   "framework": null,
   "installCommand": "",
   "buildCommand": "",
-  "outputDirectory": "docs"
+  "outputDirectory": "docs",
+  "redirects": [
+    { "source": "/DASHBOARD.md", "destination": "/GUIDE.md", "permanent": true },
+    { "source": "/IMPLEMENTATION.md", "destination": "/GUIDE.md", "permanent": true }
+  ]
 }
