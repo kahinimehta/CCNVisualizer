@@ -930,12 +930,15 @@ function updateEmbeddingTopicPill() {
     return;
   }
 
-  pill.hidden = false;
+  const theme = state.selectedTheme;
+  const count = embeddingDisplayPoints().filter((point) => embeddingPointPrimaryTheme(point) === theme).length;
   const chartWrap = document.querySelector(".embedding-chart-wrap");
   const labelMaxWidth = chartWrap?.clientWidth ? Math.max(120, chartWrap.clientWidth - gs(16)) : 120;
-  pill.textContent = fitLegendLabel(state.selectedTheme, labelMaxWidth, chartThemePx(PHONE_THEME_TITLE_SIZE));
-  pill.style.setProperty("--topic-color", themeColor(state.selectedTheme));
-  pill.title = state.selectedTheme;
+  const label = fitLegendLabel(theme, labelMaxWidth, chartThemePx(PHONE_THEME_TITLE_SIZE));
+
+  pill.hidden = false;
+  pill.innerHTML = `<strong>${label}</strong><br/>${count.toLocaleString()} submissions`;
+  pill.title = theme;
 }
 
 function embeddingPointTooltip(point) {
