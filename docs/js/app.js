@@ -305,21 +305,21 @@ function styleThemeAxisLabels(selection) {
 }
 
 const CHART_PALETTE = [
-  "#F34949", // red — Reinforcement learning
-  "#C03030", // dark red — Motor control & planning
-  "#F08519", // orange — Naturalistic encoding/decoding
-  "#F3F349", // yellow — Neural population geometry & dynamics
-  "#85F019", // chartreuse — Decision-making and metacognition
-  "#49F349", // green — Vision
-  "#84D854", // yellow-green — Perception
-  "#19F085", // teal — Language/auditory neuroscience
-  "#49F3F3", // cyan — AI, LLM, & Neural Networks
-  "#1985F0", // blue — Memory
-  "#4949F3", // indigo — Social cognition & theory of mind
-  "#8519F0", // violet — Attention & cognitive control
-  "#F349F3", // magenta — Clinical / computational psychiatry
-  "#F01985", // rose — Methods and theory
-  "#F680B0", // light rose — Everything else
+  "#EF4444", // red — Reinforcement learning
+  "#F97316", // orange — Motor control & planning
+  "#FB923C", // light orange — Naturalistic encoding/decoding
+  "#FACC15", // yellow — Neural population geometry & dynamics
+  "#F59E0B", // amber — Decision-making and metacognition
+  "#16A34A", // forest green — Vision
+  "#84CC16", // lime — Perception
+  "#0284C7", // sky blue — Language/auditory neuroscience
+  "#06B6D4", // cyan — AI, LLM, & Neural Networks
+  "#2563EB", // blue — Memory
+  "#6366F1", // indigo — Social cognition & theory of mind
+  "#9333EA", // purple — Attention & cognitive control
+  "#C026D3", // fuchsia — Clinical / computational psychiatry
+  "#EC4899", // pink — Methods and theory
+  "#64748B", // slate — Everything else
 ];
 
 const KPI_ICONS = {
