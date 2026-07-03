@@ -70,7 +70,7 @@ Names/colors: `docs/js/app.js` (`GOOGLE_FORM_TOPICS`); override names via `data/
 
 ## Theme assignment (build time)
 
-**Anthropic Claude** (`claude-opus-4-6` default) reads title, abstract, keywords, and optional track → one primary + up to four secondaries. Cached under **`year:id`** keys in `data/llm_theme_cache.json` (CCN reuses numeric ids across years).
+**Anthropic Claude** (`claude-opus-4-6` default) reads title, abstract, keywords, and optional track → one primary + up to four secondaries. Labels were auto-assigned with some manual spot-checks. Cached under **`year:id`** keys in `data/llm_theme_cache.json` (CCN reuses numeric ids across years).
 
 Legacy id-only caches migrate automatically on the next build (~538 collision rows re-classified, not a full refresh). Separate from UMAP — themes are not from TF-IDF.
 
