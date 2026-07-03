@@ -13,6 +13,7 @@ CCN archives + 2026 CSV
   submissions.json
         │
         ▼  build.py
+        ├── filter GAC update posters
         ├── Anthropic Claude → primary + secondary assigned_topics
         ├── UMAP (TF-IDF text → 2D coordinates)
         └── abstracts.csv
@@ -68,6 +69,8 @@ Rules encoded in the system prompt:
 
 Results are cached in **`data/llm_theme_cache.json`** (gitignored). Re-runs only API-call submission IDs not in cache.
 
+If classification stops midway, run `python scripts/build.py` again to resume from cache. Use `--classify-refresh` only when you want to discard cached labels and re-classify everything.
+
 ### API key
 
 Never commit keys. Use `.env` locally (`ANTHROPIC_API_KEY`) or a repository secret in CI.
@@ -98,8 +101,9 @@ The map shows semantic neighborhoods — similar language clusters together rega
 ## Dashboard behavior
 
 - Dot **color** = primary topic (`assigned_topics[0]`)
-- Click a dot → scroll to submission, show all assigned topics
+- Click/tap a dot → scroll to submission, show all assigned topics
 - Theme filter matches any value in `assigned_topics`
+- **Phone layout** (<640px): chart axis and theme labels use slightly larger type; UMAP uses nearest-point tap (small hit radius) so dense dots are easier to select accurately
 
 ## Dependencies
 

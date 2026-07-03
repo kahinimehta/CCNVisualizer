@@ -16,8 +16,8 @@ scrape.py  →  submissions.json  →  build.py  →  abstracts.csv  →  dashbo
                                         └─ abstracts.csv export
 ```
 
-1. **`scripts/scrape.py`** — scrape CCN archives → `data/submissions.json`
-2. **`scripts/build.py`** — classify themes with **Anthropic Claude**, compute UMAP, write `abstracts.csv`
+1. **`scripts/scrape.py`** — scrape CCN archives → `data/submissions.json` (excludes `[GAC update]` posters)
+2. **`scripts/build.py`** — classify themes with **Anthropic Claude**, compute UMAP, write `abstracts.csv` (also filters GAC updates)
 3. **Dashboard** — reads `docs/data/abstracts.csv` only (static site in `docs/`)
 
 ## Setup
@@ -70,9 +70,9 @@ python scripts/build.py --classify-refresh       # ignore cache, re-classify
 python scripts/build.py --skip-classify          # UMAP + CSV only (reuse existing topics)
 ```
 
-Classifications are cached in `data/llm_theme_cache.json` (gitignored). Re-runs only API-call new submission IDs.
+Classifications are cached in `data/llm_theme_cache.json` (gitignored). Re-runs only API-call new submission IDs. If a full classify run stops midway, resume with plain `python scripts/build.py` — do **not** use `--classify-refresh` unless you intend to re-pay for every submission.
 
-**Cost note:** ~3k submissions ≈ one API call each. Check [Anthropic pricing](https://www.anthropic.com/pricing) before a full run.
+**Cost note:** ~2,965 submissions ≈ one API call each on a full classify. Check [Anthropic pricing](https://www.anthropic.com/pricing) before a full run.
 
 ## Research themes
 
@@ -94,7 +94,7 @@ Open http://localhost:8080
 scripts/
   scrape.py          # Step 1: scrape → submissions.json
   build.py           # Step 2: Anthropic themes + UMAP + abstracts.csv
-  shared.py          # Text cleanup helpers (scrape + build)
+  shared.py          # Text cleanup, GAC exclusion, embedding text helpers
 data/
   submissions.json      # Scraped records (intermediate)
   embeddings_all.json   # Optional UMAP debug artifact (not used by dashboard)

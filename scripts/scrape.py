@@ -2,7 +2,7 @@
 """Step 1: Scrape CCN archives and write submissions.json.
 
 Pipeline:
-  scrape.py  →  submissions.json
+  scrape.py  →  submissions.json  (excludes [GAC update] posters)
   build.py   →  Anthropic themes + UMAP + abstracts.csv
 
 Dependencies:

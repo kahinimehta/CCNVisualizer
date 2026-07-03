@@ -3,7 +3,7 @@
 
 Pipeline:
   scrape.py  →  submissions.json
-  build.py   →  Anthropic themes + UMAP + abstracts.csv
+  build.py   →  filter GAC updates + Anthropic themes + UMAP + abstracts.csv
   dashboard  →  reads docs/data/abstracts.csv
 
 Dependencies:
