@@ -1398,7 +1398,7 @@ function renderPaperList() {
   countEl.selectAll("*").remove();
 
   const countLabel = state.selectedTheme
-    ? `${submissions.length} papers tagged with “${state.selectedTheme}” (primary or secondary)`
+    ? `${submissions.length} papers with mentions of topics related to “${state.selectedTheme}”`
     : `${submissions.length} matching submissions`;
   countEl.append("span").text(countLabel);
 
