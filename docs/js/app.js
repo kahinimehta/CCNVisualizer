@@ -179,8 +179,8 @@ function readCssNumber(property, fallback) {
 }
 
 const PHONE_GRAPH_SCALE = 0.58;
-const PHONE_AXIS_LABEL_SIZE = 8;
-const PHONE_THEME_TITLE_SIZE = 8;
+const PHONE_AXIS_LABEL_SIZE = 8.5;
+const PHONE_THEME_TITLE_SIZE = 8.5;
 
 function getUiScale() {
   return readCssNumber("--ui-scale", Math.min(3, Math.max(1, 0.6 + viewportWidth() / 500)));
