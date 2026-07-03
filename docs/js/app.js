@@ -937,12 +937,18 @@ function updateEmbeddingTopicPill() {
 
   const theme = state.selectedTheme;
   const chartWrap = document.querySelector(".embedding-chart-wrap");
-  const labelMaxWidth = chartWrap?.clientWidth ? Math.max(120, chartWrap.clientWidth - gs(16)) : 120;
-  const label = fitLegendLabel(theme, labelMaxWidth, chartThemePx(PHONE_THEME_TITLE_SIZE));
 
   pill.hidden = false;
-  pill.innerHTML = `<strong>${label}</strong>`;
+  pill.textContent = "";
+  const label = document.createElement("strong");
+  label.textContent = theme;
+  pill.appendChild(label);
   pill.title = theme;
+
+  if (chartWrap) {
+    const inset = gs(12);
+    pill.style.maxWidth = `${Math.max(96, chartWrap.clientWidth - inset * 2)}px`;
+  }
 }
 
 function embeddingPointTooltip(point) {
