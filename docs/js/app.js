@@ -185,9 +185,7 @@ function renderPhoneThemeBarChart(container, options) {
       if (onBarClick) {
         rect.style("cursor", "pointer").on("click", () => onBarClick(item));
       }
-      if (onBarTooltip) {
-        rect.on("mousemove", (event) => onBarTooltip(event, item)).on("mouseleave", hideTooltip);
-      }
+      bindBarTooltipEvents(rect, onBarTooltip, item);
 
       const label = g
         .append("text")
@@ -243,9 +241,7 @@ function renderPhoneThemeBarChart(container, options) {
     if (onBarClick) {
       rect.style("cursor", "pointer").on("click", () => onBarClick(item));
     }
-    if (onBarTooltip) {
-      rect.on("mousemove", (event) => onBarTooltip(event, item)).on("mouseleave", hideTooltip);
-    }
+    bindBarTooltipEvents(rect, onBarTooltip, item);
 
     g.append("text")
       .attr("class", "bar-value")
@@ -453,6 +449,7 @@ const state = {
 
 let tooltip = null;
 let embeddingTopicPillObserver = null;
+let phoneTooltipDismissBound = false;
 
 function ensureD3() {
   if (typeof d3 === "undefined") {
@@ -463,10 +460,50 @@ function ensureD3() {
   }
 }
 
+function setupPhoneTooltipDismiss() {
+  if (phoneTooltipDismissBound) return;
+  phoneTooltipDismissBound = true;
+  const dismiss = () => {
+    if (isPhoneLayout()) hideTooltip();
+  };
+  window.addEventListener("scroll", dismiss, { passive: true, capture: true });
+  document.addEventListener("touchmove", dismiss, { passive: true, capture: true });
+}
+
+function bindBarTooltipEvents(rect, onBarTooltip, item) {
+  if (!onBarTooltip) return;
+  if (isPhoneLayout()) {
+    rect.on("click", (event) => {
+      event.stopPropagation();
+      onBarTooltip(event, item);
+    });
+    return;
+  }
+  if (isTouchLike()) return;
+  rect.on("mousemove", (event) => onBarTooltip(event, item)).on("mouseleave", hideTooltip);
+}
+
 function showTooltip(html, event) {
   if (!tooltip) return;
   const offset = s(12);
-  tooltip.style("opacity", 1).html(html);
+  const phone = isPhoneLayout();
+
+  if (phone) {
+    tooltip.html(
+      `<button type="button" class="tooltip-close" aria-label="Close tooltip">×</button><div class="tooltip-body">${html}</div>`
+    );
+    tooltip.classed("tooltip-phone", true);
+    tooltip.select(".tooltip-close").on("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      hideTooltip();
+    });
+  } else {
+    tooltip.classed("tooltip-phone", false);
+    tooltip.html(html);
+  }
+
+  tooltip.style("opacity", 1);
 
   const node = tooltip.node();
   const width = node?.offsetWidth || 0;
@@ -481,6 +518,8 @@ function showTooltip(html, event) {
 function hideTooltip() {
   if (!tooltip) return;
   tooltip.style("opacity", 0);
+  tooltip.classed("tooltip-phone", false);
+  tooltip.selectAll(".tooltip-close").on("click", null);
 }
 
 function showError(message) {
@@ -1034,8 +1073,8 @@ function renderThemeBars(counts) {
     .attr("width", (d) => x(d.count))
     .attr("fill", (d) => themeColor(d.text))
     .attr("rx", s(4))
-    .on("mousemove", (event, d) => showTooltip(`<strong>${d.text}</strong><br/>${d.count} submissions`, event))
-    .on("mouseleave", hideTooltip);
+    .on("mousemove", isTouchLike() ? null : (event, d) => showTooltip(`<strong>${d.text}</strong><br/>${d.count} submissions`, event))
+    .on("mouseleave", isTouchLike() ? null : hideTooltip);
 
   drawThemeBarLabels(g, data, y, (d) => d.text);
 
@@ -1102,13 +1141,16 @@ function renderYearChart() {
     .attr("stroke", CCN_COLORS.navy)
     .attr("stroke-width", isPhoneLayout() ? gs(1.5) : s(2))
     .style("cursor", "pointer")
-    .on("click", (_, d) => {
+    .on("click", (event, d) => {
       state.selectedYear = String(d.year);
       d3.select("#year-select").property("value", state.selectedYear);
       renderAll();
+      if (isPhoneLayout()) {
+        showTooltip(`<strong>${d.year}</strong><br/>${d.count} submissions`, event);
+      }
     })
-    .on("mousemove", (event, d) => showTooltip(`<strong>${d.year}</strong><br/>${d.count} submissions`, event))
-    .on("mouseleave", hideTooltip);
+    .on("mousemove", isTouchLike() ? null : (event, d) => showTooltip(`<strong>${d.year}</strong><br/>${d.count} submissions`, event))
+    .on("mouseleave", isTouchLike() ? null : hideTooltip);
 
   g.append("g")
     .attr("transform", `translate(0,${height - margin.bottom})`)
@@ -1213,8 +1255,8 @@ function renderResearchThemeDeltas(submissions) {
     .attr("width", (d) => x(Math.abs(d.delta)))
     .attr("fill", (d) => (d.delta >= 0 ? CCN_COLORS.green : CCN_COLORS.pink))
     .attr("rx", s(4))
-    .on("mousemove", (event, d) => showTooltip(deltaTooltip(d), event))
-    .on("mouseleave", hideTooltip);
+    .on("mousemove", isTouchLike() ? null : (event, d) => showTooltip(deltaTooltip(d), event))
+    .on("mouseleave", isTouchLike() ? null : hideTooltip);
 
   drawThemeBarLabels(g, rows, y, (d) => d.theme);
 
@@ -1584,6 +1626,7 @@ async function init() {
 
   renderAll();
 
+  setupPhoneTooltipDismiss();
   setupEmbeddingTopicPillObserver();
 
   let resizeTimer = null;
