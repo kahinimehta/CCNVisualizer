@@ -357,7 +357,6 @@ const state = {
   selectedYear: "all",
   search: "",
   selectedTheme: "",
-  highlightedSubmissionId: "",
   deltaFromYear: "",
   deltaToYear: "",
 };
@@ -487,7 +486,7 @@ function filteredSubmissions() {
     const yearOk = state.selectedYear === "all" || String(item.year) === state.selectedYear;
     const searchOk = !search || submissionMatchesSearch(item, search);
     const themeOk =
-      !state.selectedTheme || assignedTopics(item).includes(state.selectedTheme);
+      !state.selectedTheme || primaryTheme(item) === state.selectedTheme;
     return yearOk && searchOk && themeOk;
   });
 }
@@ -498,7 +497,7 @@ function submissionsForThemeTrends() {
 
   return submissions.filter((item) => {
     const searchOk = !search || submissionMatchesSearch(item, search);
-    const themeOk = !state.selectedTheme || assignedTopics(item).includes(state.selectedTheme);
+    const themeOk = !state.selectedTheme || primaryTheme(item) === state.selectedTheme;
     return searchOk && themeOk;
   });
 }
@@ -506,9 +505,9 @@ function submissionsForThemeTrends() {
 function primaryThemeCounts(submissions) {
   const counts = new Map();
   submissions.forEach((item) => {
-    [...new Set(assignedTopics(item))].forEach((theme) => {
-      counts.set(theme, (counts.get(theme) || 0) + 1);
-    });
+    const theme = primaryTheme(item);
+    if (!theme) return;
+    counts.set(theme, (counts.get(theme) || 0) + 1);
   });
   return [...counts.entries()]
     .map(([text, count]) => ({ text, count }))
@@ -697,66 +696,23 @@ function syncThemeSelects() {
   d3.select("#embedding-theme-select").property("value", state.selectedTheme);
 }
 
-function ensureSubmissionVisible(submission) {
-  if (!submission) return;
-  const isVisible = () => filteredSubmissions().some((item) => item.id === submission.id);
-
-  if (isVisible()) return;
-
-  state.selectedTheme = "";
+function filterByPrimaryTopic(point) {
+  const topic = embeddingPointPrimaryTheme(point);
+  if (!topic) return;
+  state.selectedTheme = topic;
   syncThemeSelects();
-
-  if (state.selectedYear !== "all" && String(submission.year) !== state.selectedYear) {
-    state.selectedYear = String(submission.year);
-    d3.select("#year-select").property("value", state.selectedYear);
-  }
-
-  const search = state.search.trim().toLowerCase();
-  if (search && !submissionMatchesSearch(submission, search)) {
-    state.search = "";
-    d3.select("#search-input").property("value", "");
-  }
-}
-
-function navigateToSubmission(point) {
-  const submission = submissionForEmbeddingPoint(point);
-  if (!submission) return;
-
-  ensureSubmissionVisible(submission);
-  state.highlightedSubmissionId = submission.id;
   renderAll();
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => scrollToHighlightedSubmission());
-  });
-}
-
-function scrollToHighlightedSubmission() {
-  if (!state.highlightedSubmissionId) return;
-  const el = document.querySelector(
-    `.paper-item[data-id="${CSS.escape(state.highlightedSubmissionId)}"]`
-  );
-  if (el) {
-    el.scrollIntoView({ behavior: "smooth", block: "nearest" });
-  }
-}
-
-function embeddingActionHint() {
-  const action = isTouchLike() ? "Tap" : "Click";
-  return `<em>${action} to view this submission below</em>`;
 }
 
 function embeddingDefaultNote() {
   const count = embeddingDisplayPoints().length;
-  if (state.highlightedSubmissionId) {
-    return "Jumped to highlighted submission below — all assigned topics are shown on the card";
-  }
   if (state.selectedTheme) {
     const clearHint = isTouchLike() ? "choose “All topics” to clear" : "choose “All topics” to clear";
-    return `Showing ${count} submissions with “${state.selectedTheme}” in any assigned topic · dots stay colored by primary topic · ${clearHint}`;
+    return `Showing ${count} submissions with primary topic “${state.selectedTheme}” · ${clearHint}`;
   }
   return isTouchLike()
-    ? `${count} submissions · dots colored by primary topic · tap a dot to view all assigned topics below · use dropdown to filter by any topic`
-    : `${count} submissions · dots colored by primary topic · click a dot to view all assigned topics below · use dropdown to filter by any topic`;
+    ? `${count} submissions · dots colored by primary topic · tap a dot to filter by that topic · use dropdown to filter`
+    : `${count} submissions · dots colored by primary topic · click a dot to filter by that topic · use dropdown to filter`;
 }
 
 function renderEmbeddingNote(note) {
@@ -764,23 +720,11 @@ function renderEmbeddingNote(note) {
 }
 
 function embeddingPointTooltip(point) {
-  const submission = submissionForEmbeddingPoint(point);
-  const topics = submission ? assignedTopics(submission) : [];
-  const primary = topics[0];
-  const topicLines = topics
-    .map((topic, index) => {
-      const label = index === 0 ? `${topic} (primary)` : topic;
-      return `<span style="color:${themeColor(topic)}">■</span> ${label}`;
-    })
-    .join("<br/>");
-  const parts = [
+  return [
     `<strong>${truncateLabel(point.title, s(72))}</strong>`,
     `${point.year}${point.poster_number ? ` · Poster #${point.poster_number}` : ""}`,
-    topicLines ? `<strong>Assigned topics:</strong><br/>${topicLines}` : "",
-    primary ? `<span style="color:${themeColor(primary)}">Dot color = primary topic</span>` : "",
-  ];
-  parts.push(embeddingActionHint());
-  return parts.filter(Boolean).join("<br/>");
+    `<em>${isTouchLike() ? "Tap" : "Click"} to filter by this dot’s primary topic</em>`,
+  ].join("<br/>");
 }
 
 function themeLegendTooltip(themeName) {
@@ -790,7 +734,7 @@ function themeLegendTooltip(themeName) {
   return [
     `<strong>${themeName}</strong>`,
     `${count} visible with this primary topic`,
-    "Dropdown filter matches any assigned topic on a submission",
+    "Filter matches primary topic only",
   ].join("<br/>");
 }
 
@@ -1111,14 +1055,7 @@ function renderResearchThemeDeltas(submissions) {
 
 function pointMatchesThemeFilter(point) {
   if (!state.selectedTheme) return true;
-  const submission = submissionForEmbeddingPoint(point);
-  if (submission) return assignedTopics(submission).includes(state.selectedTheme);
-  return false;
-}
-
-function pointIsHighlighted(point) {
-  const submission = submissionForEmbeddingPoint(point);
-  return Boolean(submission && submission.id === state.highlightedSubmissionId);
+  return embeddingPointPrimaryTheme(point) === state.selectedTheme;
 }
 
 function renderEmbeddingCluster() {
@@ -1176,32 +1113,26 @@ function renderEmbeddingCluster() {
     .attr("fill", "rgba(197,224,243,0.04)")
     .attr("rx", isPhoneLayout() ? gs(8) : s(12));
 
-  const handlePointNavigate = (_, point) => {
-    navigateToSubmission(point);
+  const handlePointFilter = (_, point) => {
+    filterByPrimaryTopic(point);
   };
 
   const pointStyle = (point) => {
-    const highlighted = pointIsHighlighted(point);
     const matches = pointMatchesThemeFilter(point);
     const filtered = Boolean(state.selectedTheme);
     let radius = isPhoneLayout() ? gs(pointRadius.base) : s(pointRadius.base);
-    if (highlighted) radius = isPhoneLayout() ? gs(pointRadius.highlighted) : s(pointRadius.highlighted);
-    else if (matches && filtered) radius = isPhoneLayout() ? gs(pointRadius.selected) : s(pointRadius.selected);
+    if (matches && filtered) radius = isPhoneLayout() ? gs(pointRadius.selected) : s(pointRadius.selected);
     return {
       radius,
       opacity: !filtered || matches ? 0.92 : 0.14,
-      stroke: highlighted ? CCN_COLORS.white : matches && filtered ? CCN_COLORS.pink : CCN_COLORS.navy,
-      strokeWidth: highlighted
+      stroke: matches && filtered ? CCN_COLORS.pink : CCN_COLORS.navy,
+      strokeWidth: matches && filtered
         ? isPhoneLayout()
-          ? gs(2.5)
-          : s(2.5)
-        : matches && filtered
-          ? isPhoneLayout()
-            ? gs(1.75)
-            : s(2)
-          : isPhoneLayout()
-            ? gs(1)
-            : s(1.25),
+          ? gs(1.75)
+          : s(2)
+        : isPhoneLayout()
+          ? gs(1)
+          : s(1.25),
     };
   };
 
@@ -1254,7 +1185,7 @@ function renderEmbeddingCluster() {
           });
           if (nearest) {
             event.stopPropagation();
-            handlePointNavigate(null, nearest);
+            handlePointFilter(null, nearest);
           }
         });
     } else {
@@ -1270,14 +1201,14 @@ function renderEmbeddingCluster() {
         .style("cursor", "pointer")
         .on("click", (event, d) => {
           event.stopPropagation();
-          handlePointNavigate(null, d);
+          handlePointFilter(null, d);
         });
     }
   } else {
     pointGroups
       .on("mousemove", (event, d) => showTooltip(embeddingPointTooltip(d), event))
       .on("mouseleave", hideTooltip)
-      .on("click", handlePointNavigate);
+      .on("click", handlePointFilter);
   }
 
   const legend = svg.append("g");
@@ -1376,7 +1307,7 @@ function renderPaperList() {
   countEl.selectAll("*").remove();
 
   const countLabel = state.selectedTheme
-    ? `${submissions.length} submissions with “${state.selectedTheme}” in any assigned topic`
+    ? `${submissions.length} submissions with primary topic “${state.selectedTheme}”`
     : `${submissions.length} matching submissions`;
   countEl.append("span").text(countLabel);
 
@@ -1384,7 +1315,7 @@ function renderPaperList() {
     .selectAll(".paper-item")
     .data(submissions)
     .join("div")
-    .attr("class", (d) => `paper-item${d.id === state.highlightedSubmissionId ? " highlighted" : ""}`)
+    .attr("class", "paper-item")
     .attr("data-id", (d) => d.id);
   items.selectAll("*").remove();
 
@@ -1402,20 +1333,6 @@ function renderPaperList() {
     .text((d) =>
       `${d.year}${d.poster_number ? ` · Poster ${d.poster_number}` : ""}${d.authors ? ` · ${d.authors}` : ""}`
     );
-
-  items.each(function renderTags(d) {
-    const tagData = assignedTopics(d);
-    const tags = d3.select(this).append("div").attr("class", "keyword-tags");
-    tags
-      .selectAll(".keyword-tag")
-      .data(tagData)
-      .join("span")
-      .attr("class", (theme, index) =>
-        `keyword-tag topic-tag${index === 0 ? " topic-tag-primary" : ""}${theme === state.selectedTheme ? " active" : ""}`
-      )
-      .style("--topic-color", (theme) => themeColor(theme))
-      .text((theme, index) => (index === 0 ? `${theme} (primary)` : theme));
-  });
 }
 
 function renderAll() {
@@ -1456,26 +1373,22 @@ async function init() {
 
   d3.select("#year-select").on("change", (event) => {
     state.selectedYear = event.target.value;
-    state.highlightedSubmissionId = "";
     renderAll();
   });
 
   d3.select("#search-input").on("input", (event) => {
     state.search = event.target.value;
-    state.highlightedSubmissionId = "";
     renderAll();
   });
 
   d3.select("#theme-select").on("change", (event) => {
     state.selectedTheme = event.target.value;
-    state.highlightedSubmissionId = "";
     syncThemeSelects();
     renderAll();
   });
 
   d3.select("#embedding-theme-select").on("change", (event) => {
     state.selectedTheme = event.target.value;
-    state.highlightedSubmissionId = "";
     syncThemeSelects();
     renderAll();
   });
