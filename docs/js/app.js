@@ -97,7 +97,6 @@ function renderPhoneThemeBarChart(container, options) {
     onBarTooltip,
     valueFormat = (v, item) => String(v),
     labelFill = CCN_COLORS.muted,
-    valueAtPlotEnd = false,
   } = options;
 
   container.selectAll("*").remove();
@@ -163,10 +162,10 @@ function renderPhoneThemeBarChart(container, options) {
 
     g.append("text")
       .attr("class", "bar-value")
-      .attr("x", valueAtPlotEnd ? innerW : barWidth)
-      .attr("y", barY + barH + valueGap)
-      .attr("dominant-baseline", "hanging")
+      .attr("x", barWidth)
+      .attr("y", barY + barH)
       .attr("text-anchor", "end")
+      .attr("dominant-baseline", "hanging")
       .attr("fill", CCN_COLORS.muted)
       .style("font-size", chartThemeFs(8))
       .text(() => valueFormat(val, item));
@@ -1096,7 +1095,6 @@ function renderResearchThemeDeltas(submissions) {
       getBarFill: (d) => (d.delta >= 0 ? CCN_COLORS.green : CCN_COLORS.pink),
       onBarTooltip: (event, d) => showTooltip(deltaTooltip(d), event),
       valueFormat: (_, d) => formatDeltaPct(d.delta),
-      valueAtPlotEnd: true,
     });
     return;
   }
