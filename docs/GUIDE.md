@@ -1,6 +1,6 @@
 # CCN Visualizer — guide
 
-Interactive dashboard for CCN poster and paper archives (2017–2026). The live site reads **one precomputed file**: `data/abstracts.csv`.
+Interactive dashboard for CCN poster and paper archives (2017–2026). The live site loads **one file**: `docs/data/abstracts.csv` (mirrored at `data/abstracts.csv` after each build).
 
 ## Pipeline
 

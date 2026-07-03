@@ -45,7 +45,7 @@ Theme labels are assigned at build time via the [Anthropic API](https://www.anth
 
 ### CCN 2026 Activity Preferences (Google Form)
 - **Source:** https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform
-- **Usage:** Canonical list of 15 primary research theme names (`data/google_topics.json` at build time; hardcoded in `docs/js/app.js` for UI colors)
+- **Usage:** Canonical list of 14 research theme names (`data/google_topics.json`; UI colors in `docs/js/app.js`)
 - **Note:** Only the published form question 1 topic options are used — no response or analytics data.
 
 ## Trademarks
