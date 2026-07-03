@@ -489,9 +489,9 @@ def apply_assignments(
                 "(run without --classify-limit to classify all)."
             )
         theme_method = (
-            f"Anthropic {stats['model']}; primary + secondary from title/abstract/keywords; "
-            f"cache data/llm_theme_cache.json; classified_now={stats['classified_now']}, "
-            f"errors={stats['errors']}"
+            f"Anthropic {stats['model']}; dominant + secondary from title/abstract/keywords/track; "
+            f"auto-assigned with manual spot-checks; cache data/llm_theme_cache.json; "
+            f"classified_now={stats['classified_now']}, errors={stats['errors']}"
         )
 
     for submission in submissions:

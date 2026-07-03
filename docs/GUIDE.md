@@ -14,7 +14,7 @@ ccneuro.org archives
         │
         ▼  build.py
         ├─ drop [GAC update] posters
-        ├─ Anthropic Claude → assigned_topics (primary + secondaries)
+        ├─ Anthropic Claude → assigned_topics (dominant + secondaries)
         ├─ TF-IDF + UMAP → umap_x / umap_y (layout only)
         └─ abstracts.csv
         │
@@ -55,9 +55,9 @@ If classification stops midway, run `build.py` again to resume from `data/llm_th
 |--------|----------------|
 | `year`, `title`, `author`, `authors` | Identity, list, links |
 | `keywords` | Search |
-| `assigned_topics` | Theme filter & charts (pipe-separated, primary first); **not shown as tags in the list UI** |
+| `assigned_topics` | Theme filter & charts (pipe-separated; first topic = dominant on the map); **not shown as tags in the list UI** |
 | `abstract` | Search |
-| `umap_x`, `umap_y` | Embedding map |
+| `umap_x`, `umap_y` | Embedding map layout |
 | `source_url`, `poster_number` | Links |
 
 Build-only (not loaded in browser): `data/submissions.json`, `data/embeddings_all.json`, `data/google_topics.json`, `data/llm_theme_cache.json` (gitignored).
@@ -70,13 +70,25 @@ Names/colors: `docs/js/app.js` (`GOOGLE_FORM_TOPICS`); override names via `data/
 
 ## Theme assignment (build time)
 
-**Anthropic Claude** (`claude-opus-4-6` default) reads title, abstract, keywords, and optional track → one primary + up to four secondaries. Labels were auto-assigned with some manual spot-checks. Cached under **`year:id`** keys in `data/llm_theme_cache.json` (CCN reuses numeric ids across years).
+**Anthropic Claude** (`claude-opus-4-6` default) classifies each submission offline during `build.py` — not at dashboard runtime.
 
-Legacy id-only caches migrate automatically on the next build (~538 collision rows re-classified, not a full refresh). Separate from UMAP — themes are not from TF-IDF.
+**Sent per API call** (one submission at a time):
+
+- Allowed theme list (14 categories)
+- Year, title, abstract, author keywords
+- Conference track/area when present (`topic_area` / `track`)
+
+**Not sent:** authors, poster URL, UMAP coordinates, or the CSV as a file.
+
+**Returns:** one dominant theme (`primary_theme` in cache) plus up to four secondaries → stored as `assigned_topics` (dominant first). Labels were auto-assigned with some manual spot-checks. Cached under **`year:id`** keys in `data/llm_theme_cache.json` (CCN reuses numeric ids across years).
+
+Legacy id-only caches migrate automatically on the next build (~538 collision rows re-classified, not a full refresh). Theme assignment is separate from UMAP layout — themes are not derived from TF-IDF.
 
 ## UMAP map (build time)
 
-Weighted text (title ×2, abstract ×3, keywords ×1) → TF-IDF → UMAP (`n_neighbors=15`, `min_dist=0.12`, cosine distance) → `umap_x`, `umap_y`. Layout only; dot color in the UI is the primary topic. Topics are auto-assigned and abstracts usually match several; the map shows how those topics cluster in embedding space.
+Weighted text (title ×2, abstract ×3, keywords ×1) → TF-IDF → UMAP (`n_neighbors=15`, `min_dist=0.12`, cosine distance) → `umap_x`, `umap_y`.
+
+Topics are auto-assigned and abstracts usually match several; the map shows how those topics cluster in embedding space. Dot **color** and **highlight** in the UI use the **dominant** topic only (`assigned_topics[0]`). UMAP coordinates are layout only.
 
 ## Dashboard behavior
 
@@ -84,10 +96,10 @@ Weighted text (title ×2, abstract ×3, keywords ×1) → TF-IDF → UMAP (`n_ne
 
 | Surface | Matches |
 |---------|---------|
-| **Matching submissions list** | Theme anywhere — primary **or** secondary |
-| **UMAP map** | Dot **color** and **highlight** by **primary topic only** |
+| **Matching submissions list** | Theme anywhere — dominant **or** secondary |
+| **UMAP map** | Dot color and highlight by **dominant topic only** |
 
-Click/tap a UMAP dot sets the shared theme filter to that dot’s **primary** topic. The list then shows all papers tagged with that theme anywhere; the map brightens dots whose primary matches. Topic labels are not displayed on list cards (only in CSV/search/charts).
+Click/tap a UMAP dot sets the shared theme filter to that dot’s dominant topic. The list then shows papers with mentions of topics related to the selection; the map brightens dots whose dominant topic matches. Topic tags are not shown on list cards.
 
 Other filters: year, full-text search (title, author, abstract, keywords, assigned topics).
 
@@ -98,8 +110,14 @@ Other filters: year, full-text search (title, author, abstract, keywords, assign
 | KPIs | counts, years, themes |
 | Submissions over time | `year` |
 | Theme ranking / YoY change | `assigned_topics` (any occurrence); default comparison **2017 → 2026** |
-| Embedding map | `umap_x`, `umap_y`, primary color from `assigned_topics[0]` |
+| Embedding map | `umap_x`, `umap_y`; dominant color from `assigned_topics[0]` |
 | Matching submissions | `title`, `year`, `authors`, `source_url` |
+
+### Phone layout (< 640px)
+
+- Larger bar-chart labels; YoY shows `topic: ±x%` above each bar (colored bar; muted label text, green/pink percentage).
+- Chart tooltips (year counts, bar details) open on tap with an **×** dismiss; they hide on scroll.
+- UMAP tap filters by dominant topic only (no topic popup).
 
 ## Local preview
 

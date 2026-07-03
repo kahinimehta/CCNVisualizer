@@ -16,7 +16,7 @@ python -m http.server 8080 --directory docs
 
 ## Docs
 
-**[docs/GUIDE.md](docs/GUIDE.md)** — pipeline, data, theme assignment, dashboard filters, CI workflows.
+**[docs/GUIDE.md](docs/GUIDE.md)** — pipeline, Anthropic theme assignment, UMAP, dashboard filters (list vs map), phone layout, CI workflows.
 
 **[THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md)** · [licenses on site](https://ccn-visualizer.vercel.app/licenses.html)
 
