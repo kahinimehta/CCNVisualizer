@@ -444,7 +444,7 @@ function buildStateFromCsv(rows) {
 }
 
 function embeddingDisplayPoints() {
-  return filteredSubmissions()
+  return submissionsForEmbedding()
     .filter((item) => item.umap_x != null && item.umap_y != null)
     .map((item) => ({
       id: item.id,
@@ -478,6 +478,10 @@ function submissionMatchesSearch(item, search) {
   return haystack.includes(search);
 }
 
+function submissionMatchesTheme(submission, theme) {
+  return !theme || assignedTopics(submission).includes(theme);
+}
+
 function filteredSubmissions() {
   const { submissions } = state.data;
   const search = state.search.trim().toLowerCase();
@@ -485,9 +489,19 @@ function filteredSubmissions() {
   return submissions.filter((item) => {
     const yearOk = state.selectedYear === "all" || String(item.year) === state.selectedYear;
     const searchOk = !search || submissionMatchesSearch(item, search);
-    const themeOk =
-      !state.selectedTheme || primaryTheme(item) === state.selectedTheme;
+    const themeOk = submissionMatchesTheme(item, state.selectedTheme);
     return yearOk && searchOk && themeOk;
+  });
+}
+
+function submissionsForEmbedding() {
+  const { submissions } = state.data;
+  const search = state.search.trim().toLowerCase();
+
+  return submissions.filter((item) => {
+    const yearOk = state.selectedYear === "all" || String(item.year) === state.selectedYear;
+    const searchOk = !search || submissionMatchesSearch(item, search);
+    return yearOk && searchOk;
   });
 }
 
@@ -497,7 +511,7 @@ function submissionsForThemeTrends() {
 
   return submissions.filter((item) => {
     const searchOk = !search || submissionMatchesSearch(item, search);
-    const themeOk = !state.selectedTheme || primaryTheme(item) === state.selectedTheme;
+    const themeOk = submissionMatchesTheme(item, state.selectedTheme);
     return searchOk && themeOk;
   });
 }
@@ -505,9 +519,9 @@ function submissionsForThemeTrends() {
 function primaryThemeCounts(submissions) {
   const counts = new Map();
   submissions.forEach((item) => {
-    const theme = primaryTheme(item);
-    if (!theme) return;
-    counts.set(theme, (counts.get(theme) || 0) + 1);
+    [...new Set(assignedTopics(item))].forEach((theme) => {
+      counts.set(theme, (counts.get(theme) || 0) + 1);
+    });
   });
   return [...counts.entries()]
     .map(([text, count]) => ({ text, count }))
@@ -708,11 +722,11 @@ function embeddingDefaultNote() {
   const count = embeddingDisplayPoints().length;
   if (state.selectedTheme) {
     const clearHint = isTouchLike() ? "choose “All topics” to clear" : "choose “All topics” to clear";
-    return `Showing ${count} submissions with primary topic “${state.selectedTheme}” · ${clearHint}`;
+    return `Map highlights dots whose primary topic is “${state.selectedTheme}” · list below includes any submission tagged with this topic · ${clearHint}`;
   }
   return isTouchLike()
-    ? `${count} submissions · dots colored by primary topic · tap a dot to filter by that topic · use dropdown to filter`
-    : `${count} submissions · dots colored by primary topic · click a dot to filter by that topic · use dropdown to filter`;
+    ? `${count} submissions · dots colored by primary topic · tap a dot to filter by its primary topic · list matches any assigned topic`
+    : `${count} submissions · dots colored by primary topic · click a dot to filter by its primary topic · list matches any assigned topic`;
 }
 
 function renderEmbeddingNote(note) {
@@ -734,7 +748,7 @@ function themeLegendTooltip(themeName) {
   return [
     `<strong>${themeName}</strong>`,
     `${count} visible with this primary topic`,
-    "Filter matches primary topic only",
+    "Filter matches any assigned topic on a submission · map highlights by primary topic only",
   ].join("<br/>");
 }
 
@@ -1307,7 +1321,7 @@ function renderPaperList() {
   countEl.selectAll("*").remove();
 
   const countLabel = state.selectedTheme
-    ? `${submissions.length} submissions with primary topic “${state.selectedTheme}”`
+    ? `${submissions.length} submissions tagged with “${state.selectedTheme}”`
     : `${submissions.length} matching submissions`;
   countEl.append("span").text(countLabel);
 
