@@ -103,7 +103,7 @@ function renderPhoneThemeBarChart(container, options) {
   const width = chartContainerWidth(container);
   const margin = { top: gs(5), right: gs(30), bottom: gs(5), left: gs(5) };
   const innerW = width - margin.left - margin.right;
-  const labelFont = chartThemePx(7);
+  const labelFont = chartThemePx(PHONE_THEME_TITLE_SIZE);
   const valueFont = chartThemePx(8);
   const barH = gs(8);
   const rowGap = gs(3);
@@ -179,6 +179,8 @@ function readCssNumber(property, fallback) {
 }
 
 const PHONE_GRAPH_SCALE = 0.58;
+const PHONE_AXIS_LABEL_SIZE = 8;
+const PHONE_THEME_TITLE_SIZE = 8;
 
 function getUiScale() {
   return readCssNumber("--ui-scale", Math.min(3, Math.max(1, 0.6 + viewportWidth() / 500)));
@@ -999,7 +1001,7 @@ function renderYearChart() {
       sel
         .selectAll("text")
         .attr("fill", CCN_COLORS.muted)
-        .style("font-size", isPhoneLayout() ? chartThemeFs(7) : themeFs(10))
+        .style("font-size", isPhoneLayout() ? chartThemeFs(PHONE_AXIS_LABEL_SIZE) : themeFs(10))
     )
     .call((sel) => {
       if (isPhoneLayout()) {
@@ -1020,7 +1022,7 @@ function renderYearChart() {
       sel
         .selectAll("text")
         .attr("fill", CCN_COLORS.muted)
-        .style("font-size", isPhoneLayout() ? chartThemeFs(7) : themeFs(10))
+        .style("font-size", isPhoneLayout() ? chartThemeFs(PHONE_AXIS_LABEL_SIZE) : themeFs(10))
     )
     .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
 }
@@ -1134,7 +1136,7 @@ function renderEmbeddingCluster() {
 
   const width = chartContainerWidth(container);
   const mobileLegend = useStackedChartLegend(width) || isPhoneLayout();
-  const legendFont = isPhoneLayout() ? chartThemePx(7) : themeLabelPx(10);
+  const legendFont = isPhoneLayout() ? chartThemePx(PHONE_THEME_TITLE_SIZE) : themeLabelPx(10);
   const legendItemHeight = isPhoneLayout() ? legendFont * 2.2 : legendFont * 1.5;
   const legendThemes = themeLegendThemes();
   const legendCols = isPhoneLayout() ? 1 : mobileLegend ? (width < 520 ? 1 : 2) : 1;
@@ -1290,7 +1292,7 @@ function renderEmbeddingCluster() {
       .attr("x", 0)
       .attr("y", legendFont * 0.85)
       .attr("fill", CCN_COLORS.muted)
-      .style("font-size", isPhoneLayout() ? chartThemeFs(7) : themeFs(10))
+      .style("font-size", isPhoneLayout() ? chartThemeFs(PHONE_THEME_TITLE_SIZE) : themeFs(10))
       .style("font-weight", 600)
       .text("Primary topic (dot color)");
     legend
@@ -1321,7 +1323,7 @@ function renderEmbeddingCluster() {
           .attr("x", legendTextX)
           .attr("y", legendFont * 0.85)
           .attr("fill", CCN_COLORS.muted)
-          .style("font-size", isPhoneLayout() ? chartThemeFs(7) : themeFs(10))
+          .style("font-size", isPhoneLayout() ? chartThemeFs(PHONE_THEME_TITLE_SIZE) : themeFs(10))
           .text((d) => fitLegendLabel(d, colWidth - legendTextX, legendFont));
       });
   } else {
