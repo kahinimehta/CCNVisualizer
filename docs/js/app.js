@@ -896,15 +896,12 @@ function syncThemeSelects() {
   d3.select("#embedding-theme-select").property("value", state.selectedTheme);
 }
 
-function filterByPrimaryTopic(point, event) {
+function filterByPrimaryTopic(point) {
   const topic = embeddingPointPrimaryTheme(point);
   if (!topic) return;
   state.selectedTheme = topic;
   syncThemeSelects();
   renderAll();
-  if (isPhoneLayout() && event) {
-    showTooltip(`<strong>${topic}</strong>`, event);
-  }
 }
 
 function embeddingDefaultNote() {
@@ -1319,8 +1316,8 @@ function renderEmbeddingCluster() {
     .attr("fill", "rgba(197,224,243,0.04)")
     .attr("rx", isPhoneLayout() ? gs(8) : s(12));
 
-  const handlePointFilter = (event, point) => {
-    filterByPrimaryTopic(point, event);
+  const handlePointFilter = (_, point) => {
+    filterByPrimaryTopic(point);
   };
 
   const pointStyle = (point) => {
@@ -1391,7 +1388,7 @@ function renderEmbeddingCluster() {
           });
           if (nearest) {
             event.stopPropagation();
-            handlePointFilter(event, nearest);
+            handlePointFilter(null, nearest);
           }
         });
     } else {
@@ -1407,7 +1404,7 @@ function renderEmbeddingCluster() {
         .style("cursor", "pointer")
         .on("click", (event, d) => {
           event.stopPropagation();
-          handlePointFilter(event, d);
+          handlePointFilter(null, d);
         });
     }
   } else {
