@@ -87,6 +87,11 @@ function wrapThemeLabel(text, maxWidth, fontPx) {
   return lines.slice(0, 3);
 }
 
+function phoneBarValueClipsLeft(barWidth, valueText, valueFont) {
+  const textWidth = measureTextWidth(valueText, valueFont);
+  return barWidth - textWidth < gs(5);
+}
+
 function renderPhoneThemeBarChart(container, options) {
   const {
     data,
@@ -107,17 +112,50 @@ function renderPhoneThemeBarChart(container, options) {
   const valueFont = chartThemePx(PHONE_BAR_VALUE_SIZE);
   const barH = gs(8);
   const rowGap = gs(3);
+  const valueBelowGap = gs(5);
   const valueGap = gs(3);
   const blockGap = gs(8);
+  const sideGap = gs(5);
   const valueH = valueFont * 1.15;
   const maxVal = d3.max(data, getValue) || 1;
   const x = d3.scaleLinear().domain([0, maxVal]).range([0, innerW]);
 
   const rows = data.map((item) => {
+    const val = getValue(item);
+    const barWidth = Math.max(x(val), val > 0 ? gs(2) : 0);
+    const valueText = valueFormat(val, item);
+    const sideLayout = phoneBarValueClipsLeft(barWidth, valueText, valueFont);
+
+    if (sideLayout) {
+      const labelMaxW = Math.max(gs(48), innerW - barWidth - sideGap);
+      const lines = wrapThemeLabel(getLabel(item), labelMaxW, labelFont);
+      const labelH = lines.length * labelFont * 1.15;
+      const stackH = labelH + valueGap + valueH;
+      return {
+        item,
+        val,
+        barWidth,
+        valueText,
+        sideLayout: true,
+        lines,
+        labelX: barWidth + sideGap,
+        rowHeight: Math.max(barH, stackH) + blockGap,
+      };
+    }
+
     const lines = wrapThemeLabel(getLabel(item), innerW, labelFont);
     const labelH = lines.length * labelFont * 1.15;
-    return { item, lines, rowHeight: labelH + rowGap + barH + valueGap + valueH + blockGap };
+    return {
+      item,
+      val,
+      barWidth,
+      valueText,
+      sideLayout: false,
+      lines,
+      rowHeight: labelH + rowGap + barH + valueBelowGap + valueH + blockGap,
+    };
   });
+
   const height = margin.top + margin.bottom + d3.sum(rows, (r) => r.rowHeight);
   const svg = container
     .append("svg")
@@ -127,7 +165,58 @@ function renderPhoneThemeBarChart(container, options) {
   const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
   let yCursor = 0;
-  rows.forEach(({ item, lines, rowHeight }) => {
+  rows.forEach((row) => {
+    const { item, val, barWidth, valueText, sideLayout, lines, rowHeight } = row;
+
+    if (sideLayout) {
+      const barY = yCursor + Math.max(0, (rowHeight - blockGap - barH) / 2);
+      const labelX = row.labelX;
+      const labelY = barY + labelFont;
+      const labelH = lines.length * labelFont * 1.15;
+
+      const rect = g
+        .append("rect")
+        .attr("x", 0)
+        .attr("y", barY)
+        .attr("height", barH)
+        .attr("width", barWidth)
+        .attr("fill", getBarFill(item))
+        .attr("rx", gs(3));
+      if (onBarClick) {
+        rect.style("cursor", "pointer").on("click", () => onBarClick(item));
+      }
+      if (onBarTooltip) {
+        rect.on("mousemove", (event) => onBarTooltip(event, item)).on("mouseleave", hideTooltip);
+      }
+
+      const label = g
+        .append("text")
+        .attr("x", labelX)
+        .attr("y", labelY)
+        .attr("fill", typeof labelFill === "function" ? labelFill(item) : labelFill)
+        .style("font-size", `${labelFont}px`);
+      lines.forEach((ln, li) => {
+        label
+          .append("tspan")
+          .attr("x", labelX)
+          .attr("dy", li === 0 ? 0 : labelFont * 1.15)
+          .text(ln);
+      });
+
+      g.append("text")
+        .attr("class", "bar-value")
+        .attr("x", labelX)
+        .attr("y", labelY + labelH + valueGap)
+        .attr("text-anchor", "start")
+        .attr("dominant-baseline", "hanging")
+        .attr("fill", CCN_COLORS.muted)
+        .style("font-size", chartThemeFs(PHONE_BAR_VALUE_SIZE))
+        .text(valueText);
+
+      yCursor += rowHeight;
+      return;
+    }
+
     const text = g
       .append("text")
       .attr("x", 0)
@@ -143,8 +232,6 @@ function renderPhoneThemeBarChart(container, options) {
     });
 
     const barY = yCursor + lines.length * labelFont * 1.15 + rowGap;
-    const val = getValue(item);
-    const barWidth = Math.max(x(val), val > 0 ? gs(2) : 0);
     const rect = g
       .append("rect")
       .attr("x", 0)
@@ -163,12 +250,12 @@ function renderPhoneThemeBarChart(container, options) {
     g.append("text")
       .attr("class", "bar-value")
       .attr("x", barWidth)
-      .attr("y", barY + barH)
+      .attr("y", barY + barH + valueBelowGap)
       .attr("text-anchor", "end")
       .attr("dominant-baseline", "hanging")
       .attr("fill", CCN_COLORS.muted)
       .style("font-size", chartThemeFs(PHONE_BAR_VALUE_SIZE))
-      .text(() => valueFormat(val, item));
+      .text(valueText);
 
     yCursor += rowHeight;
   });
