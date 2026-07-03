@@ -727,12 +727,11 @@ function filterByPrimaryTopic(point) {
 function embeddingDefaultNote() {
   const count = embeddingDisplayPoints().length;
   if (state.selectedTheme) {
-    const clearHint = isTouchLike() ? "choose “All topics” to clear" : "choose “All topics” to clear";
-    return `Map: primary topic only · List below: “${state.selectedTheme}” anywhere (primary or secondary) · ${clearHint}`;
+    return "";
   }
   return isTouchLike()
-    ? `${count} submissions on map (colored by primary topic) · tap a dot to filter · list matches theme anywhere, not primary-only`
-    : `${count} submissions on map (colored by primary topic) · click a dot to filter · list matches theme anywhere, not primary-only`;
+    ? `${count} submissions · colored by primary topic · tap a dot to filter`
+    : `${count} submissions · colored by primary topic · click a dot to filter`;
 }
 
 function renderEmbeddingNote(note) {
@@ -1327,7 +1326,7 @@ function renderPaperList() {
   countEl.selectAll("*").remove();
 
   const countLabel = state.selectedTheme
-    ? `${submissions.length} papers tagged with “${state.selectedTheme}” (primary or secondary — not primary-only)`
+    ? `${submissions.length} papers tagged with “${state.selectedTheme}” (primary or secondary)`
     : `${submissions.length} matching submissions`;
   countEl.append("span").text(countLabel);
 
