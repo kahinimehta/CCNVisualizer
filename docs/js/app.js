@@ -104,7 +104,7 @@ function renderPhoneThemeBarChart(container, options) {
   const margin = { top: gs(5), right: gs(5), bottom: gs(5), left: gs(5) };
   const innerW = width - margin.left - margin.right;
   const labelFont = chartThemePx(PHONE_THEME_TITLE_SIZE);
-  const valueFont = chartThemePx(8);
+  const valueFont = chartThemePx(PHONE_BAR_VALUE_SIZE);
   const barH = gs(8);
   const rowGap = gs(3);
   const valueGap = gs(3);
@@ -167,7 +167,7 @@ function renderPhoneThemeBarChart(container, options) {
       .attr("text-anchor", "end")
       .attr("dominant-baseline", "hanging")
       .attr("fill", CCN_COLORS.muted)
-      .style("font-size", chartThemeFs(8))
+      .style("font-size", chartThemeFs(PHONE_BAR_VALUE_SIZE))
       .text(() => valueFormat(val, item));
 
     yCursor += rowHeight;
@@ -182,7 +182,8 @@ function readCssNumber(property, fallback) {
 
 const PHONE_GRAPH_SCALE = 0.58;
 const PHONE_AXIS_LABEL_SIZE = 8.5;
-const PHONE_THEME_TITLE_SIZE = 8.5;
+const PHONE_THEME_TITLE_SIZE = 10.5;
+const PHONE_BAR_VALUE_SIZE = 10.5;
 const PHONE_LEGEND_HEADING_SIZE = 10.5;
 
 function getUiScale() {
