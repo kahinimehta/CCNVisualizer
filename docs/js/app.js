@@ -512,7 +512,7 @@ function showTooltip(html, event) {
 
   if (phone) {
     tooltip.html(
-      `<button type="button" class="tooltip-close" aria-label="Close tooltip">×</button><div class="tooltip-body">${html}</div>`
+      `<div class="tooltip-phone-inner"><div class="tooltip-body">${html}</div><button type="button" class="tooltip-close" aria-label="Close tooltip">×</button></div>`
     );
     tooltip.classed("tooltip-phone", true);
     tooltip.select(".tooltip-close").on("click", (e) => {
