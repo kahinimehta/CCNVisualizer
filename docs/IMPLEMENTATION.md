@@ -27,7 +27,11 @@ CCN archives + 2026 CSV
 |--------|------|
 | `scrape.py` | Scrape CCN archives, merge 2026 CSV, refresh keywords → `submissions.json` |
 | `build.py` | Anthropic theme classification, UMAP, CSV export |
-| `shared.py` | Shared keyword cleanup, mojibake repair, embedding text (used by scrape + build) |
+| `shared.py` | Shared keyword cleanup, mojibake repair, embedding text, GAC exclusion |
+
+### Excluded content
+
+**GAC update posters** (Generative Adversarial Collaboration follow-ups, e.g. 2024 titles starting with `[GAC update]`) are dropped in `scrape.py` and again in `build.py`. They are not counted in charts or the submission list.
 
 ### scrape.py flags
 

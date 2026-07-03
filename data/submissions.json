@@ -12,15 +12,15 @@
       2025,
       2026
     ],
-    "total_count": 2967,
+    "total_count": 2965,
     "csv_2026": {
       "path": "data/ccn-2026-pending-posters.csv",
       "merged_at": "2026-07-01T20:45:35.772603+00:00",
       "count": 617,
       "note": "Provisional — replace CSV and re-run merge when updated data is available."
     },
-    "research_themes_assigned_at": "2026-07-02T23:04:33.171601+00:00",
-    "research_theme_method": "Anthropic claude-opus-4-6; primary + secondary from title/abstract/keywords; cache data/llm_theme_cache.json; classified_now=2965, errors=2",
+    "research_themes_assigned_at": "2026-07-03T00:23:06.328600+00:00",
+    "research_theme_method": "Skipped classification; reused assigned_topics from submissions.json",
     "keyword_source": "author_keywords prefer poster HTML, proceedings/authored PDFs (2017-2025), or 2026 CSV; extracted_keywords only when no author keywords are available; citation fragments and metadata area labels stripped before export",
     "keyword_years": [
       2017,
@@ -31,7 +31,8 @@
       2024,
       2025
     ],
-    "google_topics_source": "CCN 2026 Activity Preferences — Google Form question 1"
+    "google_topics_source": "CCN 2026 Activity Preferences — Google Form question 1",
+    "gac_updates_excluded": 2
   },
   "submissions": [
     {
@@ -87406,35 +87407,6 @@
       ]
     },
     {
-      "id": "607",
-      "year": 2024,
-      "title": "[GAC update] Use and Usability: concepts of representations in philosophy, neuroscience, cognitive science, and computer science",
-      "authors": "Richard D. Lange 1 , Ben Baker 2 , Andrew Richmond 3 , Nikolaus Kriegeskorte 4 , Rosa Cao 5 , Xaq Pitkow 6 , Odelia Schwartz 7 , Alessandro Achille 8 ; 1 Dept. of Computer Science, Rochester Institute of Technology, 2 Dept. of Philosophy, Colby College, 3 Rotman Institute of Philosophy, Western University, 4 Zuckerman Institute, Columbia University, 5 Dept. of Philosophy, Stanford University, 6 Neuroscience Institute, Carnegie Mellon University, 7 Dept. of Computer Science, University of Miami, 8 AWS AI Labs",
-      "abstract": "Internal representations play a central role in the study of both biological and artificial intelligence, as well as the philosophy of mind. Across neuroscience, cognitive science, computer science, and philosophy, a recurring theme is that representations not only carry information but should be “useful” for or “usable” by an agent in some sense. Here, we review how the “usefulness” of representations has been conceptualized and how it figures into different conceptions of representation. We identify and explore three aspects of use and usability: representations may or may not have content that is useful, they may or may not be in a format that is usable, and they may or may not be used downstream. We organize existing perspectives on how to think about neural representations into three “levels,” each adding assumptions and restrictions on the concept of representation. Our account is meant to give readers an appreciation for the diversity of notions of “neural representations,” help them navigate the vast and multi-disciplinary literature on the topic, and help them clarify the appropriate notion of representation for their own investigations. This paper is the result of a Generative Adversarial Collaboration that began at the CCN conference in 2021, originally titled “What makes representations ‘useful’?”. Acknowledgements: Nicholas Shea",
-      "author_keywords": [
-        "gac"
-      ],
-      "extracted_keywords": [],
-      "keywords": [
-        "gac"
-      ],
-      "topic_area": "",
-      "track": "",
-      "poster_number": "A159",
-      "source_url": "https://2024.ccneuro.org/poster/?id=607",
-      "submission_type": "poster",
-      "primary_theme": "Methods and theory",
-      "secondary_topics": [
-        "AI, LLM, & Neural Networks",
-        "Neural population geometry & dynamics"
-      ],
-      "assigned_topics": [
-        "Methods and theory",
-        "AI, LLM, & Neural Networks",
-        "Neural population geometry & dynamics"
-      ]
-    },
-    {
       "id": "170",
       "year": 2024,
       "title": "Emergent active sensing behaviors in artificial electric fish agents",
@@ -87469,33 +87441,6 @@
         "AI, LLM, & Neural Networks",
         "Perception",
         "Naturalistic encoding/decoding"
-      ]
-    },
-    {
-      "id": "608",
-      "year": 2024,
-      "title": "[GAC update] How does the brain compute with probability?",
-      "authors": "Ralf M Haefner 1 , Jeff Beck 2 , Cristina Savin 3 , Mehrdad Salmasi 4 , Xaq Pitkow 5,6,7 ; 1 Department of Brain and Cognitive Sciences, University of Rochester, 2 Department of Neurobiology, Duke University, 3 Departments of Neural Science and Data Science, New York University, 4 Gatsby Computational Neuroscience Unit, Max Planck UCL Centre for Computational Psychiatry and Ageing Research, University College London, 5 Neuroscience Institute, Department of Machine Learning, Carnegie Mellon University, 6 Department of Neuroscience, Center for Neuroscience and Artificial Intelligence, Baylor College of Medicine, 7 Department of Electrical and Computer Engineering, Department of Computer Science, Rice University",
-      "abstract": "This perspective piece is the result of a Generative Adversarial Collaboration (GAC) tackling the question `How does neural activity represent probability distributions?’. We have addressed three major obstacles to progress on answering this question: first, we provide a unified language for defining competing hypotheses. Second, we explain the fundamentals of three prominent proposals for probabilistic computations -- Probabilistic Population Codes (PPCs), Distributed Distributional Codes (DDCs), and Neural Sampling Codes (NSCs) -- and describe similarities and differences in that common language. Third, we review key empirical data previously taken as evidence for at least one of these proposal, and describe how it may or may not be explainable by alternative proposals. Finally, we describe some key challenges in resolving the debate, and propose potential directions to address them through a combination of theory and experiments.",
-      "author_keywords": [
-        "gac"
-      ],
-      "extracted_keywords": [],
-      "keywords": [
-        "gac"
-      ],
-      "topic_area": "",
-      "track": "",
-      "poster_number": "A160",
-      "source_url": "https://2024.ccneuro.org/poster/?id=608",
-      "submission_type": "poster",
-      "primary_theme": "Methods and theory",
-      "secondary_topics": [
-        "Neural population geometry & dynamics"
-      ],
-      "assigned_topics": [
-        "Methods and theory",
-        "Neural population geometry & dynamics"
       ]
     },
     {
@@ -134582,7 +134527,7 @@
           ],
           [
             "Methods and theory",
-            41
+            39
           ],
           [
             "AI, LLM, & Neural Networks",
@@ -134761,7 +134706,7 @@
         ],
         [
           "Methods and theory",
-          325
+          323
         ],
         [
           "Language/auditory neuroscience",
@@ -134815,11 +134760,11 @@
         ],
         [
           "AI, LLM, & Neural Networks",
-          1236
+          1235
         ],
         [
           "Neural population geometry & dynamics",
-          691
+          689
         ],
         [
           "Perception",

@@ -77,6 +77,13 @@ _MOJIBAKE_MARKERS = re.compile(
     r"[ÃÄÅÆÇÐÑØÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ\u0080-\u009f]"
 )
 
+GAC_UPDATE_TITLE_RE = re.compile(r"^\[\s*GAC\s+update\s*\]", re.I)
+
+
+def is_gac_update(title: str) -> bool:
+    """True for CCN Generative Adversarial Collaboration update posters (not regular submissions)."""
+    return bool(GAC_UPDATE_TITLE_RE.match((title or "").strip()))
+
 
 def strip_citation_fragments(text: str) -> str:
     if not text:

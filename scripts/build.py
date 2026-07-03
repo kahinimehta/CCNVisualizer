@@ -28,6 +28,7 @@ from umap.umap_ import UMAP  # avoid umap.__init__ → parametric_umap → tenso
 
 from shared import (
     content_keywords,
+    is_gac_update,
     repair_mojibake,
     repair_submission_text,
     sanitize_keyword_list,
@@ -643,6 +644,20 @@ def merge_2026_csv(payload: dict) -> dict:
     return payload
 
 
+def filter_gac_updates(payload: dict) -> dict:
+    submissions = payload.get("submissions", [])
+    kept = [sub for sub in submissions if not is_gac_update(sub.get("title", ""))]
+    removed = len(submissions) - len(kept)
+    if removed:
+        print(f"Excluded {removed} GAC update submission(s) from build.")
+        payload["submissions"] = kept
+        payload.setdefault("metadata", {})["gac_updates_excluded"] = removed
+        payload["metadata"]["total_count"] = len(kept)
+        years = sorted({sub.get("year") for sub in kept if sub.get("year") is not None})
+        payload["metadata"]["years"] = years
+    return payload
+
+
 def run_build(
     payload: dict | None = None,
     *,
@@ -659,6 +674,8 @@ def run_build(
 
     if merge_2026:
         payload = merge_2026_csv(payload)
+
+    payload = filter_gac_updates(payload)
 
     payload = apply_assignments(
         payload,

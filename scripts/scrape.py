@@ -31,6 +31,7 @@ from bs4 import BeautifulSoup
 from pypdf import PdfReader
 
 from shared import (
+    is_gac_update,
     is_metadata_keyword,
     normalize_keyword_phrase,
     repair_mojibake,
@@ -479,7 +480,11 @@ def scrape_meetingtrakr_year(year: int) -> list[Submission]:
                 )
 
     submissions.sort(key=lambda s: s.poster_number or s.title)
-    return submissions
+    kept = [submission for submission in submissions if not is_gac_update(submission.title)]
+    excluded = len(submissions) - len(kept)
+    if excluded:
+        print(f"  Excluded {excluded} GAC update poster(s) for {year}")
+    return kept
 
 
 def scrape_legacy_year(year: int, listing_path: str, link_pattern: str) -> list[Submission]:

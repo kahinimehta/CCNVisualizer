@@ -24,7 +24,7 @@ ccneuro.org archives
   abstracts.csv  ──→  dashboard (docs/js/app.js)
 ```
 
-**Step 1 — Scrape to JSON.** `scrape.py` pulls poster/paper records from CCN archives (2017–2026) into `data/submissions.json`. Keywords come from poster HTML, proceedings PDFs, or a token fallback. Citation fragments (`et al.`, page numbers, DOIs) and conference metadata labels are stripped at this stage.
+**Step 1 — Scrape to JSON.** `scrape.py` pulls poster/paper records from CCN archives (2017–2026) into `data/submissions.json`. Keywords come from poster HTML, proceedings PDFs, or a token fallback. Citation fragments (`et al.`, page numbers, DOIs) and conference metadata labels are stripped at this stage. **GAC update** posters (titles starting with `[GAC update]`, 2024 only today) are excluded — they are discussion pieces, not regular submissions.
 
 **Step 2 — Themes, map, CSV.** `build.py` reads the JSON, classifies each submission with **Anthropic Claude** (primary + secondary themes), computes UMAP coordinates for the embedding map, writes topics back to `submissions.json`, saves 2D coordinates to `embeddings_all.json`, and exports `abstracts.csv`. See [IMPLEMENTATION.md](IMPLEMENTATION.md) for details.
 
