@@ -365,6 +365,7 @@ const state = {
 };
 
 let tooltip = null;
+let embeddingTopicPillObserver = null;
 
 function ensureD3() {
   if (typeof d3 === "undefined") {
@@ -764,6 +765,46 @@ function embeddingDefaultNote() {
 
 function renderEmbeddingNote(note) {
   note.text(embeddingDefaultNote());
+}
+
+function setupEmbeddingTopicPillObserver() {
+  const panel = document.getElementById("embedding-panel");
+  const pill = document.getElementById("embedding-topic-pill");
+  if (!panel || !pill) return;
+
+  if (embeddingTopicPillObserver) {
+    embeddingTopicPillObserver.disconnect();
+    embeddingTopicPillObserver = null;
+  }
+
+  if (!isPhoneLayout()) {
+    pill.classList.remove("is-offscreen");
+    return;
+  }
+
+  embeddingTopicPillObserver = new IntersectionObserver(
+    ([entry]) => {
+      pill.classList.toggle("is-offscreen", !entry.isIntersecting);
+    },
+    { threshold: 0.12, rootMargin: "-8px 0px" }
+  );
+  embeddingTopicPillObserver.observe(panel);
+}
+
+function updateEmbeddingTopicPill() {
+  const pill = document.getElementById("embedding-topic-pill");
+  if (!pill) return;
+
+  if (!isPhoneLayout() || !state.selectedTheme) {
+    pill.hidden = true;
+    pill.textContent = "";
+    return;
+  }
+
+  pill.hidden = false;
+  pill.textContent = fitLegendLabel(state.selectedTheme, 120, chartThemePx(PHONE_THEME_TITLE_SIZE));
+  pill.style.setProperty("--topic-color", themeColor(state.selectedTheme));
+  pill.title = state.selectedTheme;
 }
 
 function embeddingPointTooltip(point) {
@@ -1394,6 +1435,7 @@ function renderAll() {
   renderThemeBars(primaryCounts);
   renderResearchThemeDeltas(trendSubmissions);
   renderEmbeddingCluster();
+  updateEmbeddingTopicPill();
   renderPaperList();
 
   d3.select("#year-chips")
@@ -1450,11 +1492,16 @@ async function init() {
 
   renderAll();
 
+  setupEmbeddingTopicPillObserver();
+
   let resizeTimer = null;
   window.addEventListener("resize", () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
-      if (shouldReflowOnResize()) renderAll();
+      if (shouldReflowOnResize()) {
+        setupEmbeddingTopicPillObserver();
+        renderAll();
+      }
     }, 150);
   });
 }

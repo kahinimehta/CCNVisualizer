@@ -453,6 +453,39 @@ a {
   min-height: calc(420px * var(--ui-scale));
 }
 
+.embedding-chart-wrap {
+  position: relative;
+}
+
+.embedding-topic-pill {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.45rem;
+  z-index: 2;
+  max-width: calc(100% - 1rem);
+  padding: 0.3rem 0.55rem;
+  border-radius: calc(8px * var(--ui-scale));
+  border: 1px solid var(--topic-color, var(--ccn-blue));
+  background: rgba(10, 24, 41, 0.92);
+  color: var(--topic-color, var(--ccn-blue));
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.25;
+  pointer-events: none;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.embedding-topic-pill.is-offscreen {
+  opacity: 0;
+  visibility: hidden;
+}
+
+@media (min-width: 640px) {
+  .embedding-topic-pill {
+    display: none !important;
+  }
+}
+
 .chart-note {
   margin: 0.65rem 0 0;
   color: var(--muted);
