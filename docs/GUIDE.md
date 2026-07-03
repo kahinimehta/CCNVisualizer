@@ -64,7 +64,7 @@ Build-only (not loaded in browser): `data/submissions.json`, `data/embeddings_al
 
 ## Research themes (14)
 
-Predetermined from the [CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform) Google Form and manual clustering oversight. **Everything else** is migrated away at build time.
+Predetermined from the [CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform) Google Form. **Everything else** is migrated away at build time.
 
 Names/colors: `docs/js/app.js` (`GOOGLE_FORM_TOPICS`); override names via `data/google_topics.json`.
 
