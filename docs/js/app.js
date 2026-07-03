@@ -645,7 +645,7 @@ function researchThemeDeltas(submissions, fromYear, toYear) {
   if (fromYear && toYear && String(fromYear) !== String(toYear)) {
     pair = { fromYear: String(fromYear), toYear: String(toYear) };
   } else {
-    pair = latestComparableYearPair(years, byYear, themes);
+    pair = defaultDeltaYearPair() || latestComparableYearPair(years, byYear, themes);
   }
   if (!pair) return { pair: null, rows: [] };
 
@@ -679,11 +679,14 @@ function researchThemeDeltas(submissions, fromYear, toYear) {
 }
 
 function defaultDeltaYearPair() {
-  const themes = researchThemeNames();
-  if (!themes.length || !state.data?.metadata?.years?.length) return null;
-  const years = [...state.data.metadata.years].sort((a, b) => a - b);
-  const byYear = themeCountsByYear(submissionsForThemeTrends());
-  return latestComparableYearPair(years, byYear, themes);
+  const years = state.data?.metadata?.years;
+  if (!years?.length) return null;
+  const yearSet = new Set(years.map(String));
+  if (yearSet.has("2017") && yearSet.has("2026")) {
+    return { fromYear: "2017", toYear: "2026" };
+  }
+  const sorted = [...years].sort((a, b) => a - b);
+  return { fromYear: String(sorted[0]), toYear: String(sorted[sorted.length - 1]) };
 }
 
 function syncDeltaYearState() {

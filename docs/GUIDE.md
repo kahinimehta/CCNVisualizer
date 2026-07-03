@@ -97,7 +97,7 @@ Other filters: year, full-text search (title, author, abstract, keywords, assign
 |-------|------|
 | KPIs | counts, years, themes |
 | Submissions over time | `year` |
-| Theme ranking / YoY change | `assigned_topics` (any occurrence) |
+| Theme ranking / YoY change | `assigned_topics` (any occurrence); default comparison **2017 → 2026** |
 | Embedding map | `umap_x`, `umap_y`, primary color from `assigned_topics[0]` |
 | Matching submissions | `title`, `year`, `authors`, `source_url` |
 
