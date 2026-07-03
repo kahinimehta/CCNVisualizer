@@ -61,10 +61,10 @@ DEFAULT_TOPICS = [
     "Attention & cognitive control / executive function",
     "Clinical / computational psychiatry",
     "Methods and theory",
-    "Everything else",
 ]
 
-METHODS_FALLBACK = "Everything else"
+TOPIC_FALLBACK = "Methods and theory"
+EVERYTHING_ELSE = "Everything else"
 ANTHROPIC_MODEL_DEFAULT = "claude-opus-4-6"
 MAX_SECONDARY_TOPICS = 4
 MAX_LLM_RETRIES = 4
@@ -75,8 +75,7 @@ SYSTEM_PROMPT = """You categorize CCN (Cognitive Computational Neuroscience) con
 Rules:
 - Choose exactly ONE primary_theme: the single best-fit category for the paper's main contribution.
 - Choose secondary_topics: every other category that clearly applies (0–4 items). Do not repeat the primary.
-- Prefer a specific real category over "Everything else" whenever the paper has any clear topical fit, even if the fit is partial.
-- Use "Everything else" as primary ONLY when the submission does not meaningfully match any other category.
+- Every submission must use one of the allowed categories; there is no catch-all category.
 - Use official topic strings exactly as provided (case and punctuation must match)."""
 
 UMAP_PARAMS = {
@@ -176,8 +175,10 @@ def load_google_config() -> dict:
 
 def active_topics(config: dict) -> list[str]:
     if config.get("enabled") and config.get("topics"):
-        return list(config["topics"])
-    return DEFAULT_TOPICS
+        topics = list(config["topics"])
+    else:
+        topics = list(DEFAULT_TOPICS)
+    return [topic for topic in topics if topic != EVERYTHING_ELSE]
 
 
 def submission_prompt(submission: dict, topics: list[str]) -> str:
@@ -221,19 +222,51 @@ def parse_llm_json(text: str) -> dict:
 def normalize_assignment(raw: dict, topics: list[str]) -> tuple[str, list[str], list[str]]:
     topic_set = set(topics)
     primary = str(raw.get("primary_theme", "")).strip()
-    if primary not in topic_set:
-        primary = METHODS_FALLBACK
+    if primary not in topic_set or primary == EVERYTHING_ELSE:
+        primary = ""
 
     secondaries: list[str] = []
     for item in raw.get("secondary_topics") or []:
         name = str(item).strip()
-        if name in topic_set and name != primary and name not in secondaries:
+        if name in topic_set and name != EVERYTHING_ELSE and name != primary and name not in secondaries:
             secondaries.append(name)
         if len(secondaries) >= MAX_SECONDARY_TOPICS:
             break
 
+    if not primary:
+        if secondaries:
+            primary = secondaries.pop(0)
+        else:
+            primary = TOPIC_FALLBACK
+
     assigned = [primary, *secondaries]
     return primary, secondaries, assigned
+
+
+def migrate_everything_else(submission: dict) -> bool:
+    assigned = list(submission.get("assigned_topics") or [])
+    if not assigned:
+        primary = str(submission.get("primary_theme") or "").strip()
+        secondaries = list(submission.get("secondary_topics") or [])
+        if primary:
+            assigned = [primary, *[s for s in secondaries if s and s != primary]]
+
+    new_assigned = [topic for topic in assigned if topic and topic != EVERYTHING_ELSE]
+    if not new_assigned:
+        new_assigned = [TOPIC_FALLBACK]
+
+    changed = new_assigned != assigned
+    submission["assigned_topics"] = new_assigned
+    submission["primary_theme"] = new_assigned[0]
+    submission["secondary_topics"] = new_assigned[1:]
+    return changed
+
+
+def migrate_all_everything_else(submissions: list[dict]) -> int:
+    changed = sum(1 for submission in submissions if migrate_everything_else(submission))
+    if changed:
+        print(f"Migrated {changed} submission(s) off '{EVERYTHING_ELSE}'.")
+    return changed
 
 
 def classify_submission(client, submission: dict, topics: list[str]) -> tuple[str, list[str], list[str]]:
@@ -411,6 +444,8 @@ def apply_assignments(
 
     for submission in submissions:
         submission.pop("cluster_track", None)
+
+    migrate_all_everything_else(submissions)
 
     payload.setdefault("stats", {})
     payload["stats"]["research_themes"] = compute_theme_stats(submissions, topics)

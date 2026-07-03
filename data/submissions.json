@@ -19,7 +19,7 @@
       "count": 617,
       "note": "Provisional — replace CSV and re-run merge when updated data is available."
     },
-    "research_themes_assigned_at": "2026-07-03T00:23:06.328600+00:00",
+    "research_themes_assigned_at": "2026-07-03T00:33:47.171663+00:00",
     "research_theme_method": "Skipped classification; reused assigned_topics from submissions.json",
     "keyword_source": "author_keywords prefer poster HTML, proceedings/authored PDFs (2017-2025), or 2026 CSV; extracted_keywords only when no author keywords are available; citation fragments and metadata area labels stripped before export",
     "keyword_years": [
@@ -11798,12 +11798,9 @@
       "poster_number": "",
       "source_url": "https://2018.ccneuro.org/Papers/ViewPapersdb9d.html?PaperNum=1197",
       "submission_type": "poster",
-      "primary_theme": "Everything else",
-      "secondary_topics": [
-        "Decision-making and metacognition"
-      ],
+      "primary_theme": "Decision-making and metacognition",
+      "secondary_topics": [],
       "assigned_topics": [
-        "Everything else",
         "Decision-making and metacognition"
       ]
     },
@@ -29196,12 +29193,9 @@
       "poster_number": "",
       "source_url": "https://2019.ccneuro.org/Papers/ViewPapersdb9d.html?PaperNum=1197",
       "submission_type": "poster",
-      "primary_theme": "Everything else",
-      "secondary_topics": [
-        "Decision-making and metacognition"
-      ],
+      "primary_theme": "Decision-making and metacognition",
+      "secondary_topics": [],
       "assigned_topics": [
-        "Everything else",
         "Decision-making and metacognition"
       ]
     },
@@ -41503,12 +41497,9 @@
       "poster_number": "",
       "source_url": "https://2019.ccneuro.org/Papers/ViewPapers2faa.html?PaperNum=1392",
       "submission_type": "poster",
-      "primary_theme": "Everything else",
-      "secondary_topics": [
-        "Decision-making and metacognition"
-      ],
+      "primary_theme": "Decision-making and metacognition",
+      "secondary_topics": [],
       "assigned_topics": [
-        "Everything else",
         "Decision-making and metacognition"
       ]
     },
@@ -50407,12 +50398,9 @@
       "poster_number": "",
       "source_url": "https://2022.ccneuro.org/view_paperdb9d.html?PaperNum=1197",
       "submission_type": "poster",
-      "primary_theme": "Everything else",
-      "secondary_topics": [
-        "Decision-making and metacognition"
-      ],
+      "primary_theme": "Decision-making and metacognition",
+      "secondary_topics": [],
       "assigned_topics": [
-        "Everything else",
         "Decision-making and metacognition"
       ]
     },
@@ -62078,12 +62066,9 @@
       "poster_number": "",
       "source_url": "https://2023.ccneuro.org/view_paper2faa.html?PaperNum=1392",
       "submission_type": "poster",
-      "primary_theme": "Everything else",
-      "secondary_topics": [
-        "Decision-making and metacognition"
-      ],
+      "primary_theme": "Decision-making and metacognition",
+      "secondary_topics": [],
       "assigned_topics": [
-        "Everything else",
         "Decision-making and metacognition"
       ]
     },
@@ -76776,12 +76761,9 @@
       "poster_number": "",
       "source_url": "https://2023.ccneuro.org/view_paperdb9d.html?PaperNum=1197",
       "submission_type": "poster",
-      "primary_theme": "Everything else",
-      "secondary_topics": [
-        "Decision-making and metacognition"
-      ],
+      "primary_theme": "Decision-making and metacognition",
+      "secondary_topics": [],
       "assigned_topics": [
-        "Everything else",
         "Decision-making and metacognition"
       ]
     },
@@ -82348,12 +82330,9 @@
       "source_url": "https://2023.ccneuro.org/view_papere285.html?PaperNum=1633",
       "submission_type": "poster",
       "primary_theme": "Decision-making and metacognition",
-      "secondary_topics": [
-        "Everything else"
-      ],
+      "secondary_topics": [],
       "assigned_topics": [
-        "Decision-making and metacognition",
-        "Everything else"
+        "Decision-making and metacognition"
       ]
     },
     {
@@ -87362,12 +87341,9 @@
       "poster_number": "A157",
       "source_url": "https://2024.ccneuro.org/poster/?id=404",
       "submission_type": "poster",
-      "primary_theme": "Everything else",
-      "secondary_topics": [
-        "Vision"
-      ],
+      "primary_theme": "Vision",
+      "secondary_topics": [],
       "assigned_topics": [
-        "Everything else",
         "Vision"
       ]
     },
@@ -88342,13 +88318,11 @@
       "poster_number": "A41",
       "source_url": "https://2024.ccneuro.org/poster/?id=494",
       "submission_type": "poster",
-      "primary_theme": "Everything else",
+      "primary_theme": "Language/auditory neuroscience",
       "secondary_topics": [
-        "Language/auditory neuroscience",
         "Methods and theory"
       ],
       "assigned_topics": [
-        "Everything else",
         "Language/auditory neuroscience",
         "Methods and theory"
       ]
@@ -97105,13 +97079,11 @@
       "submission_type": "poster",
       "primary_theme": "Reinforcement learning",
       "secondary_topics": [
-        "Decision-making and metacognition",
-        "Everything else"
+        "Decision-making and metacognition"
       ],
       "assigned_topics": [
         "Reinforcement learning",
-        "Decision-making and metacognition",
-        "Everything else"
+        "Decision-making and metacognition"
       ]
     },
     {
@@ -115250,12 +115222,9 @@
       "source_url": "https://2025.ccneuro.org/poster/?id=lITvVIKJa8",
       "submission_type": "poster",
       "primary_theme": "Decision-making and metacognition",
-      "secondary_topics": [
-        "Everything else"
-      ],
+      "secondary_topics": [],
       "assigned_topics": [
-        "Decision-making and metacognition",
-        "Everything else"
+        "Decision-making and metacognition"
       ]
     },
     {
@@ -121045,12 +121014,9 @@
       "source_url": "https://2026.ccneuro.org/",
       "submission_type": "poster",
       "primary_theme": "Decision-making and metacognition",
-      "secondary_topics": [
-        "Everything else"
-      ],
+      "secondary_topics": [],
       "assigned_topics": [
-        "Decision-making and metacognition",
-        "Everything else"
+        "Decision-making and metacognition"
       ]
     },
     {
@@ -121895,12 +121861,9 @@
       "poster_number": "248",
       "source_url": "https://2026.ccneuro.org/",
       "submission_type": "poster",
-      "primary_theme": "Everything else",
-      "secondary_topics": [
-        "Methods and theory"
-      ],
+      "primary_theme": "Methods and theory",
+      "secondary_topics": [],
       "assigned_topics": [
-        "Everything else",
         "Methods and theory"
       ]
     },
@@ -126163,12 +126126,9 @@
       "poster_number": "414",
       "source_url": "https://2026.ccneuro.org/",
       "submission_type": "poster",
-      "primary_theme": "Everything else",
-      "secondary_topics": [
-        "Clinical / computational psychiatry"
-      ],
+      "primary_theme": "Clinical / computational psychiatry",
+      "secondary_topics": [],
       "assigned_topics": [
-        "Everything else",
         "Clinical / computational psychiatry"
       ]
     },
@@ -127592,14 +127552,12 @@
       "poster_number": "471",
       "source_url": "https://2026.ccneuro.org/",
       "submission_type": "poster",
-      "primary_theme": "Everything else",
+      "primary_theme": "Social cognition & theory of mind",
       "secondary_topics": [
-        "Social cognition & theory of mind",
         "Language/auditory neuroscience",
         "AI, LLM, & Neural Networks"
       ],
       "assigned_topics": [
-        "Everything else",
         "Social cognition & theory of mind",
         "Language/auditory neuroscience",
         "AI, LLM, & Neural Networks"
@@ -134198,8 +134156,7 @@
         "Social cognition & theory of mind",
         "Attention & cognitive control / executive function",
         "Clinical / computational psychiatry",
-        "Methods and theory",
-        "Everything else"
+        "Methods and theory"
       ],
       "primary_by_year": {
         "2017": [
@@ -134271,7 +134228,7 @@
           ],
           [
             "Decision-making and metacognition",
-            26
+            27
           ],
           [
             "Memory",
@@ -134316,10 +134273,6 @@
           [
             "Motor control & planning",
             2
-          ],
-          [
-            "Everything else",
-            1
           ]
         ],
         "2019": [
@@ -134329,7 +134282,7 @@
           ],
           [
             "Decision-making and metacognition",
-            44
+            46
           ],
           [
             "Methods and theory",
@@ -134378,10 +134331,6 @@
           [
             "Motor control & planning",
             5
-          ],
-          [
-            "Everything else",
-            2
           ]
         ],
         "2022": [
@@ -134395,7 +134344,7 @@
           ],
           [
             "Decision-making and metacognition",
-            32
+            33
           ],
           [
             "Reinforcement learning",
@@ -134440,16 +134389,12 @@
           [
             "Motor control & planning",
             2
-          ],
-          [
-            "Everything else",
-            1
           ]
         ],
         "2023": [
           [
             "Decision-making and metacognition",
-            59
+            61
           ],
           [
             "Memory",
@@ -134502,16 +134447,12 @@
           [
             "Motor control & planning",
             7
-          ],
-          [
-            "Everything else",
-            2
           ]
         ],
         "2024": [
           [
             "Vision",
-            89
+            90
           ],
           [
             "Decision-making and metacognition",
@@ -134523,7 +134464,7 @@
           ],
           [
             "Language/auditory neuroscience",
-            44
+            45
           ],
           [
             "Methods and theory",
@@ -134560,10 +134501,6 @@
           [
             "Clinical / computational psychiatry",
             14
-          ],
-          [
-            "Everything else",
-            2
           ],
           [
             "Motor control & planning",
@@ -134643,7 +134580,7 @@
           ],
           [
             "Methods and theory",
-            62
+            63
           ],
           [
             "AI, LLM, & Neural Networks",
@@ -134671,11 +134608,11 @@
           ],
           [
             "Clinical / computational psychiatry",
-            23
+            24
           ],
           [
             "Social cognition & theory of mind",
-            22
+            23
           ],
           [
             "Perception",
@@ -134684,21 +134621,17 @@
           [
             "Motor control & planning",
             10
-          ],
-          [
-            "Everything else",
-            3
           ]
         ]
       },
       "primary_totals": [
         [
           "Vision",
-          515
+          516
         ],
         [
           "Decision-making and metacognition",
-          394
+          400
         ],
         [
           "Memory",
@@ -134706,11 +134639,11 @@
         ],
         [
           "Methods and theory",
-          323
+          324
         ],
         [
           "Language/auditory neuroscience",
-          223
+          224
         ],
         [
           "AI, LLM, & Neural Networks",
@@ -134734,11 +134667,11 @@
         ],
         [
           "Social cognition & theory of mind",
-          103
+          104
         ],
         [
           "Clinical / computational psychiatry",
-          98
+          99
         ],
         [
           "Naturalistic encoding/decoding",
@@ -134747,16 +134680,12 @@
         [
           "Motor control & planning",
           40
-        ],
-        [
-          "Everything else",
-          11
         ]
       ],
       "secondary_totals": [
         [
           "Methods and theory",
-          1383
+          1382
         ],
         [
           "AI, LLM, & Neural Networks",
@@ -134776,11 +134705,11 @@
         ],
         [
           "Vision",
-          528
+          527
         ],
         [
           "Decision-making and metacognition",
-          452
+          446
         ],
         [
           "Attention & cognitive control / executive function",
@@ -134796,7 +134725,7 @@
         ],
         [
           "Language/auditory neuroscience",
-          155
+          154
         ],
         [
           "Motor control & planning",
@@ -134804,15 +134733,11 @@
         ],
         [
           "Clinical / computational psychiatry",
-          101
+          100
         ],
         [
           "Social cognition & theory of mind",
-          66
-        ],
-        [
-          "Everything else",
-          4
+          65
         ]
       ]
     }

@@ -1,9 +1,9 @@
 {
-  "schema_version": 6,
+  "schema_version": 7,
   "enabled": true,
   "source": "CCN 2026 Activity Preferences — Google Form question 1",
   "form_url": "https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform",
-  "updated_at": "2026-07-02T00:00:00+00:00",
+  "updated_at": "2026-07-03T00:00:00+00:00",
   "question": "Which topic would you best affiliate yourself with for lower Manhattan meetups?",
   "topics": [
     "Reinforcement learning",
@@ -19,7 +19,6 @@
     "Social cognition & theory of mind",
     "Attention & cognitive control / executive function",
     "Clinical / computational psychiatry",
-    "Methods and theory",
-    "Everything else"
+    "Methods and theory"
   ]
 }

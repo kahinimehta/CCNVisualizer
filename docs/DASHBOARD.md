@@ -15,7 +15,7 @@ ccneuro.org archives
         ▼  build.py
   ┌─────────────────────────────────────┐
   │ 1. Clean keywords & repair encoding │
-  │ 2. Assign 15 themes (Anthropic)     │
+  │ 2. Assign 14 themes (Anthropic)     │
   │ 3. Build UMAP map (embeddings_all)  │
   │ 4. Export abstracts.csv             │
   └─────────────────────────────────────┘
@@ -70,7 +70,7 @@ The dashboard loads **only** `docs/data/abstracts.csv` (relative to the `docs/` 
 | `title` | Submission title |
 | `author` | First author |
 | `keywords` | Cleaned content keywords (metadata area labels and citation fragments removed) |
-| `assigned_topics` | One or more of the **15 CCN research themes**, pipe-separated (` \| `), **ordered by importance** (primary first) |
+| `assigned_topics` | One or more of the **14 CCN research themes**, pipe-separated (` \| `), **ordered by importance** (primary first) |
 
 ### Additional columns (precomputed at build time)
 
@@ -85,9 +85,9 @@ The dashboard loads **only** `docs/data/abstracts.csv` (relative to the `docs/` 
 
 List-valued fields use ` | ` as the delimiter.
 
-## The 15 research themes
+## The 14 research themes
 
-Topics in `assigned_topics` are drawn from this fixed list ([CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform), question 1):
+Topics in `assigned_topics` are drawn from this fixed list ([CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform), question 1). The former catch-all **Everything else** category is not used — submissions previously labeled that way are reassigned to their next-best topic at build time.
 
 1. Reinforcement learning  
 2. Motor control & planning  
@@ -103,14 +103,13 @@ Topics in `assigned_topics` are drawn from this fixed list ([CCN 2026 Activity P
 12. Attention & cognitive control / executive function  
 13. Clinical / computational psychiatry  
 14. Methods and theory  
-15. Everything else  
 
 Theme names and colors in the UI are defined in `docs/js/app.js`. To change names at build time, edit `data/google_topics.json` and re-run `build.py`.
 
 ## Filters
 
 - **Year** — all years or a single conference year (header dropdown + year chips)  
-- **Research theme** — header dropdown lists all 15 themes; matches any value in `assigned_topics`  
+- **Research theme** — header dropdown lists all 14 themes; matches any value in `assigned_topics`  
 - **Search** — title, author(s), abstract, keywords, assigned topics  
 - **Embedding map topic dropdown** — same theme filter, scoped to the map panel; default shows all topics with dots colored by **primary** topic only  
 

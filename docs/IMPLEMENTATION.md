@@ -48,7 +48,7 @@ CCN archives + 2026 CSV
 - `--classify-refresh` — ignore LLM cache
 - `--skip-classify` — skip Anthropic; reuse existing `assigned_topics` in JSON (UMAP + CSV only)
 
-Shared config: **`data/google_topics.json`** — optional override for the 15 theme names at build time.
+Shared config: **`data/google_topics.json`** — optional override for the 14 theme names at build time.
 
 ## Theme assignment (Anthropic Claude)
 
@@ -62,10 +62,9 @@ For each submission, Claude receives title, abstract, keywords, and optional con
 
 Rules encoded in the system prompt:
 
-- Exactly **one primary** — best-fit category
+- Exactly **one primary** — best-fit category from the 14 allowed topics
 - **0–4 secondaries** — all other clearly applicable categories
-- Prefer a specific category over **Everything else** whenever there is any topical fit
-- **Everything else** only when nothing else matches
+- No catch-all category; invalid or legacy `Everything else` labels are migrated at build time
 
 Results are cached in **`data/llm_theme_cache.json`** (gitignored). Re-runs only API-call submission IDs not in cache.
 

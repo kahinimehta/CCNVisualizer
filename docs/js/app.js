@@ -319,7 +319,6 @@ const CHART_PALETTE = [
   "#9333EA", // purple — Attention & cognitive control
   "#C026D3", // fuchsia — Clinical / computational psychiatry
   "#EC4899", // pink — Methods and theory
-  "#64748B", // slate — Everything else
 ];
 
 const KPI_ICONS = {
@@ -350,7 +349,6 @@ const GOOGLE_FORM_TOPICS = [
   "Attention & cognitive control / executive function",
   "Clinical / computational psychiatry",
   "Methods and theory",
-  "Everything else",
 ];
 
 const state = {
@@ -553,7 +551,7 @@ function embeddingPointPrimaryTheme(point) {
 
 function appendPrimaryTopicDot(parent, radius, primaryTopic, options = {}) {
   const { opacity = 0.92, stroke = CCN_COLORS.navy, strokeWidth = 1 } = options;
-  const topic = primaryTopic || "Everything else";
+  const topic = primaryTopic || "Methods and theory";
 
   parent
     .append("circle")

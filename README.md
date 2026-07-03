@@ -76,7 +76,7 @@ Classifications are cached in `data/llm_theme_cache.json` (gitignored). Re-runs 
 
 ## Research themes
 
-15 topics from [CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform), question 1. Names in `data/google_topics.json`; colors in `docs/js/app.js`.
+14 topics from [CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform), question 1 (excluding the form’s “Everything else” option). Names in `data/google_topics.json`; colors in `docs/js/app.js`.
 
 Claude assigns **one primary** theme plus **all other applicable** secondaries per submission.
 
