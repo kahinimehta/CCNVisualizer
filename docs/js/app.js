@@ -92,6 +92,31 @@ function phoneBarValueClipsLeft(barWidth, valueText, valueFont) {
   return barWidth - textWidth < gs(5);
 }
 
+function phoneBarLabelLines(item, innerW, labelFont, getLabel, splitLabel) {
+  if (splitLabel) {
+    const { prefix, suffix } = splitLabel(item);
+    return wrapThemeLabel(prefix + suffix, innerW, labelFont);
+  }
+  return wrapThemeLabel(getLabel(item), innerW, labelFont);
+}
+
+function appendPhoneBarLabel(textSel, lines, item, { x, labelFont, labelFill, splitLabel }) {
+  const fill = typeof labelFill === "function" ? labelFill(item) : labelFill;
+  const suffix = splitLabel ? splitLabel(item).suffix : null;
+  const suffixFill = splitLabel ? splitLabel(item).suffixFill : null;
+
+  lines.forEach((line, lineIndex) => {
+    const dy = lineIndex === 0 ? 0 : labelFont * 1.15;
+    if (suffix && line.endsWith(suffix)) {
+      const prefix = line.slice(0, line.length - suffix.length);
+      textSel.append("tspan").attr("x", x).attr("dy", dy).attr("fill", fill).text(prefix);
+      textSel.append("tspan").attr("fill", suffixFill).text(suffix);
+      return;
+    }
+    textSel.append("tspan").attr("x", x).attr("dy", dy).attr("fill", fill).text(line);
+  });
+}
+
 function renderPhoneThemeBarChart(container, options) {
   const {
     data,
@@ -103,6 +128,7 @@ function renderPhoneThemeBarChart(container, options) {
     valueFormat = (v, item) => String(v),
     labelFill = CCN_COLORS.muted,
     showValueLabel = true,
+    splitLabel = null,
   } = options;
 
   container.selectAll("*").remove();
@@ -145,7 +171,7 @@ function renderPhoneThemeBarChart(container, options) {
       };
     }
 
-    const lines = wrapThemeLabel(getLabel(item), innerW, labelFont);
+    const lines = phoneBarLabelLines(item, innerW, labelFont, getLabel, splitLabel);
     const labelH = lines.length * labelFont * 1.15;
     const valueBlock = showValueLabel ? valueBelowGap + valueH : 0;
     return {
@@ -222,15 +248,8 @@ function renderPhoneThemeBarChart(container, options) {
       .append("text")
       .attr("x", 0)
       .attr("y", yCursor + labelFont)
-      .attr("fill", typeof labelFill === "function" ? labelFill(item) : labelFill)
       .style("font-size", `${labelFont}px`);
-    lines.forEach((ln, li) => {
-      text
-        .append("tspan")
-        .attr("x", 0)
-        .attr("dy", li === 0 ? 0 : labelFont * 1.15)
-        .text(ln);
-    });
+    appendPhoneBarLabel(text, lines, item, { x: 0, labelFont, labelFill, splitLabel });
 
     const barY = yCursor + lines.length * labelFont * 1.15 + rowGap;
     const rect = g
@@ -1237,6 +1256,11 @@ function renderResearchThemeDeltas(submissions) {
       getBarFill: (d) => (d.delta >= 0 ? CCN_COLORS.green : CCN_COLORS.pink),
       onBarTooltip: (event, d) => showTooltip(deltaTooltip(d), event),
       showValueLabel: false,
+      splitLabel: (d) => ({
+        prefix: `${d.theme}: `,
+        suffix: formatDeltaPct(d.delta),
+        suffixFill: d.delta >= 0 ? CCN_COLORS.green : CCN_COLORS.pink,
+      }),
     });
     return;
   }
