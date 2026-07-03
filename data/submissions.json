@@ -9657,14 +9657,9 @@
       "source_url": "https://2018.ccneuro.org/Papers/ViewPapers9f46.html?PaperNum=1103",
       "submission_type": "poster",
       "primary_theme": "Methods and theory",
-      "secondary_topics": [
-        "AI, LLM, & Neural Networks",
-        "Neural population geometry & dynamics"
-      ],
+      "secondary_topics": [],
       "assigned_topics": [
-        "Methods and theory",
-        "AI, LLM, & Neural Networks",
-        "Neural population geometry & dynamics"
+        "Methods and theory"
       ]
     },
     {
@@ -86132,12 +86127,9 @@
       "source_url": "https://2024.ccneuro.org/poster/?id=197",
       "submission_type": "poster",
       "primary_theme": "Methods and theory",
-      "secondary_topics": [
-        "Memory"
-      ],
+      "secondary_topics": [],
       "assigned_topics": [
-        "Methods and theory",
-        "Memory"
+        "Methods and theory"
       ]
     },
     {
@@ -117626,17 +117618,17 @@
       "poster_number": "81",
       "source_url": "https://2026.ccneuro.org/",
       "submission_type": "poster",
-      "primary_theme": "Language/auditory neuroscience",
+      "primary_theme": "Vision",
       "secondary_topics": [
         "Naturalistic encoding/decoding",
-        "Methods and theory",
-        "AI, LLM, & Neural Networks"
+        "AI, LLM, & Neural Networks",
+        "Methods and theory"
       ],
       "assigned_topics": [
-        "Language/auditory neuroscience",
+        "Vision",
         "Naturalistic encoding/decoding",
-        "Methods and theory",
-        "AI, LLM, & Neural Networks"
+        "AI, LLM, & Neural Networks",
+        "Methods and theory"
       ]
     },
     {
