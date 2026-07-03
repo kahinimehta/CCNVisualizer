@@ -1363,7 +1363,7 @@ function renderEmbeddingCluster() {
   const color = (theme) => themeColor(theme);
   const plotBottom = mobileLegend ? plotHeight - margin.bottom : height - margin.bottom;
   const pointRadius = isPhoneLayout()
-    ? { base: 2, selected: 2.75 }
+    ? { base: 2.4, selected: 3.2 }
     : { base: 7, selected: 8.5 };
 
   const x = d3.scaleLinear().domain(d3.extent(points, (d) => d.x)).nice().range([margin.left, width - margin.right]);
@@ -1426,7 +1426,7 @@ function renderEmbeddingCluster() {
   if (isTouchLike()) {
     if (isPhoneLayout()) {
       // Nearest-point tap: large overlapping hit circles pick the wrong dot in dense regions.
-      const maxTapDist = gs(5);
+      const maxTapDist = gs(5.5);
       svg
         .append("rect")
         .attr("class", "embedding-touch-layer")
