@@ -181,6 +181,7 @@ function readCssNumber(property, fallback) {
 const PHONE_GRAPH_SCALE = 0.58;
 const PHONE_AXIS_LABEL_SIZE = 8.5;
 const PHONE_THEME_TITLE_SIZE = 8.5;
+const PHONE_LEGEND_HEADING_SIZE = 10.5;
 
 function getUiScale() {
   return readCssNumber("--ui-scale", Math.min(3, Math.max(1, 0.6 + viewportWidth() / 500)));
@@ -1135,10 +1136,11 @@ function renderEmbeddingCluster() {
   const width = chartContainerWidth(container);
   const mobileLegend = useStackedChartLegend(width) || isPhoneLayout();
   const legendFont = isPhoneLayout() ? chartThemePx(PHONE_THEME_TITLE_SIZE) : themeLabelPx(10);
+  const legendHeadingFont = isPhoneLayout() ? chartThemePx(PHONE_LEGEND_HEADING_SIZE) : legendFont;
   const legendItemHeight = isPhoneLayout() ? legendFont * 2.2 : legendFont * 1.5;
   const legendThemes = themeLegendThemes();
   const legendCols = isPhoneLayout() ? 1 : mobileLegend ? (width < 520 ? 1 : 2) : 1;
-  const legendTitleHeight = legendFont * 1.6;
+  const legendTitleHeight = legendHeadingFont * 1.6;
   const legendRows = mobileLegend ? Math.ceil(legendThemes.length / legendCols) : legendThemes.length;
   const legendBlock = mobileLegend
     ? legendTitleHeight + legendRows * legendItemHeight + (isPhoneLayout() ? gs(10) : s(16))
@@ -1288,9 +1290,9 @@ function renderEmbeddingCluster() {
       .append("text")
       .attr("class", "embedding-legend-title")
       .attr("x", 0)
-      .attr("y", legendFont * 0.85)
+      .attr("y", legendHeadingFont * 0.85)
       .attr("fill", CCN_COLORS.muted)
-      .style("font-size", isPhoneLayout() ? chartThemeFs(PHONE_THEME_TITLE_SIZE) : themeFs(10))
+      .style("font-size", isPhoneLayout() ? chartThemeFs(PHONE_LEGEND_HEADING_SIZE) : themeFs(10))
       .style("font-weight", 600)
       .text("Primary topic (dot color)");
     legend
