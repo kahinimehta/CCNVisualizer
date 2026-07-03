@@ -102,6 +102,7 @@ function renderPhoneThemeBarChart(container, options) {
     onBarTooltip,
     valueFormat = (v, item) => String(v),
     labelFill = CCN_COLORS.muted,
+    showValueLabel = true,
   } = options;
 
   container.selectAll("*").remove();
@@ -124,7 +125,8 @@ function renderPhoneThemeBarChart(container, options) {
     const val = getValue(item);
     const barWidth = Math.max(x(val), val > 0 ? gs(2) : 0);
     const valueText = valueFormat(val, item);
-    const sideLayout = phoneBarValueClipsLeft(barWidth, valueText, valueFont);
+    const sideLayout =
+      showValueLabel && phoneBarValueClipsLeft(barWidth, valueText, valueFont);
 
     if (sideLayout) {
       const labelMaxW = Math.max(gs(48), innerW - barWidth - sideGap);
@@ -145,6 +147,7 @@ function renderPhoneThemeBarChart(container, options) {
 
     const lines = wrapThemeLabel(getLabel(item), innerW, labelFont);
     const labelH = lines.length * labelFont * 1.15;
+    const valueBlock = showValueLabel ? valueBelowGap + valueH : 0;
     return {
       item,
       val,
@@ -152,7 +155,7 @@ function renderPhoneThemeBarChart(container, options) {
       valueText,
       sideLayout: false,
       lines,
-      rowHeight: labelH + rowGap + barH + valueBelowGap + valueH + blockGap,
+      rowHeight: labelH + rowGap + barH + valueBlock + blockGap,
     };
   });
 
@@ -243,69 +246,19 @@ function renderPhoneThemeBarChart(container, options) {
     }
     bindBarTooltipEvents(rect, onBarTooltip, item);
 
-    g.append("text")
-      .attr("class", "bar-value")
-      .attr("x", barWidth)
-      .attr("y", barY + barH + valueBelowGap)
-      .attr("text-anchor", "end")
-      .attr("dominant-baseline", "hanging")
-      .attr("fill", CCN_COLORS.muted)
-      .style("font-size", chartThemeFs(PHONE_BAR_VALUE_SIZE))
-      .text(valueText);
+    if (showValueLabel) {
+      g.append("text")
+        .attr("class", "bar-value")
+        .attr("x", barWidth)
+        .attr("y", barY + barH + valueBelowGap)
+        .attr("text-anchor", "end")
+        .attr("dominant-baseline", "hanging")
+        .attr("fill", CCN_COLORS.muted)
+        .style("font-size", chartThemeFs(PHONE_BAR_VALUE_SIZE))
+        .text(valueText);
+    }
 
     yCursor += rowHeight;
-  });
-}
-
-function renderPhoneDeltaStatements(container, rows, onRowTooltip) {
-  container.selectAll("*").remove();
-  const width = chartContainerWidth(container);
-  const margin = { top: gs(8), right: gs(8), bottom: gs(8), left: gs(8) };
-  const innerW = width - margin.left - margin.right;
-  const fontSize = chartThemePx(PHONE_THEME_TITLE_SIZE);
-  const lineH = fontSize * 1.35;
-  const blockGap = gs(9);
-
-  const blocks = rows.map((row) => {
-    const pct = formatDeltaPct(row.delta);
-    const lines = wrapThemeLabel(`${row.theme}: ${pct}`, innerW, fontSize);
-    return { row, lines, pct, height: lines.length * lineH + blockGap };
-  });
-
-  const height = margin.top + margin.bottom + d3.sum(blocks, (block) => block.height);
-  const svg = appendChartSvg(container, width, height);
-  const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
-
-  let yCursor = 0;
-  blocks.forEach(({ row, lines, pct }) => {
-    lines.forEach((line, lineIndex) => {
-      const lineEl = g
-        .append("text")
-        .attr("x", 0)
-        .attr("y", yCursor + fontSize)
-        .style("font-size", `${fontSize}px`);
-
-      if (line.endsWith(pct)) {
-        const prefix = line.slice(0, line.length - pct.length);
-        lineEl.append("tspan").attr("fill", CCN_COLORS.text).text(prefix);
-        lineEl
-          .append("tspan")
-          .attr("fill", row.delta >= 0 ? CCN_COLORS.green : CCN_COLORS.pink)
-          .text(pct);
-      } else {
-        lineEl.attr("fill", CCN_COLORS.text).text(line);
-      }
-
-      if (lineIndex === 0 && onRowTooltip) {
-        lineEl.style("cursor", "pointer").on("click", (event) => {
-          event.stopPropagation();
-          onRowTooltip(event, row);
-        });
-      }
-
-      yCursor += lineH;
-    });
-    yCursor += blockGap;
   });
 }
 
@@ -1271,7 +1224,14 @@ function renderResearchThemeDeltas(submissions) {
     ].join("<br/>");
 
   if (isPhoneLayout()) {
-    renderPhoneDeltaStatements(container, rows, (event, d) => showTooltip(deltaTooltip(d), event));
+    renderPhoneThemeBarChart(container, {
+      data: rows,
+      getLabel: (d) => `${d.theme}: ${formatDeltaPct(d.delta)}`,
+      getValue: (d) => Math.abs(d.delta),
+      getBarFill: (d) => (d.delta >= 0 ? CCN_COLORS.green : CCN_COLORS.pink),
+      onBarTooltip: (event, d) => showTooltip(deltaTooltip(d), event),
+      showValueLabel: false,
+    });
     return;
   }
 
