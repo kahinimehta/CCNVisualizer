@@ -374,11 +374,17 @@ function ensureD3() {
 
 function showTooltip(html, event) {
   if (!tooltip) return;
-  tooltip
-    .style("opacity", 1)
-    .html(html)
-    .style("left", `${event.pageX + s(12)}px`)
-    .style("top", `${event.pageY + s(12)}px`);
+  const offset = s(12);
+  tooltip.style("opacity", 1).html(html);
+
+  const node = tooltip.node();
+  const width = node?.offsetWidth || 0;
+  const height = node?.offsetHeight || 0;
+  const maxLeft = window.innerWidth - width - offset;
+  const maxTop = window.innerHeight - height - offset;
+  const left = Math.max(offset, Math.min(event.clientX + offset, maxLeft));
+  const top = Math.max(offset, Math.min(event.clientY + offset, maxTop));
+  tooltip.style("left", `${left}px`).style("top", `${top}px`);
 }
 
 function hideTooltip() {
