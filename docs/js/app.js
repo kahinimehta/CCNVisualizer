@@ -467,7 +467,6 @@ function setupPhoneTooltipDismiss() {
     if (isPhoneLayout()) hideTooltip();
   };
   window.addEventListener("scroll", dismiss, { passive: true, capture: true });
-  document.addEventListener("touchmove", dismiss, { passive: true, capture: true });
 }
 
 function bindBarTooltipEvents(rect, onBarTooltip, item) {
