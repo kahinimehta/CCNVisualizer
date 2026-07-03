@@ -739,22 +739,14 @@ function renderEmbeddingNote(note) {
 }
 
 function embeddingPointTooltip(point) {
-  return [
-    `<strong>${truncateLabel(point.title, s(72))}</strong>`,
-    `${point.year}${point.poster_number ? ` · Poster #${point.poster_number}` : ""}`,
-    `<em>${isTouchLike() ? "Tap" : "Click"} to filter by this dot’s primary topic</em>`,
-  ].join("<br/>");
+  return embeddingPointPrimaryTheme(point) || "Methods and theory";
 }
 
 function themeLegendTooltip(themeName) {
   const count = embeddingDisplayPoints().filter(
     (point) => embeddingPointPrimaryTheme(point) === themeName
   ).length;
-  return [
-    `<strong>${themeName}</strong>`,
-    `${count} visible with this primary topic`,
-    "Filter matches any assigned topic on a submission · map highlights by primary topic only",
-  ].join("<br/>");
+  return `<strong>${themeName}</strong><br/>${count} on map`;
 }
 
 function renderKpis(filtered) {
