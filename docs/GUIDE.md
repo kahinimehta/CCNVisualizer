@@ -76,7 +76,7 @@ Legacy id-only caches migrate automatically on the next build (~538 collision ro
 
 ## UMAP map (build time)
 
-Weighted text (title ×2, abstract ×3, keywords ×1) → TF-IDF → UMAP (`n_neighbors=15`, `min_dist=0.12`, cosine distance) → `umap_x`, `umap_y`. Layout only; dot color in the UI is the primary topic.
+Weighted text (title ×2, abstract ×3, keywords ×1) → TF-IDF → UMAP (`n_neighbors=15`, `min_dist=0.12`, cosine distance) → `umap_x`, `umap_y`. Layout only; dot color in the UI is the primary topic. Topics are auto-assigned and abstracts usually match several; the map shows how those topics cluster in embedding space.
 
 ## Dashboard behavior
 
