@@ -97,11 +97,12 @@ function renderPhoneThemeBarChart(container, options) {
     onBarTooltip,
     valueFormat = (v, item) => String(v),
     labelFill = CCN_COLORS.muted,
+    valueAtPlotEnd = false,
   } = options;
 
   container.selectAll("*").remove();
   const width = chartContainerWidth(container);
-  const margin = { top: gs(5), right: gs(30), bottom: gs(5), left: gs(5) };
+  const margin = { top: gs(5), right: gs(5), bottom: gs(5), left: gs(5) };
   const innerW = width - margin.left - margin.right;
   const labelFont = chartThemePx(PHONE_THEME_TITLE_SIZE);
   const valueFont = chartThemePx(8);
@@ -161,12 +162,14 @@ function renderPhoneThemeBarChart(container, options) {
     }
 
     g.append("text")
-      .attr("x", barWidth)
-      .attr("y", barY + barH + valueGap + valueFont * 0.85)
+      .attr("class", "bar-value")
+      .attr("x", valueAtPlotEnd ? innerW : barWidth)
+      .attr("y", barY + barH + valueGap)
+      .attr("dominant-baseline", "hanging")
       .attr("text-anchor", "end")
       .attr("fill", CCN_COLORS.muted)
       .style("font-size", chartThemeFs(8))
-      .text(valueFormat(val, item));
+      .text(() => valueFormat(val, item));
 
     yCursor += rowHeight;
   });
@@ -683,9 +686,34 @@ function defaultDeltaYearPair() {
 }
 
 function syncDeltaYearState() {
+  if (state.selectedYear !== "all") {
+    syncDeltaYearsForYearFilter();
+    return;
+  }
   const pair = defaultDeltaYearPair();
   if (!state.deltaFromYear && pair) state.deltaFromYear = pair.fromYear;
   if (!state.deltaToYear && pair) state.deltaToYear = pair.toYear;
+}
+
+function conferenceYearPairForSelection(selectedYear) {
+  const years = [...state.data.metadata.years].sort((a, b) => a - b);
+  const idx = years.indexOf(Number(selectedYear));
+  if (idx < 0) return null;
+  if (idx > 0) {
+    return { fromYear: String(years[idx - 1]), toYear: String(years[idx]) };
+  }
+  if (years.length > 1) {
+    return { fromYear: String(years[0]), toYear: String(years[1]) };
+  }
+  return null;
+}
+
+function syncDeltaYearsForYearFilter() {
+  if (state.selectedYear === "all") return;
+  const pair = conferenceYearPairForSelection(state.selectedYear);
+  if (!pair) return;
+  state.deltaFromYear = pair.fromYear;
+  state.deltaToYear = pair.toYear;
 }
 
 function renderDeltaYearControls() {
@@ -999,7 +1027,11 @@ function renderResearchThemeDeltas(submissions) {
   state.deltaToYear = pair.toYear;
   d3.select("#delta-from-year").property("value", pair.fromYear);
   d3.select("#delta-to-year").property("value", pair.toYear);
-  sub.text(`${pair.fromYear} → ${pair.toYear} · change in share of submissions (percentage points)`);
+  sub.text(
+    state.selectedYear === "all"
+      ? `${pair.fromYear} → ${pair.toYear} · change in share of submissions (percentage points)`
+      : `${pair.fromYear} → ${pair.toYear} · filtered to year ${state.selectedYear} · change in theme share (percentage points)`
+  );
 
   const deltaTooltip = (d) =>
     [
@@ -1017,6 +1049,7 @@ function renderResearchThemeDeltas(submissions) {
       getBarFill: (d) => (d.delta >= 0 ? CCN_COLORS.green : CCN_COLORS.pink),
       onBarTooltip: (event, d) => showTooltip(deltaTooltip(d), event),
       valueFormat: (_, d) => formatDeltaPct(d.delta),
+      valueAtPlotEnd: true,
     });
     return;
   }
@@ -1349,6 +1382,7 @@ function renderPaperList() {
 function renderAll() {
   const scrollSnapshot = { x: window.scrollX, y: window.scrollY };
   removeChartScrollWrappers();
+  syncDeltaYearsForYearFilter();
   const submissions = filteredSubmissions();
   const primaryCounts = primaryThemeCounts(submissions);
   const trendSubmissions = submissionsForThemeTrends();
