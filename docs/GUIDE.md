@@ -101,8 +101,6 @@ Other filters: year, full-text search (title, author, abstract, keywords, assign
 | Embedding map | `umap_x`, `umap_y`, primary color from `assigned_topics[0]` |
 | Matching submissions | `title`, `year`, `authors`, `source_url` |
 
-Phone: larger chart labels; UMAP uses nearest-point tap; a tooltip-style label appears centered on the map after filtering (hidden when you scroll past the map).
-
 ## Local preview
 
 ```bash
