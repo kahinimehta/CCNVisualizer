@@ -55,7 +55,7 @@ Build-only artifacts (not loaded by the browser): `data/submissions.json`, `data
 
 ## Research themes (14)
 
-From [CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform), question 1. **Everything else** is not used; legacy labels are migrated at build time.
+The 14 primary research themes were predetermined. They come from responses to the [CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform) Google Form, as well as manual oversight of the clustering process. **Everything else** is not used; legacy labels are migrated at build time.
 
 Reinforcement learning · Motor control & planning · Naturalistic encoding/decoding · Neural population geometry & dynamics · Decision-making and metacognition · Vision · Perception · Language/auditory neuroscience · AI, LLM, & Neural Networks · Memory · Social cognition & theory of mind · Attention & cognitive control / executive function · Clinical / computational psychiatry · Methods and theory
 
