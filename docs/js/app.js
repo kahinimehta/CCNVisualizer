@@ -257,6 +257,58 @@ function renderPhoneThemeBarChart(container, options) {
   });
 }
 
+function renderPhoneDeltaStatements(container, rows, onRowTooltip) {
+  container.selectAll("*").remove();
+  const width = chartContainerWidth(container);
+  const margin = { top: gs(8), right: gs(8), bottom: gs(8), left: gs(8) };
+  const innerW = width - margin.left - margin.right;
+  const fontSize = chartThemePx(PHONE_THEME_TITLE_SIZE);
+  const lineH = fontSize * 1.35;
+  const blockGap = gs(9);
+
+  const blocks = rows.map((row) => {
+    const pct = formatDeltaPct(row.delta);
+    const lines = wrapThemeLabel(`${row.theme}: ${pct}`, innerW, fontSize);
+    return { row, lines, pct, height: lines.length * lineH + blockGap };
+  });
+
+  const height = margin.top + margin.bottom + d3.sum(blocks, (block) => block.height);
+  const svg = appendChartSvg(container, width, height);
+  const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+  let yCursor = 0;
+  blocks.forEach(({ row, lines, pct }) => {
+    lines.forEach((line, lineIndex) => {
+      const lineEl = g
+        .append("text")
+        .attr("x", 0)
+        .attr("y", yCursor + fontSize)
+        .style("font-size", `${fontSize}px`);
+
+      if (line.endsWith(pct)) {
+        const prefix = line.slice(0, line.length - pct.length);
+        lineEl.append("tspan").attr("fill", CCN_COLORS.text).text(prefix);
+        lineEl
+          .append("tspan")
+          .attr("fill", row.delta >= 0 ? CCN_COLORS.green : CCN_COLORS.pink)
+          .text(pct);
+      } else {
+        lineEl.attr("fill", CCN_COLORS.text).text(line);
+      }
+
+      if (lineIndex === 0 && onRowTooltip) {
+        lineEl.style("cursor", "pointer").on("click", (event) => {
+          event.stopPropagation();
+          onRowTooltip(event, row);
+        });
+      }
+
+      yCursor += lineH;
+    });
+    yCursor += blockGap;
+  });
+}
+
 function readCssNumber(property, fallback) {
   const raw = getComputedStyle(document.documentElement).getPropertyValue(property).trim();
   const parsed = parseFloat(raw);
@@ -931,13 +983,12 @@ function updateEmbeddingTopicPill() {
   }
 
   const theme = state.selectedTheme;
-  const count = embeddingDisplayPoints().filter((point) => embeddingPointPrimaryTheme(point) === theme).length;
   const chartWrap = document.querySelector(".embedding-chart-wrap");
   const labelMaxWidth = chartWrap?.clientWidth ? Math.max(120, chartWrap.clientWidth - gs(16)) : 120;
   const label = fitLegendLabel(theme, labelMaxWidth, chartThemePx(PHONE_THEME_TITLE_SIZE));
 
   pill.hidden = false;
-  pill.innerHTML = `<strong>${label}</strong><br/>${count.toLocaleString()} submissions`;
+  pill.innerHTML = `<strong>${label}</strong>`;
   pill.title = theme;
 }
 
@@ -1220,14 +1271,7 @@ function renderResearchThemeDeltas(submissions) {
     ].join("<br/>");
 
   if (isPhoneLayout()) {
-    renderPhoneThemeBarChart(container, {
-      data: rows,
-      getLabel: (d) => d.theme,
-      getValue: (d) => Math.abs(d.delta),
-      getBarFill: (d) => (d.delta >= 0 ? CCN_COLORS.green : CCN_COLORS.pink),
-      onBarTooltip: (event, d) => showTooltip(deltaTooltip(d), event),
-      valueFormat: (_, d) => formatDeltaPct(d.delta),
-    });
+    renderPhoneDeltaStatements(container, rows, (event, d) => showTooltip(deltaTooltip(d), event));
     return;
   }
 
