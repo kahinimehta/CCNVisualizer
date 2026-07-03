@@ -722,11 +722,11 @@ function embeddingDefaultNote() {
   const count = embeddingDisplayPoints().length;
   if (state.selectedTheme) {
     const clearHint = isTouchLike() ? "choose “All topics” to clear" : "choose “All topics” to clear";
-    return `Map highlights dots whose primary topic is “${state.selectedTheme}” · list below includes any submission tagged with this topic · ${clearHint}`;
+    return `Map: primary topic only · List below: “${state.selectedTheme}” anywhere (primary or secondary) · ${clearHint}`;
   }
   return isTouchLike()
-    ? `${count} submissions · dots colored by primary topic · tap a dot to filter by its primary topic · list matches any assigned topic`
-    : `${count} submissions · dots colored by primary topic · click a dot to filter by its primary topic · list matches any assigned topic`;
+    ? `${count} submissions on map (colored by primary topic) · tap a dot to filter · list matches theme anywhere, not primary-only`
+    : `${count} submissions on map (colored by primary topic) · click a dot to filter · list matches theme anywhere, not primary-only`;
 }
 
 function renderEmbeddingNote(note) {
@@ -1321,7 +1321,7 @@ function renderPaperList() {
   countEl.selectAll("*").remove();
 
   const countLabel = state.selectedTheme
-    ? `${submissions.length} submissions tagged with “${state.selectedTheme}”`
+    ? `${submissions.length} papers tagged with “${state.selectedTheme}” (primary or secondary — not primary-only)`
     : `${submissions.length} matching submissions`;
   countEl.append("span").text(countLabel);
 
