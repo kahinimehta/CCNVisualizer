@@ -472,7 +472,6 @@ const state = {
 };
 
 let tooltip = null;
-let embeddingTopicPillObserver = null;
 let phoneTooltipDismissBound = false;
 
 function ensureD3() {
@@ -897,12 +896,15 @@ function syncThemeSelects() {
   d3.select("#embedding-theme-select").property("value", state.selectedTheme);
 }
 
-function filterByPrimaryTopic(point) {
+function filterByPrimaryTopic(point, event) {
   const topic = embeddingPointPrimaryTheme(point);
   if (!topic) return;
   state.selectedTheme = topic;
   syncThemeSelects();
   renderAll();
+  if (isPhoneLayout() && event) {
+    showTooltip(`<strong>${topic}</strong>`, event);
+  }
 }
 
 function embeddingDefaultNote() {
@@ -917,57 +919,6 @@ function embeddingDefaultNote() {
 
 function renderEmbeddingNote(note) {
   note.text(embeddingDefaultNote());
-}
-
-function setupEmbeddingTopicPillObserver() {
-  const chartWrap = document.querySelector(".embedding-chart-wrap");
-  const pill = document.getElementById("embedding-topic-pill");
-  if (!chartWrap || !pill) return;
-
-  if (embeddingTopicPillObserver) {
-    embeddingTopicPillObserver.disconnect();
-    embeddingTopicPillObserver = null;
-  }
-
-  if (!isPhoneLayout()) {
-    pill.classList.remove("is-offscreen");
-    return;
-  }
-
-  embeddingTopicPillObserver = new IntersectionObserver(
-    ([entry]) => {
-      const mapVisible = entry.isIntersecting && entry.intersectionRatio >= 0.08;
-      pill.classList.toggle("is-offscreen", !mapVisible);
-    },
-    { threshold: [0, 0.08, 0.2], rootMargin: "0px" }
-  );
-  embeddingTopicPillObserver.observe(chartWrap);
-}
-
-function updateEmbeddingTopicPill() {
-  const pill = document.getElementById("embedding-topic-pill");
-  if (!pill) return;
-
-  if (!isPhoneLayout() || !state.selectedTheme) {
-    pill.hidden = true;
-    pill.textContent = "";
-    return;
-  }
-
-  const theme = state.selectedTheme;
-  const chartWrap = document.querySelector(".embedding-chart-wrap");
-
-  pill.hidden = false;
-  pill.textContent = "";
-  const label = document.createElement("strong");
-  label.textContent = theme;
-  pill.appendChild(label);
-  pill.title = theme;
-
-  if (chartWrap) {
-    const inset = gs(12);
-    pill.style.maxWidth = `${Math.max(96, chartWrap.clientWidth - inset * 2)}px`;
-  }
 }
 
 function embeddingPointTooltip(point) {
@@ -1368,8 +1319,8 @@ function renderEmbeddingCluster() {
     .attr("fill", "rgba(197,224,243,0.04)")
     .attr("rx", isPhoneLayout() ? gs(8) : s(12));
 
-  const handlePointFilter = (_, point) => {
-    filterByPrimaryTopic(point);
+  const handlePointFilter = (event, point) => {
+    filterByPrimaryTopic(point, event);
   };
 
   const pointStyle = (point) => {
@@ -1440,7 +1391,7 @@ function renderEmbeddingCluster() {
           });
           if (nearest) {
             event.stopPropagation();
-            handlePointFilter(null, nearest);
+            handlePointFilter(event, nearest);
           }
         });
     } else {
@@ -1456,7 +1407,7 @@ function renderEmbeddingCluster() {
         .style("cursor", "pointer")
         .on("click", (event, d) => {
           event.stopPropagation();
-          handlePointFilter(null, d);
+          handlePointFilter(event, d);
         });
     }
   } else {
@@ -1605,8 +1556,9 @@ function renderAll() {
   renderThemeBars(primaryCounts);
   renderResearchThemeDeltas(trendSubmissions);
   renderEmbeddingCluster();
-  updateEmbeddingTopicPill();
   renderPaperList();
+
+  if (isPhoneLayout()) hideTooltip();
 
   d3.select("#year-chips")
     .selectAll(".year-chip")
@@ -1663,14 +1615,12 @@ async function init() {
   renderAll();
 
   setupPhoneTooltipDismiss();
-  setupEmbeddingTopicPillObserver();
 
   let resizeTimer = null;
   window.addEventListener("resize", () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
       if (shouldReflowOnResize()) {
-        setupEmbeddingTopicPillObserver();
         renderAll();
       }
     }, 150);

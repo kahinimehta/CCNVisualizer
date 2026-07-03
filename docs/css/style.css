@@ -457,47 +457,6 @@ a {
   position: relative;
 }
 
-.embedding-topic-pill {
-  position: absolute;
-  bottom: 0.45rem;
-  right: 0.45rem;
-  top: auto;
-  left: auto;
-  z-index: 2;
-  max-width: calc(100% - 0.9rem);
-  padding: 0.22rem 0.38rem;
-  border-radius: calc(6px * var(--ui-scale));
-  border: 1px solid var(--border);
-  background: rgba(10, 24, 41, 0.96);
-  color: var(--text);
-  font-size: 0.62rem;
-  font-weight: 400;
-  line-height: 1.2;
-  text-align: right;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  pointer-events: none;
-  transition: opacity 0.2s ease, visibility 0.2s ease;
-}
-
-.embedding-topic-pill strong {
-  color: var(--ccn-white);
-  font-weight: 600;
-  font-size: inherit;
-}
-
-.embedding-topic-pill.is-offscreen {
-  opacity: 0;
-  visibility: hidden;
-}
-
-@media (min-width: 640px) {
-  .embedding-topic-pill {
-    display: none !important;
-  }
-}
-
 .chart-note {
   margin: 0.65rem 0 0;
   color: var(--muted);
