@@ -1362,6 +1362,14 @@ function pointMatchesThemeFilter(point) {
   return embeddingPointPrimaryTheme(point) === state.selectedTheme;
 }
 
+function embeddingPlotDomain(extent, rangePx, edgePadPx) {
+  const [min, max] = extent;
+  if (min === undefined || max === undefined) return [0, 1];
+  const span = max - min || 1;
+  const pad = (edgePadPx / Math.max(rangePx, 1)) * span;
+  return [min - pad, max + pad];
+}
+
 function renderEmbeddingCluster() {
   const container = d3.select("#embedding-chart");
   container.selectAll("*").remove();
@@ -1403,19 +1411,43 @@ function renderEmbeddingCluster() {
   const plotSide = isPhoneLayout()
     ? width - margin.left - margin.right
     : mobileLegend
-      ? Math.min(plotWidth, s(300))
-      : Math.min(plotWidth, s(520));
+      ? Math.min(plotWidth, s(340))
+      : Math.min(plotWidth, s(600));
   const plotHeight = mobileLegend ? margin.top + plotSide + margin.bottom : plotSide + margin.top + margin.bottom;
   const height = mobileLegend ? plotHeight + legendBlock : plotHeight;
   const svg = appendChartSvg(container, width, height);
   const color = (theme) => themeColor(theme);
   const plotBottom = mobileLegend ? plotHeight - margin.bottom : height - margin.bottom;
+  const plotInnerW = width - margin.left - margin.right;
+  const plotInnerH = plotBottom - margin.top;
   const pointRadius = isPhoneLayout()
     ? { base: 2.4, selected: 3.2 }
     : { base: 7, selected: 8.5 };
+  const maxPointRadius = isPhoneLayout() ? gs(pointRadius.selected) : s(pointRadius.selected);
+  const edgePad = maxPointRadius + (isPhoneLayout() ? gs(4) : s(6));
 
-  const x = d3.scaleLinear().domain(d3.extent(points, (d) => d.x)).nice().range([margin.left, width - margin.right]);
-  const y = d3.scaleLinear().domain(d3.extent(points, (d) => d.y)).nice().range([plotBottom, margin.top]);
+  const x = d3
+    .scaleLinear()
+    .domain(
+      embeddingPlotDomain(
+        d3.extent(points, (d) => d.x),
+        plotInnerW,
+        edgePad
+      )
+    )
+    .nice()
+    .range([margin.left, width - margin.right]);
+  const y = d3
+    .scaleLinear()
+    .domain(
+      embeddingPlotDomain(
+        d3.extent(points, (d) => d.y),
+        plotInnerH,
+        edgePad
+      )
+    )
+    .nice()
+    .range([plotBottom, margin.top]);
 
   svg
     .append("rect")
