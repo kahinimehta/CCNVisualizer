@@ -8,6 +8,8 @@ const CCN_COLORS = {
   card: "#162d47",
 };
 
+const CHART_FONT = '"Open Sans", "Segoe UI", system-ui, sans-serif';
+
 const COMPACT_LAYOUT_MAX_WIDTH = 960;
 const STACKED_LEGEND_MAX_WIDTH = 960;
 const PHONE_MAX_WIDTH = 640;
@@ -92,7 +94,8 @@ function appendChartSvg(container, width, height) {
     .attr("viewBox", `0 0 ${width} ${height}`)
     .attr("width", "100%")
     .attr("preserveAspectRatio", "xMidYMid meet")
-    .style("height", `${height}px`);
+    .style("height", `${height}px`)
+    .style("overflow", "visible");
 }
 
 function wrapThemeLabel(text, maxWidth, fontPx) {
@@ -378,7 +381,7 @@ function themeFs(base) {
 
 let measureTextCanvas = null;
 
-function measureTextWidth(text, fontSizePx, fontFamily = 'system-ui, -apple-system, "Segoe UI", sans-serif') {
+function measureTextWidth(text, fontSizePx, fontFamily = CHART_FONT) {
   if (typeof document === "undefined") return text.length * fontSizePx * 0.58;
   measureTextCanvas = measureTextCanvas || document.createElement("canvas");
   const ctx = measureTextCanvas.getContext("2d");
@@ -390,18 +393,20 @@ function measureTextWidth(text, fontSizePx, fontFamily = 'system-ui, -apple-syst
 function themeBarLabelWidth(containerWidth = 0, labels = []) {
   const w = Math.max(containerWidth || viewportWidth(), 320);
   const labelFont = themeLabelPx(10);
-  const measured =
-    labels.length > 0
-      ? (d3.max(labels, (label) => measureTextWidth(String(label), labelFont)) || 0) + s(14)
-      : s(160);
-
-  if (isPhoneLayout()) {
-    const fraction = w < 400 ? 0.32 : 0.3;
-    return Math.min(measured, Math.max(w * fraction, s(40)));
+  const gap = s(8);
+  let measured = s(160);
+  if (labels.length > 0) {
+    measured =
+      (d3.max(labels, (label) => measureTextWidth(String(label), labelFont)) || 0) * 1.12 + gap + s(14);
   }
 
-  const cap = Math.max(s(96), Math.min(w * 0.4, s(260) * themeLabelFontScale()));
-  return Math.min(measured, cap);
+  if (isPhoneLayout()) {
+    const fraction = w < 400 ? 0.34 : 0.32;
+    return Math.min(measured, Math.max(w * fraction, s(48)));
+  }
+
+  const cap = Math.max(s(120), Math.min(w * 0.55, s(360) * themeLabelFontScale()));
+  return Math.min(Math.max(measured, s(120)), cap);
 }
 
 function themeBarRowHeight() {
@@ -424,18 +429,37 @@ function drawThemeBarLabels(g, data, y, getLabel, options = {}) {
   const baseFont = options.baseFont ?? 10;
   const fill = options.fill ?? CCN_COLORS.muted;
   const gap = options.gap ?? 8;
-  g.selectAll("text.theme-label")
-    .data(data)
-    .join("text")
-    .attr("class", "theme-label")
-    .attr("x", themeBarLabelX(gap))
-    .attr("y", (d) => y(getLabel(d)) + y.bandwidth() / 2)
-    .attr("dy", "0.35em")
-    .attr("text-anchor", "end")
-    .attr("fill", (d) => (typeof fill === "function" ? fill(d) : fill))
-    .style("font-size", themeFs(baseFont))
-    .style("pointer-events", options.pointerEvents || "auto")
-    .text(getLabel);
+  const fontPx = themeLabelPx(baseFont);
+  const maxLabelWidth = options.maxLabelWidth ?? 0;
+  const labelX = themeBarLabelX(gap);
+
+  g.selectAll("g.theme-label-group")
+    .data(data, (d) => getLabel(d))
+    .join("g")
+    .attr("class", "theme-label-group")
+    .attr("transform", (d) => `translate(0,${y(getLabel(d)) + y.bandwidth() / 2})`)
+    .each(function renderThemeLabel(d) {
+      const group = d3.select(this);
+      group.selectAll("*").remove();
+      const label = String(getLabel(d));
+      const lines = maxLabelWidth > 0 ? wrapThemeLabel(label, maxLabelWidth, fontPx) : [label];
+      const text = group
+        .append("text")
+        .attr("class", "theme-label")
+        .attr("x", labelX)
+        .attr("text-anchor", "end")
+        .attr("fill", typeof fill === "function" ? fill(d) : fill)
+        .style("font-size", themeFs(baseFont))
+        .style("pointer-events", options.pointerEvents || "auto");
+
+      lines.forEach((line, i) => {
+        text
+          .append("tspan")
+          .attr("x", labelX)
+          .attr("dy", i === 0 ? "0.35em" : "1.12em")
+          .text(line);
+      });
+    });
 }
 
 function styleThemeAxisLabels(selection) {
@@ -1067,7 +1091,8 @@ function renderThemeBars(counts) {
     .attr("viewBox", `0 0 ${width} ${height}`)
     .attr("width", "100%")
     .attr("preserveAspectRatio", "xMidYMid meet")
-    .style("height", `${height}px`);
+    .style("height", `${height}px`)
+    .style("overflow", "visible");
   const innerW = width - margin.left - margin.right;
   const plotW = themeBarPlotWidth(innerW, data, (d) => String(d.count));
   const x = d3.scaleLinear().domain([0, d3.max(data, (d) => d.count) || 1]).range([0, plotW]);
@@ -1090,7 +1115,7 @@ function renderThemeBars(counts) {
     .on("mousemove", isTouchLike() ? null : (event, d) => showTooltip(`<strong>${d.text}</strong><br/>${d.count} submissions`, event))
     .on("mouseleave", isTouchLike() ? null : hideTooltip);
 
-  drawThemeBarLabels(g, data, y, (d) => d.text);
+  drawThemeBarLabels(g, data, y, (d) => d.text, { maxLabelWidth: leftMargin - s(18) });
 
   g.selectAll("text.value")
     .data(data)
@@ -1261,7 +1286,8 @@ function renderResearchThemeDeltas(submissions) {
     .attr("viewBox", `0 0 ${width} ${height}`)
     .attr("width", "100%")
     .attr("preserveAspectRatio", "xMidYMid meet")
-    .style("height", `${height}px`);
+    .style("height", `${height}px`)
+    .style("overflow", "visible");
   const innerW = width - margin.left - margin.right;
   const maxAbs = d3.max(rows, (d) => Math.abs(d.delta)) || 1;
   const plotW = themeBarPlotWidth(innerW, rows, (d) => formatDeltaPct(d.delta));
@@ -1285,7 +1311,7 @@ function renderResearchThemeDeltas(submissions) {
     .on("mousemove", isTouchLike() ? null : (event, d) => showTooltip(deltaTooltip(d), event))
     .on("mouseleave", isTouchLike() ? null : hideTooltip);
 
-  drawThemeBarLabels(g, rows, y, (d) => d.theme);
+  drawThemeBarLabels(g, rows, y, (d) => d.theme, { maxLabelWidth: leftMargin - s(18) });
 
   g.selectAll("text.value")
     .data(rows)
@@ -1333,8 +1359,8 @@ function renderEmbeddingCluster() {
   const legendReserve = mobileLegend
     ? 0
     : Math.max(
-        s(170),
-        Math.min(s(280), (d3.max(legendThemes, (theme) => measureTextWidth(theme, legendFont)) || 0) + s(40))
+        s(190),
+        Math.min(s(300), (d3.max(legendThemes, (theme) => measureTextWidth(theme, legendFont)) || 0) + s(48))
       );
   const margin = mobileLegend
     ? isPhoneLayout()
