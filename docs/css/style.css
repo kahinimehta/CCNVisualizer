@@ -11,20 +11,39 @@
   --muted: #8fa8c4;
   --border: rgba(197, 224, 243, 0.14);
   --shadow: 0 24px 84px rgba(0, 0, 0, 0.35);
-  --ui-scale: clamp(1, calc(0.6 + 100vw / 500), 3);
-  --max-app-width: min(19200px, calc(100vw - 0.5rem));
+  /* Avoid 100vw on laptops: Safari counts scrollbar width differently than Chrome. */
+  --ui-scale: 1.12;
+  --max-app-width: 100%;
   --sidebar-width: 288px;
   --sidebar-collapsed-width: 0;
 }
 
 html {
-  font-size: clamp(16px, calc(10px + 0.45vw), 18px);
+  font-size: 16px;
+  width: 100%;
+  max-width: 100%;
+  scrollbar-gutter: stable;
+}
+
+body {
+  margin: 0;
+  font-family: "Open Sans", "Segoe UI", system-ui, sans-serif;
+  background: var(--ccn-navy-dark);
+  color: var(--text);
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+  padding-left: env(safe-area-inset-left, 0);
+  padding-right: env(safe-area-inset-right, 0);
 }
 
 @media (min-width: 1600px) {
   :root {
     --sidebar-width: 18rem;
     --ui-scale: clamp(1, calc(0.6 + 100vw / 500), 3);
+    --max-app-width: min(19200px, 100vw);
   }
 
   html {
@@ -42,25 +61,13 @@ html {
   box-sizing: border-box;
 }
 
-body {
-  margin: 0;
-  font-family: "Open Sans", "Segoe UI", system-ui, sans-serif;
-  background: var(--ccn-navy-dark);
-  color: var(--text);
-  min-height: 100vh;
-  min-height: 100dvh;
-  overflow-x: hidden;
-  padding-left: env(safe-area-inset-left, 0);
-  padding-right: env(safe-area-inset-right, 0);
-}
-
 a {
   color: var(--ccn-blue);
 }
 
 .app-shell {
   display: flex;
-  width: min(100%, var(--max-app-width));
+  width: 100%;
   max-width: var(--max-app-width);
   margin-inline: auto;
   min-height: 100vh;
@@ -87,7 +94,7 @@ a {
   left: 0;
   height: 100vh;
   height: 100dvh;
-  width: min(var(--sidebar-width), 88vw);
+  width: min(var(--sidebar-width), 100%);
   z-index: 100;
   box-shadow: var(--shadow);
   border-radius: 0;
@@ -207,7 +214,8 @@ a {
 }
 
 .main-area {
-  flex: 1 1 0%;
+  flex: 1 1 auto;
+  width: 100%;
   min-width: 0;
   max-width: 100%;
   padding: 1rem 0 2rem 1rem;

@@ -13,7 +13,14 @@ const STACKED_LEGEND_MAX_WIDTH = 960;
 const PHONE_MAX_WIDTH = 640;
 
 function viewportWidth() {
-  return document.documentElement.clientWidth || window.innerWidth;
+  const visual = window.visualViewport?.width;
+  const client = document.documentElement.clientWidth;
+  const inner = window.innerWidth;
+  return Math.round(visual || client || inner || 0);
+}
+
+function isDesktopPointer() {
+  return window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 }
 
 function isPhoneLayout() {
@@ -319,11 +326,11 @@ function fitLegendLabel(text, maxWidth, fontPx) {
 }
 
 function isCompactLayout() {
-  return viewportWidth() < COMPACT_LAYOUT_MAX_WIDTH && isTouchLike();
+  return viewportWidth() < COMPACT_LAYOUT_MAX_WIDTH && isTouchLike() && !isDesktopPointer();
 }
 
 function useStackedChartLegend(width = viewportWidth()) {
-  return width < STACKED_LEGEND_MAX_WIDTH && isTouchLike();
+  return width < STACKED_LEGEND_MAX_WIDTH && isTouchLike() && !isDesktopPointer();
 }
 
 function legendColumnCount(width) {
@@ -361,7 +368,7 @@ function measureTextWidth(text, fontSizePx, fontFamily = 'system-ui, -apple-syst
 function themeBarLabelWidth(containerWidth = 0) {
   const w = containerWidth || viewportWidth();
   const maxFromScale = s(300) * themeLabelFontScale();
-  if (w >= COMPACT_LAYOUT_MAX_WIDTH || !isTouchLike()) return maxFromScale;
+  if (w >= COMPACT_LAYOUT_MAX_WIDTH || isDesktopPointer()) return maxFromScale;
 
   const fraction = isPhoneLayout()
     ? w < 400
