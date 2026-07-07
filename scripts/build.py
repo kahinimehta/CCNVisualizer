@@ -493,7 +493,7 @@ def apply_assignments(
             )
         theme_method = (
             f"Anthropic {stats['model']}; dominant + secondary from title/abstract/keywords/track; "
-            f"auto-assigned with manual spot-checks; cache data/llm_theme_cache.json; "
+            f"auto-assigned with some manual spot-checks; cache data/llm_theme_cache.json; "
             f"classified_now={stats['classified_now']}, errors={stats['errors']}"
         )
 

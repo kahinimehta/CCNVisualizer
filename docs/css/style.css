@@ -535,10 +535,6 @@ body:not(.sidebar-collapsed) .main-area {
   font-size: 0.75rem;
 }
 
-#cluster-bars-chart {
-  min-height: calc(320px * var(--ui-scale));
-}
-
 #embedding-chart {
   min-height: calc(420px * var(--ui-scale));
 }
@@ -661,7 +657,6 @@ svg {
     font-size: clamp(12px, calc(6px + 1.45vw), 14px);
   }
 
-  #themes-over-time-chart,
   #year-chart,
   #embedding-chart {
     min-height: 0;
@@ -728,20 +723,6 @@ svg {
   display: block;
   flex: 1;
   min-width: 0;
-}
-
-.cluster-filter-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  margin-top: 0.35rem;
-  padding: 0.2rem 0.55rem;
-  border-radius: 999px;
-  background: rgba(244, 199, 195, 0.18);
-  border: 1px solid rgba(244, 199, 195, 0.45);
-  color: var(--ccn-pink);
-  font-size: 0.72rem;
-  cursor: pointer;
 }
 
 .paper-list {
