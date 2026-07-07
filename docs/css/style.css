@@ -127,16 +127,16 @@ a {
 
 .sidebar-toggle {
   align-self: flex-end;
-  width: 3.1rem;
-  height: 3.1rem;
+  width: 2.45rem;
+  height: 2.45rem;
   border: 1px solid var(--border);
-  border-radius: calc(10px * var(--ui-scale));
+  border-radius: calc(8px * var(--ui-scale));
   background: var(--ccn-navy-card);
   color: var(--ccn-blue);
   cursor: pointer;
   display: grid;
   place-items: center;
-  font-size: 1.65rem;
+  font-size: 1.3rem;
   line-height: 1;
   flex-shrink: 0;
   transition: background 0.15s, color 0.15s, box-shadow 0.15s;
@@ -144,7 +144,7 @@ a {
 
 .sidebar-toggle .toggle-icon {
   display: inline-block;
-  font-size: 1.65rem;
+  font-size: 1.3rem;
   line-height: 1;
 }
 
@@ -224,7 +224,7 @@ a {
   width: 100%;
   min-width: 0;
   max-width: none;
-  padding: 1rem 1rem 2rem 4rem;
+  padding: 1rem 1rem 2rem 3.35rem;
 }
 
 body:not(.sidebar-collapsed) .main-area {
@@ -851,7 +851,7 @@ svg {
 
 @media (min-width: 900px) {
   .main-area {
-    padding: 1.25rem 1.5rem 2rem 4rem;
+    padding: 1.25rem 1.5rem 2rem 3.35rem;
   }
 
   body:not(.sidebar-collapsed) .main-area {
