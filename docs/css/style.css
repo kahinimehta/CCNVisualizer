@@ -13,12 +13,12 @@
   --shadow: 0 24px 84px rgba(0, 0, 0, 0.35);
   --ui-scale: clamp(1, calc(0.6 + 100vw / 500), 3);
   --max-app-width: min(19200px, 100%);
-  --sidebar-width: 18rem;
+  --sidebar-width: 288px;
   --sidebar-collapsed-width: 0;
 }
 
 html {
-  font-size: clamp(16px, calc(10px + 2.8vw), 60px);
+  font-size: 16px;
 }
 
 @media (min-width: 1600px) {
@@ -64,6 +64,7 @@ a {
 
 .sidebar {
   width: var(--sidebar-width);
+  font-size: 16px;
   background: #0a1829;
   border-right: 1px solid var(--border);
   border-radius: 0 calc(12px * var(--ui-scale)) calc(12px * var(--ui-scale)) 0;
@@ -180,7 +181,7 @@ a {
 }
 
 .main-area {
-  flex: 1;
+  flex: 1 1 0%;
   min-width: 0;
   max-width: 100%;
   padding: 1rem 0 2rem 1rem;
@@ -738,15 +739,9 @@ svg {
   }
 }
 
-@media (max-width: 959px) {
+@media (max-width: 1599px) {
   :root {
-    --max-app-width: 100%;
-  }
-
-  .app-shell {
-    width: 100%;
-    max-width: none;
-    padding-inline: 0;
+    --ui-scale: clamp(1, calc(0.9 + 100vw / 2400), 1.35);
   }
 
   .sidebar:not(.collapsed) {
@@ -767,6 +762,18 @@ svg {
     position: relative;
     width: auto;
     box-shadow: none;
+  }
+}
+
+@media (max-width: 959px) {
+  :root {
+    --max-app-width: 100%;
+  }
+
+  .app-shell {
+    width: 100%;
+    max-width: none;
+    padding-inline: 0;
   }
 
   .main-area {
