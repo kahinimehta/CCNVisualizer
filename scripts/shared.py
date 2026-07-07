@@ -73,6 +73,91 @@ TITLE_WEIGHT = 2
 ABSTRACT_WEIGHT = 3
 KEYWORD_WEIGHT = 1
 
+MAX_KEYWORD_CHARS = 72
+MAX_KEYWORD_WORDS = 8
+MAX_KEYWORD_LIST_SIZE = 8
+CORRUPT_KEYWORD_SOURCE_COUNT = 15
+
+KEYWORD_VERBS = frozenset(
+    {
+        "begin",
+        "show",
+        "shows",
+        "using",
+        "used",
+        "note",
+        "noted",
+        "found",
+        "make",
+        "see",
+        "seen",
+        "give",
+        "given",
+        "provide",
+        "provides",
+        "suggest",
+        "suggests",
+        "demonstrate",
+        "demonstrates",
+        "maintain",
+        "asked",
+        "chairing",
+        "inhibit",
+    }
+)
+
+BAD_KEYWORD_FIRST_WORDS = frozenset({"they", "this", "these", "those", "as", "we", "our", "it", "its", "blue"})
+
+BAD_KEYWORD_PREFIXES = (
+    "including ",
+    "and ",
+    "as well",
+    "as noted",
+    "such as ",
+    "however ",
+    "therefore ",
+    "although ",
+    "more importantly",
+    "consistent with ",
+    "previous work ",
+    "in contrast ",
+)
+
+TITLE_KEYWORD_STOPWORDS = frozenset(
+    {
+        "a",
+        "an",
+        "the",
+        "of",
+        "for",
+        "in",
+        "on",
+        "to",
+        "and",
+        "with",
+        "from",
+        "by",
+        "via",
+        "using",
+        "model",
+        "models",
+        "study",
+        "studies",
+        "toward",
+        "towards",
+        "between",
+        "across",
+        "into",
+        "through",
+        "during",
+        "within",
+        "without",
+        "based",
+        "new",
+        "novel",
+    }
+)
+
 _MOJIBAKE_MARKERS = re.compile(
     r"[ÃÄÅÆÇÐÑØÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ\u0080-\u009f]"
 )
@@ -125,6 +210,91 @@ def is_metadata_keyword(keyword: str) -> bool:
     return False
 
 
+def normalize_field_text(text: str) -> str:
+    if not text:
+        return ""
+    cleaned = repair_mojibake(str(text))
+    cleaned = cleaned.replace("\r\n", "\n").replace("\r", "\n")
+    cleaned = re.sub(r"\s*\n\s*", " ", cleaned)
+    return re.sub(r"\s+", " ", cleaned).strip()
+
+
+def is_plausible_keyword(keyword: str) -> bool:
+    normalized = normalize_keyword_phrase(keyword)
+    if not normalized:
+        return False
+    if len(normalized) > MAX_KEYWORD_CHARS:
+        return False
+    words = normalized.split()
+    if len(words) > MAX_KEYWORD_WORDS:
+        return False
+    if len(words) == 1 and re.fullmatch(r"\d{4}", words[0]):
+        return False
+    if words[0] in BAD_KEYWORD_FIRST_WORDS:
+        return False
+    if any(word in KEYWORD_VERBS for word in words):
+        return False
+    if re.search(r"[.!?]\s", normalized):
+        return False
+    if "(" in normalized and ")" not in normalized:
+        return False
+    if any(normalized.startswith(prefix) for prefix in BAD_KEYWORD_PREFIXES):
+        return False
+    if len(normalized) > 36 and ("," in normalized or ";" in normalized):
+        return False
+    prose_markers = (" the ", " and ", " that ", " which ", " with ", " from ", " into ", " their ")
+    if len(words) >= 6 and any(marker in f" {normalized} " for marker in prose_markers):
+        return False
+    return True
+
+
+def derive_title_keywords(title: str, limit: int = 5) -> list[str]:
+    tokens = re.findall(r"[a-z][a-z0-9\-]{2,}", (title or "").lower())
+    cleaned: list[str] = []
+    seen: set[str] = set()
+    for token in tokens:
+        if token in TITLE_KEYWORD_STOPWORDS or token in seen:
+            continue
+        if is_metadata_keyword(token):
+            continue
+        seen.add(token)
+        cleaned.append(token)
+        if len(cleaned) >= limit:
+            break
+    return cleaned
+
+
+def looks_corrupted_keyword_source(cleaned: list[str]) -> bool:
+    if len(cleaned) <= MAX_KEYWORD_LIST_SIZE:
+        return False
+    singles = sum(1 for kw in cleaned if " " not in kw)
+    if singles and singles / len(cleaned) >= 0.35:
+        return True
+    if any(len(kw) > 60 for kw in cleaned):
+        return True
+    if sum(1 for kw in cleaned if not is_plausible_keyword(kw)) > 0:
+        return True
+    return False
+
+
+def compact_corrupted_keywords(keywords: list[str], cleaned: list[str]) -> list[str]:
+    if len(cleaned) <= MAX_KEYWORD_LIST_SIZE:
+        return cleaned
+    if len(keywords or []) <= CORRUPT_KEYWORD_SOURCE_COUNT and not looks_corrupted_keyword_source(cleaned):
+        return cleaned[:MAX_KEYWORD_LIST_SIZE]
+    if not looks_corrupted_keyword_source(cleaned):
+        return cleaned[:MAX_KEYWORD_LIST_SIZE]
+
+    compact = [
+        kw
+        for kw in cleaned
+        if 2 <= len(kw.split()) <= 4 and len(kw) <= 36 and "(" not in kw and is_plausible_keyword(kw)
+    ]
+    if len(compact) >= 2:
+        return compact[:MAX_KEYWORD_LIST_SIZE]
+    return []
+
+
 def sanitize_keyword_list(keywords: list[str]) -> list[str]:
     seen: set[str] = set()
     cleaned: list[str] = []
@@ -134,16 +304,42 @@ def sanitize_keyword_list(keywords: list[str]) -> list[str]:
             continue
         if is_metadata_keyword(normalized):
             continue
+        if not is_plausible_keyword(normalized):
+            continue
         if normalized in seen:
             continue
         seen.add(normalized)
         cleaned.append(normalized)
-    return cleaned
+    return compact_corrupted_keywords(list(keywords or []), cleaned)
 
 
 def sanitize_submission_keywords(submission: dict) -> None:
     for field in ("author_keywords", "extracted_keywords", "keywords"):
         submission[field] = sanitize_keyword_list(list(submission.get(field) or []))
+
+
+def reconcile_submission_keywords(submission: dict) -> None:
+    """Drop scraped prose fragments and keep keywords in sync."""
+    sanitize_submission_keywords(submission)
+    keywords = content_keywords(submission)
+    if len(keywords) > MAX_KEYWORD_LIST_SIZE:
+        keywords = keywords[:MAX_KEYWORD_LIST_SIZE]
+    if not keywords:
+        keywords = derive_title_keywords(str(submission.get("title") or ""))
+    if keywords:
+        submission["keywords"] = keywords
+        if submission.get("author_keywords"):
+            submission["author_keywords"] = keywords
+        return
+
+    topic_area = normalize_keyword_phrase(str(submission.get("topic_area") or ""))
+    track = normalize_keyword_phrase(str(submission.get("track") or ""))
+    fallback = next(
+        (label for label in (topic_area, track) if label and not is_metadata_keyword(label)),
+        None,
+    )
+    if fallback:
+        submission["keywords"] = [fallback]
 
 
 def content_keywords(submission: dict) -> list[str]:
@@ -187,7 +383,7 @@ def repair_mojibake(text: str) -> str:
 def repair_submission_text(submission: dict) -> None:
     for field in ("title", "authors", "abstract", "topic_area", "track"):
         if field in submission and submission[field]:
-            submission[field] = repair_mojibake(str(submission[field]))
+            submission[field] = normalize_field_text(str(submission[field]))
 
     for field in ("author_keywords", "extracted_keywords", "keywords", "secondary_topics", "assigned_topics"):
         values = submission.get(field)

@@ -33,6 +33,7 @@ from pypdf import PdfReader
 from shared import (
     is_gac_update,
     is_metadata_keyword,
+    is_plausible_keyword,
     normalize_keyword_phrase,
     repair_mojibake,
     strip_citation_fragments,
@@ -154,6 +155,7 @@ def normalize_author_keywords(keywords: list[str]) -> list[str]:
             and cleaned not in blocked
             and cleaned not in NOISE_KEYWORDS
             and not is_metadata_keyword(cleaned)
+            and is_plausible_keyword(cleaned)
         ):
             seen.add(cleaned)
             normalized.append(cleaned)

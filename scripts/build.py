@@ -30,6 +30,8 @@ from shared import (
     content_keywords,
     is_gac_update,
     is_year_id_cache_key,
+    normalize_field_text,
+    reconcile_submission_keywords,
     repair_mojibake,
     repair_submission_text,
     sanitize_keyword_list,
@@ -468,7 +470,7 @@ def apply_assignments(
 
     for submission in submissions:
         repair_submission_text(submission)
-        sanitize_submission_keywords(submission)
+        reconcile_submission_keywords(submission)
 
     if skip_classify:
         theme_method = "Skipped classification; reused assigned_topics from submissions.json"
@@ -525,6 +527,7 @@ def build_umap(submissions: list[dict]) -> dict:
 
     for submission in submissions:
         repair_submission_text(submission)
+        reconcile_submission_keywords(submission)
 
     texts = [submission_embedding_text(sub) for sub in submissions]
     vectorizer = TfidfVectorizer(
@@ -643,12 +646,12 @@ def build_csv_rows(payload: dict, embeddings: dict) -> list[dict[str, str]]:
             {
                 "id": sub_id,
                 "year": str(submission.get("year", "")),
-                "title": repair_mojibake(submission.get("title", "")),
-                "author": repair_mojibake(first_author(authors)),
+                "title": normalize_field_text(submission.get("title", "")),
+                "author": normalize_field_text(first_author(authors)),
                 "keywords": join_list(dashboard_keywords(submission)),
                 "assigned_topics": join_list(assigned_topics(submission)),
-                "authors": repair_mojibake(authors),
-                "abstract": repair_mojibake(submission.get("abstract", "")),
+                "authors": normalize_field_text(authors),
+                "abstract": normalize_field_text(submission.get("abstract", "")),
                 "umap_x": "" if not point else str(point.get("x", "")),
                 "umap_y": "" if not point else str(point.get("y", "")),
                 "source_url": submission.get("source_url", ""),
@@ -661,7 +664,7 @@ def build_csv_rows(payload: dict, embeddings: dict) -> list[dict[str, str]]:
 def write_csv(rows: list[dict[str, str]]) -> None:
     for path in CSV_OUTPUT_PATHS:
         path.parent.mkdir(parents=True, exist_ok=True)
-        with path.open("w", encoding="utf-8-sig", newline="") as fh:
+        with path.open("w", encoding="utf-8", newline="") as fh:
             writer = csv.DictWriter(fh, fieldnames=CSV_FIELDS)
             writer.writeheader()
             writer.writerows(rows)
@@ -698,7 +701,7 @@ def merge_2026_csv(payload: dict) -> dict:
             continue
         poster = (row.get("or_number") or "").strip()
         title = (row.get("title") or "").strip()
-        abstract = (row.get("abstract") or "").strip()
+        abstract = normalize_field_text(row.get("abstract") or "")
         primary = (row.get("primary_area") or "").strip()
         secondary = (row.get("secondary_area") or "").strip()
         topic_area = normalize_topic_area(primary, secondary)
@@ -748,6 +751,32 @@ def filter_gac_updates(payload: dict) -> dict:
         years = sorted({sub.get("year") for sub in kept if sub.get("year") is not None})
         payload["metadata"]["years"] = years
     return payload
+
+
+def repair_payload(payload: dict) -> dict:
+    for submission in payload.get("submissions", []):
+        repair_submission_text(submission)
+        reconcile_submission_keywords(submission)
+    return payload
+
+
+def run_repair_only() -> None:
+    if not DATA_PATH.exists():
+        raise SystemExit(f"Missing {DATA_PATH}. Run scripts/scrape.py first.")
+    with DATA_PATH.open(encoding="utf-8") as fh:
+        payload = json.load(fh)
+
+    payload = repair_payload(payload)
+    write_payload(payload)
+
+    if EMBEDDING_PATH.exists():
+        with EMBEDDING_PATH.open(encoding="utf-8") as fh:
+            embeddings = json.load(fh)
+    else:
+        embeddings = {"points": []}
+
+    write_csv(build_csv_rows(payload, embeddings))
+    print(f"Repaired text fields for {len(payload.get('submissions', []))} submissions.")
 
 
 def run_build(
@@ -809,7 +838,15 @@ def main() -> None:
         action="store_true",
         help="Ignore cache and re-classify (respects --classify-limit if set)",
     )
+    parser.add_argument(
+        "--repair-only",
+        action="store_true",
+        help="Sanitize keywords/abstracts in submissions.json and rewrite abstracts.csv (no API/UMAP)",
+    )
     args = parser.parse_args()
+    if args.repair_only:
+        run_repair_only()
+        return
     run_build(
         merge_2026=args.merge_2026,
         skip_classify=args.skip_classify,
