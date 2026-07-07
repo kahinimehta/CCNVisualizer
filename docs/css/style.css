@@ -541,7 +541,7 @@ svg {
   height: 0.01px;
 }
 
-@media (max-width: 639px) {
+@media (max-width: 639px) and (hover: none) and (pointer: coarse) {
   :root {
     --ui-scale: clamp(0.55, calc(0.28 + 100vw / 980), 0.68);
   }

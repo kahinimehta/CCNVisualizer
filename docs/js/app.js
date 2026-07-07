@@ -17,7 +17,7 @@ function viewportWidth() {
 }
 
 function isPhoneLayout() {
-  return viewportWidth() < PHONE_MAX_WIDTH;
+  return viewportWidth() < PHONE_MAX_WIDTH && isTouchLike();
 }
 
 function isTouchLike() {
