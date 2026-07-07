@@ -1173,10 +1173,13 @@ function renderYearChart() {
     .sort((a, b) => a.year - b.year);
 
   const width = chartContainerWidth(container);
-  const height = isPhoneLayout() ? gs(200) : s(300);
+  const axisFont = isPhoneLayout() ? chartThemePx(PHONE_AXIS_LABEL_SIZE) : themeLabelPx(10);
+  const extraBottom = Math.max(isPhoneLayout() ? gs(10) : s(14), axisFont * 1.1);
+  const plotHeight = isPhoneLayout() ? gs(200) : s(300);
+  const height = plotHeight + extraBottom;
   const margin = isPhoneLayout()
-    ? { top: gs(12), right: gs(8), bottom: gs(42), left: gs(28) }
-    : { top: s(24), right: s(24), bottom: s(36), left: s(44) };
+    ? { top: gs(12), right: gs(8), bottom: gs(42) + extraBottom, left: gs(28) }
+    : { top: s(24), right: s(24), bottom: s(36) + extraBottom, left: s(44) };
   const svg = appendChartSvg(container, width, height);
 
   const x = d3
@@ -1234,6 +1237,8 @@ function renderYearChart() {
         .selectAll("text")
         .attr("fill", CCN_COLORS.muted)
         .style("font-size", isPhoneLayout() ? chartThemeFs(PHONE_AXIS_LABEL_SIZE) : themeFs(10))
+        .style("font-family", CHART_FONT)
+        .attr("dy", isPhoneLayout() ? null : "0.82em")
     )
     .call((sel) => {
       if (isPhoneLayout()) {

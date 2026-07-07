@@ -499,6 +499,10 @@ body:not(.sidebar-collapsed) .main-area {
   padding-left: 0.15rem;
 }
 
+#year-chart {
+  padding-bottom: 0.2rem;
+}
+
 #word-cloud {
   height: clamp(12rem, 34vh, 18.75rem);
   min-height: clamp(12rem, 34vh, 18.75rem);
