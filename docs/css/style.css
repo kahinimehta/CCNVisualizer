@@ -182,11 +182,14 @@ a {
 .main-area {
   flex: 1;
   min-width: 0;
+  max-width: 100%;
   padding: 1rem 0 2rem 1rem;
 }
 
 .dashboard-container {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .topbar {
@@ -197,6 +200,9 @@ a {
   padding: 1.25rem 0 1rem;
   margin-bottom: 0;
   text-align: left;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .header-divider {
@@ -241,22 +247,29 @@ a {
 }
 
 .filter-bar {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: nowrap;
   gap: 0.75rem;
-  align-items: end;
+  align-items: flex-end;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .filter-field {
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
+  flex: 1 1 0;
   min-width: 0;
   font-size: 0.75rem;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
+
+.filter-field.search-field {
+  flex: 1.25 1 0;
 }
 
 .filter-field select,
@@ -270,13 +283,17 @@ a {
   font-size: 0.9rem;
   width: 100%;
   min-width: 0;
+  max-width: 100%;
 }
 
 .kpi-row {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 0.75rem;
   margin-bottom: 0.85rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .kpi-card {
@@ -288,6 +305,7 @@ a {
   align-items: center;
   gap: 0.85rem;
   box-shadow: var(--shadow);
+  flex: 1 1 calc(50% - 0.375rem);
   min-width: 0;
 }
 
@@ -699,7 +717,11 @@ svg {
 
 @media (min-width: 720px) {
   .kpi-row {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    flex-wrap: nowrap;
+  }
+
+  .kpi-card {
+    flex: 1 1 0;
   }
 
   .brand {
@@ -767,8 +789,15 @@ svg {
   }
 
   .filter-bar {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+    flex-wrap: wrap;
     max-width: none;
+  }
+
+  .filter-field,
+  .filter-field.search-field {
+    flex: 1 1 100%;
+    width: 100%;
   }
 
   .kpi-card {

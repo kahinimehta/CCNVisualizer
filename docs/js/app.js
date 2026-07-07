@@ -292,7 +292,7 @@ const PHONE_AXIS_LABEL_SIZE = 8.5;
 const PHONE_THEME_TITLE_SIZE = 10.5;
 const PHONE_BAR_VALUE_SIZE = 10.5;
 const PHONE_LEGEND_HEADING_SIZE = 10.5;
-const EMBEDDING_LEGEND_FONT_SIZE = 11.5;
+const EMBEDDING_LEGEND_FONT_SIZE = 14;
 
 function getUiScale() {
   return readCssNumber("--ui-scale", Math.min(3, Math.max(1, 0.6 + viewportWidth() / 500)));
