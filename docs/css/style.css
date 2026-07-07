@@ -494,6 +494,11 @@ body:not(.sidebar-collapsed) .main-area {
   overflow: visible;
 }
 
+#theme-bars,
+#theme-delta-chart {
+  padding-left: 0.15rem;
+}
+
 #word-cloud {
   height: clamp(12rem, 34vh, 18.75rem);
   min-height: clamp(12rem, 34vh, 18.75rem);
@@ -571,6 +576,13 @@ body:not(.sidebar-collapsed) .main-area {
 .card-header-with-controls .filter-field.compact > span,
 .embedding-theme-field > span {
   white-space: nowrap;
+}
+
+.card-header-with-controls .embedding-theme-field {
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  width: min(100%, 14.5rem);
+  min-width: min(14.5rem, 100%);
 }
 
 .delta-year-controls {
@@ -750,13 +762,14 @@ svg {
 }
 
 .embedding-theme-field {
-  flex: 0 0 13rem;
-  min-width: 13rem;
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  min-width: min(14.5rem, 100%);
 }
 
 .embedding-theme-field select {
   width: 100%;
-  min-width: 13rem;
+  min-width: 0;
 }
 
 .paper-item h3 {
@@ -800,7 +813,7 @@ svg {
     align-items: flex-end;
   }
 
-  .filter-field {
+  .filter-bar .filter-field {
     flex: 1 1 0;
     min-width: 0;
   }
@@ -816,6 +829,19 @@ svg {
 
   .topbar {
     text-align: left;
+  }
+}
+
+@media (max-width: 1100px) {
+  #embedding-panel .card-header-with-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #embedding-panel .card-header-with-controls .embedding-theme-field {
+    width: 100%;
+    max-width: 22rem;
+    min-width: 0;
   }
 }
 

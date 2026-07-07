@@ -99,17 +99,27 @@ function appendChartSvg(container, width, height) {
 }
 
 function wrapThemeLabel(text, maxWidth, fontPx) {
-  const maxChars = Math.max(12, Math.floor(maxWidth / (fontPx * 0.48)));
+  const width = Math.max(40, maxWidth);
   const words = String(text).split(/\s+/);
   const lines = [];
   let line = "";
+
+  const pushTruncated = (value) => {
+    let truncated = value;
+    while (truncated.length > 1 && measureTextWidth(`${truncated}…`, fontPx) > width) {
+      truncated = truncated.slice(0, -1);
+    }
+    lines.push(`${truncated}…`);
+  };
+
   for (const word of words) {
     const candidate = line ? `${line} ${word}` : word;
-    if (candidate.length > maxChars && line) {
+    const candidateWidth = measureTextWidth(candidate, fontPx);
+    if (candidateWidth > width && line) {
       lines.push(line);
       line = word;
-    } else if (candidate.length > maxChars) {
-      lines.push(`${candidate.slice(0, Math.max(1, maxChars - 1))}…`);
+    } else if (candidateWidth > width) {
+      pushTruncated(candidate);
       line = "";
     } else {
       line = candidate;
@@ -394,23 +404,55 @@ function themeBarLabelWidth(containerWidth = 0, labels = []) {
   const w = Math.max(containerWidth || viewportWidth(), 320);
   const labelFont = themeLabelPx(10);
   const gap = s(8);
-  let measured = s(160);
-  if (labels.length > 0) {
-    measured =
-      (d3.max(labels, (label) => measureTextWidth(String(label), labelFont)) || 0) * 1.12 + gap + s(14);
-  }
+  const safety = s(18);
 
   if (isPhoneLayout()) {
     const fraction = w < 400 ? 0.34 : 0.32;
-    return Math.min(measured, Math.max(w * fraction, s(48)));
+    const cap = Math.max(w * fraction, s(48));
+    const measured =
+      labels.length > 0
+        ? (d3.max(labels, (label) => measureTextWidth(String(label), labelFont)) || 0) * 1.15 + gap + s(14)
+        : s(160);
+    return Math.min(measured, cap) + safety;
   }
 
-  const cap = Math.max(s(120), Math.min(w * 0.55, s(360) * themeLabelFontScale()));
-  return Math.min(Math.max(measured, s(120)), cap);
+  const cap = Math.max(s(140), Math.min(w * 0.62, s(420) * themeLabelFontScale()));
+  const wrapWidth = Math.max(s(96), cap - gap - s(20));
+  let measured = s(140);
+  for (const label of labels) {
+    const lines = wrapThemeLabel(String(label), wrapWidth, labelFont);
+    for (const line of lines) {
+      measured = Math.max(measured, measureTextWidth(line, labelFont));
+    }
+  }
+
+  return Math.min(Math.max(measured, s(140)) * 1.1 + gap + s(14) + safety, cap + safety);
 }
 
-function themeBarRowHeight() {
-  return Math.max(s(36), themeLabelPx(10) * 1.3);
+function themeBarRowHeight(labels = [], labelWidth = 0) {
+  const fontPx = themeLabelPx(10);
+  const lineHeight = fontPx * 1.15;
+  const wrapWidth = Math.max(s(72), labelWidth - s(18));
+  const maxLines =
+    labels.length > 0
+      ? d3.max(labels, (label) => wrapThemeLabel(String(label), wrapWidth, fontPx).length) || 1
+      : 1;
+  return Math.max(s(36), maxLines * lineHeight + s(10));
+}
+
+function themeBarViewPad() {
+  return s(10);
+}
+
+function appendThemeBarSvg(container, width, height) {
+  const leftPad = themeBarViewPad();
+  return container
+    .append("svg")
+    .attr("viewBox", `${-leftPad} 0 ${width + leftPad} ${height}`)
+    .attr("width", "100%")
+    .attr("preserveAspectRatio", "xMidYMid meet")
+    .style("height", `${height}px`)
+    .style("overflow", "visible");
 }
 
 function themeBarPlotWidth(innerW, rows, formatValue) {
@@ -450,14 +492,12 @@ function drawThemeBarLabels(g, data, y, getLabel, options = {}) {
         .attr("text-anchor", "end")
         .attr("fill", typeof fill === "function" ? fill(d) : fill)
         .style("font-size", themeFs(baseFont))
+        .style("font-family", CHART_FONT)
         .style("pointer-events", options.pointerEvents || "auto");
 
       lines.forEach((line, i) => {
-        text
-          .append("tspan")
-          .attr("x", labelX)
-          .attr("dy", i === 0 ? "0.35em" : "1.12em")
-          .text(line);
+        const dy = i === 0 ? (lines.length === 1 ? "0.35em" : `${-((lines.length - 1) * 0.58)}em`) : "1.15em";
+        text.append("tspan").attr("x", labelX).attr("dy", dy).text(line);
       });
     });
 }
@@ -1082,17 +1122,12 @@ function renderThemeBars(counts) {
 
   const width = chartContainerWidth(container);
   const data = counts;
-  const leftMargin = themeBarLabelWidth(width, data.map((d) => d.text));
-  const rowHeight = themeBarRowHeight();
+  const labels = data.map((d) => d.text);
+  const leftMargin = themeBarLabelWidth(width, labels);
+  const rowHeight = themeBarRowHeight(labels, leftMargin);
   const margin = { top: s(8), right: s(12), bottom: s(8), left: leftMargin };
   const height = margin.top + margin.bottom + data.length * rowHeight;
-  const svg = container
-    .append("svg")
-    .attr("viewBox", `0 0 ${width} ${height}`)
-    .attr("width", "100%")
-    .attr("preserveAspectRatio", "xMidYMid meet")
-    .style("height", `${height}px`)
-    .style("overflow", "visible");
+  const svg = appendThemeBarSvg(container, width, height);
   const innerW = width - margin.left - margin.right;
   const plotW = themeBarPlotWidth(innerW, data, (d) => String(d.count));
   const x = d3.scaleLinear().domain([0, d3.max(data, (d) => d.count) || 1]).range([0, plotW]);
@@ -1274,20 +1309,12 @@ function renderResearchThemeDeltas(submissions) {
   }
 
   const width = chartContainerWidth(container);
-  const leftMargin = themeBarLabelWidth(
-    width,
-    rows.map((d) => d.theme)
-  );
-  const rowHeight = themeBarRowHeight();
+  const labels = rows.map((d) => d.theme);
+  const leftMargin = themeBarLabelWidth(width, labels);
+  const rowHeight = themeBarRowHeight(labels, leftMargin);
   const margin = { top: s(8), right: s(12), bottom: s(8), left: leftMargin };
   const height = margin.top + margin.bottom + rows.length * rowHeight;
-  const svg = container
-    .append("svg")
-    .attr("viewBox", `0 0 ${width} ${height}`)
-    .attr("width", "100%")
-    .attr("preserveAspectRatio", "xMidYMid meet")
-    .style("height", `${height}px`)
-    .style("overflow", "visible");
+  const svg = appendThemeBarSvg(container, width, height);
   const innerW = width - margin.left - margin.right;
   const maxAbs = d3.max(rows, (d) => Math.abs(d.delta)) || 1;
   const plotW = themeBarPlotWidth(innerW, rows, (d) => formatDeltaPct(d.delta));
@@ -1642,6 +1669,15 @@ function renderAll() {
   restorePageScroll(scrollSnapshot.x, scrollSnapshot.y);
 }
 
+async function waitForChartFonts() {
+  if (!document.fonts?.ready) return;
+  try {
+    await document.fonts.ready;
+  } catch {
+    /* ignore font load errors */
+  }
+}
+
 async function init() {
   ensureD3();
 
@@ -1687,6 +1723,7 @@ async function init() {
     renderResearchThemeDeltas(submissionsForThemeTrends());
   });
 
+  await waitForChartFonts();
   renderAll();
 
   setupPhoneTooltipDismiss();
