@@ -18,8 +18,8 @@
       "merged_at": "2026-07-07T14:32:24.252020+00:00",
       "count": 617
     },
-    "research_themes_assigned_at": "2026-07-07T15:03:29.895625+00:00",
-    "research_theme_method": "Anthropic claude-opus-4-6; dominant + secondary from title/abstract/keywords/track; auto-assigned with manual spot-checks; cache data/llm_theme_cache.json; classified_now=425, errors=1",
+    "research_themes_assigned_at": "2026-07-07T23:30:07.905357+00:00",
+    "research_theme_method": "Skipped classification; reused assigned_topics from submissions.json",
     "keyword_source": "author_keywords prefer poster HTML, proceedings/authored PDFs (2017-2025), or 2026 CSV; extracted_keywords only when no author keywords are available; citation fragments and metadata area labels stripped before export",
     "keyword_years": [
       2017,

@@ -98,7 +98,7 @@ def assigned_topics(submission: dict) -> list[str]:
 def embedding_index(embeddings: dict) -> dict:
     lookup: dict[str, dict] = {}
     for point in embeddings.get("points", []):
-        lookup[str(point.get("id", ""))] = point
+        lookup[submission_row_key({"year": point.get("year", ""), "id": point.get("id", "")})] = point
         if point.get("poster_number"):
             lookup[f"2026-{point['poster_number']}"] = point
     return lookup
