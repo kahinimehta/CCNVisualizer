@@ -23,6 +23,8 @@ html {
   width: 100%;
   max-width: 100%;
   scrollbar-gutter: stable;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -66,6 +68,7 @@ a {
 }
 
 .app-shell {
+  position: relative;
   display: flex;
   width: 100%;
   max-width: var(--max-app-width);
@@ -103,7 +106,10 @@ a {
 }
 
 .sidebar.collapsed {
-  position: relative;
+  position: absolute;
+  top: 0.85rem;
+  left: 0.25rem;
+  z-index: 90;
   width: auto;
   min-width: 0;
   padding: 0.35rem 0.2rem;
@@ -214,11 +220,15 @@ a {
 }
 
 .main-area {
-  flex: 1 1 auto;
+  flex: 1 1 0%;
   width: 100%;
   min-width: 0;
-  max-width: 100%;
-  padding: 1rem 0 2rem 1rem;
+  max-width: none;
+  padding: 1rem 1rem 2rem 4rem;
+}
+
+body:not(.sidebar-collapsed) .main-area {
+  padding-left: 1rem;
 }
 
 .dashboard-container {
@@ -287,7 +297,7 @@ a {
   gap: 0.75rem;
   align-items: end;
   width: 100%;
-  max-width: 100%;
+  max-width: none;
   min-width: 0;
 }
 
@@ -307,13 +317,29 @@ a {
   background: var(--ccn-navy-card);
   color: var(--text);
   border: 1px solid var(--border);
-  border-radius: calc(8px * var(--ui-scale));
+  border-radius: 8px;
   padding: 0.5rem 0.75rem;
   font-family: inherit;
   font-size: 0.9rem;
+  line-height: 1.25;
+  height: 2.75rem;
   width: 100%;
   min-width: 0;
   max-width: 100%;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.filter-field input[type="search"] {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.filter-field input[type="search"]::-webkit-search-decoration,
+.filter-field input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .kpi-row {
@@ -746,7 +772,15 @@ svg {
 
 @media (min-width: 720px) {
   .filter-bar {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.35fr);
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.75rem;
+    align-items: flex-end;
+  }
+
+  .filter-field {
+    flex: 1 1 0;
+    min-width: 0;
   }
 
   .kpi-row {
@@ -765,7 +799,11 @@ svg {
 
 @media (min-width: 900px) {
   .main-area {
-    padding: 1.25rem 0 2rem 1.25rem;
+    padding: 1.25rem 1.5rem 2rem 4rem;
+  }
+
+  body:not(.sidebar-collapsed) .main-area {
+    padding-left: 1.5rem;
   }
 
   #embedding-chart {
@@ -785,7 +823,11 @@ svg {
   }
 
   .main-area {
-    padding: 0.85rem 0.75rem 1.5rem;
+    padding: 0.85rem 0.75rem 1.5rem 3.5rem;
+  }
+
+  body:not(.sidebar-collapsed) .main-area {
+    padding-left: 0.75rem;
   }
 
   .topbar {
