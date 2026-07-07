@@ -709,7 +709,7 @@ svg {
   margin: 0;
 }
 
-@media (min-width: 960px) {
+@media (min-width: 720px) {
   .filter-bar {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.35fr);
   }
@@ -717,9 +717,7 @@ svg {
   .kpi-row {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
-}
 
-@media (min-width: 720px) {
   .brand {
     align-items: flex-start;
     text-align: left;

@@ -319,11 +319,11 @@ function fitLegendLabel(text, maxWidth, fontPx) {
 }
 
 function isCompactLayout() {
-  return viewportWidth() < COMPACT_LAYOUT_MAX_WIDTH;
+  return viewportWidth() < COMPACT_LAYOUT_MAX_WIDTH && isTouchLike();
 }
 
 function useStackedChartLegend(width = viewportWidth()) {
-  return width < STACKED_LEGEND_MAX_WIDTH;
+  return width < STACKED_LEGEND_MAX_WIDTH && isTouchLike();
 }
 
 function legendColumnCount(width) {
@@ -361,7 +361,7 @@ function measureTextWidth(text, fontSizePx, fontFamily = 'system-ui, -apple-syst
 function themeBarLabelWidth(containerWidth = 0) {
   const w = containerWidth || viewportWidth();
   const maxFromScale = s(300) * themeLabelFontScale();
-  if (w >= COMPACT_LAYOUT_MAX_WIDTH) return maxFromScale;
+  if (w >= COMPACT_LAYOUT_MAX_WIDTH || !isTouchLike()) return maxFromScale;
 
   const fraction = isPhoneLayout()
     ? w < 400
@@ -1275,7 +1275,7 @@ function renderEmbeddingCluster() {
   }
 
   const width = chartContainerWidth(container);
-  const mobileLegend = useStackedChartLegend(width) || isPhoneLayout();
+  const mobileLegend = isPhoneLayout() || useStackedChartLegend(width);
   const legendFont = isPhoneLayout() ? chartThemePx(PHONE_THEME_TITLE_SIZE) : themeLabelPx(10);
   const legendHeadingFont = isPhoneLayout()
     ? chartThemePx(PHONE_EMBEDDING_LEGEND_HEADING_SIZE)
