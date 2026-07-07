@@ -734,7 +734,13 @@ svg {
 }
 
 .embedding-theme-field {
-  min-width: min(100%, calc(220px * var(--ui-scale)));
+  min-width: min(100%, 12rem);
+  flex: 0 1 14rem;
+}
+
+.embedding-theme-field select {
+  width: 100%;
+  min-width: 0;
 }
 
 .paper-item h3 {

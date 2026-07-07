@@ -32,7 +32,28 @@ function isTouchLike() {
 }
 
 function chartContainerWidth(container) {
-  return container.node()?.clientWidth || viewportWidth();
+  const node = container.node();
+  if (!node) return viewportWidth();
+
+  const readWidth = (el) => {
+    if (!el) return 0;
+    const rect = el.getBoundingClientRect();
+    const width = Math.round(rect.width || el.clientWidth || 0);
+    return Number.isFinite(width) ? width : 0;
+  };
+
+  let width = readWidth(node);
+  if (width >= 160) return width;
+
+  const card = node.closest(".card");
+  width = readWidth(card);
+  if (width >= 160) return Math.max(width - 32, 280);
+
+  const main = node.closest(".main-area");
+  width = readWidth(main);
+  if (width >= 160) return Math.max(width - 48, 280);
+
+  return viewportWidth();
 }
 
 let lastLayoutWidth = viewportWidth();
@@ -70,6 +91,7 @@ function appendChartSvg(container, width, height) {
     .append("svg")
     .attr("viewBox", `0 0 ${width} ${height}`)
     .attr("width", "100%")
+    .attr("preserveAspectRatio", "xMidYMid meet")
     .style("height", `${height}px`);
 }
 
@@ -365,21 +387,21 @@ function measureTextWidth(text, fontSizePx, fontFamily = 'system-ui, -apple-syst
   return ctx.measureText(text).width;
 }
 
-function themeBarLabelWidth(containerWidth = 0) {
-  const w = containerWidth || viewportWidth();
-  const maxFromScale = s(300) * themeLabelFontScale();
-  if (w >= COMPACT_LAYOUT_MAX_WIDTH || isDesktopPointer()) return maxFromScale;
+function themeBarLabelWidth(containerWidth = 0, labels = []) {
+  const w = Math.max(containerWidth || viewportWidth(), 320);
+  const labelFont = themeLabelPx(10);
+  const measured =
+    labels.length > 0
+      ? (d3.max(labels, (label) => measureTextWidth(String(label), labelFont)) || 0) + s(14)
+      : s(160);
 
-  const fraction = isPhoneLayout()
-    ? w < 400
-      ? 0.32
-      : 0.3
-    : w < 400
-      ? 0.45
-      : w < 640
-        ? 0.42
-        : 0.36;
-  return Math.min(maxFromScale, Math.max(w * fraction, s(40)));
+  if (isPhoneLayout()) {
+    const fraction = w < 400 ? 0.32 : 0.3;
+    return Math.min(measured, Math.max(w * fraction, s(40)));
+  }
+
+  const cap = Math.max(s(96), Math.min(w * 0.4, s(260) * themeLabelFontScale()));
+  return Math.min(measured, cap);
 }
 
 function themeBarRowHeight() {
@@ -391,7 +413,7 @@ function themeBarPlotWidth(innerW, rows, formatValue) {
   const maxLabelWidth =
     d3.max(rows, (row) => measureTextWidth(formatValue(row), valueFont)) || measureTextWidth("+0.0%", valueFont);
   const reserve = Math.max(maxLabelWidth + s(12), s(40));
-  return Math.max(s(48), innerW - reserve);
+  return Math.max(s(80), innerW - reserve);
 }
 
 function themeBarLabelX(gap = 8) {
@@ -1034,13 +1056,18 @@ function renderThemeBars(counts) {
 
   container.selectAll("*").remove();
 
-  const width = container.node().clientWidth || s(360);
+  const width = chartContainerWidth(container);
   const data = counts;
-  const leftMargin = themeBarLabelWidth(width);
+  const leftMargin = themeBarLabelWidth(width, data.map((d) => d.text));
   const rowHeight = themeBarRowHeight();
   const margin = { top: s(8), right: s(12), bottom: s(8), left: leftMargin };
   const height = margin.top + margin.bottom + data.length * rowHeight;
-  const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`).attr("width", "100%").style("height", `${height}px`);
+  const svg = container
+    .append("svg")
+    .attr("viewBox", `0 0 ${width} ${height}`)
+    .attr("width", "100%")
+    .attr("preserveAspectRatio", "xMidYMid meet")
+    .style("height", `${height}px`);
   const innerW = width - margin.left - margin.right;
   const plotW = themeBarPlotWidth(innerW, data, (d) => String(d.count));
   const x = d3.scaleLinear().domain([0, d3.max(data, (d) => d.count) || 1]).range([0, plotW]);
@@ -1221,12 +1248,20 @@ function renderResearchThemeDeltas(submissions) {
     return;
   }
 
-  const width = container.node().clientWidth || s(480);
-  const leftMargin = themeBarLabelWidth(width);
+  const width = chartContainerWidth(container);
+  const leftMargin = themeBarLabelWidth(
+    width,
+    rows.map((d) => d.theme)
+  );
   const rowHeight = themeBarRowHeight();
   const margin = { top: s(8), right: s(12), bottom: s(8), left: leftMargin };
   const height = margin.top + margin.bottom + rows.length * rowHeight;
-  const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`).attr("width", "100%").style("height", `${height}px`);
+  const svg = container
+    .append("svg")
+    .attr("viewBox", `0 0 ${width} ${height}`)
+    .attr("width", "100%")
+    .attr("preserveAspectRatio", "xMidYMid meet")
+    .style("height", `${height}px`);
   const innerW = width - margin.left - margin.right;
   const maxAbs = d3.max(rows, (d) => Math.abs(d.delta)) || 1;
   const plotW = themeBarPlotWidth(innerW, rows, (d) => formatDeltaPct(d.delta));
@@ -1295,17 +1330,24 @@ function renderEmbeddingCluster() {
   const legendBlock = mobileLegend
     ? legendTitleHeight + legendRows * legendItemHeight + (isPhoneLayout() ? gs(10) : s(16))
     : 0;
+  const legendReserve = mobileLegend
+    ? 0
+    : Math.max(
+        s(170),
+        Math.min(s(280), (d3.max(legendThemes, (theme) => measureTextWidth(theme, legendFont)) || 0) + s(40))
+      );
   const margin = mobileLegend
     ? isPhoneLayout()
       ? { top: gs(8), right: gs(8), bottom: gs(8), left: gs(8) }
       : { top: s(12), right: s(12), bottom: s(12), left: s(12) }
-    : { top: s(20), right: s(320), bottom: s(20), left: s(20) };
+    : { top: s(20), right: legendReserve, bottom: s(20), left: s(20) };
+  const plotWidth = Math.max(s(220), width - margin.left - margin.right);
   const plotSide = isPhoneLayout()
     ? width - margin.left - margin.right
     : mobileLegend
-      ? s(300)
-      : s(520);
-  const plotHeight = mobileLegend ? margin.top + plotSide + margin.bottom : plotSide;
+      ? Math.min(plotWidth, s(300))
+      : Math.min(plotWidth, s(520));
+  const plotHeight = mobileLegend ? margin.top + plotSide + margin.bottom : plotSide + margin.top + margin.bottom;
   const height = mobileLegend ? plotHeight + legendBlock : plotHeight;
   const svg = appendChartSvg(container, width, height);
   const color = (theme) => themeColor(theme);
