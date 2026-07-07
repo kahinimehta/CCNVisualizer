@@ -292,7 +292,7 @@ const PHONE_AXIS_LABEL_SIZE = 8.5;
 const PHONE_THEME_TITLE_SIZE = 10.5;
 const PHONE_BAR_VALUE_SIZE = 10.5;
 const PHONE_LEGEND_HEADING_SIZE = 10.5;
-const EMBEDDING_LEGEND_FONT_SIZE = 14;
+const PHONE_EMBEDDING_LEGEND_HEADING_SIZE = 12.5;
 
 function getUiScale() {
   return readCssNumber("--ui-scale", Math.min(3, Math.max(1, 0.6 + viewportWidth() / 500)));
@@ -1276,12 +1276,10 @@ function renderEmbeddingCluster() {
 
   const width = chartContainerWidth(container);
   const mobileLegend = useStackedChartLegend(width) || isPhoneLayout();
-  const legendFont = isPhoneLayout()
-    ? chartThemePx(EMBEDDING_LEGEND_FONT_SIZE)
-    : themeLabelPx(EMBEDDING_LEGEND_FONT_SIZE);
+  const legendFont = isPhoneLayout() ? chartThemePx(PHONE_THEME_TITLE_SIZE) : themeLabelPx(10);
   const legendHeadingFont = isPhoneLayout()
-    ? chartThemePx(EMBEDDING_LEGEND_FONT_SIZE)
-    : themeLabelPx(EMBEDDING_LEGEND_FONT_SIZE);
+    ? chartThemePx(PHONE_EMBEDDING_LEGEND_HEADING_SIZE)
+    : themeLabelPx(10);
   const legendItemHeight = isPhoneLayout() ? legendFont * 2.2 : legendFont * 1.5;
   const legendThemes = themeLegendThemes();
   const legendCols = isPhoneLayout() ? 1 : mobileLegend ? (width < 520 ? 1 : 2) : 1;
@@ -1431,7 +1429,7 @@ function renderEmbeddingCluster() {
       .attr("x", 0)
       .attr("y", legendHeadingFont * 0.85)
       .attr("fill", CCN_COLORS.muted)
-      .style("font-size", isPhoneLayout() ? chartThemeFs(EMBEDDING_LEGEND_FONT_SIZE) : themeFs(EMBEDDING_LEGEND_FONT_SIZE))
+      .style("font-size", isPhoneLayout() ? chartThemeFs(PHONE_EMBEDDING_LEGEND_HEADING_SIZE) : themeFs(10))
       .style("font-weight", 600)
       .text("Dominant topic (dot color)");
     legend
@@ -1462,7 +1460,7 @@ function renderEmbeddingCluster() {
           .attr("x", legendTextX)
           .attr("y", legendFont * 0.85)
           .attr("fill", CCN_COLORS.muted)
-          .style("font-size", isPhoneLayout() ? chartThemeFs(EMBEDDING_LEGEND_FONT_SIZE) : themeFs(EMBEDDING_LEGEND_FONT_SIZE))
+          .style("font-size", isPhoneLayout() ? chartThemeFs(PHONE_THEME_TITLE_SIZE) : themeFs(10))
           .text((d) => fitLegendLabel(d, colWidth - legendTextX, legendFont));
       });
   } else {
@@ -1473,7 +1471,7 @@ function renderEmbeddingCluster() {
       .attr("x", 0)
       .attr("y", legendFont * 0.85)
       .attr("fill", CCN_COLORS.muted)
-      .style("font-size", themeFs(EMBEDDING_LEGEND_FONT_SIZE))
+      .style("font-size", themeFs(10))
       .style("font-weight", 600)
       .text("Dominant topic (dot color)");
 
@@ -1501,7 +1499,7 @@ function renderEmbeddingCluster() {
       .attr("x", s(18))
       .attr("y", legendFont * 0.85)
       .attr("fill", CCN_COLORS.muted)
-      .style("font-size", themeFs(EMBEDDING_LEGEND_FONT_SIZE))
+      .style("font-size", themeFs(10))
       .text((d) => fitLegendLabel(d, s(280), legendFont));
   }
 
