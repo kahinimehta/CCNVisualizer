@@ -15,7 +15,9 @@ if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
 from shared import (  # noqa: E402
+    conference_topic_keywords,
     content_keywords,
+    dashboard_keywords,
     normalize_field_text,
     reconcile_submission_keywords,
     repair_submission_text,
@@ -119,7 +121,7 @@ def build_csv_rows(payload: dict, embeddings: dict) -> list[dict[str, str]]:
                 "year": str(submission.get("year", "")),
                 "title": normalize_field_text(submission.get("title", "")),
                 "author": normalize_field_text(first_author(authors)),
-                "keywords": join_list(content_keywords(submission)),
+                "keywords": join_list(dashboard_keywords(submission)),
                 "assigned_topics": join_list(assigned_topics(submission)),
                 "authors": normalize_field_text(authors),
                 "abstract": normalize_field_text(submission.get("abstract", "")),

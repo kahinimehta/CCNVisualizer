@@ -318,28 +318,78 @@ def sanitize_submission_keywords(submission: dict) -> None:
         submission[field] = sanitize_keyword_list(list(submission.get(field) or []))
 
 
+YEARS_TOPIC_AREA_KEYWORDS = frozenset({2025})
+IGNORED_CONFERENCE_LABELS = frozenset({"view pdf", "view paper pdf", ""})
+
+
+def conference_topic_label(submission: dict) -> str | None:
+    for raw in (submission.get("topic_area"), submission.get("track")):
+        label = re.sub(r"\s+", " ", str(raw or "").strip())
+        if not label:
+            continue
+        if label.lower() in IGNORED_CONFERENCE_LABELS:
+            continue
+        return label.lower()
+    return None
+
+
+def conference_topic_keywords(submission: dict) -> list[str]:
+    label = conference_topic_label(submission)
+    return [label] if label else []
+
+
 def reconcile_submission_keywords(submission: dict) -> None:
     """Drop scraped prose fragments and keep keywords in sync."""
     sanitize_submission_keywords(submission)
-    keywords = content_keywords(submission)
-    if len(keywords) > MAX_KEYWORD_LIST_SIZE:
-        keywords = keywords[:MAX_KEYWORD_LIST_SIZE]
-    if not keywords:
-        keywords = derive_title_keywords(str(submission.get("title") or ""))
-    if keywords:
+
+    author = sanitize_keyword_list(list(submission.get("author_keywords") or []))
+    if author:
+        keywords = author[:MAX_KEYWORD_LIST_SIZE]
+        submission["author_keywords"] = keywords
         submission["keywords"] = keywords
-        if submission.get("author_keywords"):
-            submission["author_keywords"] = keywords
         return
 
-    topic_area = normalize_keyword_phrase(str(submission.get("topic_area") or ""))
-    track = normalize_keyword_phrase(str(submission.get("track") or ""))
-    fallback = next(
-        (label for label in (topic_area, track) if label and not is_metadata_keyword(label)),
-        None,
-    )
-    if fallback:
-        submission["keywords"] = [fallback]
+    if submission.get("year") in YEARS_TOPIC_AREA_KEYWORDS:
+        topic_kw = conference_topic_keywords(submission)
+        if topic_kw:
+            submission["keywords"] = topic_kw
+            submission["extracted_keywords"] = []
+            return
+
+    extracted = sanitize_keyword_list(list(submission.get("extracted_keywords") or []))
+    if extracted:
+        submission["keywords"] = extracted[:MAX_KEYWORD_LIST_SIZE]
+        return
+
+    topic_kw = conference_topic_keywords(submission)
+    if topic_kw:
+        submission["keywords"] = topic_kw
+        return
+
+    title_kw = derive_title_keywords(str(submission.get("title") or ""))
+    if title_kw:
+        submission["keywords"] = title_kw
+
+
+def dashboard_keywords(submission: dict) -> list[str]:
+    """Keywords for CSV/dashboard display; preserves conference topic-area labels."""
+    reconciled = [str(kw).strip() for kw in (submission.get("keywords") or []) if str(kw).strip()]
+    if reconciled:
+        return reconciled[:MAX_KEYWORD_LIST_SIZE]
+
+    author = sanitize_keyword_list(list(submission.get("author_keywords") or []))
+    if author:
+        return author[:MAX_KEYWORD_LIST_SIZE]
+
+    topic_kw = conference_topic_keywords(submission)
+    if topic_kw:
+        return topic_kw
+
+    extracted = sanitize_keyword_list(list(submission.get("extracted_keywords") or []))
+    if extracted:
+        return extracted[:MAX_KEYWORD_LIST_SIZE]
+
+    return derive_title_keywords(str(submission.get("title") or ""))
 
 
 def content_keywords(submission: dict) -> list[str]:

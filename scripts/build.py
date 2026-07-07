@@ -28,6 +28,7 @@ from umap.umap_ import UMAP  # avoid umap.__init__ → parametric_umap → tenso
 
 from shared import (
     content_keywords,
+    dashboard_keywords,
     is_gac_update,
     is_year_id_cache_key,
     normalize_field_text,
@@ -594,10 +595,6 @@ def first_author(authors: str) -> str:
 
 def join_list(values: list[str]) -> str:
     return LIST_DELIMITER.join(value for value in values if value)
-
-
-def dashboard_keywords(submission: dict) -> list[str]:
-    return content_keywords(submission) or sanitize_keyword_list(list(submission.get("keywords") or []))
 
 
 def assigned_topics(submission: dict) -> list[str]:
