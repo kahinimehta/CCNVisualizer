@@ -39,7 +39,7 @@ Theme labels are assigned at build time via the [Anthropic API](https://www.anth
 ## Data
 
 ### CCN conference archives
-- **Source:** https://ccneuro.org and year-specific sites (e.g. `2024.ccneuro.org`); provisional 2026 data from `data/ccn-2026-pending-posters.csv`
+- **Source:** https://ccneuro.org and year-specific conference sites (2017–2026)
 - **Usage:** Publicly listed poster/paper metadata (titles, authors, abstracts, keywords, topics)
 - **Note:** CCN submission content remains the property of respective authors. This project aggregates publicly available archive listings for academic visualization. Refer to each conference site's terms and author copyrights for reuse of paper content.
 

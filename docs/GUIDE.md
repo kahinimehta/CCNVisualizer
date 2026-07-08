@@ -1,136 +1,42 @@
 # CCN Visualizer — guide
 
-Technical reference for the pipeline, data, and dashboard. **Entry point:** [README](../README.md) · **Live site:** https://ccn-visualizer.vercel.app/
+[README](../README.md) · **Live:** https://ccn-visualizer.vercel.app/
 
-Runtime loads one file: `docs/data/abstracts.csv` (mirrored at `data/abstracts.csv` after each build).
+The dashboard loads `docs/data/abstracts.csv` (mirrored to `data/abstracts.csv` after each build).
 
 ## Pipeline
 
 ```
-ccneuro.org archives
-        │
-        ▼  scrape.py
-  submissions.json
-        │
-        ▼  build.py
-        ├─ drop [GAC update] posters
-        ├─ Anthropic Claude → assigned_topics (dominant + secondaries)
-        ├─ TF-IDF + UMAP → umap_x / umap_y (layout only)
-        └─ abstracts.csv
-        │
-        ▼  dashboard (docs/)
+scrape.py  →  submissions.json  →  build.py  →  abstracts.csv  →  docs/
 ```
 
-| Script | Output |
-|--------|--------|
-| `scrape.py` | `data/submissions.json` (2017–2025 archives) |
-| `scrape_2026.py` | `data/ccn-2026-pending-posters.csv` (2026 MeetingTrakr listings) |
-| `build.py` | themes, map coords, `data/abstracts.csv` + `docs/data/abstracts.csv` |
-| `shared.py` | keyword cleanup, GAC filter, embedding text, `year:id` row keys |
+| Step | What it does |
+|------|----------------|
+| **scrape.py** | Pulls 2017–2026 from ccneuro.org archives. 2026 uses the MeetingTrakr search listing on `2026.ccneuro.org` (poster number, title, presenter, topic area). Abstracts are carried forward from prior `submissions.json` when detail pages are unavailable. |
+| **build.py** | Drops `[GAC update]` posters; Anthropic Claude assigns `assigned_topics`; TF-IDF + UMAP writes map coordinates; exports CSV. |
+| **Deploy** | Push `main` → Vercel serves `docs/`. Commit `docs/data/abstracts.csv` after rebuilds. |
 
-### Rebuild & flags
-
-Basic setup: [README](../README.md). Useful `build.py` flags:
-
-| Flag | Purpose |
-|------|---------|
-| `--skip-classify` | UMAP/CSV only; keep existing `assigned_topics` |
-| `--classify-limit N` | Smoke test (first N uncached rows) |
-| `--classify-refresh` | Re-classify all (avoid after cache migration) |
-| `--merge-2026` | Merge `data/ccn-2026-pending-posters.csv` before build |
-| `--repair-only` | Sanitize keywords/abstracts in `submissions.json` and rewrite CSV (no API/UMAP) |
-
-**2026 refresh:** `python scripts/scrape_2026.py` → `python scripts/build.py --merge-2026`
-
-If classification stops midway, run `build.py` again to resume from `data/llm_theme_cache.json`.
-
-**Deploy:** push to `main` → Vercel serves `docs/` (no GitHub Pages workflow). Data changes must be committed separately (local rebuild or GitHub Actions below).
-
-**Pre-deployment cleaning:** the live dataset was manually cleaned before deployment — keyword/abstract text repair (`build.py --repair-only` or `--skip-classify` UMAP regen), UTF-8 CSV export without BOM, 2025 keywords from MeetingTrakr topic areas, and theme-label spot-checks. Re-run those steps after major scrapes before pushing `docs/data/abstracts.csv`.
-
-**GitHub Actions** (require `ANTHROPIC_API_KEY` secret):
-
-| Workflow | When to use |
-|----------|-------------|
-| **Update 2026 Data** | Routine 2026 CSV merge + build |
-| **Scrape CCN Data** | Full or partial archive re-scrape + build |
-
-## CSV columns
-
-| Column | Dashboard use |
-|--------|----------------|
-| `year`, `title`, `author`, `authors` | Identity, list, links |
-| `keywords` | Search |
-| `assigned_topics` | Theme filter & charts (pipe-separated; first topic = dominant on the map); **not shown as tags in the list UI** |
-| `abstract` | Search |
-| `umap_x`, `umap_y` | Embedding map layout |
-| `source_url`, `poster_number` | Links |
-
-Build-only (not loaded in browser): `data/submissions.json`, `data/embeddings_all.json`, `data/google_topics.json`, `data/llm_theme_cache.json` (gitignored).
-
-## Research themes (14)
-
-Predetermined from the [CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform) Google Form. **Everything else** is migrated away at build time.
-
-Names/colors: `docs/js/app.js` (`GOOGLE_FORM_TOPICS`); override names via `data/google_topics.json`.
-
-## Theme assignment (build time)
-
-**Anthropic Claude** (`claude-opus-4-6` default) classifies each submission offline during `build.py` — not at dashboard runtime.
-
-**Sent per API call** (one submission at a time):
-
-- Allowed theme list (14 categories)
-- Year, title, abstract, author keywords
-- Conference track/area when present (`topic_area` / `track`)
-
-**Not sent:** authors, poster URL, UMAP coordinates, or the CSV as a file.
-
-**Returns:** one dominant theme (`primary_theme` in cache) plus up to four secondaries → stored as `assigned_topics` (dominant first). Labels were auto-assigned with manual spot-checks before deployment. Cached under **`year:id`** keys in `data/llm_theme_cache.json` (CCN reuses numeric ids across years; never key papers by bare `id` alone).
-
-Legacy id-only caches migrate automatically on the next build. Theme assignment is separate from UMAP layout — themes are not derived from TF-IDF.
-
-### Paper identity (`year:id`)
-
-CCN reuses numeric poster IDs across years (~500 collisions in the full archive). Every pipeline stage and the dashboard treat **`year:id`** as the stable key (`submission_row_key()` in Python; `submissionRowKey()` in `docs/js/app.js`). The embedding map D3 joins and theme lookups use this composite key so all years can be shown together without dropped or mis-colored dots.
-
-## UMAP map (build time)
-
-Weighted text (title ×2, abstract ×3, keywords ×1) → TF-IDF → UMAP (`n_neighbors=15`, `min_dist=0.12`, cosine distance) → `umap_x`, `umap_y`.
-
-Topics are auto-assigned and abstracts usually match several; the map shows how those topics cluster in embedding space. Dot **color** and **highlight** in the UI use the **dominant** topic only (`assigned_topics[0]`). UMAP coordinates are layout only.
-
-## Dashboard behavior
-
-### Theme filter (two behaviors)
-
-| Surface | Matches |
-|---------|---------|
-| **Matching submissions list** | Theme anywhere — dominant **or** secondary |
-| **UMAP map** | Dot color and highlight by **dominant topic only** |
-
-Click/tap a UMAP dot sets the shared theme filter to that dot’s dominant topic. The list then shows papers with mentions of topics related to the selection; the map brightens dots whose dominant topic matches. Topic tags are not shown on list cards.
-
-Other filters: year, full-text search (title, author, abstract, keywords, assigned topics).
-
-### Panels
-
-| Panel | Data |
-|-------|------|
-| KPIs | counts, years, themes |
-| Submissions over time | `year` |
-| Theme ranking / YoY change | `assigned_topics` (any occurrence); default comparison **2017 → 2026** |
-| Embedding map | `umap_x`, `umap_y`; dominant color from `assigned_topics[0]` |
-| Matching submissions | `title`, `year`, `authors`, `source_url` |
-
-### Phone layout (< 640px)
-
-- Larger bar-chart labels; YoY shows `topic: ±x%` above each bar (colored bar; muted label text, green/pink percentage).
-- Chart tooltips (year counts, bar details) open on tap with an **×** dismiss; they hide on scroll.
-- UMAP tap filters by dominant topic only (no topic popup).
-
-## Local preview
+### Commands
 
 ```bash
+pip install -r requirements.txt
+cp .env.example .env
+python scripts/scrape.py
+python scripts/build.py
 python -m http.server 8080 --directory docs
 ```
+
+Useful `build.py` flags: `--skip-classify` (UMAP/CSV only), `--repair-only` (text cleanup, no API/UMAP), `--classify-limit N`, `--classify-refresh`.
+
+**GitHub Actions** (need `ANTHROPIC_API_KEY`): **Scrape CCN Data** (full/partial rescrape + build), **Update 2026 Data** (rescrape 2026 + build).
+
+Production data was manually cleaned before deployment (text repair, theme spot-checks).
+
+## Themes, keys, and filters
+
+- **14 themes** from the [CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform) Google Form. Claude assigns dominant + secondary topics at build time (cached as `year:id` in `data/llm_theme_cache.json`).
+- **Paper keys:** `year:id` — CCN reuses numeric IDs across years; never key by bare `id` alone.
+- **List filter:** matches any assigned topic (dominant or secondary).
+- **UMAP map:** dot color and highlight use the dominant topic only (`assigned_topics[0]`).
+
+Build-only artifacts (not loaded in the browser): `data/submissions.json`, `data/embeddings_all.json`, `data/google_topics.json`, `data/llm_theme_cache.json` (gitignored).

@@ -9,19 +9,19 @@ Interactive dashboard for [Cognitive Computational Neuroscience (CCN)](https://c
 ```bash
 pip install -r requirements.txt
 cp .env.example .env   # ANTHROPIC_API_KEY (never commit)
-python scripts/scrape.py --merge-2026
+python scripts/scrape.py
 python scripts/build.py
 python -m http.server 8080 --directory docs
 ```
 
 ## Docs
 
-**[docs/GUIDE.md](docs/GUIDE.md)** — pipeline, Anthropic theme assignment, UMAP, dashboard filters (list vs map), phone layout, CI workflows.
+**[docs/GUIDE.md](docs/GUIDE.md)** — pipeline, themes, deploy, CI.
 
 **[THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md)** · [licenses on site](https://ccn-visualizer.vercel.app/licenses.html)
 
 ## Deploy
 
-Pushes to `main` deploy the static `docs/` folder on Vercel (not GitHub Pages). Rebuild and commit `docs/data/abstracts.csv` locally or via GitHub Actions (`Update 2026 Data` / `Scrape CCN Data`); see the guide.
+Pushes to `main` deploy the static `docs/` folder on Vercel. Rebuild and commit `docs/data/abstracts.csv` locally or via GitHub Actions; see the guide.
 
-The current production dataset was **manually cleaned** before deployment (text/keyword repair, UMAP regen, theme spot-checks). Repeat that hygiene after major scrapes — details in [docs/GUIDE.md](docs/GUIDE.md).
+Production data was manually cleaned before deployment (text repair, theme spot-checks).

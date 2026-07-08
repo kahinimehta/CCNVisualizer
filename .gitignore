@@ -6,6 +6,7 @@ __pycache__/
 venv/
 data/raw/
 data/backups/
+data/ccn-2026-pending-posters.csv
 data/llm_theme_cache.json
 scripts/ccn_embeddings.npy
 .DS_Store

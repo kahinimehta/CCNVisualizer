@@ -11,14 +11,14 @@ Dependencies:
 
 from __future__ import annotations
 
-import csv
+import difflib
 import hashlib
 import json
 import re
 import time
 from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from dataclasses import asdict, dataclass, field, fields
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from html import unescape
 from io import BytesIO
@@ -41,7 +41,8 @@ from shared import (
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "data"
-CSV_PATH_2026 = ROOT / "data" / "ccn-2026-pending-posters.csv"
+SEARCH_2026_URL = "https://2026.ccneuro.org/search-papers/"
+SEARCH_2026_BASE = "https://2026.ccneuro.org"
 
 SESSION = requests.Session()
 SESSION.headers.update(
@@ -674,7 +675,141 @@ YEAR_CONFIGS = [
     {"year": 2023, "kind": "legacy", "listing_path": "accepted_papers.html", "link_pattern": r"view_paper"},
     {"year": 2024, "kind": "meetingtrakr"},
     {"year": 2025, "kind": "meetingtrakr"},
+    {"year": 2026, "kind": "search2026"},
 ]
+
+
+def normalize_match_title(title: str) -> str:
+    return re.sub(r"\s+", " ", (title or "").strip().lower())
+
+
+def load_prior_submissions_by_title(year: int) -> dict[str, dict]:
+    path = DATA_DIR / "submissions.json"
+    if not path.exists():
+        return {}
+    with path.open(encoding="utf-8") as fh:
+        payload = json.load(fh)
+    index: dict[str, dict] = {}
+    for submission in payload.get("submissions", []):
+        if submission.get("year") != year:
+            continue
+        key = normalize_match_title(submission.get("title", ""))
+        if key:
+            index[key] = submission
+    return index
+
+
+def match_prior_submission(title: str, index: dict[str, dict], *, cutoff: float = 0.86) -> dict | None:
+    key = normalize_match_title(title)
+    if key in index:
+        return index[key]
+    close = difflib.get_close_matches(key, list(index), n=1, cutoff=cutoff)
+    if close:
+        return index[close[0]]
+    return None
+
+
+def unique_2026_poster_number(poster_number: str, poster_id: str) -> str:
+    poster_number = poster_number.strip()
+    if re.match(r"^[A-Za-z]+\d+$", poster_number):
+        return poster_number
+    poster_id = poster_id.strip()
+    if poster_id and poster_id != poster_number:
+        return f"{poster_number}-{poster_id}"
+    return poster_number
+
+
+def fetch_2026_listings() -> list[dict]:
+    SESSION.get(SEARCH_2026_URL, timeout=45)
+    response = SESSION.post(
+        SEARCH_2026_URL,
+        data={
+            "form": "search_form",
+            "search_string": "",
+            "search_papers": "Entire Paper",
+            "submit": "Search",
+        },
+        timeout=120,
+    )
+    response.raise_for_status()
+    soup = BeautifulSoup(response.text, "lxml")
+    listings: list[dict] = []
+    for tr in soup.select("table.listing tr"):
+        cells = tr.find_all("td")
+        if len(cells) < 4:
+            continue
+        link = cells[1].find("a", href=re.compile(r"poster/\?id="))
+        if not link:
+            continue
+        href = link.get("href", "")
+        match = re.search(r"id=([^&'\"]*)", href)
+        poster_id = match.group(1).strip() if match else ""
+        poster_number = cells[0].get_text(strip=True)
+        listings.append(
+            {
+                "poster_id": poster_id or poster_number,
+                "poster_number": poster_number,
+                "title": link.get_text(strip=True),
+                "presenter": cells[2].get_text(strip=True),
+                "topic_area": cells[3].get_text(strip=True),
+            }
+        )
+    if not listings:
+        raise RuntimeError("No 2026 poster rows found in search results.")
+    return listings
+
+
+def scrape_2026_year() -> list[Submission]:
+    print(f"Fetching CCN 2026 listings from {SEARCH_2026_URL}")
+    listings = fetch_2026_listings()
+    print(f"  Found {len(listings)} posters for 2026")
+    prior_by_title = load_prior_submissions_by_title(2026)
+    submissions: list[Submission] = []
+    carried = 0
+    missing = 0
+
+    for item in listings:
+        poster = unique_2026_poster_number(item["poster_number"], item["poster_id"])
+        title = item["title"]
+        topic_label = clean_text(item["topic_area"])
+        topic_area = topic_label.lower() if topic_label else ""
+        prior = match_prior_submission(title, prior_by_title)
+        abstract = clean_text(prior.get("abstract", "")) if prior else ""
+        if abstract:
+            carried += 1
+        else:
+            missing += 1
+        author_keywords, extracted_keywords, keywords = resolve_keyword_fields(
+            author_keywords=[topic_label] if topic_label else [],
+            topic_area=topic_area,
+            title=title,
+        )
+        poster_id = item["poster_id"]
+        detail_url = f"{SEARCH_2026_BASE}/poster/?id={poster_id}" if poster_id else SEARCH_2026_BASE
+        submissions.append(
+            Submission(
+                id=f"2026-{poster or title[:24]}",
+                year=2026,
+                title=title,
+                authors=item["presenter"],
+                abstract=abstract,
+                author_keywords=author_keywords,
+                extracted_keywords=extracted_keywords,
+                keywords=keywords,
+                topic_area=topic_area,
+                poster_number=poster,
+                source_url=detail_url,
+                submission_type="poster",
+            )
+        )
+
+    print(f"  Abstracts carried forward: {carried}; missing: {missing}")
+    submissions.sort(key=lambda s: s.poster_number or s.title)
+    kept = [submission for submission in submissions if not is_gac_update(submission.title)]
+    excluded = len(submissions) - len(kept)
+    if excluded:
+        print(f"  Excluded {excluded} GAC update poster(s) for 2026")
+    return kept
 
 
 def compute_stats(submissions: list[Submission]) -> dict:
@@ -731,6 +866,8 @@ def scrape_all(years: Iterable[int] | None = None) -> dict:
         try:
             if config["kind"] == "meetingtrakr":
                 submissions = scrape_meetingtrakr_year(year)
+            elif config["kind"] == "search2026":
+                submissions = scrape_2026_year()
             elif config["kind"] == "ccn2017":
                 submissions = scrape_2017_year()
             else:
@@ -747,7 +884,7 @@ def scrape_all(years: Iterable[int] | None = None) -> dict:
     payload = {
         "metadata": {
             "scraped_at": datetime.now(timezone.utc).isoformat(),
-            "source": "https://ccneuro.org archives (2017-2025)",
+            "source": "https://ccneuro.org archives (2017-2026)",
             "years": sorted({s.year for s in all_submissions}),
             "total_count": len(all_submissions),
         },
@@ -772,7 +909,7 @@ CACHE_DIR = ROOT / "data" / "pdf_cache"
 YEARS_WITH_PDF = (2017, 2018, 2019, 2022, 2023, 2024, 2025)
 
 KEYWORD_SOURCE_NOTE = (
-    "author_keywords prefer author-provided fields (poster HTML, proceedings PDF, 2026 CSV); "
+    "author_keywords prefer author-provided fields (poster HTML, proceedings PDF, 2026 topic areas); "
     "extracted_keywords only when no author keywords or conference label is available"
 )
 
@@ -1025,68 +1162,6 @@ def needs_pdf_keyword_refresh(submission: dict) -> bool:
 
 SUBMISSION_FIELDS = {f.name for f in fields(Submission)}
 
-def submission_from_dict(item: dict) -> Submission:
-    return Submission(**{key: value for key, value in item.items() if key in SUBMISSION_FIELDS})
-
-def normalize_topic_area_csv(primary: str, secondary: str = "") -> str:
-    parts = [p.strip() for p in re.split(r"[+;,]", f"{primary},{secondary}") if p.strip()]
-    return parts[0].lower() if parts else ""
-
-def author_keywords_from_csv(row: dict[str, str]) -> list[str]:
-    keywords: list[str] = []
-    for field in ("primary_area", "secondary_area"):
-        raw = (row.get(field) or "").strip()
-        if not raw:
-            continue
-        for part in re.split(r"[+;,]", raw):
-            kw = part.strip()
-            if kw:
-                keywords.append(kw)
-    return keywords
-
-def csv_row_to_submission(row: dict[str, str]) -> Submission:
-    poster = (row.get("or_number") or "").strip()
-    title = (row.get("title") or "").strip()
-    abstract = (row.get("abstract") or "").strip()
-    primary = (row.get("primary_area") or "").strip()
-    secondary = (row.get("secondary_area") or "").strip()
-    topic_area = normalize_topic_area_csv(primary, secondary)
-    author_keywords, extracted_keywords, keywords = resolve_keyword_fields(
-        author_keywords=author_keywords_from_csv(row), topic_area=topic_area,
-    )
-    return Submission(
-        id=f"2026-{poster or title[:24]}", year=2026, title=title, authors="", abstract=abstract,
-        author_keywords=author_keywords, extracted_keywords=extracted_keywords, keywords=keywords,
-        topic_area=topic_area, track=(row.get("track") or "").strip(), poster_number=poster,
-        source_url="https://2026.ccneuro.org/", submission_type="poster",
-    )
-
-def load_csv_submissions() -> list[Submission]:
-    if not CSV_PATH_2026.exists():
-        print(f"No 2026 CSV at {CSV_PATH_2026}; skipping merge.")
-        return []
-    with CSV_PATH_2026.open(encoding="utf-8") as fh:
-        rows = list(csv.DictReader(fh))
-    submissions = [csv_row_to_submission(row) for row in rows if (row.get("title") or "").strip()]
-    print(f"Loaded {len(submissions)} submissions from {CSV_PATH_2026.name}")
-    return submissions
-
-def merge_2026_into_payload(payload: dict) -> dict:
-    csv_subs = load_csv_submissions()
-    if not csv_subs:
-        return payload
-    kept = [s for s in payload.get("submissions", []) if s.get("year") != 2026]
-    submission_objs = [submission_from_dict(item) for item in kept] + csv_subs
-    stats = compute_stats(submission_objs)
-    payload["submissions"] = [asdict(s) for s in submission_objs]
-    payload["stats"] = serialize_stats(stats)
-    payload.setdefault("metadata", {})
-    payload["metadata"]["total_count"] = len(submission_objs)
-    payload["metadata"]["years"] = sorted({s.year for s in submission_objs})
-    payload["metadata"]["source"] = "https://ccneuro.org archives (2017-2025) + 2026 pending CSV"
-    payload["metadata"]["csv_2026"] = {"path": str(CSV_PATH_2026.relative_to(ROOT)), "merged_at": datetime.now(timezone.utc).isoformat(), "count": len(csv_subs)}
-    return payload
-
 def _refresh_one(submission: dict) -> tuple[str, bool]:
     had_author = bool(submission.get("author_keywords"))
     if needs_pdf_keyword_refresh(submission):
@@ -1130,7 +1205,6 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Scrape CCN archives → submissions.json")
     parser.add_argument("--years", nargs="*", type=int)
     parser.add_argument("--quick", action="store_true")
-    parser.add_argument("--merge-2026", action="store_true")
     parser.add_argument("--refresh-keywords", action="store_true")
     parser.add_argument("--add-2017", action="store_true")
     args = parser.parse_args()
@@ -1149,14 +1223,10 @@ def main() -> None:
         with path.open(encoding="utf-8") as fh:
             payload = json.load(fh)
         payload = add_2017_to_payload(payload)
-        if args.merge_2026:
-            payload = merge_2026_into_payload(payload)
         write_outputs(backfill_keyword_fields(payload))
         return
     years = [2024, 2025] if args.quick else args.years
     payload = scrape_all(years)
-    if args.merge_2026:
-        payload = merge_2026_into_payload(payload)
     write_outputs(backfill_keyword_fields(payload))
     print(f"Done. Scraped {payload['metadata']['total_count']} submissions.")
 

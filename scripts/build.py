@@ -48,7 +48,6 @@ GOOGLE_TOPICS_PATH = ROOT / "data" / "google_topics.json"
 LLM_CACHE_PATH = ROOT / "data" / "llm_theme_cache.json"
 EMBEDDING_PATH = ROOT / "data" / "embeddings_all.json"
 CSV_OUTPUT_PATHS = (ROOT / "data" / "abstracts.csv", ROOT / "docs" / "data" / "abstracts.csv")
-CSV_PATH_2026 = ROOT / "data" / "ccn-2026-pending-posters.csv"
 LIST_DELIMITER = " | "
 
 DEFAULT_TOPICS = [
@@ -507,7 +506,7 @@ def apply_assignments(
     payload["metadata"]["research_themes_assigned_at"] = datetime.now(timezone.utc).isoformat()
     payload["metadata"]["research_theme_method"] = theme_method
     payload["metadata"]["keyword_source"] = (
-        "author_keywords prefer poster HTML, proceedings/authored PDFs (2017-2025), or 2026 CSV; "
+        "author_keywords prefer poster HTML, proceedings/authored PDFs (2017-2025), or 2026 topic areas; "
         "extracted_keywords only when no author keywords are available; citation fragments and "
         "metadata area labels stripped before export"
     )
@@ -668,74 +667,6 @@ def write_csv(rows: list[dict[str, str]]) -> None:
         print(f"Wrote {path}")
 
 
-def merge_2026_csv(payload: dict) -> dict:
-    if not CSV_PATH_2026.exists():
-        print(f"No 2026 CSV at {CSV_PATH_2026}; skipping merge.")
-        return payload
-
-    def normalize_topic_area(primary: str, secondary: str = "") -> str:
-        parts = [p.strip() for p in re.split(r"[+;,]", f"{primary},{secondary}") if p.strip()]
-        return parts[0].lower() if parts else ""
-
-    def author_keywords_from_csv(row: dict[str, str]) -> list[str]:
-        keywords: list[str] = []
-        for field in ("primary_area", "secondary_area"):
-            raw = (row.get(field) or "").strip()
-            if not raw:
-                continue
-            for part in re.split(r"[+;,]", raw):
-                kw = part.strip()
-                if kw:
-                    keywords.append(kw)
-        return keywords
-
-    with CSV_PATH_2026.open(encoding="utf-8") as fh:
-        rows = list(csv.DictReader(fh))
-
-    new_rows = []
-    for row in rows:
-        if not (row.get("title") or "").strip():
-            continue
-        poster = (row.get("or_number") or "").strip()
-        title = (row.get("title") or "").strip()
-        abstract = normalize_field_text(row.get("abstract") or "")
-        primary = (row.get("primary_area") or "").strip()
-        secondary = (row.get("secondary_area") or "").strip()
-        topic_area = normalize_topic_area(primary, secondary)
-        author_kw = sanitize_keyword_list(author_keywords_from_csv(row))
-        keywords = author_kw or ([topic_area] if topic_area else [])
-        new_rows.append(
-            {
-                "id": f"2026-{poster or title[:24]}",
-                "year": 2026,
-                "title": title,
-                "authors": "",
-                "abstract": abstract,
-                "author_keywords": author_kw,
-                "extracted_keywords": [],
-                "keywords": keywords,
-                "topic_area": topic_area,
-                "track": (row.get("track") or "").strip(),
-                "poster_number": poster,
-                "source_url": "https://2026.ccneuro.org/",
-                "submission_type": "poster",
-            }
-        )
-
-    kept = [s for s in payload.get("submissions", []) if s.get("year") != 2026]
-    payload["submissions"] = kept + new_rows
-    payload.setdefault("metadata", {})
-    payload["metadata"]["total_count"] = len(payload["submissions"])
-    payload["metadata"]["years"] = sorted({s["year"] for s in payload["submissions"]})
-    payload["metadata"]["csv_2026"] = {
-        "path": str(CSV_PATH_2026.relative_to(ROOT)),
-        "merged_at": datetime.now(timezone.utc).isoformat(),
-        "count": len(new_rows),
-    }
-    print(f"Merged {len(new_rows)} rows from {CSV_PATH_2026.name}")
-    return payload
-
-
 def filter_gac_updates(payload: dict) -> dict:
     submissions = payload.get("submissions", [])
     kept = [sub for sub in submissions if not is_gac_update(sub.get("title", ""))]
@@ -779,7 +710,6 @@ def run_repair_only() -> None:
 def run_build(
     payload: dict | None = None,
     *,
-    merge_2026: bool = False,
     skip_classify: bool = False,
     classify_limit: int | None = None,
     classify_refresh: bool = False,
@@ -789,9 +719,6 @@ def run_build(
             raise SystemExit(f"Missing {DATA_PATH}. Run scripts/scrape.py first.")
         with DATA_PATH.open(encoding="utf-8") as fh:
             payload = json.load(fh)
-
-    if merge_2026:
-        payload = merge_2026_csv(payload)
 
     payload = filter_gac_updates(payload)
 
@@ -817,7 +744,6 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Classify themes (Anthropic), compute UMAP, write abstracts.csv"
     )
-    parser.add_argument("--merge-2026", action="store_true", help="Merge 2026 poster CSV before building")
     parser.add_argument(
         "--skip-classify",
         action="store_true",
@@ -845,7 +771,6 @@ def main() -> None:
         run_repair_only()
         return
     run_build(
-        merge_2026=args.merge_2026,
         skip_classify=args.skip_classify,
         classify_limit=args.classify_limit,
         classify_refresh=args.classify_refresh,

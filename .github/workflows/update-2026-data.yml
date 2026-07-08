@@ -19,10 +19,13 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Scrape 2026 posters
+        run: python scripts/scrape.py --years 2026
+
       - name: Build dashboard data
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: python scripts/build.py --merge-2026
+        run: python scripts/build.py
 
       - name: Commit updated data
         run: |
