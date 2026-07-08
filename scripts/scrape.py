@@ -1160,8 +1160,6 @@ def needs_pdf_keyword_refresh(submission: dict) -> bool:
     return bool(submission.get("source_url"))
 
 
-SUBMISSION_FIELDS = {f.name for f in fields(Submission)}
-
 def _refresh_one(submission: dict) -> tuple[str, bool]:
     had_author = bool(submission.get("author_keywords"))
     if needs_pdf_keyword_refresh(submission):
