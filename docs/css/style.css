@@ -666,6 +666,19 @@ svg {
     font-size: clamp(12px, calc(6px + 1.45vw), 14px);
   }
 
+  #embedding-panel .card-header-with-controls {
+    gap: 0.5rem;
+    align-items: stretch;
+  }
+
+  #embedding-panel .card-header-with-controls > div:first-child {
+    flex: 0 1 auto;
+  }
+
+  #embedding-panel .card-header-with-controls .embedding-theme-field {
+    max-width: none;
+  }
+
   #year-chart,
   #embedding-chart {
     min-height: 0;
