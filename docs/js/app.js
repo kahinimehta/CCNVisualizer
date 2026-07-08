@@ -368,13 +368,6 @@ function useStackedChartLegend(width = viewportWidth()) {
   return width < STACKED_LEGEND_MAX_WIDTH && isTouchLike() && !isDesktopPointer();
 }
 
-function legendColumnCount(width) {
-  if (isPhoneLayout()) return 2;
-  if (width < 480) return 1;
-  if (width < 1400) return 2;
-  return 3;
-}
-
 function themeLabelFontScale() {
   if (isPhoneLayout()) return 1;
   const ui = getUiScale();
@@ -536,8 +529,6 @@ const KPI_ICONS = {
   years:
     '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M4 10h16"/><path d="M8 14h3"/><path d="M13 14h3"/></svg>',
 };
-
-const LIST_DELIMITER = " | ";
 
 const GOOGLE_FORM_TOPICS = [
   "Reinforcement learning",
@@ -981,15 +972,6 @@ function renderDeltaYearControls() {
   syncDeltaYearState();
   fromSelect.property("value", state.deltaFromYear);
   toSelect.property("value", state.deltaToYear);
-}
-
-function truncateLabel(text, max = s(28)) {
-  if (!text) return "";
-  return text.length > max ? `${text.slice(0, max)}…` : text;
-}
-
-function displaySubmissions() {
-  return filteredSubmissions();
 }
 
 function syncThemeSelects() {
@@ -1653,7 +1635,7 @@ function renderEmbeddingCluster() {
 }
 
 function renderPaperList() {
-  const submissions = displaySubmissions();
+  const submissions = filteredSubmissions();
   const list = d3.select("#paper-list");
   const countEl = d3.select("#results-count");
   countEl.selectAll("*").remove();

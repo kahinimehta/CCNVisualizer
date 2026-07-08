@@ -23,3 +23,5 @@ python -m http.server 8080 --directory docs
 ## Deploy
 
 Pushes to `main` deploy the static `docs/` folder on Vercel. Rebuild and commit `docs/data/abstracts.csv` locally or via GitHub Actions (`Update 2026 Data` / `Scrape CCN Data`); see the guide.
+
+The current production dataset was **manually cleaned** before deployment (text/keyword repair, UMAP regen, theme spot-checks). Repeat that hygiene after major scrapes — details in [docs/GUIDE.md](docs/GUIDE.md).

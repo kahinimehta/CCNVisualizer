@@ -23,7 +23,8 @@ ccneuro.org archives
 
 | Script | Output |
 |--------|--------|
-| `scrape.py` | `data/submissions.json` |
+| `scrape.py` | `data/submissions.json` (2017–2025 archives) |
+| `scrape_2026.py` | `data/ccn-2026-pending-posters.csv` (2026 MeetingTrakr listings) |
 | `build.py` | themes, map coords, `data/abstracts.csv` + `docs/data/abstracts.csv` |
 | `shared.py` | keyword cleanup, GAC filter, embedding text, `year:id` row keys |
 
@@ -37,10 +38,15 @@ Basic setup: [README](../README.md). Useful `build.py` flags:
 | `--classify-limit N` | Smoke test (first N uncached rows) |
 | `--classify-refresh` | Re-classify all (avoid after cache migration) |
 | `--merge-2026` | Merge `data/ccn-2026-pending-posters.csv` before build |
+| `--repair-only` | Sanitize keywords/abstracts in `submissions.json` and rewrite CSV (no API/UMAP) |
+
+**2026 refresh:** `python scripts/scrape_2026.py` → `python scripts/build.py --merge-2026`
 
 If classification stops midway, run `build.py` again to resume from `data/llm_theme_cache.json`.
 
 **Deploy:** push to `main` → Vercel serves `docs/`. Data changes must be committed separately (local rebuild or GitHub Actions below).
+
+**Pre-deployment cleaning:** the live dataset was manually cleaned before deployment — keyword/abstract text repair (`build.py --repair-only` or `--skip-classify` UMAP regen), UTF-8 CSV export without BOM, 2025 keywords from MeetingTrakr topic areas, and theme-label spot-checks. Re-run those steps after major scrapes before pushing `docs/data/abstracts.csv`.
 
 **GitHub Actions** (require `ANTHROPIC_API_KEY` secret):
 
@@ -80,9 +86,13 @@ Names/colors: `docs/js/app.js` (`GOOGLE_FORM_TOPICS`); override names via `data/
 
 **Not sent:** authors, poster URL, UMAP coordinates, or the CSV as a file.
 
-**Returns:** one dominant theme (`primary_theme` in cache) plus up to four secondaries → stored as `assigned_topics` (dominant first). Labels were auto-assigned with some manual spot-checks. Cached under **`year:id`** keys in `data/llm_theme_cache.json` (CCN reuses numeric ids across years).
+**Returns:** one dominant theme (`primary_theme` in cache) plus up to four secondaries → stored as `assigned_topics` (dominant first). Labels were auto-assigned with manual spot-checks before deployment. Cached under **`year:id`** keys in `data/llm_theme_cache.json` (CCN reuses numeric ids across years; never key papers by bare `id` alone).
 
-Legacy id-only caches migrate automatically on the next build (~538 collision rows re-classified, not a full refresh). Theme assignment is separate from UMAP layout — themes are not derived from TF-IDF.
+Legacy id-only caches migrate automatically on the next build. Theme assignment is separate from UMAP layout — themes are not derived from TF-IDF.
+
+### Paper identity (`year:id`)
+
+CCN reuses numeric poster IDs across years (~500 collisions in the full archive). Every pipeline stage and the dashboard treat **`year:id`** as the stable key (`submission_row_key()` in Python; `submissionRowKey()` in `docs/js/app.js`). The embedding map D3 joins and theme lookups use this composite key so all years can be shown together without dropped or mis-colored dots.
 
 ## UMAP map (build time)
 
