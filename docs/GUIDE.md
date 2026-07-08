@@ -44,7 +44,7 @@ Basic setup: [README](../README.md). Useful `build.py` flags:
 
 If classification stops midway, run `build.py` again to resume from `data/llm_theme_cache.json`.
 
-**Deploy:** push to `main` → Vercel serves `docs/`. Data changes must be committed separately (local rebuild or GitHub Actions below).
+**Deploy:** push to `main` → Vercel serves `docs/` (no GitHub Pages workflow). Data changes must be committed separately (local rebuild or GitHub Actions below).
 
 **Pre-deployment cleaning:** the live dataset was manually cleaned before deployment — keyword/abstract text repair (`build.py --repair-only` or `--skip-classify` UMAP regen), UTF-8 CSV export without BOM, 2025 keywords from MeetingTrakr topic areas, and theme-label spot-checks. Re-run those steps after major scrapes before pushing `docs/data/abstracts.csv`.
 
