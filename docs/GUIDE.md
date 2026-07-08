@@ -2,41 +2,44 @@
 
 [README](../README.md) · **Live:** https://ccn-visualizer.vercel.app/
 
-The dashboard loads `docs/data/abstracts.csv` (mirrored to `data/abstracts.csv` after each build).
+## Workflow
 
-## Pipeline
-
+```mermaid
+flowchart LR
+  A[ccneuro.org archives] --> B[scrape.py]
+  B --> C[submissions.json]
+  C --> D[build.py]
+  D --> E[abstracts.csv]
+  E --> F[docs/ dashboard]
+  F --> G[Vercel deploy]
 ```
-scrape.py  →  submissions.json  →  build.py  →  abstracts.csv  →  docs/
-```
-
-| Step | What it does |
-|------|----------------|
-| **scrape.py** | Pulls 2017–2026 from ccneuro.org archives. 2026 uses the MeetingTrakr search listing on `2026.ccneuro.org` (poster number, title, presenter, topic area). Abstracts are carried forward from prior `submissions.json` when detail pages are unavailable. |
-| **build.py** | Drops `[GAC update]` posters; Anthropic Claude assigns `assigned_topics`; TF-IDF + UMAP writes map coordinates; exports CSV. |
-| **Deploy** | Push `main` → Vercel serves `docs/`. Commit `docs/data/abstracts.csv` after rebuilds. |
-
-### Commands
 
 ```bash
-pip install -r requirements.txt
-cp .env.example .env
-python scripts/scrape.py
-python scripts/build.py
-python -m http.server 8080 --directory docs
+pip install -r requirements.txt && cp .env.example .env
+python scripts/scrape.py && python scripts/build.py
 ```
 
-Useful `build.py` flags: `--skip-classify` (UMAP/CSV only), `--repair-only` (text cleanup, no API/UMAP), `--classify-limit N`, `--classify-refresh`.
+Push `main` → Vercel serves `docs/`. Commit `docs/data/abstracts.csv` after rebuilds.
 
-**GitHub Actions** (need `ANTHROPIC_API_KEY`): **Scrape CCN Data** (full/partial rescrape + build), **Update 2026 Data** (rescrape 2026 + build).
+**Before deployment:** manually check scraped text, theme labels, and spot-fix outliers (production data was cleaned this way).
 
-Production data was manually cleaned before deployment (text repair, theme spot-checks).
+## Data sources
 
-## Themes, keys, and filters
+| Source | Use |
+|--------|-----|
+| [ccneuro.org](https://ccneuro.org) year sites (2017–2026) | Titles, authors, abstracts, keywords, poster metadata |
+| [2026.ccneuro.org](https://2026.ccneuro.org) MeetingTrakr search | 2026 listings (detail pages often lack abstracts; prior data used for carry-forward) |
+| [CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform) Google Form | 14 research theme names (`data/google_topics.json`) |
 
-- **14 themes** from the [CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform) Google Form. Claude assigns dominant + secondary topics at build time (cached as `year:id` in `data/llm_theme_cache.json`).
-- **Paper keys:** `year:id` — CCN reuses numeric IDs across years; never key by bare `id` alone.
-- **List filter:** matches any assigned topic (dominant or secondary).
-- **UMAP map:** dot color and highlight use the dominant topic only (`assigned_topics[0]`).
+Dashboard runtime loads only `docs/data/abstracts.csv`.
 
-Build-only artifacts (not loaded in the browser): `data/submissions.json`, `data/embeddings_all.json`, `data/google_topics.json`, `data/llm_theme_cache.json` (gitignored).
+## LLM (theme assignment)
+
+| | |
+|--|--|
+| **Provider** | [Anthropic API](https://www.anthropic.com/) |
+| **Model** | `claude-opus-4-6` (override with `ANTHROPIC_MODEL` in `.env`) |
+| **When** | Offline in `build.py` — not at dashboard runtime |
+| **Output** | `assigned_topics` per paper (dominant + secondaries), cached as `year:id` in `data/llm_theme_cache.json` |
+
+UMAP map layout uses TF-IDF + UMAP locally; themes are not derived from the embedding.
