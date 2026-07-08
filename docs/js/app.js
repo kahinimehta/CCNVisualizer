@@ -652,6 +652,12 @@ function splitField(value) {
     .filter(Boolean);
 }
 
+function submissionRowKey(submission) {
+  const year = submission?.year ?? "";
+  const paperId = String(submission?.id ?? submission?.poster_number ?? submission?.title ?? "");
+  return `${year}:${paperId}`;
+}
+
 function csvRowToSubmission(row) {
   const umapX = row.umap_x === "" || row.umap_x == null ? null : Number(row.umap_x);
   const umapY = row.umap_y === "" || row.umap_y == null ? null : Number(row.umap_y);
@@ -830,7 +836,8 @@ function appendPrimaryTopicDot(parent, radius, primaryTopic, options = {}) {
 }
 
 function submissionForEmbeddingPoint(point) {
-  return state.data?.submissions?.find((item) => item.id === point.id);
+  const key = submissionRowKey(point);
+  return state.data?.submissions?.find((item) => submissionRowKey(item) === key);
 }
 
 function themeCountsByYear(submissions) {
@@ -1485,7 +1492,7 @@ function renderEmbeddingCluster() {
     .append("g")
     .attr("class", "embedding-points")
     .selectAll("g.embedding-point-group")
-    .data(points, (d) => d.id)
+    .data(points, submissionRowKey)
     .join("g")
     .attr("class", "embedding-point-group")
     .attr("transform", (d) => `translate(${x(d.x)},${y(d.y)})`)
@@ -1536,7 +1543,7 @@ function renderEmbeddingCluster() {
     } else {
       svg
         .selectAll("circle.embedding-hit")
-        .data(points, (d) => d.id)
+        .data(points, submissionRowKey)
         .join("circle")
         .attr("class", "embedding-hit")
         .attr("cx", (d) => x(d.x))
@@ -1661,7 +1668,7 @@ function renderPaperList() {
     .data(submissions)
     .join("div")
     .attr("class", "paper-item")
-    .attr("data-id", (d) => d.id);
+    .attr("data-id", submissionRowKey);
   items.selectAll("*").remove();
 
   items
