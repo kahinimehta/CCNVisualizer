@@ -1253,6 +1253,195 @@ function renderYearChart() {
     .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
 }
 
+function themeShareByYearRows(submissions) {
+  const themes = researchThemeNames();
+  const years = [...(state.data?.metadata?.years || [])].sort((a, b) => a - b);
+  const byYear = themeCountsByYear(submissions);
+  const totals = globalThemeTotals();
+  const orderedThemes = [...themes].sort((a, b) => (totals.get(b) || 0) - (totals.get(a) || 0));
+
+  const rows = years.map((year) => {
+    const yearKey = String(year);
+    const yearMap = byYear.get(yearKey) || new Map();
+    const total = orderedThemes.reduce((sum, theme) => sum + (yearMap.get(theme) || 0), 0);
+    const row = { year, total };
+    orderedThemes.forEach((theme) => {
+      row[theme] = total > 0 ? (yearMap.get(theme) || 0) / total : 0;
+    });
+    return row;
+  });
+
+  return { themes: orderedThemes, rows };
+}
+
+function renderThemeShareByYear() {
+  const container = d3.select("#theme-share-by-year");
+  if (container.empty()) return;
+  container.selectAll("*").remove();
+
+  const submissions = state.data?.submissions || [];
+  const { themes, rows } = themeShareByYearRows(submissions);
+
+  if (!themes.length || !rows.length) {
+    container.append("p").style("color", CCN_COLORS.muted).text("No theme data available.");
+    return;
+  }
+
+  const width = chartContainerWidth(container);
+  const stackedLegend = useStackedChartLegend(width);
+  const legendFont = isPhoneLayout() ? chartThemePx(PHONE_THEME_TITLE_SIZE) : themeLabelPx(10);
+  const legendHeadingFont = isPhoneLayout()
+    ? chartThemePx(PHONE_THEME_TITLE_SIZE)
+    : themeLabelPx(11);
+  const legendCols = isPhoneLayout() ? 1 : stackedLegend ? (width < 520 ? 1 : 2) : 2;
+  const legendItemHeight = isPhoneLayout() ? legendFont * 2.05 : legendFont * 1.55;
+  const legendTitleHeight = legendHeadingFont * 1.6;
+  const legendRows = Math.ceil(themes.length / legendCols);
+  const legendBlock = legendTitleHeight + legendRows * legendItemHeight + (isPhoneLayout() ? gs(12) : s(18));
+
+  const axisFont = isPhoneLayout() ? chartThemePx(PHONE_AXIS_LABEL_SIZE) : themeLabelPx(10);
+  const extraBottom = Math.max(isPhoneLayout() ? gs(10) : s(14), axisFont * 1.1);
+  const plotHeight = isPhoneLayout() ? gs(220) : s(320);
+  const margin = isPhoneLayout()
+    ? { top: gs(12), right: gs(10), bottom: gs(42) + extraBottom, left: gs(34) }
+    : { top: s(20), right: s(20), bottom: s(36) + extraBottom, left: s(48) };
+  const height = plotHeight + legendBlock;
+  const svg = appendChartSvg(container, width, height);
+
+  const years = rows.map((d) => d.year);
+  const x = d3
+    .scaleBand()
+    .domain(years)
+    .range([margin.left, width - margin.right])
+    .padding(isPhoneLayout() ? 0.18 : 0.28);
+  const y = d3
+    .scaleLinear()
+    .domain([0, 1])
+    .range([plotHeight - margin.bottom, margin.top]);
+
+  const stack = d3.stack().keys(themes).order(d3.stackOrderNone).offset(d3.stackOffsetNone);
+  const series = stack(rows);
+  const countsByYear = themeCountsByYear(submissions);
+
+  const shareTooltip = (d) => {
+    const count = countsByYear.get(String(d.data.year))?.get(d.theme) || 0;
+    const share = d.data[d.theme] || 0;
+    return [
+      `<strong>${d.theme}</strong>`,
+      `${d.data.year}: ${(share * 100).toFixed(1)}% of topic assignments`,
+      `${count} submissions tagged`,
+    ].join("<br/>");
+  };
+
+  const g = svg.append("g");
+
+  const bands = g
+    .selectAll("g.theme-share-series")
+    .data(series)
+    .join("g")
+    .attr("class", "theme-share-series")
+    .attr("fill", (d) => themeColor(d.key));
+
+  bands
+    .selectAll("rect")
+    .data((d) => d.map((point) => ({ theme: d.key, ...point })))
+    .join("rect")
+    .attr("x", (d) => x(d.data.year))
+    .attr("y", (d) => y(d[1]))
+    .attr("height", (d) => Math.max(0, y(d[0]) - y(d[1])))
+    .attr("width", x.bandwidth())
+    .attr("rx", isPhoneLayout() ? gs(1) : s(2))
+    .style("cursor", "default")
+    .on("mousemove", isTouchLike() ? null : (event, d) => showTooltip(shareTooltip(d), event))
+    .on("mouseleave", isTouchLike() ? null : hideTooltip)
+    .on("click", isPhoneLayout() ? (event, d) => showTooltip(shareTooltip(d), event) : null);
+
+  g.append("g")
+    .attr("transform", `translate(0,${plotHeight - margin.bottom})`)
+    .call(d3.axisBottom(x).tickFormat(d3.format("d")).tickSizeOuter(0))
+    .call((sel) =>
+      sel
+        .selectAll("text")
+        .attr("fill", CCN_COLORS.muted)
+        .style("font-size", isPhoneLayout() ? chartThemeFs(PHONE_AXIS_LABEL_SIZE) : themeFs(10))
+        .style("font-family", CHART_FONT)
+        .attr("dy", isPhoneLayout() ? null : "0.82em")
+    )
+    .call((sel) => {
+      if (isPhoneLayout()) {
+        sel
+          .selectAll("text")
+          .attr("transform", "rotate(-40)")
+          .attr("text-anchor", "end")
+          .attr("dx", gs(-2))
+          .attr("dy", gs(3));
+      }
+    })
+    .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
+
+  g.append("g")
+    .attr("transform", `translate(${margin.left},0)`)
+    .call(
+      d3
+        .axisLeft(y)
+        .ticks(isPhoneLayout() ? 4 : 5)
+        .tickFormat((d) => d3.format("0.1f")(d))
+    )
+    .call((sel) =>
+      sel
+        .selectAll("text")
+        .attr("fill", CCN_COLORS.muted)
+        .style("font-size", isPhoneLayout() ? chartThemeFs(PHONE_AXIS_LABEL_SIZE) : themeFs(10))
+    )
+    .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
+
+  const legend = svg
+    .append("g")
+    .attr("transform", `translate(${margin.left}, ${plotHeight + (isPhoneLayout() ? gs(4) : s(6))})`);
+  const colWidth = (width - margin.left - margin.right) / legendCols;
+  const legendMarker = isPhoneLayout() ? gs(8) : s(12);
+  const legendTextX = isPhoneLayout() ? gs(12) : s(18);
+
+  legend
+    .append("text")
+    .attr("class", "theme-share-legend-title")
+    .attr("x", 0)
+    .attr("y", legendHeadingFont * 0.85)
+    .attr("fill", CCN_COLORS.muted)
+    .style("font-size", `${legendHeadingFont}px`)
+    .style("font-family", CHART_FONT)
+    .text("Research themes");
+
+  legend
+    .selectAll("g.legend-item")
+    .data(themes)
+    .join("g")
+    .attr("class", "legend-item")
+    .attr("transform", (_, i) => {
+      const col = i % legendCols;
+      const row = Math.floor(i / legendCols);
+      return `translate(${col * colWidth}, ${legendTitleHeight + row * legendItemHeight})`;
+    })
+    .each(function drawLegendItem(theme) {
+      const item = d3.select(this);
+      item
+        .append("rect")
+        .attr("width", legendMarker)
+        .attr("height", legendMarker)
+        .attr("rx", isPhoneLayout() ? gs(2) : s(3))
+        .attr("y", legendFont * 0.15)
+        .attr("fill", themeColor(theme));
+      item
+        .append("text")
+        .attr("x", legendTextX)
+        .attr("y", legendFont * 0.85)
+        .attr("fill", CCN_COLORS.muted)
+        .style("font-size", isPhoneLayout() ? chartThemeFs(PHONE_THEME_TITLE_SIZE) : themeFs(10))
+        .style("font-family", CHART_FONT)
+        .text(fitLegendLabel(theme, colWidth - legendTextX, legendFont));
+    });
+}
+
 function renderResearchThemeDeltas(submissions) {
   const container = d3.select("#theme-delta-chart");
   container.selectAll("*").remove();
@@ -1681,6 +1870,7 @@ function renderAll() {
   renderThemeSelect(primaryCounts);
   renderEmbeddingThemeSelect();
   renderYearChart();
+  renderThemeShareByYear();
   renderThemeBars(primaryCounts);
   renderResearchThemeDeltas(trendSubmissions);
   renderEmbeddingCluster();

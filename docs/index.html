@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=23" />
+  <link rel="stylesheet" href="css/style.css?v=24" />
   <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 </head>
 <body>
@@ -72,6 +72,14 @@
             <p class="card-sub">Poster &amp; paper counts by conference year · click a year to filter</p>
           </div>
           <div id="year-chart"></div>
+        </section>
+
+        <section class="card card-full">
+          <div class="card-header">
+            <h2>Theme share by year</h2>
+            <p class="card-sub">Stacked theme mix for every conference year · normalized to 1 · all years · not affected by filters · submissions can appear in multiple topics</p>
+          </div>
+          <div id="theme-share-by-year"></div>
         </section>
 
         <section class="card card-full">
@@ -151,6 +159,6 @@
 
   <div class="tooltip" id="tooltip"></div>
   <script src="js/sidebar.js?v=20"></script>
-  <script src="js/app.js?v=22"></script>
+  <script src="js/app.js?v=23"></script>
 </body>
 </html>
