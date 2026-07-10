@@ -1257,16 +1257,17 @@ function themeShareByYearRows(submissions) {
   const themes = researchThemeNames();
   const years = [...(state.data?.metadata?.years || [])].sort((a, b) => a - b);
   const byYear = themeCountsByYear(submissions);
+  const yearTotals = submissionCountByYear(submissions);
   const totals = globalThemeTotals();
   const orderedThemes = [...themes].sort((a, b) => (totals.get(b) || 0) - (totals.get(a) || 0));
 
   const rows = years.map((year) => {
     const yearKey = String(year);
     const yearMap = byYear.get(yearKey) || new Map();
-    const total = orderedThemes.reduce((sum, theme) => sum + (yearMap.get(theme) || 0), 0);
-    const row = { year, total };
+    const yearTotal = yearTotals.get(yearKey) || 0;
+    const row = { year, yearTotal };
     orderedThemes.forEach((theme) => {
-      row[theme] = total > 0 ? (yearMap.get(theme) || 0) / total : 0;
+      row[theme] = themeShareOfSubmissions(yearMap.get(theme) || 0, yearTotal) / 100;
     });
     return row;
   });
@@ -1296,15 +1297,15 @@ function renderThemeShareByYear() {
   const legendCols = isPhoneLayout() ? 1 : stackedLegend ? (width < 520 ? 1 : 2) : 2;
   const legendItemHeight = isPhoneLayout() ? legendFont * 2.05 : legendFont * 1.55;
   const legendTitleHeight = legendHeadingFont * 1.6;
-  const legendRows = Math.ceil(themes.length / legendCols);
-  const legendBlock = legendTitleHeight + legendRows * legendItemHeight + (isPhoneLayout() ? gs(12) : s(18));
+  const legendRowsCount = Math.ceil(themes.length / legendCols);
+  const legendBlock = legendTitleHeight + legendRowsCount * legendItemHeight + (isPhoneLayout() ? gs(12) : s(18));
 
   const axisFont = isPhoneLayout() ? chartThemePx(PHONE_AXIS_LABEL_SIZE) : themeLabelPx(10);
   const extraBottom = Math.max(isPhoneLayout() ? gs(10) : s(14), axisFont * 1.1);
   const plotHeight = isPhoneLayout() ? gs(220) : s(320);
   const margin = isPhoneLayout()
-    ? { top: gs(12), right: gs(10), bottom: gs(42) + extraBottom, left: gs(34) }
-    : { top: s(20), right: s(20), bottom: s(36) + extraBottom, left: s(48) };
+    ? { top: gs(12), right: gs(10), bottom: gs(42) + extraBottom, left: gs(40) }
+    : { top: s(20), right: s(20), bottom: s(36) + extraBottom, left: s(52) };
   const height = plotHeight + legendBlock;
   const svg = appendChartSvg(container, width, height);
 
@@ -1314,22 +1315,25 @@ function renderThemeShareByYear() {
     .domain(years)
     .range([margin.left, width - margin.right])
     .padding(isPhoneLayout() ? 0.18 : 0.28);
-  const y = d3
-    .scaleLinear()
-    .domain([0, 1])
-    .range([plotHeight - margin.bottom, margin.top]);
 
   const stack = d3.stack().keys(themes).order(d3.stackOrderNone).offset(d3.stackOffsetNone);
   const series = stack(rows);
+  const maxStack = d3.max(series[series.length - 1], (d) => d[1]) || 1;
+  const y = d3
+    .scaleLinear()
+    .domain([0, Math.max(1, maxStack)])
+    .nice()
+    .range([plotHeight - margin.bottom, margin.top]);
+
   const countsByYear = themeCountsByYear(submissions);
 
   const shareTooltip = (d) => {
     const count = countsByYear.get(String(d.data.year))?.get(d.theme) || 0;
+    const yearTotal = d.data.yearTotal || 0;
     const share = d.data[d.theme] || 0;
     return [
       `<strong>${d.theme}</strong>`,
-      `${d.data.year}: ${(share * 100).toFixed(1)}% of topic assignments`,
-      `${count} submissions tagged`,
+      `${d.data.year}: ${count} / ${yearTotal} submissions (${(share * 100).toFixed(1)}%)`,
     ].join("<br/>");
   };
 
@@ -1385,7 +1389,7 @@ function renderThemeShareByYear() {
       d3
         .axisLeft(y)
         .ticks(isPhoneLayout() ? 4 : 5)
-        .tickFormat((d) => d3.format("0.1f")(d))
+        .tickFormat((d) => `${Math.round(d * 100)}%`)
     )
     .call((sel) =>
       sel
