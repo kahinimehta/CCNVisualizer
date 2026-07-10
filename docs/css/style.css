@@ -496,6 +496,7 @@ body:not(.sidebar-collapsed) .main-area {
 }
 
 #year-chart,
+#theme-share-by-year,
 #theme-bars,
 #theme-delta-chart,
 #embedding-chart {
@@ -508,7 +509,8 @@ body:not(.sidebar-collapsed) .main-area {
   padding-left: 0.15rem;
 }
 
-#year-chart {
+#year-chart,
+#theme-share-by-year {
   padding-bottom: 0.2rem;
 }
 
@@ -680,6 +682,7 @@ svg {
   }
 
   #year-chart,
+  #theme-share-by-year,
   #embedding-chart {
     min-height: 0;
   }
