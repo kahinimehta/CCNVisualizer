@@ -1186,7 +1186,10 @@ function renderThemeBars(counts) {
       getValue: (d) => d.count,
       getBarFill: (d) => themeColor(d.text),
       onBarClick: onThemeBarClick,
-      onBarTooltip: (event, d) => showTooltip(`<strong>${d.text}</strong><br/>${d.count} submissions`, event),
+      onBarTooltip: (event, d) =>
+        showTooltip(`<strong>${d.text}</strong><br/>${d.count} submissions`, event, {
+          mode: isPhoneLayout() ? "tap" : "hover",
+        }),
     });
     return;
   }
@@ -1586,7 +1589,8 @@ function renderResearchThemeDeltas(submissions) {
       getLabel: (d) => `${d.theme}: ${formatDeltaPct(d.delta)}`,
       getValue: (d) => Math.abs(d.delta),
       getBarFill: (d) => (d.delta >= 0 ? CCN_COLORS.green : CCN_COLORS.pink),
-      onBarTooltip: (event, d) => showTooltip(deltaTooltip(d), event),
+      onBarTooltip: (event, d) =>
+        showTooltip(deltaTooltip(d), event, { mode: isPhoneLayout() ? "tap" : "hover" }),
       showValueLabel: false,
       splitLabel: (d) => ({
         prefix: `${d.theme}: `,
