@@ -88,14 +88,20 @@ function removeChartScrollWrappers() {
   });
 }
 
-function appendChartSvg(container, width, height) {
-  return container
+function appendChartSvg(container, width, height, options = {}) {
+  const { preserveAspectRatio = "xMidYMid meet", lockHeight = true } = options;
+  const svg = container
     .append("svg")
     .attr("viewBox", `0 0 ${width} ${height}`)
     .attr("width", "100%")
-    .attr("preserveAspectRatio", "xMidYMid meet")
-    .style("height", `${height}px`)
+    .attr("preserveAspectRatio", preserveAspectRatio)
     .style("overflow", "visible");
+  if (lockHeight) {
+    svg.style("height", `${height}px`);
+  } else {
+    svg.style("height", "auto");
+  }
+  return svg;
 }
 
 function wrapThemeLabel(text, maxWidth, fontPx) {
@@ -551,7 +557,9 @@ const state = {
   data: null,
   selectedYear: "all",
   search: "",
-  selectedTheme: "",
+  selectedThemes: [],
+  themeFilterMode: "include",
+  highlightedSubmissionKey: "",
   deltaFromYear: "",
   deltaToYear: "",
 };
@@ -693,7 +701,8 @@ function buildStateFromCsv(rows) {
 }
 
 function embeddingDisplayPoints() {
-  return submissionsForEmbedding()
+  // Always include every paper with coordinates; filters only highlight matches.
+  return (state.data?.submissions || [])
     .filter((item) => item.umap_x != null && item.umap_y != null)
     .map((item) => ({
       id: item.id,
@@ -727,8 +736,15 @@ function submissionMatchesSearch(item, search) {
   return haystack.includes(search);
 }
 
-function submissionMatchesTheme(submission, theme) {
-  return !theme || assignedTopics(submission).includes(theme);
+function hasThemeFilter() {
+  return state.selectedThemes.length > 0;
+}
+
+function submissionMatchesThemeFilter(submission) {
+  if (!hasThemeFilter()) return true;
+  const assigned = assignedTopics(submission);
+  const hitsAny = state.selectedThemes.some((theme) => assigned.includes(theme));
+  return state.themeFilterMode === "exclude" ? !hitsAny : hitsAny;
 }
 
 function filteredSubmissions() {
@@ -738,19 +754,8 @@ function filteredSubmissions() {
   return submissions.filter((item) => {
     const yearOk = state.selectedYear === "all" || String(item.year) === state.selectedYear;
     const searchOk = !search || submissionMatchesSearch(item, search);
-    const themeOk = submissionMatchesTheme(item, state.selectedTheme);
+    const themeOk = submissionMatchesThemeFilter(item);
     return yearOk && searchOk && themeOk;
-  });
-}
-
-function submissionsForEmbedding() {
-  const { submissions } = state.data;
-  const search = state.search.trim().toLowerCase();
-
-  return submissions.filter((item) => {
-    const yearOk = state.selectedYear === "all" || String(item.year) === state.selectedYear;
-    const searchOk = !search || submissionMatchesSearch(item, search);
-    return yearOk && searchOk;
   });
 }
 
@@ -760,7 +765,7 @@ function submissionsForThemeTrends() {
 
   return submissions.filter((item) => {
     const searchOk = !search || submissionMatchesSearch(item, search);
-    const themeOk = submissionMatchesTheme(item, state.selectedTheme);
+    const themeOk = submissionMatchesThemeFilter(item);
     return searchOk && themeOk;
   });
 }
@@ -803,24 +808,14 @@ function themeColor(theme) {
   return CHART_PALETTE[(index >= 0 ? index : 0) % CHART_PALETTE.length];
 }
 
-function themeLegendThemes() {
-  return googleTopicNames();
-}
-
-function embeddingPointPrimaryTheme(point) {
-  const submission = submissionForEmbeddingPoint(point);
-  return submission ? primaryTheme(submission) : null;
-}
-
-function appendPrimaryTopicDot(parent, radius, primaryTopic, options = {}) {
-  const { opacity = 0.92, stroke = CCN_COLORS.navy, strokeWidth = 1 } = options;
-  const topic = primaryTopic || "Methods and theory";
+function appendBlackDot(parent, radius, options = {}) {
+  const { opacity = 0.88, stroke = "#111827", strokeWidth = 1, fill = "#111827" } = options;
 
   parent
     .append("circle")
     .attr("class", "embedding-point")
     .attr("r", radius)
-    .attr("fill", themeColor(topic))
+    .attr("fill", fill)
     .attr("stroke", stroke)
     .attr("stroke-width", strokeWidth)
     .attr("opacity", opacity);
@@ -974,42 +969,107 @@ function renderDeltaYearControls() {
   toSelect.property("value", state.deltaToYear);
 }
 
-function syncThemeSelects() {
-  d3.select("#theme-select").property("value", state.selectedTheme);
-  d3.select("#embedding-theme-select").property("value", state.selectedTheme);
+function toggleThemeFilter(theme) {
+  if (!theme) return;
+  const idx = state.selectedThemes.indexOf(theme);
+  if (idx >= 0) {
+    state.selectedThemes = state.selectedThemes.filter((item) => item !== theme);
+  } else {
+    state.selectedThemes = [...state.selectedThemes, theme];
+  }
+  state.highlightedSubmissionKey = "";
+  renderAll();
 }
 
-function filterByPrimaryTopic(point) {
-  const topic = embeddingPointPrimaryTheme(point);
-  if (!topic) return;
-  state.selectedTheme = topic;
-  syncThemeSelects();
+function clearThemeFilters() {
+  state.selectedThemes = [];
+  state.highlightedSubmissionKey = "";
   renderAll();
+}
+
+function setThemeFilterMode(mode) {
+  state.themeFilterMode = mode === "exclude" ? "exclude" : "include";
+  state.highlightedSubmissionKey = "";
+  renderAll();
+}
+
+function ensureSubmissionVisible(submission) {
+  if (!submission) return;
+  const key = submissionRowKey(submission);
+  const isVisible = () => filteredSubmissions().some((item) => submissionRowKey(item) === key);
+  if (isVisible()) return;
+
+  state.selectedThemes = [];
+
+  if (state.selectedYear !== "all" && String(submission.year) !== state.selectedYear) {
+    state.selectedYear = String(submission.year);
+    d3.select("#year-select").property("value", state.selectedYear);
+  }
+
+  const search = state.search.trim().toLowerCase();
+  if (search && !submissionMatchesSearch(submission, search)) {
+    state.search = "";
+    d3.select("#search-input").property("value", "");
+  }
+}
+
+function focusSubmissionFromPoint(point) {
+  const submission = submissionForEmbeddingPoint(point);
+  if (!submission) return;
+  ensureSubmissionVisible(submission);
+  state.highlightedSubmissionKey = submissionRowKey(submission);
+  renderAll();
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => scrollToHighlightedSubmission());
+  });
+}
+
+function scrollToHighlightedSubmission() {
+  if (!state.highlightedSubmissionKey) return;
+  const el = document.querySelector(
+    `.paper-item[data-id="${CSS.escape(state.highlightedSubmissionKey)}"]`
+  );
+  if (el) {
+    el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
 }
 
 function embeddingDefaultNote() {
   const count = embeddingDisplayPoints().length;
-  if (state.selectedTheme) {
-    return "";
+  const highlighted = embeddingHighlightCount();
+  if (state.highlightedSubmissionKey) {
+    return "Jumped to highlighted submission below — topic tags are shown on the card";
+  }
+  if (hasThemeFilter()) {
+    const mode = state.themeFilterMode === "exclude" ? "excluding" : "including";
+    const labels = state.selectedThemes.join(", ");
+    return `${count} papers on map · ${highlighted} highlighted (${mode} ${labels}) · click/tap a dot to open that paper`;
   }
   return isTouchLike()
-    ? `${count} submissions · colored by dominant topic · tap a dot to filter`
-    : `${count} submissions · colored by dominant topic · click a dot to filter`;
+    ? `${count} submissions · black dots · tap a dot to view its topic tags below · use topic chips to highlight`
+    : `${count} submissions · black dots · click a dot to view its topic tags below · use topic chips to highlight`;
 }
 
 function renderEmbeddingNote(note) {
   note.text(embeddingDefaultNote());
 }
 
-function embeddingPointTooltip(point) {
-  return embeddingPointPrimaryTheme(point) || "Methods and theory";
+function embeddingPointTopics(point) {
+  const submission = submissionForEmbeddingPoint(point);
+  return submission ? assignedTopics(submission) : [];
 }
 
-function themeLegendTooltip(themeName) {
-  const count = embeddingDisplayPoints().filter(
-    (point) => embeddingPointPrimaryTheme(point) === themeName
-  ).length;
-  return `<strong>${themeName}</strong><br/>${count} on map`;
+function embeddingPointTooltip(point) {
+  const submission = submissionForEmbeddingPoint(point);
+  const topics = embeddingPointTopics(point);
+  const title = submission?.title || point.title || "Submission";
+  const topicLine = topics.length ? topics.join(" · ") : "No topics assigned";
+  const action = isTouchLike() ? "Tap" : "Click";
+  return `<strong>${title}</strong><br/>${topicLine}<br/><em>${action} to view this submission below</em>`;
+}
+
+function embeddingHighlightCount() {
+  return embeddingDisplayPoints().filter((point) => pointMatchesThemeFilter(point)).length;
 }
 
 function renderKpis(filtered) {
@@ -1055,53 +1115,54 @@ function renderYearControls() {
     .text((d) => (d === "all" ? "All years" : d))
     .on("click", (_, d) => {
       state.selectedYear = d;
+      state.highlightedSubmissionKey = "";
       d3.select("#year-select").property("value", d);
       renderAll();
     });
 }
 
-function renderEmbeddingThemeSelect() {
-  const select = d3.select("#embedding-theme-select");
-  if (select.empty()) return;
+function renderThemeMultiSelect() {
+  const host = d3.select("#theme-multi-select");
+  if (host.empty()) return;
 
   const topics = googleTopicNames();
-  select.selectAll("option:not(:first-child)").remove();
-  select
-    .selectAll("option.theme")
-    .data(topics)
-    .join("option")
-    .attr("class", "theme")
-    .attr("value", String)
-    .text(String);
-  select.property("value", state.selectedTheme);
-}
+  const selected = new Set(state.selectedThemes);
+  const exclude = state.themeFilterMode === "exclude";
 
-function renderThemeSelect(counts) {
-  const select = d3.select("#theme-select");
-  const countMap = new Map(counts.map((d) => [d.text, d.count]));
-  const topics = googleTopicNames();
-  select.selectAll("option:not(:first-child)").remove();
-  select
-    .selectAll("option.theme")
-    .data(topics)
-    .join("option")
-    .attr("class", "theme")
-    .attr("value", String)
-    .text((theme) => {
-      const count = countMap.get(theme) || 0;
-      return count ? `${theme} (${count})` : theme;
-    });
-  select.property("value", state.selectedTheme);
+  host
+    .selectAll("button.theme-chip")
+    .data(topics, (d) => d)
+    .join("button")
+    .attr("type", "button")
+    .attr("class", (theme) => {
+      const classes = ["theme-chip"];
+      if (selected.has(theme)) {
+        classes.push("selected");
+        if (exclude) classes.push("exclude");
+      }
+      return classes.join(" ");
+    })
+    .attr("aria-pressed", (theme) => (selected.has(theme) ? "true" : "false"))
+    .text((theme) => theme)
+    .on("click", (_, theme) => toggleThemeFilter(theme));
+
+  d3.select("#theme-mode-include").classed("active", !exclude);
+  d3.select("#theme-mode-exclude").classed("active", exclude);
+
+  const clearBtn = d3.select("#theme-clear-btn");
+  if (!clearBtn.empty()) clearBtn.node().hidden = !hasThemeFilter();
 }
 
 function renderThemeBars(counts) {
   const container = d3.select("#theme-bars");
+  const onThemeBarClick = (d) => toggleThemeFilter(d.text);
   if (isPhoneLayout()) {
     renderPhoneThemeBarChart(container, {
       data: counts,
       getLabel: (d) => d.text,
       getValue: (d) => d.count,
       getBarFill: (d) => themeColor(d.text),
+      onBarClick: onThemeBarClick,
       onBarTooltip: (event, d) => showTooltip(`<strong>${d.text}</strong><br/>${d.count} submissions`, event),
     });
     return;
@@ -1136,6 +1197,8 @@ function renderThemeBars(counts) {
     .attr("width", (d) => x(d.count))
     .attr("fill", (d) => themeColor(d.text))
     .attr("rx", s(4))
+    .style("cursor", "pointer")
+    .on("click", (_, d) => onThemeBarClick(d))
     .on("mousemove", isTouchLike() ? null : (event, d) => showTooltip(`<strong>${d.text}</strong><br/>${d.count} submissions`, event))
     .on("mouseleave", isTouchLike() ? null : hideTooltip);
 
@@ -1267,7 +1330,7 @@ function themeShareByYearRows(submissions) {
     const yearTotal = yearTotals.get(yearKey) || 0;
     const row = { year, yearTotal };
     orderedThemes.forEach((theme) => {
-      row[theme] = themeShareOfSubmissions(yearMap.get(theme) || 0, yearTotal) / 100;
+      row[theme] = yearMap.get(theme) || 0;
     });
     return row;
   });
@@ -1330,10 +1393,9 @@ function renderThemeShareByYear() {
   const shareTooltip = (d) => {
     const count = countsByYear.get(String(d.data.year))?.get(d.theme) || 0;
     const yearTotal = d.data.yearTotal || 0;
-    const share = d.data[d.theme] || 0;
     return [
       `<strong>${d.theme}</strong>`,
-      `${d.data.year}: ${count} / ${yearTotal} submissions (${(share * 100).toFixed(1)}%)`,
+      `${d.data.year}: ${count} topic assignments · ${yearTotal} submissions that year`,
     ].join("<br/>");
   };
 
@@ -1389,7 +1451,7 @@ function renderThemeShareByYear() {
       d3
         .axisLeft(y)
         .ticks(isPhoneLayout() ? 4 : 5)
-        .tickFormat((d) => `${Math.round(d * 100)}%`)
+        .tickFormat((d) => (Number.isInteger(d) ? String(d) : d3.format(".1f")(d)))
     )
     .call((sel) =>
       sel
@@ -1414,7 +1476,7 @@ function renderThemeShareByYear() {
     .attr("fill", CCN_COLORS.muted)
     .style("font-size", `${legendHeadingFont}px`)
     .style("font-family", CHART_FONT)
-    .text("Research themes");
+    .text("Research themes (counts)");
 
   legend
     .selectAll("g.legend-item")
@@ -1540,15 +1602,16 @@ function renderResearchThemeDeltas(submissions) {
 }
 
 function pointMatchesThemeFilter(point) {
-  if (!state.selectedTheme) return true;
-  return embeddingPointPrimaryTheme(point) === state.selectedTheme;
+  const submission = submissionForEmbeddingPoint(point);
+  if (!submission) return !hasThemeFilter();
+  return submissionMatchesThemeFilter(submission);
 }
 
-function embeddingPlotDomain(extent, rangePx, edgePadPx) {
+function embeddingPlotDomain(extent, padRatio = 0.06) {
   const [min, max] = extent;
   if (min === undefined || max === undefined) return [0, 1];
   const span = max - min || 1;
-  const pad = (edgePadPx / Math.max(rangePx, 1)) * span;
+  const pad = span * padRatio;
   return [min - pad, max + pad];
 }
 
@@ -1559,143 +1622,109 @@ function renderEmbeddingCluster() {
   const note = d3.select("#embedding-note");
   const points = embeddingDisplayPoints();
   if (!points.length) {
-    container.append("p").style("color", CCN_COLORS.muted).text("No submissions with map coordinates match the current filters.");
+    container.append("p").style("color", CCN_COLORS.muted).text("No submissions with map coordinates.");
     note.text("");
     return;
   }
 
-  const width = chartContainerWidth(container);
-  const mobileLegend = isPhoneLayout() || useStackedChartLegend(width);
-  const legendFont = isPhoneLayout() ? chartThemePx(PHONE_THEME_TITLE_SIZE) : themeLabelPx(10);
-  const legendHeadingFont = isPhoneLayout()
-    ? chartThemePx(PHONE_EMBEDDING_LEGEND_HEADING_SIZE)
-    : themeLabelPx(10);
-  const legendItemHeight = isPhoneLayout() ? legendFont * 2.2 : legendFont * 1.5;
-  const legendThemes = themeLegendThemes();
-  const legendCols = isPhoneLayout() ? 1 : mobileLegend ? (width < 520 ? 1 : 2) : 1;
-  const legendTitleHeight = legendHeadingFont * 1.6;
-  const legendRows = mobileLegend ? Math.ceil(legendThemes.length / legendCols) : legendThemes.length;
-  const legendBlock = mobileLegend
-    ? legendTitleHeight + legendRows * legendItemHeight + (isPhoneLayout() ? gs(10) : s(16))
-    : 0;
-  const legendReserve = mobileLegend
-    ? 0
-    : Math.max(
-        s(190),
-        Math.min(s(300), (d3.max(legendThemes, (theme) => measureTextWidth(theme, legendFont)) || 0) + s(48))
-      );
-  const margin = mobileLegend
-    ? isPhoneLayout()
-      ? { top: gs(8), right: gs(8), bottom: gs(8), left: gs(8) }
-      : { top: s(12), right: s(12), bottom: s(12), left: s(12) }
-    : { top: s(20), right: legendReserve, bottom: s(20), left: s(20) };
-  const plotWidth = Math.max(s(220), width - margin.left - margin.right);
-  const plotSide = isPhoneLayout()
-    ? width - margin.left - margin.right
-    : mobileLegend
-      ? Math.min(plotWidth, s(340))
-      : Math.min(plotWidth, s(600));
-  const plotHeight = mobileLegend ? margin.top + plotSide + margin.bottom : plotSide + margin.top + margin.bottom;
-  const height = mobileLegend ? plotHeight + legendBlock : plotHeight;
-  const svg = appendChartSvg(container, width, height);
-  const color = (theme) => themeColor(theme);
-  const plotBottom = mobileLegend ? plotHeight - margin.bottom : height - margin.bottom;
-  const plotInnerW = width - margin.left - margin.right;
-  const plotInnerH = plotBottom - margin.top;
-  const pointRadius = isPhoneLayout()
-    ? { base: 2.4, selected: 3.2 }
-    : { base: 7, selected: 8.5 };
-  const maxPointRadius = isPhoneLayout() ? gs(pointRadius.selected) : s(pointRadius.selected);
-  const edgePad = maxPointRadius + (isPhoneLayout() ? gs(4) : s(6));
+  const width = Math.max(280, chartContainerWidth(container));
+  const margin = isPhoneLayout()
+    ? { top: 10, right: 10, bottom: 10, left: 10 }
+    : { top: 16, right: 16, bottom: 16, left: 16 };
+  const plotInnerW = Math.max(160, width - margin.left - margin.right);
 
-  const x = d3
-    .scaleLinear()
-    .domain(
-      embeddingPlotDomain(
-        d3.extent(points, (d) => d.x),
-        plotInnerW,
-        edgePad
-      )
-    )
-    .nice()
-    .range([margin.left, width - margin.right]);
-  const y = d3
-    .scaleLinear()
-    .domain(
-      embeddingPlotDomain(
-        d3.extent(points, (d) => d.y),
-        plotInnerH,
-        edgePad
-      )
-    )
-    .nice()
-    .range([plotBottom, margin.top]);
+  const xDomain = embeddingPlotDomain(d3.extent(points, (d) => d.x));
+  const yDomain = embeddingPlotDomain(d3.extent(points, (d) => d.y));
+  const xSpan = Math.max(xDomain[1] - xDomain[0], 1e-6);
+  const ySpan = Math.max(yDomain[1] - yDomain[0], 1e-6);
+
+  // Full-width isotropic layout: same data units per pixel on both axes.
+  const unitsPerPx = xSpan / plotInnerW;
+  const plotInnerH = ySpan / unitsPerPx;
+  const height = margin.top + plotInnerH + margin.bottom;
+  const svg = appendChartSvg(container, width, height, {
+    preserveAspectRatio: "xMidYMid meet",
+    lockHeight: false,
+  });
+
+  const plotBottom = height - margin.bottom;
+  const pointRadius = isPhoneLayout()
+    ? { base: 2.6, selected: 3.6, dim: 2.2 }
+    : { base: 4.2, selected: 5.6, dim: 3.4 };
+
+  const x = d3.scaleLinear().domain(xDomain).range([margin.left, width - margin.right]);
+  const y = d3.scaleLinear().domain(yDomain).range([plotBottom, margin.top]);
 
   svg
     .append("rect")
     .attr("x", margin.left)
     .attr("y", margin.top)
-    .attr("width", width - margin.left - margin.right)
-    .attr("height", plotBottom - margin.top)
+    .attr("width", plotInnerW)
+    .attr("height", plotInnerH)
     .attr("fill", "rgba(197,224,243,0.04)")
-    .attr("rx", isPhoneLayout() ? gs(8) : s(12));
+    .attr("rx", isPhoneLayout() ? 8 : 12);
 
-  const handlePointFilter = (_, point) => {
-    filterByPrimaryTopic(point);
+  const handlePointNavigate = (_, point) => {
+    focusSubmissionFromPoint(point);
   };
 
   const pointStyle = (point) => {
-    const matches = pointMatchesThemeFilter(point);
-    const filtered = Boolean(state.selectedTheme);
-    let radius = isPhoneLayout() ? gs(pointRadius.base) : s(pointRadius.base);
-    if (matches && filtered) radius = isPhoneLayout() ? gs(pointRadius.selected) : s(pointRadius.selected);
+    const themeMatch = pointMatchesThemeFilter(point);
+    const filtering = hasThemeFilter();
+    const highlighted =
+      state.highlightedSubmissionKey && submissionRowKey(point) === state.highlightedSubmissionKey;
+    const active = !filtering || themeMatch;
+    let radius = active ? pointRadius.base : pointRadius.dim;
+    if (highlighted || (active && filtering)) radius = pointRadius.selected;
     return {
       radius,
-      opacity: !filtered || matches ? 0.92 : 0.14,
-      stroke: matches && filtered ? CCN_COLORS.pink : CCN_COLORS.navy,
-      strokeWidth: matches && filtered
-        ? isPhoneLayout()
-          ? gs(1.75)
-          : s(2)
-        : isPhoneLayout()
-          ? gs(1)
-          : s(1.25),
+      opacity: active ? (highlighted ? 1 : 0.9) : 0.12,
+      stroke: highlighted || (active && filtering) ? CCN_COLORS.pink : "#111827",
+      strokeWidth: highlighted || (active && filtering) ? 1.75 : 1,
+      fill: "#111827",
     };
   };
+
+  // Draw dimmed points first so highlighted matches stay on top.
+  const ordered = [...points].sort((a, b) => {
+    const aActive = pointMatchesThemeFilter(a) ? 1 : 0;
+    const bActive = pointMatchesThemeFilter(b) ? 1 : 0;
+    return aActive - bActive;
+  });
 
   const pointGroups = svg
     .append("g")
     .attr("class", "embedding-points")
     .selectAll("g.embedding-point-group")
-    .data(points, submissionRowKey)
+    .data(ordered, submissionRowKey)
     .join("g")
     .attr("class", "embedding-point-group")
     .attr("transform", (d) => `translate(${x(d.x)},${y(d.y)})`)
     .style("cursor", "pointer")
     .style("pointer-events", isTouchLike() ? "none" : "auto");
 
-  pointGroups.each(function renderPrimaryPoint(point) {
+  pointGroups.each(function renderBlackPoint(point) {
     const group = d3.select(this);
     group.selectAll("*").remove();
     const style = pointStyle(point);
-    appendPrimaryTopicDot(group, style.radius, embeddingPointPrimaryTheme(point), {
+    appendBlackDot(group, style.radius, {
       opacity: style.opacity,
       stroke: style.stroke,
       strokeWidth: style.strokeWidth,
+      fill: style.fill,
     });
   });
 
   if (isTouchLike()) {
     if (isPhoneLayout()) {
-      // Nearest-point tap: large overlapping hit circles pick the wrong dot in dense regions.
-      const maxTapDist = gs(5.5);
+      const maxTapDist = 14;
       svg
         .append("rect")
         .attr("class", "embedding-touch-layer")
         .attr("x", margin.left)
         .attr("y", margin.top)
-        .attr("width", width - margin.left - margin.right)
-        .attr("height", plotBottom - margin.top)
+        .attr("width", plotInnerW)
+        .attr("height", plotInnerH)
         .attr("fill", "transparent")
         .style("cursor", "pointer")
         .style("touch-action", "manipulation")
@@ -1712,7 +1741,7 @@ function renderEmbeddingCluster() {
           });
           if (nearest) {
             event.stopPropagation();
-            handlePointFilter(null, nearest);
+            handlePointNavigate(null, nearest);
           }
         });
     } else {
@@ -1723,108 +1752,35 @@ function renderEmbeddingCluster() {
         .attr("class", "embedding-hit")
         .attr("cx", (d) => x(d.x))
         .attr("cy", (d) => y(d.y))
-        .attr("r", s(12))
+        .attr("r", 12)
         .attr("fill", "transparent")
         .style("cursor", "pointer")
         .on("click", (event, d) => {
           event.stopPropagation();
-          handlePointFilter(null, d);
+          handlePointNavigate(null, d);
         });
     }
   } else {
     pointGroups
       .on("mousemove", (event, d) => showTooltip(embeddingPointTooltip(d), event))
       .on("mouseleave", hideTooltip)
-      .on("click", handlePointFilter);
-  }
-
-  const legend = svg.append("g");
-  if (mobileLegend) {
-    const colWidth = (width - margin.left - margin.right) / legendCols;
-    const legendMarker = isPhoneLayout() ? gs(8) : s(12);
-    const legendTextX = isPhoneLayout() ? gs(12) : s(18);
-    legend.attr("transform", `translate(${margin.left}, ${plotHeight + (isPhoneLayout() ? gs(6) : s(8))})`);
-    legend
-      .append("text")
-      .attr("class", "embedding-legend-title")
-      .attr("x", 0)
-      .attr("y", legendHeadingFont * 0.85)
-      .attr("fill", CCN_COLORS.muted)
-      .style("font-size", isPhoneLayout() ? chartThemeFs(PHONE_EMBEDDING_LEGEND_HEADING_SIZE) : themeFs(10))
-      .style("font-weight", 600)
-      .text("Dominant topic (dot color)");
-    legend
-      .selectAll("g.legend-item")
-      .data(legendThemes)
-      .join("g")
-      .attr("class", "legend-item")
-      .attr("transform", (_, i) => {
-        const col = i % legendCols;
-        const row = Math.floor(i / legendCols);
-        return `translate(${col * colWidth}, ${legendTitleHeight + row * legendItemHeight})`;
-      })
-      .on("mousemove", isTouchLike() ? null : (event, themeName) => showTooltip(themeLegendTooltip(themeName), event))
-      .on("mouseleave", isTouchLike() ? null : hideTooltip)
-      .each(function appendMobileLegendItem() {
-        const item = d3.select(this);
-        item
-          .append("rect")
-          .attr("width", legendMarker)
-          .attr("height", legendMarker)
-          .attr("rx", isPhoneLayout() ? gs(2) : s(3))
-          .attr("y", legendFont * 0.15)
-          .attr("fill", (d) => color(d))
-          .attr("stroke", (d) => (d === state.selectedTheme ? CCN_COLORS.pink : "transparent"))
-          .attr("stroke-width", isPhoneLayout() ? gs(1.5) : s(2));
-        item
-          .append("text")
-          .attr("x", legendTextX)
-          .attr("y", legendFont * 0.85)
-          .attr("fill", CCN_COLORS.muted)
-          .style("font-size", isPhoneLayout() ? chartThemeFs(PHONE_THEME_TITLE_SIZE) : themeFs(10))
-          .text((d) => fitLegendLabel(d, colWidth - legendTextX, legendFont));
-      });
-  } else {
-    const legendRoot = legend.attr("transform", `translate(${width - margin.right + s(12)}, ${margin.top})`);
-    legendRoot
-      .append("text")
-      .attr("class", "embedding-legend-title")
-      .attr("x", 0)
-      .attr("y", legendFont * 0.85)
-      .attr("fill", CCN_COLORS.muted)
-      .style("font-size", themeFs(10))
-      .style("font-weight", 600)
-      .text("Dominant topic (dot color)");
-
-    const legendItems = legendRoot
-      .selectAll("g.legend-item")
-      .data(legendThemes)
-      .join("g")
-      .attr("class", "legend-item")
-      .attr("transform", (_, i) => `translate(0, ${legendTitleHeight + i * legendItemHeight})`)
-      .on("mousemove", isTouchLike() ? null : (event, themeName) => showTooltip(themeLegendTooltip(themeName), event))
-      .on("mouseleave", isTouchLike() ? null : hideTooltip);
-
-    legendItems
-      .append("rect")
-      .attr("width", s(12))
-      .attr("height", s(12))
-      .attr("rx", s(3))
-      .attr("y", legendFont * 0.15)
-      .attr("fill", (d) => color(d))
-      .attr("stroke", (d) => (d === state.selectedTheme ? CCN_COLORS.pink : "transparent"))
-      .attr("stroke-width", s(2));
-
-    legendItems
-      .append("text")
-      .attr("x", s(18))
-      .attr("y", legendFont * 0.85)
-      .attr("fill", CCN_COLORS.muted)
-      .style("font-size", themeFs(10))
-      .text((d) => fitLegendLabel(d, s(280), legendFont));
+      .on("click", handlePointNavigate);
   }
 
   renderEmbeddingNote(note);
+}
+
+function themeFilterSummaryLabel() {
+  if (!hasThemeFilter()) return "";
+  const joined = state.selectedThemes.join(", ");
+  if (state.themeFilterMode === "exclude") {
+    return state.selectedThemes.length === 1
+      ? `excluding “${joined}”`
+      : `excluding ${state.selectedThemes.length} topics`;
+  }
+  return state.selectedThemes.length === 1
+    ? `including “${joined}”`
+    : `including any of ${state.selectedThemes.length} topics`;
 }
 
 function renderPaperList() {
@@ -1833,16 +1789,20 @@ function renderPaperList() {
   const countEl = d3.select("#results-count");
   countEl.selectAll("*").remove();
 
-  const countLabel = state.selectedTheme
-    ? `${submissions.length} papers with mentions of topics related to “${state.selectedTheme}”`
+  const filterLabel = themeFilterSummaryLabel();
+  const countLabel = filterLabel
+    ? `${submissions.length} papers ${filterLabel}`
     : `${submissions.length} matching submissions`;
   countEl.append("span").text(countLabel);
 
+  const selected = new Set(state.selectedThemes);
   const items = list
     .selectAll(".paper-item")
-    .data(submissions)
+    .data(submissions, submissionRowKey)
     .join("div")
-    .attr("class", "paper-item")
+    .attr("class", (d) =>
+      `paper-item${submissionRowKey(d) === state.highlightedSubmissionKey ? " highlighted" : ""}`
+    )
     .attr("data-id", submissionRowKey);
   items.selectAll("*").remove();
 
@@ -1860,6 +1820,24 @@ function renderPaperList() {
     .text((d) =>
       `${d.year}${d.poster_number ? ` · Poster ${d.poster_number}` : ""}${d.authors ? ` · ${d.authors}` : ""}`
     );
+
+  items.each(function renderTags(d) {
+    const tagData = assignedTopics(d);
+    const tags = d3.select(this).append("div").attr("class", "keyword-tags");
+    tags
+      .selectAll(".keyword-tag")
+      .data(tagData)
+      .join("button")
+      .attr("type", "button")
+      .attr("class", (theme) => `keyword-tag topic-tag${selected.has(theme) ? " active" : ""}`)
+      .style("--topic-color", (theme) => themeColor(theme))
+      .text((theme) => theme)
+      .on("click", (event, theme) => {
+        event.preventDefault();
+        event.stopPropagation();
+        toggleThemeFilter(theme);
+      });
+  });
 }
 
 function renderAll() {
@@ -1871,8 +1849,7 @@ function renderAll() {
   const trendSubmissions = submissionsForThemeTrends();
 
   renderKpis(submissions);
-  renderThemeSelect(primaryCounts);
-  renderEmbeddingThemeSelect();
+  renderThemeMultiSelect();
   renderYearChart();
   renderThemeShareByYear();
   renderThemeBars(primaryCounts);
@@ -1913,25 +1890,19 @@ async function init() {
 
   d3.select("#year-select").on("change", (event) => {
     state.selectedYear = event.target.value;
+    state.highlightedSubmissionKey = "";
     renderAll();
   });
 
   d3.select("#search-input").on("input", (event) => {
     state.search = event.target.value;
+    state.highlightedSubmissionKey = "";
     renderAll();
   });
 
-  d3.select("#theme-select").on("change", (event) => {
-    state.selectedTheme = event.target.value;
-    syncThemeSelects();
-    renderAll();
-  });
-
-  d3.select("#embedding-theme-select").on("change", (event) => {
-    state.selectedTheme = event.target.value;
-    syncThemeSelects();
-    renderAll();
-  });
+  d3.select("#theme-mode-include").on("click", () => setThemeFilterMode("include"));
+  d3.select("#theme-mode-exclude").on("click", () => setThemeFilterMode("exclude"));
+  d3.select("#theme-clear-btn").on("click", () => clearThemeFilters());
 
   d3.select("#delta-from-year").on("change", (event) => {
     state.deltaFromYear = event.target.value;
@@ -1949,14 +1920,16 @@ async function init() {
   setupPhoneTooltipDismiss();
 
   let resizeTimer = null;
-  window.addEventListener("resize", () => {
+  const scheduleReflow = () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
       if (shouldReflowOnResize()) {
         renderAll();
       }
     }, 150);
-  });
+  };
+  window.addEventListener("resize", scheduleReflow);
+  window.visualViewport?.addEventListener("resize", scheduleReflow);
 }
 
 if (document.readyState === "loading") {
