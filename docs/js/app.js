@@ -1649,8 +1649,9 @@ function renderEmbeddingCluster() {
 
   const plotBottom = height - margin.bottom;
   const pointRadius = isPhoneLayout()
-    ? { base: 2.6, selected: 3.6, dim: 2.2 }
-    : { base: 4.2, selected: 5.6, dim: 3.4 };
+    ? { base: 2.4, selected: 3.2, dim: 2.0 }
+    : { base: 7, selected: 8.5, dim: 5.5 };
+  const scaleR = (n) => (isPhoneLayout() ? gs(n) : s(n));
 
   const x = d3.scaleLinear().domain(xDomain).range([margin.left, width - margin.right]);
   const y = d3.scaleLinear().domain(yDomain).range([plotBottom, margin.top]);
@@ -1662,7 +1663,7 @@ function renderEmbeddingCluster() {
     .attr("width", plotInnerW)
     .attr("height", plotInnerH)
     .attr("fill", "rgba(197,224,243,0.04)")
-    .attr("rx", isPhoneLayout() ? 8 : 12);
+    .attr("rx", isPhoneLayout() ? gs(8) : s(12));
 
   const handlePointNavigate = (_, point) => {
     focusSubmissionFromPoint(point);
@@ -1674,13 +1675,19 @@ function renderEmbeddingCluster() {
     const highlighted =
       state.highlightedSubmissionKey && submissionRowKey(point) === state.highlightedSubmissionKey;
     const active = !filtering || themeMatch;
-    let radius = active ? pointRadius.base : pointRadius.dim;
-    if (highlighted || (active && filtering)) radius = pointRadius.selected;
+    let radius = scaleR(active ? pointRadius.base : pointRadius.dim);
+    if (highlighted || (active && filtering)) radius = scaleR(pointRadius.selected);
     return {
       radius,
       opacity: active ? (highlighted ? 1 : 0.9) : 0.12,
       stroke: highlighted || (active && filtering) ? CCN_COLORS.pink : "#111827",
-      strokeWidth: highlighted || (active && filtering) ? 1.75 : 1,
+      strokeWidth: highlighted || (active && filtering)
+        ? isPhoneLayout()
+          ? gs(1.75)
+          : s(2)
+        : isPhoneLayout()
+          ? gs(1)
+          : s(1.25),
       fill: "#111827",
     };
   };
