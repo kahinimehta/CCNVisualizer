@@ -568,6 +568,9 @@ let tooltip = null;
 let tooltipDismissBound = false;
 let tooltipVisible = false;
 let tooltipMode = null; // "hover" | "tap"
+let tooltipInteractive = false;
+let tooltipHideTimer = null;
+let tooltipAnchorPoint = null;
 
 function ensureD3() {
   if (typeof d3 === "undefined") {
@@ -576,6 +579,21 @@ function ensureD3() {
   if (!tooltip) {
     tooltip = d3.select("#tooltip");
   }
+}
+
+function cancelHideTooltip() {
+  if (tooltipHideTimer != null) {
+    clearTimeout(tooltipHideTimer);
+    tooltipHideTimer = null;
+  }
+}
+
+function scheduleHideTooltip(delayMs = 160) {
+  cancelHideTooltip();
+  tooltipHideTimer = setTimeout(() => {
+    tooltipHideTimer = null;
+    hideTooltip();
+  }, delayMs);
 }
 
 function setupTooltipDismiss() {
@@ -609,35 +627,83 @@ function bindBarTooltipEvents(rect, onBarTooltip, item) {
     .on("mouseleave", hideTooltip);
 }
 
+function bindTooltipInteractions(options = {}) {
+  if (!tooltip) return;
+  const { onTopicClick = null, onOpenPaper = null } = options;
+
+  tooltip.selectAll(".tooltip-close").on("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    hideTooltip();
+  });
+
+  tooltip.selectAll("button.tooltip-topic").on("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const theme = event.currentTarget?.getAttribute("data-theme");
+    if (!theme) return;
+    if (typeof onTopicClick === "function") {
+      onTopicClick(theme);
+      return;
+    }
+    toggleThemeFilter(theme);
+  });
+
+  tooltip.selectAll("button.tooltip-open-paper").on("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (typeof onOpenPaper === "function") {
+      onOpenPaper();
+      return;
+    }
+    if (tooltipAnchorPoint) focusSubmissionFromPoint(tooltipAnchorPoint);
+    hideTooltip();
+  });
+
+  tooltip
+    .on("mouseenter", () => {
+      if (tooltipInteractive) cancelHideTooltip();
+    })
+    .on("mouseleave", () => {
+      if (tooltipInteractive && tooltipMode === "hover") scheduleHideTooltip();
+    });
+}
+
 function showTooltip(html, event, options = {}) {
   if (!tooltip) return;
   const phone = isPhoneLayout();
   const mode = options.mode || (phone ? "tap" : "hover");
+  const interactive = Boolean(options.interactive);
 
   // Phone never uses hover tooltips — only explicit taps.
   if (phone && mode === "hover") return;
   if (!phone && isTouchLike() && mode === "hover") return;
 
+  cancelHideTooltip();
   const offset = s(12);
   tooltipMode = mode;
+  tooltipInteractive = interactive;
+  tooltipAnchorPoint = options.anchorPoint || null;
 
   if (phone || mode === "tap") {
     tooltip.html(
       `<div class="tooltip-phone-inner"><div class="tooltip-body">${html}</div><button type="button" class="tooltip-close" aria-label="Close tooltip">×</button></div>`
     );
     tooltip.classed("tooltip-phone", true);
-    tooltip.select(".tooltip-close").on("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      hideTooltip();
-    });
   } else {
     tooltip.classed("tooltip-phone", false);
     tooltip.html(html);
   }
 
+  tooltip.classed("tooltip-interactive", interactive);
   tooltipVisible = true;
-  tooltip.style("opacity", 1).style("pointer-events", phone || mode === "tap" ? "auto" : "none");
+  const allowPointer = interactive || phone || mode === "tap";
+  tooltip.style("opacity", 1).style("pointer-events", allowPointer ? "auto" : "none");
+
+  bindTooltipInteractions({
+    onTopicClick: options.onTopicClick,
+    onOpenPaper: options.onOpenPaper,
+  });
 
   const node = tooltip.node();
   const width = node?.offsetWidth || 0;
@@ -653,11 +719,18 @@ function showTooltip(html, event, options = {}) {
 
 function hideTooltip() {
   if (!tooltip) return;
+  cancelHideTooltip();
   tooltipVisible = false;
   tooltipMode = null;
+  tooltipInteractive = false;
+  tooltipAnchorPoint = null;
   tooltip.style("opacity", 0).style("pointer-events", "none");
   tooltip.classed("tooltip-phone", false);
+  tooltip.classed("tooltip-interactive", false);
+  tooltip.on("mouseenter", null).on("mouseleave", null);
   tooltip.selectAll(".tooltip-close").on("click", null);
+  tooltip.selectAll("button.tooltip-topic").on("click", null);
+  tooltip.selectAll("button.tooltip-open-paper").on("click", null);
 }
 
 function showError(message) {
@@ -742,6 +815,14 @@ function assignedTopics(submission) {
   return submission.assigned_topics?.length ? submission.assigned_topics : [];
 }
 
+function sortedTopics(topics) {
+  return [...topics].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+}
+
+function assignedTopicsSorted(submission) {
+  return sortedTopics(assignedTopics(submission));
+}
+
 function primaryTheme(submission) {
   return assignedTopics(submission)[0] || null;
 }
@@ -766,8 +847,9 @@ function hasThemeFilter() {
 function submissionMatchesThemeFilter(submission) {
   if (!hasThemeFilter()) return true;
   const assigned = assignedTopics(submission);
-  const hitsAny = state.selectedThemes.some((theme) => assigned.includes(theme));
-  return state.themeFilterMode === "exclude" ? !hitsAny : hitsAny;
+  // Multi-topic filters require all selected topics ("both/all of"), not any-of.
+  const hitsAll = state.selectedThemes.every((theme) => assigned.includes(theme));
+  return state.themeFilterMode === "exclude" ? !hitsAll : hitsAll;
 }
 
 function filteredSubmissions() {
@@ -992,16 +1074,17 @@ function renderDeltaYearControls() {
   toSelect.property("value", state.deltaToYear);
 }
 
-function toggleThemeFilter(theme) {
+function toggleThemeFilter(theme, options = {}) {
   if (!theme) return;
+  const { rerender = true } = options;
   const idx = state.selectedThemes.indexOf(theme);
   if (idx >= 0) {
     state.selectedThemes = state.selectedThemes.filter((item) => item !== theme);
   } else {
-    state.selectedThemes = [...state.selectedThemes, theme];
+    state.selectedThemes = sortedTopics([...state.selectedThemes, theme]);
   }
   state.highlightedSubmissionKey = "";
-  renderAll();
+  if (rerender) renderAll();
 }
 
 function clearThemeFilters() {
@@ -1057,6 +1140,22 @@ function scrollToHighlightedSubmission() {
   }
 }
 
+function themeFilterDisplayText() {
+  if (!hasThemeFilter()) return "";
+  const topics = sortedTopics(state.selectedThemes);
+  const joined =
+    topics.length === 1
+      ? `“${topics[0]}”`
+      : topics.length === 2
+        ? `“${topics[0]}” and “${topics[1]}”`
+        : `${topics.slice(0, -1).map((t) => `“${t}”`).join(", ")}, and “${topics[topics.length - 1]}”`;
+  const bothLabel = topics.length === 1 ? joined : `both/all of ${joined}`;
+  if (state.themeFilterMode === "exclude") {
+    return `Exclude papers with ${bothLabel}`;
+  }
+  return `Include papers with ${bothLabel}`;
+}
+
 function embeddingDefaultNote() {
   const count = embeddingDisplayPoints().length;
   const highlighted = embeddingHighlightCount();
@@ -1064,13 +1163,11 @@ function embeddingDefaultNote() {
     return "Jumped to highlighted submission below — topic tags are shown on the card";
   }
   if (hasThemeFilter()) {
-    const mode = state.themeFilterMode === "exclude" ? "excluding" : "including";
-    const labels = state.selectedThemes.join(", ");
-    return `${count} papers on map · ${highlighted} highlighted (${mode} ${labels}) · click/tap a dot to open that paper`;
+    return `${count} papers on map · ${highlighted} highlighted · ${themeFilterDisplayText()}`;
   }
   return isTouchLike()
-    ? `${count} submissions · black dots · tap a dot to view its topic tags below · use topic chips to highlight`
-    : `${count} submissions · black dots · click a dot to view its topic tags below · use topic chips to highlight`;
+    ? `${count} submissions · black dots · tap a dot to see topics and filter · or open the paper`
+    : `${count} submissions · black dots · hover a dot to see topics and click a topic to filter`;
 }
 
 function renderEmbeddingNote(note) {
@@ -1079,16 +1176,57 @@ function renderEmbeddingNote(note) {
 
 function embeddingPointTopics(point) {
   const submission = submissionForEmbeddingPoint(point);
-  return submission ? assignedTopics(submission) : [];
+  return submission ? assignedTopicsSorted(submission) : [];
 }
 
-function embeddingPointTooltip(point) {
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function embeddingPointTooltipHtml(point) {
   const submission = submissionForEmbeddingPoint(point);
   const topics = embeddingPointTopics(point);
-  const title = submission?.title || point.title || "Submission";
-  const topicLine = topics.length ? topics.join(" · ") : "No topics assigned";
-  const action = isTouchLike() ? "Tap" : "Click";
-  return `<strong>${title}</strong><br/>${topicLine}<br/><em>${action} to view this submission below</em>`;
+  const selected = new Set(state.selectedThemes);
+  const title = escapeHtml(submission?.title || point.title || "Submission");
+  const topicButtons = topics.length
+    ? topics
+        .map((theme) => {
+          const active = selected.has(theme) ? " active" : "";
+          const color = themeColor(theme);
+          const safeTheme = escapeHtml(theme);
+          return `<button type="button" class="tooltip-topic${active}" data-theme="${safeTheme}" style="--topic-color:${color}">${safeTheme}</button>`;
+        })
+        .join("")
+    : `<span class="tooltip-hint">No topics assigned</span>`;
+  const hint = isPhoneLayout()
+    ? "Tap a topic to filter · Open paper below"
+    : "Click a topic to filter by it";
+  return [
+    `<strong>${title}</strong>`,
+    `<div class="tooltip-topics">${topicButtons}</div>`,
+    `<div class="tooltip-actions"><button type="button" class="tooltip-action tooltip-open-paper">Open paper</button></div>`,
+    `<span class="tooltip-hint">${hint}</span>`,
+  ].join("");
+}
+
+function showEmbeddingPointTooltip(event, point, mode = "hover") {
+  showTooltip(embeddingPointTooltipHtml(point), event, {
+    mode,
+    interactive: true,
+    anchorPoint: point,
+    onTopicClick: (theme) => {
+      toggleThemeFilter(theme);
+    },
+    onOpenPaper: () => {
+      focusSubmissionFromPoint(point);
+      hideTooltip();
+    },
+  });
 }
 
 function embeddingHighlightCount() {
@@ -1144,11 +1282,24 @@ function renderYearControls() {
     });
 }
 
+function renderThemeFilterStatus() {
+  const status = d3.select("#theme-filter-status");
+  if (status.empty()) return;
+  const node = status.node();
+  if (!hasThemeFilter()) {
+    if (node) node.hidden = true;
+    status.text("");
+    return;
+  }
+  if (node) node.hidden = false;
+  status.html(`<strong>Active filter:</strong> ${escapeHtml(themeFilterDisplayText())}`);
+}
+
 function renderThemeMultiSelect() {
   const host = d3.select("#theme-multi-select");
   if (host.empty()) return;
 
-  const topics = googleTopicNames();
+  const topics = sortedTopics(googleTopicNames());
   const selected = new Set(state.selectedThemes);
   const exclude = state.themeFilterMode === "exclude";
 
@@ -1174,6 +1325,7 @@ function renderThemeMultiSelect() {
 
   const clearBtn = d3.select("#theme-clear-btn");
   if (!clearBtn.empty()) clearBtn.node().hidden = !hasThemeFilter();
+  renderThemeFilterStatus();
 }
 
 function renderThemeBars(counts) {
@@ -1712,10 +1864,6 @@ function renderEmbeddingCluster() {
     .attr("fill", "rgba(197,224,243,0.04)")
     .attr("rx", isPhoneLayout() ? gs(8) : s(12));
 
-  const handlePointNavigate = (_, point) => {
-    focusSubmissionFromPoint(point);
-  };
-
   const pointStyle = (point) => {
     const themeMatch = pointMatchesThemeFilter(point);
     const filtering = hasThemeFilter();
@@ -1795,7 +1943,7 @@ function renderEmbeddingCluster() {
           });
           if (nearest) {
             event.stopPropagation();
-            handlePointNavigate(null, nearest);
+            showEmbeddingPointTooltip(event, nearest, "tap");
           }
         });
     } else {
@@ -1811,16 +1959,26 @@ function renderEmbeddingCluster() {
         .style("cursor", "pointer")
         .on("click", (event, d) => {
           event.stopPropagation();
-          handlePointNavigate(null, d);
+          showEmbeddingPointTooltip(event, d, "tap");
         });
     }
   } else if (isDesktopPointer()) {
     pointGroups
-      .on("mousemove", (event, d) => showTooltip(embeddingPointTooltip(d), event, { mode: "hover" }))
-      .on("mouseleave", hideTooltip)
-      .on("click", handlePointNavigate);
+      .on("mousemove", (event, d) => {
+        cancelHideTooltip();
+        showEmbeddingPointTooltip(event, d, "hover");
+      })
+      .on("mouseleave", () => scheduleHideTooltip())
+      .on("click", (event, d) => {
+        event.stopPropagation();
+        focusSubmissionFromPoint(d);
+        hideTooltip();
+      });
   } else {
-    pointGroups.on("click", handlePointNavigate);
+    pointGroups.on("click", (event, d) => {
+      event.stopPropagation();
+      showEmbeddingPointTooltip(event, d, "tap");
+    });
   }
 
   renderEmbeddingNote(note);
@@ -1828,15 +1986,7 @@ function renderEmbeddingCluster() {
 
 function themeFilterSummaryLabel() {
   if (!hasThemeFilter()) return "";
-  const joined = state.selectedThemes.join(", ");
-  if (state.themeFilterMode === "exclude") {
-    return state.selectedThemes.length === 1
-      ? `excluding “${joined}”`
-      : `excluding ${state.selectedThemes.length} topics`;
-  }
-  return state.selectedThemes.length === 1
-    ? `including “${joined}”`
-    : `including any of ${state.selectedThemes.length} topics`;
+  return themeFilterDisplayText().replace(/^Include papers with /i, "with ").replace(/^Exclude papers with /i, "excluding ");
 }
 
 function renderPaperList() {
@@ -1878,21 +2028,15 @@ function renderPaperList() {
     );
 
   items.each(function renderTags(d) {
-    const tagData = assignedTopics(d);
+    const tagData = assignedTopicsSorted(d);
     const tags = d3.select(this).append("div").attr("class", "keyword-tags");
     tags
       .selectAll(".keyword-tag")
       .data(tagData)
-      .join("button")
-      .attr("type", "button")
+      .join("span")
       .attr("class", (theme) => `keyword-tag topic-tag${selected.has(theme) ? " active" : ""}`)
       .style("--topic-color", (theme) => themeColor(theme))
-      .text((theme) => theme)
-      .on("click", (event, theme) => {
-        event.preventDefault();
-        event.stopPropagation();
-        toggleThemeFilter(theme);
-      });
+      .text((theme) => theme);
   });
 }
 

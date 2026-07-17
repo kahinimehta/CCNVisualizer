@@ -670,6 +670,26 @@ body:not(.sidebar-collapsed) .main-area {
   border-color: rgba(197, 224, 243, 0.4);
 }
 
+.theme-filter-status {
+  margin: 0.55rem 0 0;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid rgba(244, 199, 195, 0.35);
+  border-radius: 0.45rem;
+  background: rgba(244, 199, 195, 0.1);
+  color: var(--ccn-pink);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.theme-filter-status[hidden] {
+  display: none;
+}
+
+.theme-filter-status strong {
+  color: var(--ccn-white);
+  font-weight: 600;
+}
+
 .card-header {
   margin-bottom: 0.75rem;
 }
@@ -831,6 +851,76 @@ svg {
   min-width: 0;
 }
 
+.tooltip.tooltip-interactive {
+  pointer-events: auto;
+  max-width: min(calc(360px * var(--ui-scale)), 92vw);
+}
+
+.tooltip-topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0.45rem 0 0.35rem;
+}
+
+.tooltip-topic {
+  appearance: none;
+  border: 1px solid var(--topic-color, rgba(197, 224, 243, 0.4));
+  background: color-mix(in srgb, var(--topic-color, #c5e0f3) 28%, transparent);
+  color: var(--topic-color, var(--ccn-blue));
+  border-radius: 0.3rem;
+  padding: 0.12rem 0.45rem;
+  font: inherit;
+  font-size: 0.72rem;
+  line-height: 1.3;
+  cursor: pointer;
+}
+
+.tooltip-topic.active {
+  box-shadow: 0 0 0 1px var(--topic-color, var(--ccn-pink));
+  font-weight: 600;
+}
+
+.tooltip-topic:hover,
+.tooltip-topic:focus-visible {
+  filter: brightness(1.12);
+  outline: none;
+}
+
+.tooltip-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+}
+
+.tooltip-action {
+  appearance: none;
+  border: 1px solid rgba(197, 224, 243, 0.35);
+  background: rgba(197, 224, 243, 0.1);
+  color: var(--ccn-blue);
+  border-radius: 0.3rem;
+  padding: 0.18rem 0.5rem;
+  font: inherit;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+.tooltip-action:hover,
+.tooltip-action:focus-visible {
+  border-color: rgba(197, 224, 243, 0.55);
+  color: var(--ccn-white);
+  outline: none;
+}
+
+.tooltip-hint {
+  display: block;
+  margin-top: 0.3rem;
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-style: italic;
+}
+
 .paper-list {
   flex: 1 1 auto;
   min-height: 0;
@@ -894,7 +984,7 @@ svg {
   border-radius: 0.35rem;
   padding: 0.15rem 0.55rem;
   font-size: 0.72rem;
-  cursor: pointer;
+  cursor: default;
 }
 
 .keyword-tag.topic-tag {
