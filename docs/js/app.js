@@ -565,7 +565,9 @@ const state = {
 };
 
 let tooltip = null;
-let phoneTooltipDismissBound = false;
+let tooltipDismissBound = false;
+let tooltipVisible = false;
+let tooltipMode = null; // "hover" | "tap"
 
 function ensureD3() {
   if (typeof d3 === "undefined") {
@@ -576,17 +578,24 @@ function ensureD3() {
   }
 }
 
-function setupPhoneTooltipDismiss() {
-  if (phoneTooltipDismissBound) return;
-  phoneTooltipDismissBound = true;
-  const dismiss = () => {
-    if (isPhoneLayout()) hideTooltip();
+function setupTooltipDismiss() {
+  if (tooltipDismissBound) return;
+  tooltipDismissBound = true;
+
+  const dismissOnScroll = () => {
+    if (tooltipVisible) hideTooltip();
   };
-  window.addEventListener("scroll", dismiss, { passive: true, capture: true });
+
+  // Capture phase catches window scroll and nested scrollers (e.g. paper list).
+  document.addEventListener("scroll", dismissOnScroll, { passive: true, capture: true });
+  window.addEventListener("scroll", dismissOnScroll, { passive: true, capture: true });
+  window.visualViewport?.addEventListener("scroll", dismissOnScroll, { passive: true });
+  window.visualViewport?.addEventListener("resize", dismissOnScroll, { passive: true });
 }
 
 function bindBarTooltipEvents(rect, onBarTooltip, item) {
   if (!onBarTooltip) return;
+  // Phone: tap only. Desktop pointer: hover. Other touch: no hover tooltips.
   if (isPhoneLayout()) {
     rect.on("click", (event) => {
       event.stopPropagation();
@@ -594,16 +603,25 @@ function bindBarTooltipEvents(rect, onBarTooltip, item) {
     });
     return;
   }
-  if (isTouchLike()) return;
-  rect.on("mousemove", (event) => onBarTooltip(event, item)).on("mouseleave", hideTooltip);
+  if (isTouchLike() || !isDesktopPointer()) return;
+  rect
+    .on("mousemove", (event) => onBarTooltip(event, item))
+    .on("mouseleave", hideTooltip);
 }
 
-function showTooltip(html, event) {
+function showTooltip(html, event, options = {}) {
   if (!tooltip) return;
-  const offset = s(12);
   const phone = isPhoneLayout();
+  const mode = options.mode || (phone ? "tap" : "hover");
 
-  if (phone) {
+  // Phone never uses hover tooltips — only explicit taps.
+  if (phone && mode === "hover") return;
+  if (!phone && isTouchLike() && mode === "hover") return;
+
+  const offset = s(12);
+  tooltipMode = mode;
+
+  if (phone || mode === "tap") {
     tooltip.html(
       `<div class="tooltip-phone-inner"><div class="tooltip-body">${html}</div><button type="button" class="tooltip-close" aria-label="Close tooltip">×</button></div>`
     );
@@ -618,21 +636,26 @@ function showTooltip(html, event) {
     tooltip.html(html);
   }
 
-  tooltip.style("opacity", 1);
+  tooltipVisible = true;
+  tooltip.style("opacity", 1).style("pointer-events", phone || mode === "tap" ? "auto" : "none");
 
   const node = tooltip.node();
   const width = node?.offsetWidth || 0;
   const height = node?.offsetHeight || 0;
   const maxLeft = window.innerWidth - width - offset;
   const maxTop = window.innerHeight - height - offset;
-  const left = Math.max(offset, Math.min(event.clientX + offset, maxLeft));
-  const top = Math.max(offset, Math.min(event.clientY + offset, maxTop));
+  const clientX = event?.clientX ?? window.innerWidth / 2;
+  const clientY = event?.clientY ?? window.innerHeight / 2;
+  const left = Math.max(offset, Math.min(clientX + offset, maxLeft));
+  const top = Math.max(offset, Math.min(clientY + offset, maxTop));
   tooltip.style("left", `${left}px`).style("top", `${top}px`);
 }
 
 function hideTooltip() {
   if (!tooltip) return;
-  tooltip.style("opacity", 0);
+  tooltipVisible = false;
+  tooltipMode = null;
+  tooltip.style("opacity", 0).style("pointer-events", "none");
   tooltip.classed("tooltip-phone", false);
   tooltip.selectAll(".tooltip-close").on("click", null);
 }
@@ -1199,8 +1222,14 @@ function renderThemeBars(counts) {
     .attr("rx", s(4))
     .style("cursor", "pointer")
     .on("click", (_, d) => onThemeBarClick(d))
-    .on("mousemove", isTouchLike() ? null : (event, d) => showTooltip(`<strong>${d.text}</strong><br/>${d.count} submissions`, event))
-    .on("mouseleave", isTouchLike() ? null : hideTooltip);
+    .on(
+      "mousemove",
+      isDesktopPointer()
+        ? (event, d) =>
+            showTooltip(`<strong>${d.text}</strong><br/>${d.count} submissions`, event, { mode: "hover" })
+        : null
+    )
+    .on("mouseleave", isDesktopPointer() ? hideTooltip : null);
 
   drawThemeBarLabels(g, data, y, (d) => d.text, { maxLabelWidth: leftMargin - s(18) });
 
@@ -1275,11 +1304,16 @@ function renderYearChart() {
       d3.select("#year-select").property("value", state.selectedYear);
       renderAll();
       if (isPhoneLayout()) {
-        showTooltip(`<strong>${d.year}</strong><br/>${d.count} submissions`, event);
+        showTooltip(`<strong>${d.year}</strong><br/>${d.count} submissions`, event, { mode: "tap" });
       }
     })
-    .on("mousemove", isTouchLike() ? null : (event, d) => showTooltip(`<strong>${d.year}</strong><br/>${d.count} submissions`, event))
-    .on("mouseleave", isTouchLike() ? null : hideTooltip);
+    .on(
+      "mousemove",
+      isDesktopPointer()
+        ? (event, d) => showTooltip(`<strong>${d.year}</strong><br/>${d.count} submissions`, event, { mode: "hover" })
+        : null
+    )
+    .on("mouseleave", isDesktopPointer() ? hideTooltip : null);
 
   g.append("g")
     .attr("transform", `translate(0,${height - margin.bottom})`)
@@ -1418,9 +1452,15 @@ function renderThemeShareByYear() {
     .attr("width", x.bandwidth())
     .attr("rx", isPhoneLayout() ? gs(1) : s(2))
     .style("cursor", "default")
-    .on("mousemove", isTouchLike() ? null : (event, d) => showTooltip(shareTooltip(d), event))
-    .on("mouseleave", isTouchLike() ? null : hideTooltip)
-    .on("click", isPhoneLayout() ? (event, d) => showTooltip(shareTooltip(d), event) : null);
+    .on(
+      "mousemove",
+      isDesktopPointer() ? (event, d) => showTooltip(shareTooltip(d), event, { mode: "hover" }) : null
+    )
+    .on("mouseleave", isDesktopPointer() ? hideTooltip : null)
+    .on(
+      "click",
+      isPhoneLayout() ? (event, d) => showTooltip(shareTooltip(d), event, { mode: "tap" }) : null
+    );
 
   g.append("g")
     .attr("transform", `translate(0,${plotHeight - margin.bottom})`)
@@ -1584,8 +1624,11 @@ function renderResearchThemeDeltas(submissions) {
     .attr("width", (d) => x(Math.abs(d.delta)))
     .attr("fill", (d) => (d.delta >= 0 ? CCN_COLORS.green : CCN_COLORS.pink))
     .attr("rx", s(4))
-    .on("mousemove", isTouchLike() ? null : (event, d) => showTooltip(deltaTooltip(d), event))
-    .on("mouseleave", isTouchLike() ? null : hideTooltip);
+    .on(
+      "mousemove",
+      isDesktopPointer() ? (event, d) => showTooltip(deltaTooltip(d), event, { mode: "hover" }) : null
+    )
+    .on("mouseleave", isDesktopPointer() ? hideTooltip : null);
 
   drawThemeBarLabels(g, rows, y, (d) => d.theme, { maxLabelWidth: leftMargin - s(18) });
 
@@ -1767,11 +1810,13 @@ function renderEmbeddingCluster() {
           handlePointNavigate(null, d);
         });
     }
-  } else {
+  } else if (isDesktopPointer()) {
     pointGroups
-      .on("mousemove", (event, d) => showTooltip(embeddingPointTooltip(d), event))
+      .on("mousemove", (event, d) => showTooltip(embeddingPointTooltip(d), event, { mode: "hover" }))
       .on("mouseleave", hideTooltip)
       .on("click", handlePointNavigate);
+  } else {
+    pointGroups.on("click", handlePointNavigate);
   }
 
   renderEmbeddingNote(note);
@@ -1924,7 +1969,7 @@ async function init() {
   await waitForChartFonts();
   renderAll();
 
-  setupPhoneTooltipDismiss();
+  setupTooltipDismiss();
 
   let resizeTimer = null;
   const scheduleReflow = () => {
