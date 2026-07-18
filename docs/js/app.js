@@ -348,9 +348,9 @@ const PHONE_EMBEDDING_LEGEND_HEADING_SIZE = 12.5;
 
 // Fixed chart design scales — not tied to viewport/zoom.
 // Desktop stays large; phones use a calmer scale so plots aren't cramped.
-const DESKTOP_CHART_SCALE = 3.4;
+const DESKTOP_CHART_SCALE = 4.53;
 const PHONE_CHART_SCALE = 1.2;
-const DESKTOP_ROOT_FONT_PX = 48;
+const DESKTOP_ROOT_FONT_PX = 64;
 const PHONE_ROOT_FONT_PX = 16;
 
 function enforceRootFontSize() {

@@ -31,7 +31,7 @@
   --border: rgba(197, 224, 243, 0.14);
   --shadow: 0 24px 84px rgba(0, 0, 0, 0.35);
   /* Fixed design scale — browser zoom scales rem/px uniformly; do not tie to vw. */
-  --ui-scale: 3.4;
+  --ui-scale: 4.53;
   --max-app-width: 100%;
   --sidebar-width: 18rem;
   --sidebar-collapsed-width: 0;
@@ -40,7 +40,7 @@
 html {
   /* Absolute px (not %). Brave was still rendering ~16px-looking UI at 32px
      on some laptops — use a larger locked root; JS also enforces this. */
-  font-size: 48px !important;
+  font-size: 64px !important;
   width: 100%;
   max-width: 100%;
   scrollbar-gutter: stable;
@@ -1213,10 +1213,10 @@ svg {
 /* Mouse/trackpad desktops (incl. Brave on laptop): always keep large root type. */
 @media (hover: hover) and (pointer: fine) {
   :root {
-    --ui-scale: 3.4;
+    --ui-scale: 4.53;
   }
 
   html {
-    font-size: 48px !important;
+    font-size: 64px !important;
   }
 }
