@@ -41,13 +41,21 @@
 }
 
 html {
-  /* Respect OS/browser font size; desktop adds fluid clamp below. */
+  /* Default: respect OS/browser font size. Wider viewports use fluid clamp
+     (viewport-based only — NOT pointer/hover, so touch laptops match mice). */
   font-size: 100%;
   width: 100%;
   max-width: 100%;
   scrollbar-gutter: stable;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+}
+
+/* Same scale on Chrome / Edge / Brave / touch laptops at the same width. */
+@media (min-width: 640px) {
+  html {
+    font-size: clamp(1.25rem, 0.65rem + 2vw, 2.75rem);
+  }
 }
 
 body {
