@@ -411,15 +411,43 @@ function themeFs(base) {
   return `${themeLabelPx(base)}px`;
 }
 
-let measureTextCanvas = null;
+// DOM measurement — not canvas.measureText(), which Brave Shields / privacy
+// browsers noise or zero out as a fingerprinting surface, collapsing layouts.
+let measureTextEl = null;
+
+function heuristicTextWidth(text, fontSizePx) {
+  return Math.max(1, String(text).length * fontSizePx * 0.58);
+}
+
+function ensureMeasureTextEl() {
+  if (measureTextEl && measureTextEl.isConnected) return measureTextEl;
+  if (typeof document === "undefined") return null;
+  const host = document.body || document.documentElement;
+  if (!host) return null;
+  measureTextEl = document.createElement("span");
+  measureTextEl.setAttribute("aria-hidden", "true");
+  measureTextEl.style.cssText =
+    "position:absolute;left:-99999px;top:0;visibility:hidden;white-space:pre;" +
+    "margin:0;padding:0;border:0;pointer-events:none;contain:layout style;";
+  host.appendChild(measureTextEl);
+  return measureTextEl;
+}
 
 function measureTextWidth(text, fontSizePx, fontFamily = CHART_FONT) {
-  if (typeof document === "undefined") return text.length * fontSizePx * 0.58;
-  measureTextCanvas = measureTextCanvas || document.createElement("canvas");
-  const ctx = measureTextCanvas.getContext("2d");
-  if (!ctx) return text.length * fontSizePx * 0.58;
-  ctx.font = `${fontSizePx}px ${fontFamily}`;
-  return ctx.measureText(text).width;
+  const value = text == null ? "" : String(text);
+  const size = Number(fontSizePx);
+  const fontPx = Number.isFinite(size) && size > 0 ? size : 12;
+  if (typeof document === "undefined") return heuristicTextWidth(value, fontPx);
+
+  const el = ensureMeasureTextEl();
+  if (!el) return heuristicTextWidth(value, fontPx);
+
+  el.style.font = `${fontPx}px ${fontFamily}`;
+  el.textContent = value;
+  // offsetWidth / getBoundingClientRect use real layout metrics, not canvas.
+  const width = el.offsetWidth || el.getBoundingClientRect().width;
+  if (!Number.isFinite(width) || width <= 0) return heuristicTextWidth(value, fontPx);
+  return width;
 }
 
 function themeBarLabelWidth(containerWidth = 0, labels = []) {
