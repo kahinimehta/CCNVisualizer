@@ -527,6 +527,20 @@ const CHART_PALETTE = [
   "#EC4899", // pink — Methods and theory
 ];
 
+// Distinct year colors for the UMAP map (2017–2026).
+const YEAR_PALETTE = [
+  "#F97316", // 2017 orange
+  "#EAB308", // 2018 yellow
+  "#84CC16", // 2019 lime
+  "#14B8A6", // 2020 teal
+  "#0EA5E9", // 2021 sky
+  "#3B82F6", // 2022 blue
+  "#8B5CF6", // 2023 violet
+  "#D946EF", // 2024 fuchsia
+  "#F43F5E", // 2025 rose
+  "#F4C7C3", // 2026 CCN pink
+];
+
 const KPI_ICONS = {
   submissions:
     '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 17V9"/><path d="M12 17V7"/><path d="M16 17v-5"/></svg>',
@@ -1004,8 +1018,17 @@ function themeColor(theme) {
   return CHART_PALETTE[(index >= 0 ? index : 0) % CHART_PALETTE.length];
 }
 
-function appendBlackDot(parent, radius, options = {}) {
-  const { opacity = 0.88, stroke = "#111827", strokeWidth = 1, fill = "#111827" } = options;
+function yearColor(year) {
+  const years = state.data?.metadata?.years || [];
+  const index = years.indexOf(Number(year));
+  if (index >= 0) return YEAR_PALETTE[index % YEAR_PALETTE.length];
+  const fallbackYears = [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026];
+  const fallbackIndex = fallbackYears.indexOf(Number(year));
+  return YEAR_PALETTE[(fallbackIndex >= 0 ? fallbackIndex : 0) % YEAR_PALETTE.length];
+}
+
+function appendEmbeddingDot(parent, radius, options = {}) {
+  const { opacity = 0.88, stroke = "#0f2238", strokeWidth = 1, fill = "#111827" } = options;
 
   parent
     .append("circle")
@@ -1257,8 +1280,8 @@ function embeddingDefaultNote() {
     return `${count} papers on map · ${highlighted} highlighted · ${themeFilterDisplayText()}`;
   }
   return isTouchLike()
-    ? `${count} submissions · black dots · tap a dot to see topics and filter · or open the paper`
-    : `${count} submissions · black dots · hover a dot to see topics and click a topic to filter`;
+    ? `${count} submissions · colored by year · tap a dot to see topics and filter · or open the paper`
+    : `${count} submissions · colored by year · hover a dot to see topics and click a topic to filter`;
 }
 
 function renderEmbeddingNote(note) {
@@ -1284,6 +1307,9 @@ function embeddingPointTooltipHtml(point) {
   const topics = embeddingPointTopics(point);
   const selected = new Set(state.selectedThemes);
   const title = escapeHtml(submission?.title || point.title || "Submission");
+  const year = submission?.year ?? point.year;
+  const yearLabel = year != null ? escapeHtml(String(year)) : "";
+  const yearSwatch = year != null ? yearColor(year) : CCN_COLORS.muted;
   const topicButtons = topics.length
     ? topics
         .map((theme) => {
@@ -1299,6 +1325,9 @@ function embeddingPointTooltipHtml(point) {
     : "Click a topic to filter by it";
   return [
     `<strong>${title}</strong>`,
+    yearLabel
+      ? `<div class="tooltip-year"><span class="tooltip-year-swatch" style="background:${yearSwatch}"></span>${yearLabel}</div>`
+      : "",
     `<div class="tooltip-topics">${topicButtons}</div>`,
     `<div class="tooltip-actions"><button type="button" class="tooltip-action tooltip-open-paper">Open paper</button></div>`,
     `<span class="tooltip-hint">${hint}</span>`,
@@ -1905,6 +1934,72 @@ function embeddingPlotDomain(extent, padRatio = 0.06) {
   return [min - pad, max + pad];
 }
 
+function renderEmbeddingYearLegend(svg, years, width, plotHeight, margin) {
+  const legendFont = isPhoneLayout() ? chartThemePx(PHONE_THEME_TITLE_SIZE) : themeLabelPx(10);
+  const legendHeadingFont = isPhoneLayout()
+    ? chartThemePx(PHONE_EMBEDDING_LEGEND_HEADING_SIZE)
+    : themeLabelPx(11);
+  const marker = isPhoneLayout() ? gs(8) : s(10);
+  const itemGapX = isPhoneLayout() ? gs(10) : s(14);
+  const itemGapY = isPhoneLayout() ? legendFont * 1.7 : legendFont * 1.55;
+  const titleHeight = legendHeadingFont * 1.55;
+  const usableW = Math.max(120, width - margin.left - margin.right);
+
+  const legendRoot = svg
+    .append("g")
+    .attr("class", "embedding-year-legend")
+    .attr("transform", `translate(${margin.left}, ${plotHeight + (isPhoneLayout() ? gs(6) : s(8))})`);
+
+  legendRoot
+    .append("text")
+    .attr("class", "embedding-legend-title")
+    .attr("x", 0)
+    .attr("y", legendHeadingFont * 0.85)
+    .attr("fill", CCN_COLORS.muted)
+    .style("font-size", `${legendHeadingFont}px`)
+    .style("font-family", CHART_FONT)
+    .style("font-weight", 600)
+    .text("Year (dot color)");
+
+  let cursorX = 0;
+  let cursorY = titleHeight;
+  let rows = 1;
+
+  years.forEach((year) => {
+    const label = String(year);
+    const labelW = measureTextWidth(label, legendFont);
+    const itemW = marker + (isPhoneLayout() ? gs(4) : s(6)) + labelW;
+    if (cursorX > 0 && cursorX + itemW > usableW) {
+      cursorX = 0;
+      cursorY += itemGapY;
+      rows += 1;
+    }
+
+    const item = legendRoot.append("g").attr("transform", `translate(${cursorX}, ${cursorY})`);
+    item
+      .append("circle")
+      .attr("cx", marker / 2)
+      .attr("cy", legendFont * 0.35)
+      .attr("r", marker / 2)
+      .attr("fill", yearColor(year))
+      .attr("stroke", "#0f2238")
+      .attr("stroke-width", isPhoneLayout() ? gs(0.8) : s(1));
+    item
+      .append("text")
+      .attr("x", marker + (isPhoneLayout() ? gs(4) : s(6)))
+      .attr("y", legendFont * 0.55)
+      .attr("fill", CCN_COLORS.muted)
+      .style("font-size", `${legendFont}px`)
+      .style("font-family", CHART_FONT)
+      .text(label);
+
+    cursorX += itemW + itemGapX;
+  });
+
+  const legendBlock = titleHeight + rows * itemGapY + (isPhoneLayout() ? gs(8) : s(12));
+  return legendBlock;
+}
+
 function renderEmbeddingCluster() {
   const container = d3.select("#embedding-chart");
   container.selectAll("*").remove();
@@ -1917,6 +2012,7 @@ function renderEmbeddingCluster() {
     return;
   }
 
+  const years = [...(state.data?.metadata?.years || [])].sort((a, b) => a - b);
   const width = Math.max(280, chartContainerWidth(container));
   const margin = isPhoneLayout()
     ? { top: 10, right: 10, bottom: 10, left: 10 }
@@ -1931,12 +2027,14 @@ function renderEmbeddingCluster() {
   // Full-width isotropic layout: same data units per pixel on both axes.
   const unitsPerPx = xSpan / plotInnerW;
   const plotInnerH = ySpan / unitsPerPx;
-  const height = margin.top + plotInnerH + margin.bottom;
-  const svg = appendChartSvg(container, width, height, {
+  const plotHeight = margin.top + plotInnerH + margin.bottom;
+  // Provisional height; expand after measuring the year legend.
+  const provisionalLegend = isPhoneLayout() ? gs(70) : s(56);
+  const svg = appendChartSvg(container, width, plotHeight + provisionalLegend, {
     preserveAspectRatio: "xMidYMid meet",
   });
 
-  const plotBottom = height - margin.bottom;
+  const plotBottom = plotHeight - margin.bottom;
   const pointRadius = isPhoneLayout()
     ? { base: 2.4, selected: 3.2, dim: 2.0 }
     : { base: 7, selected: 8.5, dim: 5.5 };
@@ -1962,10 +2060,11 @@ function renderEmbeddingCluster() {
     const active = !filtering || themeMatch;
     let radius = scaleR(active ? pointRadius.base : pointRadius.dim);
     if (highlighted || (active && filtering)) radius = scaleR(pointRadius.selected);
+    const fill = yearColor(point.year);
     return {
       radius,
-      opacity: active ? (highlighted ? 1 : 0.9) : 0.12,
-      stroke: highlighted || (active && filtering) ? CCN_COLORS.pink : "#111827",
+      opacity: active ? (highlighted ? 1 : 0.9) : 0.14,
+      stroke: highlighted || (active && filtering) ? CCN_COLORS.pink : "#0f2238",
       strokeWidth: highlighted || (active && filtering)
         ? isPhoneLayout()
           ? gs(1.75)
@@ -1973,7 +2072,7 @@ function renderEmbeddingCluster() {
         : isPhoneLayout()
           ? gs(1)
           : s(1.25),
-      fill: "#111827",
+      fill,
     };
   };
 
@@ -1995,17 +2094,21 @@ function renderEmbeddingCluster() {
     .style("cursor", "pointer")
     .style("pointer-events", isTouchLike() ? "none" : "auto");
 
-  pointGroups.each(function renderBlackPoint(point) {
+  pointGroups.each(function renderYearPoint(point) {
     const group = d3.select(this);
     group.selectAll("*").remove();
     const style = pointStyle(point);
-    appendBlackDot(group, style.radius, {
+    appendEmbeddingDot(group, style.radius, {
       opacity: style.opacity,
       stroke: style.stroke,
       strokeWidth: style.strokeWidth,
       fill: style.fill,
     });
   });
+
+  const legendBlock = renderEmbeddingYearLegend(svg, years, width, plotHeight, margin);
+  const totalHeight = plotHeight + legendBlock;
+  svg.attr("viewBox", `0 0 ${width} ${totalHeight}`);
 
   if (isTouchLike()) {
     if (isPhoneLayout()) {

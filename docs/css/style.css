@@ -836,6 +836,23 @@ svg {
   max-width: min(calc(360px * var(--ui-scale)), 92vw);
 }
 
+.tooltip-year {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.3rem;
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
+.tooltip-year-swatch {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 34, 56, 0.55);
+  flex: 0 0 auto;
+}
+
 .tooltip-topics {
   display: flex;
   flex-wrap: wrap;
