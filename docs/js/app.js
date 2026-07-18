@@ -2065,7 +2065,7 @@ function renderEmbeddingCluster() {
 
   const plotBottom = plotHeight - margin.bottom;
   const pointRadius = isPhoneLayout()
-    ? { base: 1.2, selected: 1.6, dim: 1.0 }
+    ? { base: 2.4, selected: 3.2, dim: 2.0 }
     : { base: 3.5, selected: 4.25, dim: 2.75 };
   const scaleR = (n) => (isPhoneLayout() ? gs(n) : s(n));
 
