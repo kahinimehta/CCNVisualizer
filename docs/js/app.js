@@ -27,7 +27,9 @@ function isDesktopPointer() {
 }
 
 function isPhoneLayout() {
-  return viewportWidth() < PHONE_MAX_WIDTH && isTouchLike();
+  // Require device width so a narrowed desktop/Brave window is not treated as a phone.
+  const phoneDevice = window.matchMedia(`(max-device-width: ${PHONE_MAX_WIDTH - 1}px)`).matches;
+  return viewportWidth() < PHONE_MAX_WIDTH && isTouchLike() && phoneDevice;
 }
 
 function isTouchLike() {
