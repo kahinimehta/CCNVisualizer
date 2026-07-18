@@ -405,18 +405,18 @@ function applyPageScale() {
 
   if (isPhoneLayout()) {
     desktopLayoutScale = PHONE_CHART_SCALE;
-    root.style.fontSize = `${PHONE_ROOT_FONT_PX}px`;
+    root.style.setProperty("font-size", `${PHONE_ROOT_FONT_PX}px`, "important");
     root.style.setProperty("--ui-scale", String(PHONE_UI_SCALE));
     return;
   }
 
   let scale = desktopScaleFromViewport();
-  root.style.fontSize = `${(16 * scale).toFixed(3)}px`;
+  root.style.setProperty("font-size", `${(16 * scale).toFixed(3)}px`, "important");
   root.style.setProperty("--ui-scale", String(scale));
   // Rem probe needs the tentative root font-size applied first.
   scale = calibrateScaleAgainstRemProbe(scale);
   desktopLayoutScale = scale;
-  root.style.fontSize = `${(16 * scale).toFixed(3)}px`;
+  root.style.setProperty("font-size", `${(16 * scale).toFixed(3)}px`, "important");
   root.style.setProperty("--ui-scale", String(scale));
 }
 

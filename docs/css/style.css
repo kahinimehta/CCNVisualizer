@@ -38,8 +38,8 @@
 }
 
 html {
-  /* Fallback before JS; never % of browser default. */
-  font-size: 52px !important;
+  /* Fallback before JS; never % of browser default. JS overrides via inline style. */
+  font-size: 52px;
   width: 100%;
   max-width: 100%;
   scrollbar-gutter: stable;
@@ -1211,13 +1211,13 @@ svg {
   }
 }
 
-/* Desktop pointer: full-width layout with locked root type. */
+/* Desktop pointer: full-width layout; JS sets the live root size. */
 @media (hover: hover) and (pointer: fine) {
   :root {
     --ui-scale: 3.25;
   }
 
   html {
-    font-size: 52px !important;
+    font-size: 52px;
   }
 }
