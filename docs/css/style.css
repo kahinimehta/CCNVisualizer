@@ -1224,9 +1224,3 @@ svg {
   }
 }
 
-/* Desktop: fluid root — smooth between laptop and wide monitors, no staircase. */
-@media (hover: hover) and (pointer: fine) {
-  html {
-    font-size: clamp(1.25rem, 0.65rem + 2vw, 2.75rem);
-  }
-}
