@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="font-size:52px">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -9,14 +9,14 @@
   <link rel="icon" href="assets/favicon-32.png?v=2" type="image/png" sizes="32x32" />
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=2" />
   <meta name="theme-color" content="#0f2238" />
-  <link rel="stylesheet" href="css/style.css?v=47" />
+  <link rel="stylesheet" href="css/style.css?v=48" />
   <style>
-    .license-page { max-width: calc(760px * var(--ui-scale)); margin: 0 auto; }
-    .license-page h1 { color: var(--ccn-white); margin-bottom: 0.5rem; }
-    .license-page h2 { color: var(--ccn-blue); font-size: 1rem; margin-top: 1.5rem; }
-    .license-page p, .license-page li { color: var(--muted); line-height: 1.6; font-size: 0.9rem; }
+    .license-page { max-width: min(48rem, 100%); margin: 0 auto; }
+    .license-page h1 { color: var(--ccn-white); margin-bottom: 0.5rem; font-size: clamp(1.45rem, 1.1rem + 1vw, 2rem); }
+    .license-page h2 { color: var(--ccn-blue); font-size: clamp(0.95rem, 0.9rem + 0.25vw, 1.1rem); margin-top: 1.5rem; }
+    .license-page p, .license-page li { color: var(--muted); line-height: 1.6; font-size: clamp(0.85rem, 0.8rem + 0.2vw, 0.95rem); }
     .license-page a { color: var(--ccn-blue); }
-    .license-card { background: var(--ccn-navy-card); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; margin-top: 1rem; }
+    .license-card { background: var(--ccn-navy-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.25rem; margin-top: 1rem; }
   </style>
 </head>
 <body>

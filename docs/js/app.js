@@ -346,53 +346,25 @@ const PHONE_BAR_VALUE_SIZE = 10.5;
 const PHONE_LEGEND_HEADING_SIZE = 10.5;
 const PHONE_EMBEDDING_LEGEND_HEADING_SIZE = 12.5;
 
-// Viewport-normalized scale: same window width ⇒ same root/chart scale in every
-// browser. No body { zoom } (that collapsed the layout). A rem probe corrects
-// UA font inflation so Chrome / Edge / Brave converge.
+// Charts follow the CSS fluid root (clamp on html). No forced px root — that
+// fought OS/browser font settings and drifted across Chrome/Edge/Brave.
 const PHONE_CHART_SCALE = 1.2;
-const PHONE_ROOT_FONT_PX = 16;
 const PHONE_UI_SCALE = 1.12;
-const DESKTOP_SCALE_MIN = 2.75;
-const DESKTOP_SCALE_MAX = 3.6;
-/** Fallback before the first applyPageScale() (≈52px root). */
-let desktopLayoutScale = 3.25;
+let layoutScale = 1;
 
-function clampDesktopScale(scale) {
-  return Math.min(DESKTOP_SCALE_MAX, Math.max(DESKTOP_SCALE_MIN, scale));
+function readRootFontPx() {
+  if (typeof document === "undefined") return 16;
+  const px = parseFloat(getComputedStyle(document.documentElement).fontSize);
+  return Number.isFinite(px) && px > 0 ? px : 16;
 }
 
-/** Scale from layout viewport width so equal windows match across browsers. */
-function desktopScaleFromViewport() {
-  const vw = viewportWidth();
-  if (!vw) return desktopLayoutScale;
-  // ~52px root near 1530px width; clamps keep laptop/desktop readable.
-  return clampDesktopScale((vw * 0.034) / 16);
-}
-
-/**
- * If the UA inflates/deflates rem vs our root px, nudge scale so 10rem matches
- * the expected CSS pixel width. Cancels a common Chrome/Edge/Brave mismatch.
- */
-function calibrateScaleAgainstRemProbe(scale) {
-  if (typeof document === "undefined" || !document.body) return scale;
-  const expected = 10 * 16 * scale;
-  const probe = document.createElement("div");
-  probe.setAttribute("aria-hidden", "true");
-  probe.style.cssText =
-    "position:fixed;left:-9999px;top:0;width:10rem;height:1px;margin:0;padding:0;border:0;visibility:hidden;pointer-events:none;";
-  document.body.appendChild(probe);
-  const measured = probe.getBoundingClientRect().width;
-  probe.remove();
-  if (!Number.isFinite(measured) || measured <= 0) return scale;
-  const drift = expected / measured;
-  if (Math.abs(drift - 1) < 0.02 || Math.abs(drift - 1) > 0.45) return scale;
-  return clampDesktopScale(scale * drift);
-}
-
+/** Sync chart/--ui-scale to the live computed root font-size from CSS clamp(). */
 function applyPageScale() {
   const root = document.documentElement;
   if (!root) return;
 
+  // Drop legacy inline font-size locks from older deploys.
+  root.style.removeProperty("font-size");
   root.classList.remove("is-brave", "no-css-zoom");
   root.style.zoom = "";
   root.style.removeProperty("--page-zoom");
@@ -404,20 +376,13 @@ function applyPageScale() {
   }
 
   if (isPhoneLayout()) {
-    desktopLayoutScale = PHONE_CHART_SCALE;
-    root.style.setProperty("font-size", `${PHONE_ROOT_FONT_PX}px`, "important");
+    layoutScale = PHONE_CHART_SCALE;
     root.style.setProperty("--ui-scale", String(PHONE_UI_SCALE));
     return;
   }
 
-  let scale = desktopScaleFromViewport();
-  root.style.setProperty("font-size", `${(16 * scale).toFixed(3)}px`, "important");
-  root.style.setProperty("--ui-scale", String(scale));
-  // Rem probe needs the tentative root font-size applied first.
-  scale = calibrateScaleAgainstRemProbe(scale);
-  desktopLayoutScale = scale;
-  root.style.setProperty("font-size", `${(16 * scale).toFixed(3)}px`, "important");
-  root.style.setProperty("--ui-scale", String(scale));
+  layoutScale = Math.max(1, readRootFontPx() / 16);
+  root.style.setProperty("--ui-scale", String(layoutScale));
 }
 
 function enforceRootFontSize() {
@@ -425,7 +390,7 @@ function enforceRootFontSize() {
 }
 
 function getUiScale() {
-  return isPhoneLayout() ? PHONE_CHART_SCALE : desktopLayoutScale;
+  return isPhoneLayout() ? PHONE_CHART_SCALE : layoutScale;
 }
 
 const s = (n) => n * getUiScale();

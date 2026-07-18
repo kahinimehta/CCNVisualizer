@@ -30,16 +30,19 @@
   --muted: #8fa8c4;
   --border: rgba(197, 224, 243, 0.14);
   --shadow: 0 24px 84px rgba(0, 0, 0, 0.35);
-  /* JS sets --ui-scale from viewport width so equal windows match across UAs. */
-  --ui-scale: 3.25;
+  /* Tracks computed root (JS syncs). Radii/spacing use rem so they fluid-scale. */
+  --ui-scale: 1;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1rem;
   --max-app-width: 100%;
   --sidebar-width: 18rem;
   --sidebar-collapsed-width: 0;
 }
 
 html {
-  /* Fallback before JS; never % of browser default. JS overrides via inline style. */
-  font-size: 52px;
+  /* Respect OS/browser font size; desktop adds fluid clamp below. */
+  font-size: 100%;
   width: 100%;
   max-width: 100%;
   scrollbar-gutter: stable;
@@ -88,7 +91,7 @@ a {
   font-size: 0.95rem;
   background: #0a1829;
   border-right: 1px solid var(--border);
-  border-radius: 0 calc(12px * var(--ui-scale)) calc(12px * var(--ui-scale)) 0;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -136,7 +139,7 @@ a {
   width: 2.45rem;
   height: 2.45rem;
   border: 1px solid var(--border);
-  border-radius: calc(8px * var(--ui-scale));
+  border-radius: var(--radius-sm);
   background: var(--ccn-navy-card);
   color: var(--ccn-blue);
   cursor: pointer;
@@ -180,12 +183,14 @@ a {
   display: block;
   height: auto;
   max-width: 100%;
+  aspect-ratio: 132 / 36;
 }
 
 .sidebar-logo .ccn-logo {
   width: min(100%, 11.5rem);
   height: auto;
   max-width: 100%;
+  aspect-ratio: 132 / 36;
 }
 
 .sidebar.collapsed .sidebar-logo {
@@ -201,7 +206,7 @@ a {
 .nav-link {
   display: block;
   padding: 0.65rem 0.8rem;
-  border-radius: calc(8px * var(--ui-scale));
+  border-radius: var(--radius-sm);
   background: transparent;
   color: var(--muted);
   font-size: 0.88rem;
@@ -283,7 +288,7 @@ body:not(.sidebar-collapsed) .main-area {
 
 .brand h1 {
   margin: 0;
-  font-size: 2rem;
+  font-size: clamp(1.45rem, 1.1rem + 1.15vw, 2.15rem);
   font-weight: 700;
   color: var(--ccn-white);
   letter-spacing: -0.02em;
@@ -293,7 +298,7 @@ body:not(.sidebar-collapsed) .main-area {
 .brand-subtitle {
   margin: 0.35rem 0 0;
   color: var(--muted);
-  font-size: 0.92rem;
+  font-size: clamp(0.82rem, 0.74rem + 0.3vw, 1rem);
   line-height: 1.45;
 }
 
@@ -317,7 +322,7 @@ body:not(.sidebar-collapsed) .main-area {
   flex-direction: column;
   gap: 0.3rem;
   min-width: 0;
-  font-size: 0.75rem;
+  font-size: clamp(0.7rem, 0.64rem + 0.2vw, 0.8rem);
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -366,7 +371,7 @@ body:not(.sidebar-collapsed) .main-area {
 .kpi-card {
   background: var(--ccn-navy-card);
   border: 1px solid var(--border);
-  border-radius: calc(14px * var(--ui-scale));
+  border-radius: var(--radius-md);
   padding: 0.9rem 1rem;
   display: flex;
   align-items: center;
@@ -408,7 +413,7 @@ body:not(.sidebar-collapsed) .main-area {
 
 .kpi-card .label {
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: clamp(0.72rem, 0.68rem + 0.2vw, 0.85rem);
   margin-bottom: 0.15rem;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -416,7 +421,7 @@ body:not(.sidebar-collapsed) .main-area {
 }
 
 .kpi-card .value {
-  font-size: 1.35rem;
+  font-size: clamp(1.15rem, 1rem + 0.55vw, 1.55rem);
   font-weight: 700;
   color: var(--ccn-white);
   line-height: 1.1;
@@ -433,7 +438,7 @@ body:not(.sidebar-collapsed) .main-area {
   border: 1px solid var(--border);
   background: var(--ccn-navy-card);
   color: var(--text);
-  border-radius: calc(8px * var(--ui-scale));
+  border-radius: var(--radius-sm);
   padding: 0.35rem 0.75rem;
   cursor: pointer;
   font-size: 0.8rem;
@@ -457,7 +462,7 @@ body:not(.sidebar-collapsed) .main-area {
 .card {
   background: var(--ccn-navy-card);
   border: 1px solid var(--border);
-  border-radius: calc(16px * var(--ui-scale));
+  border-radius: var(--radius-lg);
   padding: 1rem 1.05rem 1.1rem;
   box-shadow: var(--shadow);
   width: 100%;
@@ -536,8 +541,8 @@ body:not(.sidebar-collapsed) .main-area {
 }
 
 #word-cloud {
-  height: clamp(12rem, 34vh, 18.75rem);
-  min-height: clamp(12rem, 34vh, 18.75rem);
+  height: clamp(12rem, 34dvh, 18.75rem);
+  min-height: clamp(12rem, 34dvh, 18.75rem);
 }
 
 .theme-analytics {
@@ -738,7 +743,7 @@ body:not(.sidebar-collapsed) .main-area {
 
 .card-header h2 {
   margin: 0;
-  font-size: 1rem;
+  font-size: clamp(0.95rem, 0.88rem + 0.3vw, 1.15rem);
   font-weight: 700;
   color: var(--ccn-white);
 }
@@ -746,7 +751,7 @@ body:not(.sidebar-collapsed) .main-area {
 .card-sub {
   margin: 0.2rem 0 0;
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: clamp(0.72rem, 0.68rem + 0.2vw, 0.88rem);
 }
 
 #submissions-panel {
@@ -793,7 +798,7 @@ svg {
   }
 
   html {
-    font-size: 16px;
+    font-size: 100%;
   }
 
   .app-shell {
@@ -814,11 +819,11 @@ svg {
   }
 
   .brand h1 {
-    font-size: 1.35rem;
+    font-size: clamp(1.25rem, 1.1rem + 1.5vw, 1.55rem);
   }
 
   .brand-subtitle {
-    font-size: 0.8rem;
+    font-size: clamp(0.76rem, 0.72rem + 0.4vw, 0.88rem);
   }
 
   .filter-bar {
@@ -866,7 +871,7 @@ svg {
   }
 
   .tooltip {
-    max-width: min(20rem, 92vw);
+    max-width: min(20rem, 92%);
     font-size: 0.84rem;
     padding: 0.5rem 0.65rem;
   }
@@ -876,7 +881,7 @@ svg {
     top: 50%;
     right: auto;
     bottom: auto;
-    max-width: min(20rem, 88vw);
+    max-width: min(20rem, 88%);
     font-size: 0.84rem;
     padding: 0.55rem 0.65rem;
     transform: translate(-50%, -50%) scale(0.5);
@@ -910,10 +915,10 @@ svg {
   border: 1px solid var(--border);
   color: var(--text);
   padding: 0.55rem 0.75rem;
-  border-radius: calc(8px * var(--ui-scale));
+  border-radius: var(--radius-sm);
   font-size: 0.82rem;
   line-height: 1.45;
-  max-width: min(calc(320px * var(--ui-scale)), 90vw);
+  max-width: min(22rem, 90%);
   opacity: 0;
   transition: opacity 0.1s;
   z-index: 1000;
@@ -972,7 +977,7 @@ svg {
 
 .tooltip.tooltip-interactive {
   pointer-events: auto;
-  max-width: min(calc(360px * var(--ui-scale)), 92vw);
+  max-width: min(24rem, 92%);
 }
 
 .tooltip-year {
@@ -1065,7 +1070,7 @@ svg {
 .paper-list {
   flex: 1 1 auto;
   min-height: 0;
-  max-height: clamp(14rem, 38vh, 26rem);
+  max-height: clamp(14rem, 38dvh, 26rem);
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
@@ -1079,7 +1084,7 @@ svg {
 .paper-item {
   background: var(--ccn-navy-elevated);
   border: 1px solid var(--border);
-  border-radius: calc(12px * var(--ui-scale));
+  border-radius: var(--radius-md);
   padding: 0.8rem 0.9rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -1211,13 +1216,9 @@ svg {
   }
 }
 
-/* Desktop pointer: full-width layout; JS sets the live root size. */
+/* Desktop: fluid root — smooth between laptop and wide monitors, no staircase. */
 @media (hover: hover) and (pointer: fine) {
-  :root {
-    --ui-scale: 3.25;
-  }
-
   html {
-    font-size: 52px;
+    font-size: clamp(1.25rem, 0.65rem + 2vw, 2.75rem);
   }
 }
