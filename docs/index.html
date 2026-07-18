@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=29" />
+  <link rel="stylesheet" href="css/style.css?v=30" />
   <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 </head>
 <body>
@@ -42,6 +42,14 @@
           <div class="header-divider" aria-hidden="true"></div>
         </div>
         <div class="filter-bar">
+          <label class="filter-field">
+            <span>Dataset</span>
+            <select id="dataset-select" aria-label="Select abstracts CSV dataset">
+              <option value="abstracts.csv">Full topics (abstracts.csv)</option>
+              <option value="abstracts_2_topics.csv">First two topics only</option>
+              <option value="abstract_v_3.csv">Drop Methods unless top-two</option>
+            </select>
+          </label>
           <label class="filter-field">
             <span>Year</span>
             <select id="year-select">
@@ -157,6 +165,6 @@
 
   <div class="tooltip" id="tooltip"></div>
   <script src="js/sidebar.js?v=20"></script>
-  <script src="js/app.js?v=29"></script>
+  <script src="js/app.js?v=30"></script>
 </body>
 </html>

@@ -555,8 +555,27 @@ const GOOGLE_FORM_TOPICS = [
   "Methods and theory",
 ];
 
+const DATASET_OPTIONS = [
+  {
+    file: "abstracts.csv",
+    label: "Full topics (abstracts.csv)",
+  },
+  {
+    file: "abstracts_2_topics.csv",
+    label: "First two topics only",
+  },
+  {
+    file: "abstract_v_3.csv",
+    label: "Drop Methods unless top-two",
+  },
+];
+
+const DATASET_STORAGE_KEY = "ccn-visualizer-dataset";
+const DEFAULT_DATASET = DATASET_OPTIONS[0].file;
+
 const state = {
   data: null,
+  datasetFile: DEFAULT_DATASET,
   selectedYear: "all",
   search: "",
   selectedThemes: [],
@@ -784,7 +803,7 @@ function buildStatsFromSubmissions(submissions) {
   return { counts_by_year: countsByYear };
 }
 
-function buildStateFromCsv(rows) {
+function buildStateFromCsv(rows, source = DEFAULT_DATASET) {
   const submissions = rows.map(csvRowToSubmission);
   const years = [...new Set(submissions.map((item) => item.year))].sort((a, b) => a - b);
   return {
@@ -792,10 +811,80 @@ function buildStateFromCsv(rows) {
     metadata: {
       years,
       total_count: submissions.length,
-      source: "abstracts.csv",
+      source,
     },
     stats: buildStatsFromSubmissions(submissions),
   };
+}
+
+function isValidDatasetFile(file) {
+  return DATASET_OPTIONS.some((option) => option.file === file);
+}
+
+function readStoredDatasetFile() {
+  try {
+    const stored = localStorage.getItem(DATASET_STORAGE_KEY);
+    if (stored && isValidDatasetFile(stored)) return stored;
+  } catch {
+    /* ignore storage errors */
+  }
+  return DEFAULT_DATASET;
+}
+
+function persistDatasetFile(file) {
+  try {
+    localStorage.setItem(DATASET_STORAGE_KEY, file);
+  } catch {
+    /* ignore storage errors */
+  }
+}
+
+function renderDatasetSelect() {
+  const select = d3.select("#dataset-select");
+  if (select.empty()) return;
+  select.selectAll("option").remove();
+  select
+    .selectAll("option")
+    .data(DATASET_OPTIONS)
+    .join("option")
+    .attr("value", (d) => d.file)
+    .text((d) => d.label);
+  select.property("value", state.datasetFile);
+}
+
+async function loadDataset(file, options = {}) {
+  const { resetFilters = false } = options;
+  const datasetFile = isValidDatasetFile(file) ? file : DEFAULT_DATASET;
+  const csvRows = await d3.csv(`data/${datasetFile}`);
+  if (!csvRows?.length) {
+    throw new Error(`Could not load data/${datasetFile}`);
+  }
+
+  state.datasetFile = datasetFile;
+  persistDatasetFile(datasetFile);
+  state.data = buildStateFromCsv(csvRows, datasetFile);
+
+  if (resetFilters) {
+    state.selectedYear = "all";
+    state.search = "";
+    state.selectedThemes = [];
+    state.themeFilterMode = "include";
+    state.highlightedSubmissionKey = "";
+    state.deltaFromYear = "";
+    state.deltaToYear = "";
+    d3.select("#search-input").property("value", "");
+    d3.select("#year-select").property("value", "all");
+  } else if (
+    state.selectedYear !== "all" &&
+    !state.data.metadata.years.map(String).includes(String(state.selectedYear))
+  ) {
+    state.selectedYear = "all";
+  }
+
+  renderDatasetSelect();
+  renderYearControls();
+  renderDeltaYearControls();
+  renderAll();
 }
 
 function embeddingDisplayPoints() {
@@ -2079,15 +2168,19 @@ async function waitForChartFonts() {
 async function init() {
   ensureD3();
 
-  const csvRows = await d3.csv("data/abstracts.csv");
-  if (!csvRows?.length) {
-    throw new Error("Could not load data/abstracts.csv");
-  }
+  state.datasetFile = readStoredDatasetFile();
+  renderDatasetSelect();
 
-  state.data = buildStateFromCsv(csvRows);
-
-  renderYearControls();
-  renderDeltaYearControls();
+  d3.select("#dataset-select").on("change", async (event) => {
+    const nextFile = event.target.value;
+    try {
+      await loadDataset(nextFile, { resetFilters: true });
+    } catch (error) {
+      console.error(error);
+      showError(`Failed to load dataset: ${error.message}`);
+      renderDatasetSelect();
+    }
+  });
 
   d3.select("#year-select").on("change", (event) => {
     state.selectedYear = event.target.value;
@@ -2116,7 +2209,7 @@ async function init() {
   });
 
   await waitForChartFonts();
-  renderAll();
+  await loadDataset(state.datasetFile);
 
   setupTooltipDismiss();
 
