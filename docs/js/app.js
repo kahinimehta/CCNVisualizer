@@ -27,9 +27,8 @@ function isDesktopPointer() {
 }
 
 function isPhoneLayout() {
-  // Require device width so a narrowed desktop/Brave window is not treated as a phone.
-  const phoneDevice = window.matchMedia(`(max-device-width: ${PHONE_MAX_WIDTH - 1}px)`).matches;
-  return viewportWidth() < PHONE_MAX_WIDTH && isTouchLike() && phoneDevice;
+  // Viewport + touch only. max-device-width is deprecated and disagrees across browsers.
+  return viewportWidth() < PHONE_MAX_WIDTH && isTouchLike();
 }
 
 function isTouchLike() {
@@ -339,70 +338,50 @@ function readCssNumber(property, fallback) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
-const PHONE_GRAPH_SCALE = 0.72;
-const PHONE_AXIS_LABEL_SIZE = 8.5;
-const PHONE_THEME_TITLE_SIZE = 10.5;
-const PHONE_BAR_VALUE_SIZE = 10.5;
-const PHONE_LEGEND_HEADING_SIZE = 10.5;
-const PHONE_EMBEDDING_LEGEND_HEADING_SIZE = 12.5;
+const PHONE_AXIS_LABEL_SIZE = 11;
+const PHONE_THEME_TITLE_SIZE = 12;
+const PHONE_BAR_VALUE_SIZE = 12;
+const PHONE_LEGEND_HEADING_SIZE = 12;
+const PHONE_EMBEDDING_LEGEND_HEADING_SIZE = 13;
 
-// Charts follow the CSS fluid root (clamp on html). No forced px root — that
-// fought OS/browser font settings and drifted across Chrome/Edge/Brave.
-const PHONE_CHART_SCALE = 1.2;
-const PHONE_UI_SCALE = 1.12;
-let layoutScale = 1;
-
-function readRootFontPx() {
-  if (typeof document === "undefined") return 16;
-  const px = parseFloat(getComputedStyle(document.documentElement).fontSize);
-  return Number.isFinite(px) && px > 0 ? px : 16;
-}
-
-/** Sync chart/--ui-scale to the live computed root font-size from CSS clamp(). */
+/**
+ * Single scale source: CSS clamp() on html for UI type/spacing (rem).
+ * Chart geometry uses fixed design px; SVG scales via viewBox + width:100%
+ * in appendChartSvg — do NOT multiply by root font-size (that double-scaled).
+ */
 function applyPageScale() {
   const root = document.documentElement;
   if (!root) return;
 
-  // Drop legacy inline font-size locks from older deploys.
+  // Drop legacy inline locks from older deploys (zoom / forced px root / etc.).
   root.style.removeProperty("font-size");
   root.classList.remove("is-brave", "no-css-zoom");
   root.style.zoom = "";
   root.style.removeProperty("--page-zoom");
+  root.style.setProperty("--ui-scale", "1");
   if (document.body) {
     document.body.style.zoom = "";
     document.body.style.width = "";
     document.body.style.maxWidth = "";
     document.body.style.transform = "";
   }
-
-  if (isPhoneLayout()) {
-    layoutScale = PHONE_CHART_SCALE;
-    root.style.setProperty("--ui-scale", String(PHONE_UI_SCALE));
-    return;
-  }
-
-  layoutScale = Math.max(1, readRootFontPx() / 16);
-  root.style.setProperty("--ui-scale", String(layoutScale));
 }
 
 function enforceRootFontSize() {
   applyPageScale();
 }
 
-function getUiScale() {
-  return isPhoneLayout() ? PHONE_CHART_SCALE : layoutScale;
-}
-
-const s = (n) => n * getUiScale();
-const gs = (n) => (isPhoneLayout() ? n * PHONE_CHART_SCALE * PHONE_GRAPH_SCALE : s(n));
-const fs = (n) => `${s(n)}px`;
+/** Identity — charts must not re-scale from CSS root. */
+const s = (n) => n;
+const gs = (n) => n;
+const fs = (n) => `${n}px`;
 
 function chartThemePx(base) {
-  return isPhoneLayout() ? gs(base) : themeLabelPx(base);
+  return base;
 }
 
 function chartThemeFs(base) {
-  return `${chartThemePx(base)}px`;
+  return `${base}px`;
 }
 
 function fitLegendLabel(text, maxWidth, fontPx) {
@@ -422,11 +401,11 @@ function useStackedChartLegend(width = viewportWidth()) {
 }
 
 function themeLabelPx(base) {
-  return s(base);
+  return base;
 }
 
 function themeFs(base) {
-  return `${themeLabelPx(base)}px`;
+  return `${base}px`;
 }
 
 let measureTextCanvas = null;

@@ -30,7 +30,7 @@
   --muted: #8fa8c4;
   --border: rgba(197, 224, 243, 0.14);
   --shadow: 0 24px 84px rgba(0, 0, 0, 0.35);
-  /* Tracks computed root (JS syncs). Radii/spacing use rem so they fluid-scale. */
+  /* Kept at 1 — charts no longer multiply geometry by this (avoids double-scale). */
   --ui-scale: 1;
   --radius-sm: 0.5rem;
   --radius-md: 0.875rem;
@@ -800,9 +800,10 @@ svg {
 
 /* Phone-only: require device width too so a narrow laptop/Brave window
    does not drop to the phone font scale. */
-@media (max-width: 639px) and (max-device-width: 639px) and (hover: none) and (pointer: coarse) {
+/* Match JS isPhoneLayout: viewport width + touch only (no max-device-width). */
+@media (max-width: 639px) and (hover: none) and (pointer: coarse) {
   :root {
-    --ui-scale: 1.12;
+    --ui-scale: 1;
   }
 
   html {
