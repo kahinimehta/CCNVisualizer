@@ -12,15 +12,15 @@
   --border: rgba(197, 224, 243, 0.14);
   --shadow: 0 24px 84px rgba(0, 0, 0, 0.35);
   /* Fixed design scale — browser zoom scales rem/px uniformly; do not tie to vw.
-     1.344 × 1.2 ≈ 1.613 so the whole UI reads another ~20% larger. */
-  --ui-scale: 1.613;
+     1.613 × 1.4 ≈ 2.258 so the whole UI reads ~40% larger. */
+  --ui-scale: 2.258;
   --max-app-width: min(72rem, 100%);
   --sidebar-width: 18rem;
   --sidebar-collapsed-width: 0;
 }
 
 html {
-  font-size: 144%;
+  font-size: 202%;
   width: 100%;
   max-width: 100%;
   scrollbar-gutter: stable;
