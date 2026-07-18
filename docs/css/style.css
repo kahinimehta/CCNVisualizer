@@ -39,7 +39,10 @@
 }
 
 html {
-  font-size: 202%;
+  /* Absolute px — not % of the browser default. Brave (and some Chromium
+     builds) ship a smaller default font size, so 202% looked tiny there
+     while Chrome looked fine. 32px ≈ 200% of a 16px default. */
+  font-size: 32px;
   width: 100%;
   max-width: 100%;
   scrollbar-gutter: stable;
@@ -82,7 +85,7 @@ a {
 
 .sidebar {
   flex: 0 0 auto;
-  font-size: 18px;
+  font-size: 0.95rem;
   background: #0a1829;
   border-right: 1px solid var(--border);
   border-radius: 0 calc(12px * var(--ui-scale)) calc(12px * var(--ui-scale)) 0;
@@ -791,7 +794,7 @@ svg {
   }
 
   html {
-    font-size: 100%;
+    font-size: 16px;
   }
 
   .app-shell {
