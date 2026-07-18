@@ -312,7 +312,8 @@ body:not(.sidebar-collapsed) .main-area {
 
 .filter-bar {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11.5rem), 1fr));
+  /* px basis — rem would track the fluid html clamp and shift wrap points. */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 184px), 1fr));
   gap: 0.75rem;
   align-items: end;
   width: 100%;
@@ -322,7 +323,7 @@ body:not(.sidebar-collapsed) .main-area {
 
 .filter-bar .search-field,
 .filter-bar #dataset-select {
-  min-width: min(100%, 14rem);
+  min-width: min(100%, 224px);
 }
 
 .filter-field {
@@ -368,7 +369,8 @@ body:not(.sidebar-collapsed) .main-area {
 
 .kpi-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12.5rem), 1fr));
+  /* px basis — rem would track the fluid html clamp and shift wrap points. */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
   gap: 0.75rem;
   margin-bottom: 0.85rem;
   width: 100%;
