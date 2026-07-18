@@ -649,7 +649,7 @@ body:not(.sidebar-collapsed) .main-area {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
-  flex: 1 1 16rem;
+  flex: 1 1 256px;
   min-width: 0;
 }
 
@@ -729,7 +729,7 @@ body:not(.sidebar-collapsed) .main-area {
 }
 
 .card-header-with-controls > div:first-child {
-  flex: 1 1 16rem;
+  flex: 1 1 256px;
   min-width: 0;
 }
 
