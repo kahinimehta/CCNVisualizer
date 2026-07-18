@@ -345,10 +345,14 @@ const PHONE_LEGEND_HEADING_SIZE = 12;
 const PHONE_EMBEDDING_LEGEND_HEADING_SIZE = 13;
 
 /**
- * Single scale source: CSS clamp() on html for UI type/spacing (rem).
- * Chart geometry uses fixed design px; SVG scales via viewBox + width:100%
- * in appendChartSvg — do NOT multiply by root font-size (that double-scaled).
+ * Two independent, non-compounding systems:
+ * 1) CSS clamp() on html → rem UI type/spacing
+ * 2) Fixed CHART_DESIGN_SCALE → SVG viewBox units (same on every device)
+ * SVG then scales to the container via viewBox + width:100% in appendChartSvg.
+ * Never derive (2) from (1) — that double-scaled and drifted across devices.
  */
+const CHART_DESIGN_SCALE = 2;
+
 function applyPageScale() {
   const root = document.documentElement;
   if (!root) return;
@@ -371,17 +375,16 @@ function enforceRootFontSize() {
   applyPageScale();
 }
 
-/** Identity — charts must not re-scale from CSS root. */
-const s = (n) => n;
-const gs = (n) => n;
-const fs = (n) => `${n}px`;
+const s = (n) => n * CHART_DESIGN_SCALE;
+const gs = (n) => n * CHART_DESIGN_SCALE;
+const fs = (n) => `${s(n)}px`;
 
 function chartThemePx(base) {
-  return base;
+  return s(base);
 }
 
 function chartThemeFs(base) {
-  return `${base}px`;
+  return `${chartThemePx(base)}px`;
 }
 
 function fitLegendLabel(text, maxWidth, fontPx) {
@@ -401,11 +404,11 @@ function useStackedChartLegend(width = viewportWidth()) {
 }
 
 function themeLabelPx(base) {
-  return base;
+  return s(base);
 }
 
 function themeFs(base) {
-  return `${base}px`;
+  return `${themeLabelPx(base)}px`;
 }
 
 let measureTextCanvas = null;
