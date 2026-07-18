@@ -764,6 +764,90 @@ svg {
 }
 
 @media (max-width: 639px) and (hover: none) and (pointer: coarse) {
+  :root {
+    /* Keep desktop large; phones need a normal readable scale. */
+    --ui-scale: 1.12;
+  }
+
+  html {
+    font-size: 100%;
+  }
+
+  .app-shell {
+    padding-inline: 0;
+  }
+
+  .main-area {
+    padding: 0.7rem 0.65rem 1.25rem 2.85rem;
+  }
+
+  body:not(.sidebar-collapsed) .main-area {
+    padding-left: 0.65rem;
+  }
+
+  .topbar {
+    gap: 0.7rem;
+    padding: 0.65rem 0 0.75rem;
+  }
+
+  .brand h1 {
+    font-size: 1.35rem;
+  }
+
+  .brand-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .filter-bar {
+    grid-template-columns: 1fr;
+    gap: 0.55rem;
+  }
+
+  .theme-filter-bar {
+    margin-top: 0.65rem;
+    gap: 0.4rem 0.5rem;
+  }
+
+  .theme-chip {
+    font-size: 0.68rem;
+    padding: 0.18rem 0.45rem;
+  }
+
+  .theme-filter-status {
+    font-size: 0.74rem;
+    padding: 0.4rem 0.55rem;
+  }
+
+  .kpi-row {
+    gap: 0.55rem;
+  }
+
+  .kpi-card {
+    padding: 0.65rem 0.7rem;
+  }
+
+  .card {
+    padding: 0.8rem 0.75rem;
+  }
+
+  .card-header h2 {
+    font-size: 0.95rem;
+  }
+
+  .card-sub {
+    font-size: 0.74rem;
+  }
+
+  .paper-list {
+    max-height: min(22rem, 52vh);
+  }
+
+  .tooltip {
+    max-width: min(20rem, 92vw);
+    font-size: 0.84rem;
+    padding: 0.5rem 0.65rem;
+  }
+
   #year-chart,
   #theme-share-by-year {
     min-height: 0;

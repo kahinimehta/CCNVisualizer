@@ -337,23 +337,24 @@ function readCssNumber(property, fallback) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
-const PHONE_GRAPH_SCALE = 0.58;
+const PHONE_GRAPH_SCALE = 0.72;
 const PHONE_AXIS_LABEL_SIZE = 8.5;
 const PHONE_THEME_TITLE_SIZE = 10.5;
 const PHONE_BAR_VALUE_SIZE = 10.5;
 const PHONE_LEGEND_HEADING_SIZE = 10.5;
 const PHONE_EMBEDDING_LEGEND_HEADING_SIZE = 12.5;
 
-// Fixed chart design scale (matches --ui-scale). Not tied to viewport/zoom.
-// 1.613 × 1.4 so charts stay ~40% larger with the rest of the UI.
-const CHART_DESIGN_SCALE = 2.258;
+// Fixed chart design scales — not tied to viewport/zoom.
+// Desktop stays large; phones use a calmer scale so plots aren't cramped.
+const DESKTOP_CHART_SCALE = 2.258;
+const PHONE_CHART_SCALE = 1.2;
 
 function getUiScale() {
-  return CHART_DESIGN_SCALE;
+  return isPhoneLayout() ? PHONE_CHART_SCALE : DESKTOP_CHART_SCALE;
 }
 
-const s = (n) => n * CHART_DESIGN_SCALE;
-const gs = (n) => (isPhoneLayout() ? n * CHART_DESIGN_SCALE * PHONE_GRAPH_SCALE : s(n));
+const s = (n) => n * getUiScale();
+const gs = (n) => (isPhoneLayout() ? n * PHONE_CHART_SCALE * PHONE_GRAPH_SCALE : s(n));
 const fs = (n) => `${s(n)}px`;
 
 function chartThemePx(base) {
