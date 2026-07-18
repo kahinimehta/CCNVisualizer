@@ -346,29 +346,78 @@ const PHONE_BAR_VALUE_SIZE = 10.5;
 const PHONE_LEGEND_HEADING_SIZE = 10.5;
 const PHONE_EMBEDDING_LEGEND_HEADING_SIZE = 12.5;
 
-// Same absolute scale in every browser: fixed root px + matching chart scale.
-// (CSS body { zoom } was abandoned — it shrank the layout to a left strip.)
-const DESKTOP_CHART_SCALE = 3.25;
+// Viewport-normalized scale: same window width ⇒ same root/chart scale in every
+// browser. No body { zoom } (that collapsed the layout). A rem probe corrects
+// UA font inflation so Chrome / Edge / Brave converge.
 const PHONE_CHART_SCALE = 1.2;
-const DESKTOP_ROOT_FONT_PX = 52;
 const PHONE_ROOT_FONT_PX = 16;
-const DESKTOP_UI_SCALE = 3.25;
 const PHONE_UI_SCALE = 1.12;
+const DESKTOP_SCALE_MIN = 2.75;
+const DESKTOP_SCALE_MAX = 3.6;
+/** Fallback before the first applyPageScale() (≈52px root). */
+let desktopLayoutScale = 3.25;
+
+function clampDesktopScale(scale) {
+  return Math.min(DESKTOP_SCALE_MAX, Math.max(DESKTOP_SCALE_MIN, scale));
+}
+
+/** Scale from layout viewport width so equal windows match across browsers. */
+function desktopScaleFromViewport() {
+  const vw = viewportWidth();
+  if (!vw) return desktopLayoutScale;
+  // ~52px root near 1530px width; clamps keep laptop/desktop readable.
+  return clampDesktopScale((vw * 0.034) / 16);
+}
+
+/**
+ * If the UA inflates/deflates rem vs our root px, nudge scale so 10rem matches
+ * the expected CSS pixel width. Cancels a common Chrome/Edge/Brave mismatch.
+ */
+function calibrateScaleAgainstRemProbe(scale) {
+  if (typeof document === "undefined" || !document.body) return scale;
+  const expected = 10 * 16 * scale;
+  const probe = document.createElement("div");
+  probe.setAttribute("aria-hidden", "true");
+  probe.style.cssText =
+    "position:fixed;left:-9999px;top:0;width:10rem;height:1px;margin:0;padding:0;border:0;visibility:hidden;pointer-events:none;";
+  document.body.appendChild(probe);
+  const measured = probe.getBoundingClientRect().width;
+  probe.remove();
+  if (!Number.isFinite(measured) || measured <= 0) return scale;
+  const drift = expected / measured;
+  if (Math.abs(drift - 1) < 0.02 || Math.abs(drift - 1) > 0.45) return scale;
+  return clampDesktopScale(scale * drift);
+}
 
 function applyPageScale() {
   const root = document.documentElement;
   if (!root) return;
-  const phone = isPhoneLayout();
+
   root.classList.remove("is-brave", "no-css-zoom");
   root.style.zoom = "";
-  root.style.fontSize = `${phone ? PHONE_ROOT_FONT_PX : DESKTOP_ROOT_FONT_PX}px`;
-  root.style.setProperty("--ui-scale", String(phone ? PHONE_UI_SCALE : DESKTOP_UI_SCALE));
   root.style.removeProperty("--page-zoom");
   if (document.body) {
     document.body.style.zoom = "";
     document.body.style.width = "";
     document.body.style.maxWidth = "";
+    document.body.style.transform = "";
   }
+
+  if (isPhoneLayout()) {
+    desktopLayoutScale = PHONE_CHART_SCALE;
+    root.style.fontSize = `${PHONE_ROOT_FONT_PX}px`;
+    root.style.setProperty("--ui-scale", String(PHONE_UI_SCALE));
+    return;
+  }
+
+  let scale = desktopScaleFromViewport();
+  root.style.fontSize = `${(16 * scale).toFixed(3)}px`;
+  root.style.setProperty("--ui-scale", String(scale));
+  // Rem probe needs the tentative root font-size applied first.
+  scale = calibrateScaleAgainstRemProbe(scale);
+  desktopLayoutScale = scale;
+  root.style.fontSize = `${(16 * scale).toFixed(3)}px`;
+  root.style.setProperty("--ui-scale", String(scale));
 }
 
 function enforceRootFontSize() {
@@ -376,7 +425,7 @@ function enforceRootFontSize() {
 }
 
 function getUiScale() {
-  return isPhoneLayout() ? PHONE_CHART_SCALE : DESKTOP_CHART_SCALE;
+  return isPhoneLayout() ? PHONE_CHART_SCALE : desktopLayoutScale;
 }
 
 const s = (n) => n * getUiScale();
@@ -2326,7 +2375,7 @@ async function waitForChartFonts() {
 
 async function init() {
   ensureD3();
-  enforceRootFontSize();
+  applyPageScale();
 
   state.datasetFile = readStoredDatasetFile();
   renderDatasetSelect();
@@ -2369,6 +2418,7 @@ async function init() {
   });
 
   await waitForChartFonts();
+  applyPageScale();
   await loadDataset(state.datasetFile);
 
   setupTooltipDismiss();
@@ -2377,7 +2427,7 @@ async function init() {
   const scheduleReflow = () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
-      enforceRootFontSize();
+      applyPageScale();
       if (shouldReflowOnResize()) {
         renderAll();
       }

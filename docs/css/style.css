@@ -30,8 +30,7 @@
   --muted: #8fa8c4;
   --border: rgba(197, 224, 243, 0.14);
   --shadow: 0 24px 84px rgba(0, 0, 0, 0.35);
-  /* Absolute root px + matching UI scale — same in every Chromium browser.
-     Do not use body { zoom }: width compensation collapses the layout. */
+  /* JS sets --ui-scale from viewport width so equal windows match across UAs. */
   --ui-scale: 3.25;
   --max-app-width: 100%;
   --sidebar-width: 18rem;
@@ -39,7 +38,7 @@
 }
 
 html {
-  /* Fixed px, never % of browser default (avoids Chrome/Edge/Brave drift). */
+  /* Fallback before JS; never % of browser default. */
   font-size: 52px !important;
   width: 100%;
   max-width: 100%;
@@ -61,6 +60,9 @@ body {
   overflow-x: clip;
   padding-left: env(safe-area-inset-left, 0);
   padding-right: env(safe-area-inset-right, 0);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
 }
 
 * {
@@ -791,7 +793,7 @@ svg {
   }
 
   html {
-    font-size: 16px !important;
+    font-size: 16px;
   }
 
   .app-shell {
