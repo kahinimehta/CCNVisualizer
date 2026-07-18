@@ -1219,3 +1219,14 @@ svg {
     gap: 0.65rem;
   }
 }
+
+/* Mouse/trackpad desktops (incl. Brave on laptop): always keep large root type. */
+@media (hover: hover) and (pointer: fine) {
+  :root {
+    --ui-scale: 2.258;
+  }
+
+  html {
+    font-size: 32px;
+  }
+}
