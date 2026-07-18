@@ -11,15 +11,15 @@
   --muted: #8fa8c4;
   --border: rgba(197, 224, 243, 0.14);
   --shadow: 0 24px 84px rgba(0, 0, 0, 0.35);
-  /* Avoid 100vw on laptops: Safari counts scrollbar width differently than Chrome. */
+  /* Fixed design scale — browser zoom scales rem/px uniformly; do not tie to vw. */
   --ui-scale: 1.12;
-  --max-app-width: 100%;
-  --sidebar-width: 288px;
+  --max-app-width: min(72rem, 100%);
+  --sidebar-width: 18rem;
   --sidebar-collapsed-width: 0;
 }
 
 html {
-  font-size: 16px;
+  font-size: 100%;
   width: 100%;
   max-width: 100%;
   scrollbar-gutter: stable;
@@ -30,6 +30,7 @@ html {
 body {
   margin: 0;
   font-family: "Open Sans", "Segoe UI", system-ui, sans-serif;
+  font-size: 1rem;
   background: var(--ccn-navy-dark);
   color: var(--text);
   min-height: 100vh;
@@ -39,24 +40,6 @@ body {
   overflow-x: clip;
   padding-left: env(safe-area-inset-left, 0);
   padding-right: env(safe-area-inset-right, 0);
-}
-
-@media (min-width: 1600px) {
-  :root {
-    --sidebar-width: 18rem;
-    --ui-scale: clamp(1, calc(0.6 + 100vw / 500), 3);
-    --max-app-width: min(19200px, 100vw);
-  }
-
-  html {
-    font-size: clamp(48px, calc(10px + 2.8vw), 66px);
-  }
-}
-
-@media (min-width: 2400px) {
-  html {
-    font-size: clamp(51px, calc(10px + 2.8vw), 72px);
-  }
 }
 
 * {
@@ -499,12 +482,23 @@ body:not(.sidebar-collapsed) .main-area {
 #theme-share-by-year,
 #theme-bars,
 #theme-delta-chart {
-  min-height: calc(280px * var(--ui-scale));
+  min-height: 0;
   overflow: visible;
 }
 
 #embedding-chart {
   overflow: visible;
+}
+
+#year-chart svg,
+#theme-share-by-year svg,
+#theme-bars svg,
+#theme-delta-chart svg,
+#embedding-chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
 }
 
 #theme-bars,
@@ -557,13 +551,6 @@ body:not(.sidebar-collapsed) .main-area {
 .embedding-chart-wrap {
   position: relative;
   width: 100%;
-}
-
-#embedding-chart svg {
-  display: block;
-  width: 100%;
-  height: auto;
-  max-width: 100%;
 }
 
 .chart-note {
@@ -775,14 +762,6 @@ svg {
 }
 
 @media (max-width: 639px) and (hover: none) and (pointer: coarse) {
-  :root {
-    --ui-scale: clamp(0.55, calc(0.28 + 100vw / 980), 0.68);
-  }
-
-  html {
-    font-size: clamp(12px, calc(6px + 1.45vw), 14px);
-  }
-
   #year-chart,
   #theme-share-by-year {
     min-height: 0;

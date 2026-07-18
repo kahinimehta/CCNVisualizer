@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=28" />
+  <link rel="stylesheet" href="css/style.css?v=29" />
   <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 </head>
 <body>
@@ -88,7 +88,7 @@
         <section class="card card-full">
           <div class="card-header">
             <h2>Research theme ranking</h2>
-            <p class="card-sub">Theme counts in current filter · submissions can appear in multiple topics · click a bar to add/remove that topic (filters require all selected topics)</p>
+            <p class="card-sub">Theme counts in current filter · submissions can appear in multiple topics · click a bar to add/remove that topic (filters match all selected topics)</p>
           </div>
           <div id="theme-bars"></div>
         </section>
@@ -120,7 +120,7 @@
                 <h2>Abstract embedding map</h2>
                 <p class="card-sub">
                   UMAP of every submission (2017–2026) · black dots · hover a dot to see its topics and click a topic to filter.<br />
-                  Multi-topic filters require both/all selected topics. The full map always stays visible; matches are highlighted.
+                  Multi-topic filters require all selected topics. The full map always stays visible; matches are highlighted.
                 </p>
               </div>
               <div class="embedding-chart-wrap">
@@ -157,6 +157,6 @@
 
   <div class="tooltip" id="tooltip"></div>
   <script src="js/sidebar.js?v=20"></script>
-  <script src="js/app.js?v=28"></script>
+  <script src="js/app.js?v=29"></script>
 </body>
 </html>

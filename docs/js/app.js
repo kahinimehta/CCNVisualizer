@@ -15,10 +15,11 @@ const STACKED_LEGEND_MAX_WIDTH = 960;
 const PHONE_MAX_WIDTH = 640;
 
 function viewportWidth() {
-  const visual = window.visualViewport?.width;
+  // Use layout viewport only — visualViewport changes with pinch-zoom and
+  // would otherwise reflow charts as if the device width changed.
   const client = document.documentElement.clientWidth;
   const inner = window.innerWidth;
-  return Math.round(visual || client || inner || 0);
+  return Math.round(client || inner || 0);
 }
 
 function isDesktopPointer() {
@@ -37,10 +38,11 @@ function chartContainerWidth(container) {
   const node = container.node();
   if (!node) return viewportWidth();
 
+  // Prefer layout widths (client/offset) over getBoundingClientRect so
+  // pinch-zoom visual scaling does not rewrite chart geometry.
   const readWidth = (el) => {
     if (!el) return 0;
-    const rect = el.getBoundingClientRect();
-    const width = Math.round(rect.width || el.clientWidth || 0);
+    const width = Math.round(el.clientWidth || el.offsetWidth || 0);
     return Number.isFinite(width) ? width : 0;
   };
 
@@ -89,19 +91,19 @@ function removeChartScrollWrappers() {
 }
 
 function appendChartSvg(container, width, height, options = {}) {
-  const { preserveAspectRatio = "xMidYMid meet", lockHeight = true } = options;
-  const svg = container
+  // Always size via viewBox + width:100% + height:auto so browser zoom and
+  // container width scale charts uniformly without distorting proportions.
+  const { preserveAspectRatio = "xMidYMid meet" } = options;
+  return container
     .append("svg")
     .attr("viewBox", `0 0 ${width} ${height}`)
     .attr("width", "100%")
+    .attr("height", null)
     .attr("preserveAspectRatio", preserveAspectRatio)
+    .style("width", "100%")
+    .style("height", "auto")
+    .style("max-width", "100%")
     .style("overflow", "visible");
-  if (lockHeight) {
-    svg.style("height", `${height}px`);
-  } else {
-    svg.style("height", "auto");
-  }
-  return svg;
 }
 
 function wrapThemeLabel(text, maxWidth, fontPx) {
@@ -342,12 +344,15 @@ const PHONE_BAR_VALUE_SIZE = 10.5;
 const PHONE_LEGEND_HEADING_SIZE = 10.5;
 const PHONE_EMBEDDING_LEGEND_HEADING_SIZE = 12.5;
 
+// Fixed chart design scale (matches --ui-scale). Not tied to viewport/zoom.
+const CHART_DESIGN_SCALE = 1.12;
+
 function getUiScale() {
-  return readCssNumber("--ui-scale", Math.min(3, Math.max(1, 0.6 + viewportWidth() / 500)));
+  return CHART_DESIGN_SCALE;
 }
 
-const s = (n) => n * getUiScale();
-const gs = (n) => (isPhoneLayout() ? n * getUiScale() * PHONE_GRAPH_SCALE : s(n));
+const s = (n) => n * CHART_DESIGN_SCALE;
+const gs = (n) => (isPhoneLayout() ? n * CHART_DESIGN_SCALE * PHONE_GRAPH_SCALE : s(n));
 const fs = (n) => `${s(n)}px`;
 
 function chartThemePx(base) {
@@ -374,14 +379,8 @@ function useStackedChartLegend(width = viewportWidth()) {
   return width < STACKED_LEGEND_MAX_WIDTH && isTouchLike() && !isDesktopPointer();
 }
 
-function themeLabelFontScale() {
-  if (isPhoneLayout()) return 1;
-  const ui = getUiScale();
-  return 1 + ((ui - 1) / 2) * 0.8;
-}
-
 function themeLabelPx(base) {
-  return s(base) * themeLabelFontScale();
+  return s(base);
 }
 
 function themeFs(base) {
@@ -415,7 +414,7 @@ function themeBarLabelWidth(containerWidth = 0, labels = []) {
     return Math.min(measured, cap) + safety;
   }
 
-  const cap = Math.max(s(140), Math.min(w * 0.62, s(420) * themeLabelFontScale()));
+  const cap = Math.max(s(140), Math.min(w * 0.62, s(420)));
   const wrapWidth = Math.max(s(96), cap - gap - s(20));
   let measured = s(140);
   for (const label of labels) {
@@ -449,8 +448,11 @@ function appendThemeBarSvg(container, width, height) {
     .append("svg")
     .attr("viewBox", `${-leftPad} 0 ${width + leftPad} ${height}`)
     .attr("width", "100%")
+    .attr("height", null)
     .attr("preserveAspectRatio", "xMidYMid meet")
-    .style("height", `${height}px`)
+    .style("width", "100%")
+    .style("height", "auto")
+    .style("max-width", "100%")
     .style("overflow", "visible");
 }
 
@@ -847,7 +849,7 @@ function hasThemeFilter() {
 function submissionMatchesThemeFilter(submission) {
   if (!hasThemeFilter()) return true;
   const assigned = assignedTopics(submission);
-  // Multi-topic filters require all selected topics ("both/all of"), not any-of.
+  // Multi-topic filters require all selected topics ("all of"), not any-of.
   const hitsAll = state.selectedThemes.every((theme) => assigned.includes(theme));
   return state.themeFilterMode === "exclude" ? !hitsAll : hitsAll;
 }
@@ -1149,11 +1151,11 @@ function themeFilterDisplayText() {
       : topics.length === 2
         ? `“${topics[0]}” and “${topics[1]}”`
         : `${topics.slice(0, -1).map((t) => `“${t}”`).join(", ")}, and “${topics[topics.length - 1]}”`;
-  const bothLabel = topics.length === 1 ? joined : `both/all of ${joined}`;
+  const allLabel = topics.length === 1 ? joined : `all of ${joined}`;
   if (state.themeFilterMode === "exclude") {
-    return `Exclude papers with ${bothLabel}`;
+    return `Exclude papers with ${allLabel}`;
   }
-  return `Include papers with ${bothLabel}`;
+  return `Include papers with ${allLabel}`;
 }
 
 function embeddingDefaultNote() {
@@ -1843,7 +1845,6 @@ function renderEmbeddingCluster() {
   const height = margin.top + plotInnerH + margin.bottom;
   const svg = appendChartSvg(container, width, height, {
     preserveAspectRatio: "xMidYMid meet",
-    lockHeight: false,
   });
 
   const plotBottom = height - margin.bottom;
@@ -2128,8 +2129,8 @@ async function init() {
       }
     }, 150);
   };
+  // Reflow on layout resize only — not visualViewport pinch-zoom.
   window.addEventListener("resize", scheduleReflow);
-  window.visualViewport?.addEventListener("resize", scheduleReflow);
 }
 
 if (document.readyState === "loading") {
