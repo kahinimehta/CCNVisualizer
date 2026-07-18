@@ -848,6 +848,25 @@ svg {
     padding: 0.5rem 0.65rem;
   }
 
+  .tooltip.tooltip-phone-centered {
+    left: 50%;
+    top: 50%;
+    right: auto;
+    bottom: auto;
+    max-width: min(20rem, 88vw);
+    font-size: 0.84rem;
+    padding: 0.55rem 0.65rem;
+    transform: translate(-50%, -50%) scale(0.5);
+    transform-origin: center center;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+  }
+
+  .tooltip.tooltip-phone-centered .tooltip-close {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 1rem;
+  }
+
   #year-chart,
   #theme-share-by-year {
     min-height: 0;
@@ -877,6 +896,10 @@ svg {
 .tooltip.tooltip-phone {
   pointer-events: auto;
   padding: 0.55rem 0.65rem;
+}
+
+.tooltip.tooltip-phone-centered {
+  z-index: 1200;
 }
 
 .tooltip-phone-inner {

@@ -606,6 +606,7 @@ let tooltipDismissBound = false;
 let tooltipVisible = false;
 let tooltipMode = null; // "hover" | "tap"
 let tooltipInteractive = false;
+let tooltipSticky = false; // phone tap popups stay until X
 let tooltipHideTimer = null;
 let tooltipAnchorPoint = null;
 
@@ -638,7 +639,8 @@ function setupTooltipDismiss() {
   tooltipDismissBound = true;
 
   const dismissOnScroll = () => {
-    if (tooltipVisible) hideTooltip();
+    // Sticky phone tap popups stay until the user hits X.
+    if (tooltipVisible && !tooltipSticky) hideTooltip();
   };
 
   // Capture phase catches window scroll and nested scrollers (e.g. paper list).
@@ -720,6 +722,7 @@ function showTooltip(html, event, options = {}) {
   const offset = s(12);
   tooltipMode = mode;
   tooltipInteractive = interactive;
+  tooltipSticky = phone && mode === "tap";
   tooltipAnchorPoint = options.anchorPoint || null;
 
   if (phone || mode === "tap") {
@@ -727,8 +730,10 @@ function showTooltip(html, event, options = {}) {
       `<div class="tooltip-phone-inner"><div class="tooltip-body">${html}</div><button type="button" class="tooltip-close" aria-label="Close tooltip">×</button></div>`
     );
     tooltip.classed("tooltip-phone", true);
+    tooltip.classed("tooltip-phone-centered", phone);
   } else {
     tooltip.classed("tooltip-phone", false);
+    tooltip.classed("tooltip-phone-centered", false);
     tooltip.html(html);
   }
 
@@ -741,6 +746,12 @@ function showTooltip(html, event, options = {}) {
     onTopicClick: options.onTopicClick,
     onOpenPaper: options.onOpenPaper,
   });
+
+  if (phone && mode === "tap") {
+    // Centered half-size phone popup; CSS handles transform.
+    tooltip.style("left", "50%").style("top", "50%");
+    return;
+  }
 
   const node = tooltip.node();
   const width = node?.offsetWidth || 0;
@@ -760,14 +771,23 @@ function hideTooltip() {
   tooltipVisible = false;
   tooltipMode = null;
   tooltipInteractive = false;
+  tooltipSticky = false;
   tooltipAnchorPoint = null;
   tooltip.style("opacity", 0).style("pointer-events", "none");
+  tooltip.style("left", null).style("top", null);
   tooltip.classed("tooltip-phone", false);
+  tooltip.classed("tooltip-phone-centered", false);
   tooltip.classed("tooltip-interactive", false);
   tooltip.on("mouseenter", null).on("mouseleave", null);
   tooltip.selectAll(".tooltip-close").on("click", null);
   tooltip.selectAll("button.tooltip-topic").on("click", null);
   tooltip.selectAll("button.tooltip-open-paper").on("click", null);
+}
+
+function refreshStickyPhoneTooltip() {
+  if (!tooltipSticky || !tooltipAnchorPoint || !isPhoneLayout()) return;
+  const anchor = tooltipAnchorPoint;
+  showEmbeddingPointTooltip(null, anchor, "tap");
 }
 
 function showError(message) {
@@ -1343,10 +1363,15 @@ function showEmbeddingPointTooltip(event, point, mode = "hover") {
     anchorPoint: point,
     onTopicClick: (theme) => {
       toggleThemeFilter(theme);
+      // Keep the phone popup open and refresh active topic chips.
+      if (isPhoneLayout()) {
+        requestAnimationFrame(() => refreshStickyPhoneTooltip());
+      }
     },
     onOpenPaper: () => {
       focusSubmissionFromPoint(point);
-      hideTooltip();
+      // Phone sticky popup stays until X; desktop closes after jump.
+      if (!isPhoneLayout()) hideTooltip();
     },
   });
 }
@@ -2252,7 +2277,10 @@ function renderAll() {
   renderEmbeddingCluster();
   renderPaperList();
 
-  if (isPhoneLayout()) hideTooltip();
+  // Keep sticky phone tap popups open across re-renders; only X closes them.
+  if (isPhoneLayout() && tooltipSticky && tooltipAnchorPoint) {
+    requestAnimationFrame(() => refreshStickyPhoneTooltip());
+  }
 
   d3.select("#year-chips")
     .selectAll(".year-chip")
