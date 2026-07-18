@@ -345,8 +345,8 @@ const PHONE_LEGEND_HEADING_SIZE = 10.5;
 const PHONE_EMBEDDING_LEGEND_HEADING_SIZE = 12.5;
 
 // Fixed chart design scale (matches --ui-scale). Not tied to viewport/zoom.
-// Base 1.12 × 1.2 so charts stay ~20% larger with the rest of the UI.
-const CHART_DESIGN_SCALE = 1.344;
+// 1.344 × 1.2 so charts stay another ~20% larger with the rest of the UI.
+const CHART_DESIGN_SCALE = 1.613;
 
 function getUiScale() {
   return CHART_DESIGN_SCALE;
