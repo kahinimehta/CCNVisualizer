@@ -30,17 +30,17 @@
   --muted: #8fa8c4;
   --border: rgba(197, 224, 243, 0.14);
   --shadow: 0 24px 84px rgba(0, 0, 0, 0.35);
-  /* Fixed design scale — browser zoom scales rem/px uniformly; do not tie to vw. */
-  --ui-scale: 3.4;
+  /* Design tokens — page zoom (body) is the cross-browser scale lever. */
+  --ui-scale: 1.15;
+  --page-zoom: 3.5;
   --max-app-width: 100%;
   --sidebar-width: 18rem;
   --sidebar-collapsed-width: 0;
 }
 
 html {
-  /* Absolute px (not %). Brave was still rendering ~16px-looking UI at 32px
-     on some laptops — use a larger locked root; JS also enforces this. */
-  font-size: 48px !important;
+  /* Always 16px — never % of the browser default (that drifts across Chrome/Edge/Brave). */
+  font-size: 16px !important;
   width: 100%;
   max-width: 100%;
   scrollbar-gutter: stable;
@@ -54,13 +54,29 @@ body {
   font-size: 1rem;
   background: var(--ccn-navy-dark);
   color: var(--text);
-  min-height: 100vh;
-  min-height: 100dvh;
-  width: 100%;
-  max-width: 100%;
   overflow-x: clip;
   padding-left: env(safe-area-inset-left, 0);
   padding-right: env(safe-area-inset-right, 0);
+  /* One zoom for the whole page — same in Chrome, Edge, and Brave.
+     Width is divided by zoom so the scaled page still fits the viewport. */
+  zoom: var(--page-zoom);
+  width: calc(100% / var(--page-zoom));
+  max-width: calc(100% / var(--page-zoom));
+  min-height: calc(100vh / var(--page-zoom));
+  min-height: calc(100dvh / var(--page-zoom));
+}
+
+/* Firefox: no CSS zoom — fall back to scaling the root font instead. */
+html.no-css-zoom {
+  font-size: calc(16px * var(--page-zoom)) !important;
+}
+
+html.no-css-zoom body {
+  zoom: 1;
+  width: 100%;
+  max-width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 * {
@@ -787,11 +803,15 @@ svg {
    does not drop to the phone font scale. */
 @media (max-width: 639px) and (max-device-width: 639px) and (hover: none) and (pointer: coarse) {
   :root {
-    /* Keep desktop large; phones need a normal readable scale. */
     --ui-scale: 1.12;
+    --page-zoom: 1;
   }
 
   html {
+    font-size: 16px !important;
+  }
+
+  html.no-css-zoom {
     font-size: 16px !important;
   }
 
@@ -1210,26 +1230,14 @@ svg {
   }
 }
 
-/* Mouse/trackpad desktops: moderate default for Chrome/Edge. */
+/* Desktop pointer: keep the invariant page zoom (JS may refine --page-zoom). */
 @media (hover: hover) and (pointer: fine) {
   :root {
-    --ui-scale: 3.4;
+    --ui-scale: 1.15;
+    --page-zoom: 3.5;
   }
 
   html {
-    font-size: 48px !important;
-  }
-}
-
-/* Brave tends to render smaller — bump desktop type only there. */
-html.is-brave {
-  --ui-scale: 4.53;
-  font-size: 64px !important;
-}
-
-@media (max-width: 639px) and (max-device-width: 639px) and (hover: none) and (pointer: coarse) {
-  html.is-brave {
-    --ui-scale: 1.12;
     font-size: 16px !important;
   }
 }

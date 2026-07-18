@@ -346,38 +346,76 @@ const PHONE_BAR_VALUE_SIZE = 10.5;
 const PHONE_LEGEND_HEADING_SIZE = 10.5;
 const PHONE_EMBEDDING_LEGEND_HEADING_SIZE = 12.5;
 
-// Fixed chart design scales — not tied to viewport/zoom.
-// Desktop stays large; phones use a calmer scale so plots aren't cramped.
-// Chrome/Edge/etc. stay moderate; Brave often renders smaller, so it gets a bump.
-const DESKTOP_CHART_SCALE = 3.4;
-const DESKTOP_CHART_SCALE_BRAVE = 4.53;
+// Invariant page scale: html stays 16px everywhere; body { zoom } carries the
+// design scale so Chrome / Edge / Brave / phones share one pipeline. Chart
+// scales stay near 1 because zoom already enlarges SVG with the rest of the UI.
+const DESKTOP_PAGE_ZOOM = 3.5;
+const PHONE_PAGE_ZOOM = 1;
+const DESKTOP_CHART_SCALE = 1.15;
 const PHONE_CHART_SCALE = 1.2;
-const DESKTOP_ROOT_FONT_PX = 48;
-const DESKTOP_ROOT_FONT_PX_BRAVE = 64;
-const PHONE_ROOT_FONT_PX = 16;
+const DESKTOP_UI_SCALE = 1.15;
+const PHONE_UI_SCALE = 1.12;
 
-function isBraveBrowser() {
-  return typeof navigator !== "undefined" && typeof navigator.brave !== "undefined";
+function supportsCssZoom() {
+  if (typeof CSS !== "undefined" && typeof CSS.supports === "function") {
+    return CSS.supports("zoom", "1");
+  }
+  return true;
 }
 
-function desktopRootFontPx() {
-  return isBraveBrowser() ? DESKTOP_ROOT_FONT_PX_BRAVE : DESKTOP_ROOT_FONT_PX;
+/** Unzoomed 100px probe — detects browser page-zoom / text scaling drift. */
+function measureCssPxProbe() {
+  const probe = document.createElement("div");
+  probe.setAttribute("aria-hidden", "true");
+  probe.style.cssText =
+    "position:fixed;left:0;top:0;width:100px;height:100px;margin:0;padding:0;border:0;" +
+    "transform:none;zoom:1;visibility:hidden;pointer-events:none;";
+  document.documentElement.appendChild(probe);
+  const width = probe.getBoundingClientRect().width;
+  probe.remove();
+  return width;
 }
 
-function desktopChartScale() {
-  return isBraveBrowser() ? DESKTOP_CHART_SCALE_BRAVE : DESKTOP_CHART_SCALE;
+function targetPageZoom() {
+  return isPhoneLayout() ? PHONE_PAGE_ZOOM : DESKTOP_PAGE_ZOOM;
+}
+
+function applyPageScale() {
+  const root = document.documentElement;
+  if (!root) return;
+
+  root.classList.remove("is-brave");
+  root.style.fontSize = "16px";
+
+  const phone = isPhoneLayout();
+  const baseZoom = targetPageZoom();
+  const uiScale = phone ? PHONE_UI_SCALE : DESKTOP_UI_SCALE;
+  root.style.setProperty("--ui-scale", String(uiScale));
+
+  // Compensate if this browser's page zoom / DPI mapping isn't 1:1 with CSS px.
+  let zoom = baseZoom;
+  const measured = measureCssPxProbe();
+  if (Number.isFinite(measured) && measured > 0) {
+    const browserFactor = measured / 100;
+    if (browserFactor > 0.05) {
+      zoom = Math.min(6, Math.max(0.75, baseZoom / browserFactor));
+    }
+  }
+
+  root.style.setProperty("--page-zoom", String(zoom));
+  root.dataset.pageZoom = String(zoom);
+  root.classList.toggle("no-css-zoom", !supportsCssZoom());
 }
 
 function enforceRootFontSize() {
-  const root = document.documentElement;
-  if (!root) return;
-  root.classList.toggle("is-brave", isBraveBrowser());
-  root.style.fontSize = `${isPhoneLayout() ? PHONE_ROOT_FONT_PX : desktopRootFontPx()}px`;
-  root.style.setProperty("--ui-scale", String(isPhoneLayout() ? 1.12 : desktopChartScale()));
+  applyPageScale();
 }
 
 function getUiScale() {
-  return isPhoneLayout() ? PHONE_CHART_SCALE : desktopChartScale();
+  if (isPhoneLayout()) return PHONE_CHART_SCALE;
+  // Without CSS zoom (e.g. Firefox), bake page zoom into chart geometry.
+  if (!supportsCssZoom()) return DESKTOP_CHART_SCALE * DESKTOP_PAGE_ZOOM;
+  return DESKTOP_CHART_SCALE;
 }
 
 const s = (n) => n * getUiScale();
