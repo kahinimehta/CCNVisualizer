@@ -30,19 +30,17 @@
   --muted: #8fa8c4;
   --border: rgba(197, 224, 243, 0.14);
   --shadow: 0 24px 84px rgba(0, 0, 0, 0.35);
-  /* Fixed design scale — browser zoom scales rem/px uniformly; do not tie to vw.
-     1.613 × 1.4 ≈ 2.258 so the whole UI reads ~40% larger. */
-  --ui-scale: 2.258;
+  /* Fixed design scale — browser zoom scales rem/px uniformly; do not tie to vw. */
+  --ui-scale: 3.4;
   --max-app-width: 100%;
   --sidebar-width: 18rem;
   --sidebar-collapsed-width: 0;
 }
 
 html {
-  /* Absolute px — not % of the browser default. Brave (and some Chromium
-     builds) ship a smaller default font size, so 202% looked tiny there
-     while Chrome looked fine. 32px ≈ 200% of a 16px default. */
-  font-size: 32px;
+  /* Absolute px (not %). Brave was still rendering ~16px-looking UI at 32px
+     on some laptops — use a larger locked root; JS also enforces this. */
+  font-size: 48px !important;
   width: 100%;
   max-width: 100%;
   scrollbar-gutter: stable;
@@ -283,7 +281,7 @@ body:not(.sidebar-collapsed) .main-area {
 
 .brand h1 {
   margin: 0;
-  font-size: clamp(1.65rem, 4vw, 2.25rem);
+  font-size: 2rem;
   font-weight: 700;
   color: var(--ccn-white);
   letter-spacing: -0.02em;
@@ -416,7 +414,7 @@ body:not(.sidebar-collapsed) .main-area {
 }
 
 .kpi-card .value {
-  font-size: clamp(1.05rem, 2.4vw, 1.35rem);
+  font-size: 1.35rem;
   font-weight: 700;
   color: var(--ccn-white);
   line-height: 1.1;
@@ -794,7 +792,7 @@ svg {
   }
 
   html {
-    font-size: 16px;
+    font-size: 16px !important;
   }
 
   .app-shell {
@@ -1195,16 +1193,8 @@ svg {
     gap: 0.85rem;
   }
 
-  .brand-subtitle {
-    font-size: 0.82rem;
-  }
-
   .kpi-card {
     padding: 0.7rem 0.75rem;
-  }
-
-  .brand h1 {
-    font-size: 1.35rem;
   }
 }
 
@@ -1223,10 +1213,10 @@ svg {
 /* Mouse/trackpad desktops (incl. Brave on laptop): always keep large root type. */
 @media (hover: hover) and (pointer: fine) {
   :root {
-    --ui-scale: 2.258;
+    --ui-scale: 3.4;
   }
 
   html {
-    font-size: 32px;
+    font-size: 48px !important;
   }
 }
