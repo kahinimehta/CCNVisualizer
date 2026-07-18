@@ -859,6 +859,13 @@ svg {
     transform: translate(-50%, -50%) scale(0.5);
     transform-origin: center center;
     box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+    text-align: left;
+  }
+
+  .tooltip.tooltip-phone-centered .tooltip-body,
+  .tooltip.tooltip-phone-centered .tooltip-topics {
+    text-align: left;
+    justify-content: flex-start;
   }
 
   .tooltip.tooltip-phone-centered .tooltip-close {
@@ -965,8 +972,12 @@ svg {
 .tooltip-topics {
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
   gap: 0.3rem;
   margin: 0.45rem 0 0.35rem;
+  width: 100%;
+  text-align: left;
 }
 
 .tooltip-topic {
@@ -979,6 +990,7 @@ svg {
   font: inherit;
   font-size: 0.72rem;
   line-height: 1.3;
+  text-align: left;
   cursor: pointer;
 }
 
