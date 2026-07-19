@@ -2263,16 +2263,16 @@ function renderEmbeddingYearLegend(svg, years, width, plotHeight, margin) {
   return legendBlock;
 }
 
-/** Desktop dots track plot/viewport (+ Windows/Brave boost). Phone uses yesterday's gs() radii. */
+/** Desktop dots track plot/viewport (+ Windows/Brave boost). Phone: slightly smaller gs() radii. */
 function embeddingPointRadii(plotInnerW) {
   if (isPhoneLayout()) {
-    const base = gs(2.4);
+    const base = gs(2.1);
     return {
       base,
-      selected: gs(3.2),
-      dim: gs(2.0),
-      stroke: gs(1),
-      strokeActive: gs(1.75),
+      selected: gs(2.8),
+      dim: gs(1.75),
+      stroke: gs(0.9),
+      strokeActive: gs(1.5),
     };
   }
   const w = Math.max(320, viewportWidth());
