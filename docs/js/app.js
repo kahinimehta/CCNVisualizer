@@ -377,6 +377,18 @@ function isBraveBrowser() {
   return /\bBrave\b/i.test(navigator.userAgent || "");
 }
 
+/** Google Chrome only — not Brave/Edge (both also contain "Chrome" in UA). */
+function isGoogleChrome() {
+  if (typeof navigator === "undefined" || isBraveBrowser()) return false;
+  const ua = navigator.userAgent || "";
+  if (/\bEdg\//.test(ua) || /\bOPR\//.test(ua) || /\bSamsungBrowser\//.test(ua)) return false;
+  const brands = navigator.userAgentData?.brands;
+  if (Array.isArray(brands) && brands.length) {
+    return brands.some((b) => /Google Chrome/i.test(b?.brand || ""));
+  }
+  return /\bChrome\//.test(ua) && !/\bChromium\//.test(ua);
+}
+
 function platformVisualBoost() {
   if (cachedPlatformBoost != null) return cachedPlatformBoost;
   // Phone keeps yesterday's independent scale — never apply desktop boost there.
@@ -385,14 +397,15 @@ function platformVisualBoost() {
     return cachedPlatformBoost;
   }
 
-  // Chrome/Safari stay at 1 (they were reading too large after global bumps).
-  // Brave still paints smaller, so only Brave gets a real lift.
+  // Brave paints small → lift. Chrome paints large → pull down. Safari stays ~1.
   let boost = 1;
   if (isBraveBrowser()) {
     boost = isWindowsPlatform() ? 1.55 : 1.3;
     const dpr = Number(window.devicePixelRatio) || 1;
     const screenW = Number(window.screen?.width) || 0;
     if (isWindowsPlatform() && dpr < 1.2 && screenW >= 1600) boost = 1.65;
+  } else if (isGoogleChrome()) {
+    boost = 0.82;
   }
 
   cachedPlatformBoost = boost;
@@ -403,13 +416,21 @@ function rootFontPxForViewport() {
   const w = Math.max(320, viewportWidth());
   // Desktop only — phones use CSS font-size: 100%.
   const boost = platformVisualBoost();
-  // Chrome/Safari use a calmer root; Brave keeps the larger curve × boost.
-  const base =
-    boost > 1
-      ? Math.min(28, Math.max(20, 14 + w * 0.0075))
-      : Math.min(22, Math.max(17, 13 + w * 0.0055));
-  const cap = boost > 1.2 ? 46 : 26;
-  return Math.min(cap, Math.round(base * Math.max(boost, 1) * 100) / 100);
+  let base;
+  if (boost > 1) {
+    // Brave
+    base = Math.min(28, Math.max(20, 14 + w * 0.0075));
+  } else if (boost < 1) {
+    // Chrome — lower curve so bar labels / UI match Brave/Safari
+    base = Math.min(18.5, Math.max(15, 12.5 + w * 0.004));
+  } else {
+    // Safari / other
+    base = Math.min(20, Math.max(16, 13 + w * 0.0045));
+  }
+  const scaled = base * boost;
+  const cap = boost > 1.2 ? 46 : boost < 1 ? 20 : 24;
+  const floor = boost < 1 ? 14.5 : 16;
+  return Math.min(cap, Math.max(floor, Math.round(scaled * 100) / 100));
 }
 
 function chartDesignScale() {
@@ -422,9 +443,11 @@ function chartDesignScale() {
   cachedChartScaleKey = key;
   if (boost > 1) {
     cachedChartScale = Math.min(5.4, Math.max(2.95, 2.7 + w / 1800) * boost);
+  } else if (boost < 1) {
+    // Chrome — noticeably tighter chart type/marks
+    cachedChartScale = Math.min(2.55, Math.max(2.05, 1.95 + w / 2200));
   } else {
-    // Chrome/Safari — tighter marks so bar labels don't dominate the plot.
-    cachedChartScale = Math.min(3.15, Math.max(2.45, 2.25 + w / 2000));
+    cachedChartScale = Math.min(2.85, Math.max(2.25, 2.1 + w / 2000));
   }
   return cachedChartScale;
 }
@@ -458,8 +481,10 @@ function applyPageScale() {
   root.style.zoom = "";
   root.style.removeProperty("--page-zoom");
   root.classList.toggle("is-phone", phone);
-  root.classList.toggle("is-windows", !phone && isWindowsPlatform());
+  // Only mark Brave for CSS floors — do not tag Windows Chrome (was inflating it).
+  root.classList.toggle("is-windows", false);
   root.classList.toggle("is-brave", !phone && isBraveBrowser());
+  root.classList.toggle("is-chrome", !phone && isGoogleChrome());
   root.classList.remove("no-css-zoom");
 
   if (phone) {
