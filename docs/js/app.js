@@ -366,8 +366,10 @@ function isWindowsPlatform() {
 
 function isBraveBrowser() {
   if (typeof navigator === "undefined") return false;
-  // Presence of navigator.brave is the reliable signal (isBrave() is async).
+  // navigator.brave exists in Brave even before isBrave() resolves.
   if (navigator.brave) return true;
+  const brands = navigator.userAgentData?.brands;
+  if (Array.isArray(brands) && brands.some((b) => /Brave/i.test(b?.brand || ""))) return true;
   return /\bBrave\b/i.test(navigator.userAgent || "");
 }
 
@@ -379,15 +381,17 @@ function platformVisualBoost() {
     return cachedPlatformBoost;
   }
 
+  // Chrome/Safari baseline = 1. Brave paints smaller at the same CSS width, so
+  // it always gets an extra multiplier — including on Windows (stacked).
   let boost = 1;
   if (isWindowsPlatform()) {
-    boost = 1.32;
-    // Low DPR on a wide Windows panel → CSS px look physically tiny.
+    boost = 1.3;
     const dpr = Number(window.devicePixelRatio) || 1;
     const screenW = Number(window.screen?.width) || 0;
-    if (dpr < 1.2 && screenW >= 1600) boost = 1.42;
-  } else if (isBraveBrowser()) {
-    boost = 1.22;
+    if (dpr < 1.2 && screenW >= 1600) boost = 1.4;
+  }
+  if (isBraveBrowser()) {
+    boost *= 1.28;
   }
 
   cachedPlatformBoost = boost;
@@ -397,8 +401,11 @@ function platformVisualBoost() {
 function rootFontPxForViewport() {
   const w = Math.max(320, viewportWidth());
   // Desktop only — phones use CSS font-size: 100%.
+  const boost = platformVisualBoost();
   const base = Math.min(28, Math.max(20, 14 + w * 0.0075));
-  return Math.min(38, Math.round(base * platformVisualBoost() * 100) / 100);
+  // Brave/Windows need a higher cap so the boost isn't clipped away.
+  const cap = boost > 1.2 ? 46 : 38;
+  return Math.min(cap, Math.round(base * boost * 100) / 100);
 }
 
 function chartDesignScale() {
@@ -409,8 +416,27 @@ function chartDesignScale() {
   const key = `${w}:${boost}:d`;
   if (key === cachedChartScaleKey) return cachedChartScale;
   cachedChartScaleKey = key;
-  cachedChartScale = Math.min(4.6, Math.max(2.95, 2.7 + w / 1800) * boost);
+  const cap = boost > 1.2 ? 5.4 : 4.6;
+  cachedChartScale = Math.min(cap, Math.max(2.95, 2.7 + w / 1800) * boost);
   return cachedChartScale;
+}
+
+/** Confirm Brave via async API (Shields can hide sync signals) and rescale desktop. */
+async function confirmBraveDesktopScale() {
+  if (isPhoneLayout()) return false;
+  try {
+    if (!navigator.brave || typeof navigator.brave.isBrave !== "function") return false;
+    const yes = await navigator.brave.isBrave();
+    if (!yes) return false;
+    const wasBrave = document.documentElement.classList.contains("is-brave");
+    cachedPlatformBoost = null;
+    cachedChartScaleKey = "";
+    document.documentElement.classList.add("is-brave");
+    applyPageScale();
+    return !wasBrave || platformVisualBoost() > 1;
+  } catch {
+    return false;
+  }
 }
 
 function applyPageScale() {
@@ -2165,11 +2191,12 @@ function embeddingPointRadii(plotInnerW) {
   }
   const w = Math.max(320, viewportWidth());
   const boost = platformVisualBoost();
-  // ~0.8% of plot width; Windows/Brave multiply so dots match Mac Chrome/Safari.
+  // ~0.8% of plot width; Brave/Windows boost so dots match Chrome/Safari.
   const fromPlot = plotInnerW / 125;
   const fromViewport = w / 200;
   const raw = Math.max(fromPlot, fromViewport * 0.9);
-  const base = Math.min(11, Math.max(3.8, raw) * boost);
+  const cap = boost > 1.2 ? 13 : 11;
+  const base = Math.min(cap, Math.max(3.8, raw) * boost);
   return {
     base,
     selected: base * 1.4,
@@ -2490,6 +2517,8 @@ async function init() {
 
   await waitForChartFonts();
   applyPageScale();
+  // Resolve Brave async so desktop type/charts/dots match before first paint.
+  await confirmBraveDesktopScale();
   await loadDataset(state.datasetFile);
 
   setupTooltipDismiss();
