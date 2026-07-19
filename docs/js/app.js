@@ -352,16 +352,28 @@ const DESKTOP_CHART_LABEL = 10;
 const DESKTOP_CHART_HEADING = 11;
 
 /**
- * Desktop scale from viewport width; Chrome gets a modest type lift.
- * Phone: unchanged PHONE_* path + 100% root.
+ * Desktop scale from viewport width, with browser type lifts where needed.
+ * Chrome: modest (+8%). Brave: larger lift (paints small). Phone unchanged.
  */
 const CHROME_TYPE_BOOST = 1.08;
+const BRAVE_TYPE_BOOST_MAC = 1.22;
+const BRAVE_TYPE_BOOST_WIN = 1.3;
 let cachedChartScale = 2.5;
 let cachedChartScaleKey = "";
+let cachedBrowserTypeBoost = null;
+
+function isWindowsPlatform() {
+  if (typeof navigator === "undefined") return false;
+  const uaDataPlatform = navigator.userAgentData?.platform || "";
+  if (/Windows/i.test(uaDataPlatform)) return true;
+  if (/Win/i.test(navigator.platform || "")) return true;
+  return /Windows/i.test(navigator.userAgent || "");
+}
 
 function isBraveBrowser() {
   if (typeof navigator === "undefined") return false;
   if (navigator.brave) return true;
+  if (document.documentElement?.classList.contains("is-brave")) return true;
   const brands = navigator.userAgentData?.brands;
   if (Array.isArray(brands) && brands.some((b) => /Brave/i.test(b?.brand || ""))) return true;
   return /\bBrave\b/i.test(navigator.userAgent || "");
@@ -379,59 +391,95 @@ function isGoogleChrome() {
   return /\bChrome\//.test(ua) && !/\bChromium\//.test(ua);
 }
 
-function chromeTypeBoost() {
-  return !isPhoneLayout() && isGoogleChrome() ? CHROME_TYPE_BOOST : 1;
+function browserTypeBoost() {
+  if (cachedBrowserTypeBoost != null) return cachedBrowserTypeBoost;
+  if (isPhoneLayout()) {
+    cachedBrowserTypeBoost = 1;
+    return cachedBrowserTypeBoost;
+  }
+  if (isBraveBrowser()) {
+    cachedBrowserTypeBoost = isWindowsPlatform() ? BRAVE_TYPE_BOOST_WIN : BRAVE_TYPE_BOOST_MAC;
+  } else if (isGoogleChrome()) {
+    cachedBrowserTypeBoost = CHROME_TYPE_BOOST;
+  } else {
+    cachedBrowserTypeBoost = 1;
+  }
+  return cachedBrowserTypeBoost;
 }
 
 /** Desktop root font from layout width (px, not rem/prefs). */
 function desktopRootPxForViewport(w = viewportWidth()) {
   const width = Math.max(320, w);
   const base = Math.min(19, Math.max(16, 13.5 + width * 0.004));
-  return base * chromeTypeBoost();
+  return base * browserTypeBoost();
 }
 
 /** Desktop SVG design scale from layout width. */
 function desktopChartScaleForViewport(w = viewportWidth()) {
   const width = Math.max(320, w);
   const base = Math.min(2.65, Math.max(2.2, 2.05 + width / 2000));
-  return base * chromeTypeBoost();
+  return base * browserTypeBoost();
 }
 
 function rootFontPxForViewport() {
-  return Math.round(desktopRootPxForViewport() * 100) / 100;
+  const px = desktopRootPxForViewport();
+  const boost = browserTypeBoost();
+  const cap = boost > 1.15 ? 28 : 22;
+  return Math.round(Math.min(cap, Math.max(16, px)) * 100) / 100;
 }
 
 function chartDesignScale() {
   if (isPhoneLayout()) return PHONE_CHART_SCALE;
   const w = Math.max(320, viewportWidth());
-  const chrome = isGoogleChrome();
-  const key = `${w}:d:${chrome ? "c" : "o"}`;
+  const boost = browserTypeBoost();
+  const key = `${w}:d:${boost}`;
   if (key === cachedChartScaleKey) return cachedChartScale;
   cachedChartScaleKey = key;
   cachedChartScale = desktopChartScaleForViewport(w);
   return cachedChartScale;
 }
 
+/** Confirm Brave via async API (Shields can hide sync signals) and rescale desktop. */
+async function confirmBraveDesktopScale() {
+  if (isPhoneLayout()) return false;
+  try {
+    if (!navigator.brave || typeof navigator.brave.isBrave !== "function") return false;
+    const yes = await navigator.brave.isBrave();
+    if (!yes) return false;
+    const wasBrave = document.documentElement.classList.contains("is-brave");
+    cachedBrowserTypeBoost = null;
+    cachedChartScaleKey = "";
+    document.documentElement.classList.add("is-brave");
+    applyPageScale();
+    return !wasBrave || browserTypeBoost() > 1;
+  } catch {
+    return false;
+  }
+}
+
 function applyPageScale() {
   const root = document.documentElement;
   if (!root) return;
 
+  cachedBrowserTypeBoost = null;
   cachedChartScaleKey = "";
 
   const phone = isPhoneLayout();
   const chrome = !phone && isGoogleChrome();
+  const brave = !phone && isBraveBrowser();
   root.style.zoom = "";
   root.style.removeProperty("--page-zoom");
   root.classList.toggle("is-phone", phone);
   root.classList.toggle("is-chrome", chrome);
-  root.classList.remove("is-windows", "is-brave", "no-css-zoom");
+  root.classList.toggle("is-brave", brave);
+  root.classList.remove("is-windows", "no-css-zoom");
 
   if (phone) {
     root.style.fontSize = "100%";
     root.style.setProperty("--ui-scale", "1.12");
   } else {
     root.style.fontSize = `${rootFontPxForViewport()}px`;
-    root.style.setProperty("--ui-scale", "1");
+    root.style.setProperty("--ui-scale", String(browserTypeBoost()));
   }
 
   if (document.body) {
@@ -484,7 +532,10 @@ function themeFs(base) {
 
 function styleDesktopChartText(selection) {
   if (isPhoneLayout()) return selection;
-  return selection.style("font-family", CHART_FONT).style("font-weight", "400");
+  selection.style("font-family", CHART_FONT);
+  // Brave paints light type thinner — slightly heavier weight helps match Chrome/Safari.
+  selection.style("font-weight", isBraveBrowser() ? "500" : "400");
+  return selection;
 }
 
 // DOM measurement — not canvas.measureText(), which Brave Shields / privacy
@@ -2496,6 +2547,8 @@ async function init() {
 
   await waitForChartFonts();
   applyPageScale();
+  // Resolve Brave async so desktop type/charts match before first paint settles.
+  await confirmBraveDesktopScale();
   await loadDataset(state.datasetFile);
 
   setupTooltipDismiss();
