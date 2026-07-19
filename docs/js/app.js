@@ -805,7 +805,7 @@ let tooltipDismissBound = false;
 let tooltipVisible = false;
 let tooltipMode = null; // "hover" | "tap"
 let tooltipInteractive = false;
-let tooltipSticky = false; // phone tap popups stay until X
+let tooltipSticky = false; // tap/click popups stay until X (phone + desktop)
 let tooltipHideTimer = null;
 let tooltipAnchorPoint = null;
 
@@ -838,7 +838,7 @@ function setupTooltipDismiss() {
   tooltipDismissBound = true;
 
   const dismissOnScroll = () => {
-    // Sticky phone tap popups stay until the user hits X.
+    // Sticky tap/click popups stay until the user hits X.
     if (tooltipVisible && !tooltipSticky) hideTooltip();
   };
 
@@ -847,6 +847,25 @@ function setupTooltipDismiss() {
   window.addEventListener("scroll", dismissOnScroll, { passive: true, capture: true });
   window.visualViewport?.addEventListener("scroll", dismissOnScroll, { passive: true });
   window.visualViewport?.addEventListener("resize", dismissOnScroll, { passive: true });
+
+  // Click outside a sticky popup dismisses it (topic buttons / X stay interactive).
+  document.addEventListener(
+    "pointerdown",
+    (event) => {
+      if (!tooltipVisible || !tooltipSticky) return;
+      const node = tooltip?.node();
+      if (node && node.contains(event.target)) return;
+      if (event.target?.closest?.(".embedding-point-group, .embedding-hit, .embedding-touch-layer")) {
+        return;
+      }
+      hideTooltip();
+    },
+    true
+  );
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && tooltipVisible) hideTooltip();
+  });
 }
 
 function bindBarTooltipEvents(rect, onBarTooltip, item) {
@@ -921,7 +940,8 @@ function showTooltip(html, event, options = {}) {
   const offset = s(12);
   tooltipMode = mode;
   tooltipInteractive = interactive;
-  tooltipSticky = phone && mode === "tap";
+  // Click/tap pins the popup so moving across nearby dots won't steal it.
+  tooltipSticky = mode === "tap";
   tooltipAnchorPoint = options.anchorPoint || null;
 
   if (phone || mode === "tap") {
@@ -983,8 +1003,8 @@ function hideTooltip() {
   tooltip.selectAll("button.tooltip-open-paper").on("click", null);
 }
 
-function refreshStickyPhoneTooltip() {
-  if (!tooltipSticky || !tooltipAnchorPoint || !isPhoneLayout()) return;
+function refreshStickyTooltip() {
+  if (!tooltipSticky || !tooltipAnchorPoint) return;
   const anchor = tooltipAnchorPoint;
   showEmbeddingPointTooltip(null, anchor, "tap");
 }
@@ -1502,7 +1522,7 @@ function embeddingDefaultNote() {
   }
   return isTouchLike()
     ? `${count} submissions · colored by year · tap a dot to see topics and filter · or open the paper`
-    : `${count} submissions · colored by year · hover a dot to see topics and click a topic to filter`;
+    : `${count} submissions · colored by year · hover a dot for topics · click a dot to pin the popup`;
 }
 
 function renderEmbeddingNote(note) {
@@ -1543,7 +1563,7 @@ function embeddingPointTooltipHtml(point) {
     : `<span class="tooltip-hint">No topics assigned</span>`;
   const hint = isPhoneLayout()
     ? "Tap a topic to filter · Open paper below"
-    : "Click a topic to filter by it";
+    : "Click a topic to filter · × closes pinned popup";
   return [
     `<strong>${title}</strong>`,
     yearLabel
@@ -1562,15 +1582,14 @@ function showEmbeddingPointTooltip(event, point, mode = "hover") {
     anchorPoint: point,
     onTopicClick: (theme) => {
       toggleThemeFilter(theme);
-      // Keep the phone popup open and refresh active topic chips.
-      if (isPhoneLayout()) {
-        requestAnimationFrame(() => refreshStickyPhoneTooltip());
+      // Keep pinned popups open and refresh active topic chips.
+      if (tooltipSticky) {
+        requestAnimationFrame(() => refreshStickyTooltip());
       }
     },
     onOpenPaper: () => {
       focusSubmissionFromPoint(point);
-      // Phone sticky popup stays until X; desktop closes after jump.
-      if (!isPhoneLayout()) hideTooltip();
+      hideTooltip();
     },
   });
 }
@@ -2417,14 +2436,19 @@ function renderEmbeddingCluster() {
   } else if (isDesktopPointer()) {
     pointGroups
       .on("mousemove", (event, d) => {
+        // Pinned click popup stays put — don't let nearby dots steal it.
+        if (tooltipSticky) return;
         cancelHideTooltip();
         showEmbeddingPointTooltip(event, d, "hover");
       })
-      .on("mouseleave", () => scheduleHideTooltip())
+      .on("mouseleave", () => {
+        if (tooltipSticky) return;
+        scheduleHideTooltip();
+      })
       .on("click", (event, d) => {
         event.stopPropagation();
-        focusSubmissionFromPoint(d);
-        hideTooltip();
+        // Pin popup so topics stay clickable while moving across dense dots.
+        showEmbeddingPointTooltip(event, d, "tap");
       });
   } else {
     pointGroups.on("click", (event, d) => {
@@ -2509,9 +2533,9 @@ function renderAll() {
   renderEmbeddingCluster();
   renderPaperList();
 
-  // Keep sticky phone tap popups open across re-renders; only X closes them.
-  if (isPhoneLayout() && tooltipSticky && tooltipAnchorPoint) {
-    requestAnimationFrame(() => refreshStickyPhoneTooltip());
+  // Keep sticky tap/click popups open across re-renders; only X closes them.
+  if (tooltipSticky && tooltipAnchorPoint) {
+    requestAnimationFrame(() => refreshStickyTooltip());
   }
 
   d3.select("#year-chips")
