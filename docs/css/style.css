@@ -42,8 +42,12 @@
 }
 
 html {
-  /* Larger fluid root (~20–25px). UI chrome stays px below. */
-  font-size: clamp(1.25rem, 1.15rem + 0.5vw, 1.55rem);
+  /*
+   * Viewport-relative px (not rem). Brave/Chrome "Font size" prefs change the
+   * rem baseline and were shrinking this UI on Windows/Brave while Safari/Chrome
+   * (Medium) looked fine. vw keeps type proportional to screen width.
+   */
+  font-size: clamp(20px, 14px + 0.75vw, 28px);
   width: 100%;
   max-width: 100%;
   scrollbar-gutter: stable;

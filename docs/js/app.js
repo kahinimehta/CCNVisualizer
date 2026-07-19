@@ -346,23 +346,36 @@ const PHONE_EMBEDDING_LEGEND_HEADING_SIZE = 13;
 
 /**
  * Two independent, non-compounding systems:
- * 1) CSS clamp() on html → rem UI type/spacing
- * 2) Fixed CHART_DESIGN_SCALE → SVG viewBox units (same on every device)
+ * 1) CSS clamp(px + vw) on html → UI type (viewport-relative; not rem/prefs)
+ * 2) Viewport-width chart scale → SVG label/mark sizes in viewBox units
  * SVG then scales to the container via viewBox + width:100% in appendChartSvg.
- * Never derive (2) from (1) — that double-scaled and drifted across devices.
+ * Never derive (2) from computed root font-size — that double-scaled across devices.
+ * Both track screen width so Brave/Windows match Chrome/Safari at the same viewport.
  */
-const CHART_DESIGN_SCALE = 2.75;
+let cachedChartScale = 3.1;
+let cachedChartScaleForWidth = -1;
+
+function chartDesignScale() {
+  const w = Math.max(320, viewportWidth());
+  if (w === cachedChartScaleForWidth) return cachedChartScale;
+  // ~2.95 on phones → ~3.55 on wide laptops/desktops
+  cachedChartScaleForWidth = w;
+  cachedChartScale = Math.min(3.55, Math.max(2.95, 2.7 + w / 1800));
+  return cachedChartScale;
+}
 
 function applyPageScale() {
   const root = document.documentElement;
   if (!root) return;
 
   // Drop legacy inline locks from older deploys (zoom / forced px root / etc.).
+  // Root type comes from CSS px+vw clamp — do not write rem-tied inline font-size.
   root.style.removeProperty("font-size");
   root.classList.remove("is-brave", "no-css-zoom");
   root.style.zoom = "";
   root.style.removeProperty("--page-zoom");
   root.style.setProperty("--ui-scale", "1");
+  cachedChartScaleForWidth = -1;
   if (document.body) {
     document.body.style.zoom = "";
     document.body.style.width = "";
@@ -375,8 +388,8 @@ function enforceRootFontSize() {
   applyPageScale();
 }
 
-const s = (n) => n * CHART_DESIGN_SCALE;
-const gs = (n) => n * CHART_DESIGN_SCALE;
+const s = (n) => n * chartDesignScale();
+const gs = (n) => n * chartDesignScale();
 const fs = (n) => `${s(n)}px`;
 
 function chartThemePx(base) {
@@ -2077,16 +2090,20 @@ function renderEmbeddingYearLegend(svg, years, width, plotHeight, margin) {
   return legendBlock;
 }
 
-/** Dot size tracks plot width so visual density stays stable across devices. */
+/** Dot size tracks plot + viewport width so Brave/Windows match Chrome/Safari. */
 function embeddingPointRadii(plotInnerW) {
-  // Tuned so ~2900 points look reasonably separated from ~320px to ~1400px wide.
-  const base = Math.min(4.5, Math.max(1.6, plotInnerW / 220));
+  const w = Math.max(320, viewportWidth());
+  // ~0.75% of plot width, with a higher floor so dots stay visible on large
+  // Windows displays where the same CSS px used to look like pinpricks.
+  const fromPlot = plotInnerW / 135;
+  const fromViewport = w / 220;
+  const base = Math.min(8.5, Math.max(3.4, Math.max(fromPlot, fromViewport * 0.85)));
   return {
     base,
-    selected: base * 1.35,
-    dim: base * 0.78,
-    stroke: Math.max(0.75, base * 0.3),
-    strokeActive: Math.max(1, base * 0.45),
+    selected: base * 1.4,
+    dim: base * 0.8,
+    stroke: Math.max(1, base * 0.32),
+    strokeActive: Math.max(1.25, base * 0.5),
   };
 }
 
