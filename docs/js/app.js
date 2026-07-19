@@ -340,7 +340,9 @@ function readCssNumber(property, fallback) {
 
 // Yesterday's clean phone chart constants (restored) — do not share desktop scale.
 const PHONE_GRAPH_SCALE = 0.72;
-const PHONE_CHART_SCALE = 1.2;
+const TYPE_NUDGE = 1.04; // very slight global type lift
+const PHONE_CHART_SCALE = 1.2 * TYPE_NUDGE;
+const PHONE_UI_SCALE = 1.12 * TYPE_NUDGE;
 const PHONE_AXIS_LABEL_SIZE = 8.5;
 const PHONE_THEME_TITLE_SIZE = 10.5;
 const PHONE_BAR_VALUE_SIZE = 10.5;
@@ -348,13 +350,13 @@ const PHONE_LEGEND_HEADING_SIZE = 10.5;
 const PHONE_EMBEDDING_LEGEND_HEADING_SIZE = 12.5;
 
 // Shared desktop chart label bases — same in every desktop browser.
-// Kept below 10 so axis/legend/topic labels stay readable without crowding.
-const DESKTOP_CHART_LABEL = 8;
-const DESKTOP_CHART_HEADING = 9;
+const DESKTOP_CHART_LABEL = 8.5;
+const DESKTOP_CHART_HEADING = 9.5;
 
 /**
  * Desktop scale from viewport width, with browser type lifts where needed.
- * Chrome: modest (+8%). Brave: larger lift (paints small). Phone unchanged.
+ * Chrome: modest (+8%). Brave: larger lift (paints small).
+ * TYPE_NUDGE applies a very slight extra lift everywhere.
  */
 const CHROME_TYPE_BOOST = 1.08;
 const BRAVE_TYPE_BOOST_MAC = 1.22;
@@ -398,13 +400,13 @@ function browserTypeBoost() {
     cachedBrowserTypeBoost = 1;
     return cachedBrowserTypeBoost;
   }
+  let boost = 1;
   if (isBraveBrowser()) {
-    cachedBrowserTypeBoost = isWindowsPlatform() ? BRAVE_TYPE_BOOST_WIN : BRAVE_TYPE_BOOST_MAC;
+    boost = isWindowsPlatform() ? BRAVE_TYPE_BOOST_WIN : BRAVE_TYPE_BOOST_MAC;
   } else if (isGoogleChrome()) {
-    cachedBrowserTypeBoost = CHROME_TYPE_BOOST;
-  } else {
-    cachedBrowserTypeBoost = 1;
+    boost = CHROME_TYPE_BOOST;
   }
+  cachedBrowserTypeBoost = boost * TYPE_NUDGE;
   return cachedBrowserTypeBoost;
 }
 
@@ -477,7 +479,7 @@ function applyPageScale() {
 
   if (phone) {
     root.style.fontSize = "100%";
-    root.style.setProperty("--ui-scale", "1.12");
+    root.style.setProperty("--ui-scale", String(PHONE_UI_SCALE));
   } else {
     root.style.fontSize = `${rootFontPxForViewport()}px`;
     root.style.setProperty("--ui-scale", String(browserTypeBoost()));
