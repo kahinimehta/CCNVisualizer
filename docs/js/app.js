@@ -352,23 +352,26 @@ const DESKTOP_CHART_LABEL = 10;
 const DESKTOP_CHART_HEADING = 11;
 
 /**
- * Browser-agnostic desktop scale: root + charts from viewport width only.
- * No UA / Brave / Chrome multipliers — CSS px is the same contract everywhere.
- * Phone: unchanged PHONE_* path + 100% root.
+ * Browser-agnostic desktop scale (viewport width only — no UA sniffing).
+ * Measurement targets match ~2026-07-17: 16px root + 1.12 chart scale below
+ * 1600px; larger clamp past 1600px. Phone: unchanged PHONE_* + 100% root.
  */
-let cachedChartScale = 2.5;
+let cachedChartScale = 1.12;
 let cachedChartScaleKey = "";
 
-/** Desktop root font from layout width (px, not rem/prefs). */
+/** Desktop root font from layout width (px). Mirrors July 17 breakpoints. */
 function desktopRootPxForViewport(w = viewportWidth()) {
   const width = Math.max(320, w);
-  return Math.min(19, Math.max(16, 13.5 + width * 0.004));
+  if (width < 1600) return 16;
+  if (width < 2400) return Math.min(66, Math.max(48, 10 + width * 0.028));
+  return Math.min(72, Math.max(51, 10 + width * 0.028));
 }
 
-/** Desktop SVG design scale from layout width. */
+/** Desktop SVG design scale from layout width. Mirrors July 17 --ui-scale. */
 function desktopChartScaleForViewport(w = viewportWidth()) {
   const width = Math.max(320, w);
-  return Math.min(2.65, Math.max(2.2, 2.05 + width / 2000));
+  if (width < 1600) return 1.12;
+  return Math.min(3, Math.max(1, 0.6 + width / 500));
 }
 
 function rootFontPxForViewport() {
@@ -401,8 +404,9 @@ function applyPageScale() {
     root.style.fontSize = "100%";
     root.style.setProperty("--ui-scale", "1.12");
   } else {
+    const chartScale = chartDesignScale();
     root.style.fontSize = `${rootFontPxForViewport()}px`;
-    root.style.setProperty("--ui-scale", "1");
+    root.style.setProperty("--ui-scale", String(chartScale));
   }
 
   if (document.body) {
@@ -2129,8 +2133,8 @@ function renderEmbeddingYearLegend(svg, years, width, plotHeight, margin) {
   return legendBlock;
 }
 
-/** Desktop dots track plot/viewport (+ Windows/Brave boost). Phone uses yesterday's gs() radii. */
-function embeddingPointRadii(plotInnerW) {
+/** Desktop: July 17 measurement bases × chart scale. Phone: yesterday's gs() radii. */
+function embeddingPointRadii(_plotInnerW) {
   if (isPhoneLayout()) {
     const base = gs(2.4);
     return {
@@ -2141,18 +2145,12 @@ function embeddingPointRadii(plotInnerW) {
       strokeActive: gs(1.75),
     };
   }
-  const w = Math.max(320, viewportWidth());
-  // ~0.8% of plot width — viewport only, no browser multiplier.
-  const fromPlot = plotInnerW / 125;
-  const fromViewport = w / 200;
-  const raw = Math.max(fromPlot, fromViewport * 0.9);
-  const base = Math.min(11, Math.max(3.8, raw));
   return {
-    base,
-    selected: base * 1.4,
-    dim: base * 0.8,
-    stroke: Math.max(1, base * 0.32),
-    strokeActive: Math.max(1.25, base * 0.5),
+    base: s(7),
+    selected: s(8.5),
+    dim: s(5.5),
+    stroke: s(1.25),
+    strokeActive: s(2),
   };
 }
 
