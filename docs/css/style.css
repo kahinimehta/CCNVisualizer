@@ -42,9 +42,8 @@
 }
 
 html {
-  /* Tight fluid root everywhere: ~16–18px, no 640px cliff, no 2x swing.
-     Body copy rides this; UI chrome uses fixed px below. */
-  font-size: clamp(1rem, 0.94rem + 0.25vw, 1.125rem);
+  /* Larger but still tight fluid root (~18–22px). UI chrome stays px below. */
+  font-size: clamp(1.125rem, 1.05rem + 0.4vw, 1.375rem);
   width: 100%;
   max-width: 100%;
   scrollbar-gutter: stable;
@@ -290,17 +289,18 @@ body:not(.sidebar-collapsed) .main-area {
 
 .brand h1 {
   margin: 0;
-  font-size: clamp(1.45rem, 1.1rem + 1.15vw, 2.15rem);
+  font-size: clamp(1.55rem, 1.2rem + 1.2vw, 2.25rem);
   font-weight: 700;
   color: var(--ccn-white);
   letter-spacing: -0.02em;
   line-height: 1.1;
+  overflow-wrap: anywhere;
 }
 
 .brand-subtitle {
   margin: 0.35rem 0 0;
   color: var(--muted);
-  font-size: clamp(0.82rem, 0.74rem + 0.3vw, 1rem);
+  font-size: clamp(0.9rem, 0.82rem + 0.35vw, 1.08rem);
   line-height: 1.45;
 }
 
@@ -425,7 +425,7 @@ body:not(.sidebar-collapsed) .main-area {
 }
 
 .kpi-card .value {
-  font-size: clamp(1.15rem, 1rem + 0.55vw, 1.55rem);
+  font-size: clamp(1.25rem, 1.1rem + 0.55vw, 1.65rem);
   font-weight: 700;
   color: var(--ccn-white);
   line-height: 1.1;
@@ -436,6 +436,9 @@ body:not(.sidebar-collapsed) .main-area {
   flex-wrap: wrap;
   gap: 0.4rem;
   margin-bottom: 0.85rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .year-chip {
@@ -445,7 +448,7 @@ body:not(.sidebar-collapsed) .main-area {
   border-radius: var(--radius-sm);
   padding: 0.35rem 0.75rem;
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 0.88rem;
   font-family: inherit;
   transition: 0.15s ease;
 }
@@ -461,6 +464,9 @@ body:not(.sidebar-collapsed) .main-area {
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .card {
@@ -470,7 +476,10 @@ body:not(.sidebar-collapsed) .main-area {
   padding: 1rem 1.05rem 1.1rem;
   box-shadow: var(--shadow);
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   overflow: visible;
+  box-sizing: border-box;
 }
 
 .card-wide,
@@ -482,12 +491,17 @@ body:not(.sidebar-collapsed) .main-area {
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .embedding-main {
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
+  width: 100%;
+  max-width: 100%;
   min-width: 0;
 }
 
@@ -579,11 +593,15 @@ body:not(.sidebar-collapsed) .main-area {
 #embedding-chart {
   min-height: 0;
   width: 100%;
+  max-width: 100%;
 }
 
 .embedding-chart-wrap {
   position: relative;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .chart-note {
@@ -612,6 +630,9 @@ body:not(.sidebar-collapsed) .main-area {
   align-items: flex-start;
   gap: 0.55rem 0.75rem;
   margin-top: 0.85rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .theme-filter-mode {
@@ -645,6 +666,7 @@ body:not(.sidebar-collapsed) .main-area {
   gap: 0.35rem;
   flex: 1 1 256px;
   min-width: 0;
+  max-width: 100%;
 }
 
 .theme-chip {

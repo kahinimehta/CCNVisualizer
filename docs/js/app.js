@@ -351,7 +351,7 @@ const PHONE_EMBEDDING_LEGEND_HEADING_SIZE = 13;
  * SVG then scales to the container via viewBox + width:100% in appendChartSvg.
  * Never derive (2) from (1) — that double-scaled and drifted across devices.
  */
-const CHART_DESIGN_SCALE = 2;
+const CHART_DESIGN_SCALE = 2.45;
 
 function applyPageScale() {
   const root = document.documentElement;
@@ -2114,9 +2114,14 @@ function renderEmbeddingCluster() {
   const xSpan = Math.max(xDomain[1] - xDomain[0], 1e-6);
   const ySpan = Math.max(yDomain[1] - yDomain[0], 1e-6);
 
-  // Full-width isotropic layout: same data units per pixel on both axes.
-  const unitsPerPx = xSpan / plotInnerW;
-  const plotInnerH = ySpan / unitsPerPx;
+  // Broad aspect: full width, compressed height vs isotropic (shorter + wider look).
+  const unitsPerPxX = xSpan / plotInnerW;
+  const isotropicH = ySpan / unitsPerPxX;
+  const targetH = plotInnerW / (isPhoneLayout() ? 2.15 : 2.6);
+  const plotInnerH = Math.max(
+    isPhoneLayout() ? 150 : 180,
+    Math.min(isotropicH, targetH)
+  );
   const plotHeight = margin.top + plotInnerH + margin.bottom;
   // Provisional height; expand after measuring the year legend.
   const provisionalLegend = isPhoneLayout() ? gs(70) : s(56);
@@ -2193,7 +2198,7 @@ function renderEmbeddingCluster() {
 
   if (isTouchLike()) {
     if (isPhoneLayout()) {
-      const maxTapDist = 14;
+      const maxTapDist = Math.max(16, pointRadius.selected * 2.8);
       svg
         .append("rect")
         .attr("class", "embedding-touch-layer")
@@ -2228,7 +2233,7 @@ function renderEmbeddingCluster() {
         .attr("class", "embedding-hit")
         .attr("cx", (d) => x(d.x))
         .attr("cy", (d) => y(d.y))
-        .attr("r", 12)
+        .attr("r", Math.max(12, pointRadius.selected * 2.2))
         .attr("fill", "transparent")
         .style("cursor", "pointer")
         .on("click", (event, d) => {
