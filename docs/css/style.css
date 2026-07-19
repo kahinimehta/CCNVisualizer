@@ -442,10 +442,30 @@ body:not(.sidebar-collapsed) .main-area {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
-  margin-bottom: 0.85rem;
+  margin-bottom: 0;
   width: 100%;
   max-width: 100%;
   min-width: 0;
+}
+
+.year-filter-card {
+  border-color: rgba(197, 224, 243, 0.28);
+  background: linear-gradient(
+    180deg,
+    rgba(197, 224, 243, 0.06) 0%,
+    var(--ccn-navy-card) 42%
+  );
+}
+
+.year-filter-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 0.35rem;
+}
+
+.year-filter-controls .year-filter-select {
+  max-width: min(100%, 220px);
 }
 
 .year-chip {
