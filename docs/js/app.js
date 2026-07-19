@@ -184,16 +184,16 @@ function renderPhoneThemeBarChart(container, options) {
 
   container.selectAll("*").remove();
   const width = chartContainerWidth(container);
-  const margin = { top: gs(5), right: gs(5), bottom: gs(5), left: gs(5) };
+  const margin = { top: gs(4), right: gs(4), bottom: gs(4), left: gs(4) };
   const innerW = width - margin.left - margin.right;
   const labelFont = chartThemePx(PHONE_THEME_TITLE_SIZE);
   const valueFont = chartThemePx(PHONE_BAR_VALUE_SIZE);
-  const barH = gs(8);
-  const rowGap = gs(3);
-  const valueBelowGap = gs(5);
-  const valueGap = gs(3);
-  const blockGap = gs(8);
-  const sideGap = gs(5);
+  const barH = gs(9);
+  const rowGap = gs(2);
+  const valueBelowGap = gs(4);
+  const valueGap = gs(2);
+  const blockGap = gs(5);
+  const sideGap = gs(4);
   const valueH = valueFont * 1.15;
   const maxVal = d3.max(data, getValue) || 1;
   const x = d3.scaleLinear().domain([0, maxVal]).range([0, innerW]);
@@ -338,11 +338,12 @@ function readCssNumber(property, fallback) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
-const PHONE_AXIS_LABEL_SIZE = 11;
-const PHONE_THEME_TITLE_SIZE = 12;
-const PHONE_BAR_VALUE_SIZE = 12;
-const PHONE_LEGEND_HEADING_SIZE = 12;
-const PHONE_EMBEDDING_LEGEND_HEADING_SIZE = 13;
+// Phone chart label bases — kept small because chartDesignScale still multiplies them.
+const PHONE_AXIS_LABEL_SIZE = 9;
+const PHONE_THEME_TITLE_SIZE = 10;
+const PHONE_BAR_VALUE_SIZE = 10;
+const PHONE_LEGEND_HEADING_SIZE = 10;
+const PHONE_EMBEDDING_LEGEND_HEADING_SIZE = 11;
 
 /**
  * Two independent, non-compounding systems:
@@ -397,9 +398,9 @@ function platformVisualBoost() {
 
 function rootFontPxForViewport() {
   const w = Math.max(320, viewportWidth());
-  // Phones need a calmer root so rem UI/filters/KPIs don't crowd the narrow width.
+  // Phones stay near browser-normal type so rem UI does not dominate the width.
   if (isPhoneLayout()) {
-    return Math.min(17.5, Math.max(16, 15.25 + w * 0.0035));
+    return Math.min(16.5, Math.max(15.5, 15 + w * 0.0025));
   }
   // Desktop: same curve as CSS fallback clamp(20px, 14px + 0.75vw, 28px), then platform boost.
   const base = Math.min(28, Math.max(20, 14 + w * 0.0075));
@@ -414,8 +415,8 @@ function chartDesignScale() {
   if (key === cachedChartScaleKey) return cachedChartScale;
   cachedChartScaleKey = key;
   if (phone) {
-    // Calmer phone chart density — desktop floors were crowding small screens.
-    cachedChartScale = Math.min(2.55, Math.max(2.2, 2.05 + w / 2200));
+    // Quiet phone chart marks/labels (~18–20px axis text with PHONE_* bases).
+    cachedChartScale = Math.min(2.05, Math.max(1.85, 1.75 + w / 2400));
     return cachedChartScale;
   }
   // Desktop: ~2.95 → ~3.55, then Windows/Brave boost.
@@ -641,7 +642,7 @@ function styleThemeAxisLabels(selection) {
   selection
     .selectAll("text")
     .attr("fill", CCN_COLORS.muted)
-    .style("font-size", isPhoneLayout() ? chartThemeFs(8) : themeFs(10));
+    .style("font-size", isPhoneLayout() ? chartThemeFs(7) : themeFs(10));
 }
 
 const CHART_PALETTE = [
@@ -1689,11 +1690,11 @@ function renderYearChart() {
 
   const width = chartContainerWidth(container);
   const axisFont = isPhoneLayout() ? chartThemePx(PHONE_AXIS_LABEL_SIZE) : themeLabelPx(10);
-  const extraBottom = Math.max(isPhoneLayout() ? gs(10) : s(14), axisFont * 1.1);
-  const plotHeight = isPhoneLayout() ? gs(200) : s(300);
+  const extraBottom = Math.max(isPhoneLayout() ? gs(8) : s(14), axisFont * 1.05);
+  const plotHeight = isPhoneLayout() ? gs(175) : s(300);
   const height = plotHeight + extraBottom;
   const margin = isPhoneLayout()
-    ? { top: gs(12), right: gs(8), bottom: gs(42) + extraBottom, left: gs(28) }
+    ? { top: gs(10), right: gs(8), bottom: gs(34) + extraBottom, left: gs(24) }
     : { top: s(24), right: s(24), bottom: s(36) + extraBottom, left: s(44) };
   const svg = appendChartSvg(container, width, height);
 
@@ -1823,19 +1824,19 @@ function renderThemeShareByYear() {
   const stackedLegend = useStackedChartLegend(width);
   const legendFont = isPhoneLayout() ? chartThemePx(PHONE_THEME_TITLE_SIZE) : themeLabelPx(10);
   const legendHeadingFont = isPhoneLayout()
-    ? chartThemePx(PHONE_THEME_TITLE_SIZE)
+    ? chartThemePx(PHONE_LEGEND_HEADING_SIZE)
     : themeLabelPx(11);
-  const legendCols = isPhoneLayout() ? 1 : stackedLegend ? (width < 520 ? 1 : 2) : 2;
-  const legendItemHeight = isPhoneLayout() ? legendFont * 2.05 : legendFont * 1.55;
-  const legendTitleHeight = legendHeadingFont * 1.6;
+  const legendCols = isPhoneLayout() ? (width >= 360 ? 2 : 1) : stackedLegend ? (width < 520 ? 1 : 2) : 2;
+  const legendItemHeight = isPhoneLayout() ? legendFont * 1.55 : legendFont * 1.55;
+  const legendTitleHeight = legendHeadingFont * 1.45;
   const legendRowsCount = Math.ceil(themes.length / legendCols);
-  const legendBlock = legendTitleHeight + legendRowsCount * legendItemHeight + (isPhoneLayout() ? gs(12) : s(18));
+  const legendBlock = legendTitleHeight + legendRowsCount * legendItemHeight + (isPhoneLayout() ? gs(8) : s(18));
 
   const axisFont = isPhoneLayout() ? chartThemePx(PHONE_AXIS_LABEL_SIZE) : themeLabelPx(10);
-  const extraBottom = Math.max(isPhoneLayout() ? gs(10) : s(14), axisFont * 1.1);
-  const plotHeight = isPhoneLayout() ? gs(220) : s(320);
+  const extraBottom = Math.max(isPhoneLayout() ? gs(8) : s(14), axisFont * 1.05);
+  const plotHeight = isPhoneLayout() ? gs(185) : s(320);
   const margin = isPhoneLayout()
-    ? { top: gs(12), right: gs(10), bottom: gs(42) + extraBottom, left: gs(40) }
+    ? { top: gs(10), right: gs(8), bottom: gs(34) + extraBottom, left: gs(34) }
     : { top: s(20), right: s(20), bottom: s(36) + extraBottom, left: s(52) };
   const height = plotHeight + legendBlock;
   const svg = appendChartSvg(container, width, height);
@@ -2215,9 +2216,9 @@ function renderEmbeddingCluster() {
   // Broad aspect: full width, compressed height vs isotropic (shorter + wider look).
   const unitsPerPxX = xSpan / plotInnerW;
   const isotropicH = ySpan / unitsPerPxX;
-  const targetH = plotInnerW / (isPhoneLayout() ? 2.55 : 3.25);
+  const targetH = plotInnerW / (isPhoneLayout() ? 2.35 : 3.25);
   const plotInnerH = Math.max(
-    isPhoneLayout() ? 140 : 160,
+    isPhoneLayout() ? 160 : 160,
     Math.min(isotropicH, targetH)
   );
   const plotHeight = margin.top + plotInnerH + margin.bottom;

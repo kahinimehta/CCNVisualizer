@@ -850,12 +850,12 @@ svg {
     --sidebar-width: 280px;
   }
 
-  /* Calm phone root — desktop 20–28px floors were crowding filters/KPIs. */
+  /* Near-normal phone root so rem UI stays proportional to the screen. */
   html,
   html.is-phone,
   html.is-windows,
   html.is-brave {
-    font-size: 16.5px;
+    font-size: 15.75px;
   }
 
   .app-shell {
@@ -863,134 +863,182 @@ svg {
   }
 
   .main-area {
-    padding: 0.75rem 0.75rem 1.4rem 2.75rem;
+    padding: 0.7rem 0.7rem 1.35rem 2.6rem;
   }
 
   body:not(.sidebar-collapsed) .main-area {
-    padding-left: 0.75rem;
+    padding-left: 0.7rem;
   }
 
   .topbar {
-    gap: 0.75rem;
-    padding: 0.7rem 0 0.85rem;
+    gap: 0.65rem;
+    padding: 0.6rem 0 0.75rem;
+  }
+
+  .brand {
+    gap: 0.55rem;
   }
 
   .brand h1 {
-    font-size: clamp(1.2rem, 1.05rem + 1.2vw, 1.4rem);
+    font-size: clamp(1.1rem, 1rem + 1vw, 1.28rem);
   }
 
   .brand-subtitle {
-    font-size: clamp(0.78rem, 0.74rem + 0.3vw, 0.88rem);
+    font-size: clamp(0.72rem, 0.7rem + 0.25vw, 0.8rem);
+    line-height: 1.35;
   }
 
   .filter-bar {
     grid-template-columns: 1fr;
-    gap: 0.6rem;
+    gap: 0.55rem;
   }
 
   .filter-field {
-    font-size: 0.7rem;
+    font-size: 0.66rem;
+    letter-spacing: 0.03em;
   }
 
   .filter-field select,
   .filter-field input {
-    font-size: 0.9rem;
-    height: 42px;
-    padding: 0.45rem 0.7rem;
+    font-size: 0.84rem;
+    height: 40px;
+    padding: 0.4rem 0.65rem;
   }
 
   .theme-filter-bar {
-    margin-top: 0.7rem;
-    gap: 0.45rem 0.55rem;
+    margin-top: 0.6rem;
+    gap: 0.4rem 0.45rem;
   }
 
   .theme-chip {
-    font-size: 0.72rem;
-    padding: 0.2rem 0.48rem;
+    font-size: 0.68rem;
+    padding: 0.16rem 0.42rem;
   }
 
   .theme-mode-btn {
-    font-size: 0.78rem;
-    padding: 0.32rem 0.6rem;
+    font-size: 0.72rem;
+    padding: 0.28rem 0.55rem;
+  }
+
+  .theme-clear-btn {
+    font-size: 0.7rem;
+    padding: 0.24rem 0.5rem;
   }
 
   .theme-filter-status {
-    font-size: 0.76rem;
-    padding: 0.4rem 0.55rem;
+    font-size: 0.72rem;
+    padding: 0.35rem 0.5rem;
   }
 
   .kpi-row {
-    gap: 0.6rem;
-    margin-bottom: 0.75rem;
+    gap: 0.55rem;
+    margin-bottom: 0.65rem;
   }
 
   .kpi-card {
-    padding: 0.7rem 0.75rem;
-    gap: 0.65rem;
+    padding: 0.6rem 0.65rem;
+    gap: 0.55rem;
+  }
+
+  .kpi-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
+
+  .kpi-icon svg {
+    width: 16px;
+    height: 16px;
   }
 
   .kpi-card .label {
-    font-size: 0.72rem;
+    font-size: 0.68rem;
   }
 
   .kpi-card .value {
-    font-size: clamp(1.15rem, 1.05rem + 0.8vw, 1.4rem);
+    font-size: clamp(1.05rem, 0.98rem + 0.6vw, 1.22rem);
+  }
+
+  .year-chips-row {
+    gap: 0.35rem;
+    margin-bottom: 0.65rem;
   }
 
   .year-chip {
-    font-size: 0.84rem;
-    padding: 0.32rem 0.65rem;
+    font-size: 0.78rem;
+    padding: 0.28rem 0.55rem;
   }
 
   .card {
-    padding: 0.85rem 0.8rem 0.95rem;
+    padding: 0.75rem 0.7rem 0.85rem;
   }
 
   .card-header h2 {
-    font-size: 0.95rem;
+    font-size: 0.88rem;
   }
 
   .card-sub {
-    font-size: 0.76rem;
+    font-size: 0.7rem;
   }
 
   .theme-panel-title {
-    font-size: 0.92rem;
+    font-size: 0.86rem;
   }
 
   .theme-panel-sub,
   .chart-note,
   .chart-disclaimer {
-    font-size: 0.74rem;
+    font-size: 0.7rem;
+  }
+
+  .theme-analytics-row {
+    gap: 0.85rem;
+    padding-top: 0.4rem;
   }
 
   .dashboard-grid,
   .viz-stack,
   .theme-analytics {
-    gap: 0.75rem;
+    gap: 0.65rem;
   }
 
   .paper-list {
-    max-height: min(320px, 50vh);
+    max-height: min(300px, 48vh);
+    gap: 0.45rem;
+  }
+
+  .paper-item {
+    padding: 0.6rem 0.7rem;
   }
 
   .paper-item h3 {
-    font-size: 0.92rem;
+    font-size: 0.85rem;
   }
 
   .paper-item .meta {
-    font-size: 0.78rem;
+    font-size: 0.72rem;
   }
 
   .keyword-tag {
-    font-size: 0.72rem;
-    padding: 0.14rem 0.48rem;
+    font-size: 0.68rem;
+    padding: 0.12rem 0.42rem;
   }
 
   .tooltip {
-    max-width: min(300px, 92%);
-    font-size: 0.84rem;
-    padding: 0.5rem 0.65rem;
+    max-width: min(280px, 92%);
+    font-size: 0.78rem;
+    padding: 0.45rem 0.55rem;
+  }
+
+  .tooltip-topic,
+  .tooltip-action {
+    font-size: 0.7rem;
+    padding: 0.12rem 0.4rem;
+  }
+
+  .tooltip-year,
+  .tooltip-hint {
+    font-size: 0.68rem;
   }
 
   .tooltip.tooltip-phone-centered {
@@ -998,9 +1046,9 @@ svg {
     top: 50%;
     right: auto;
     bottom: auto;
-    max-width: min(300px, 88%);
-    font-size: 0.84rem;
-    padding: 0.55rem 0.65rem;
+    max-width: min(280px, 88%);
+    font-size: 0.78rem;
+    padding: 0.5rem 0.55rem;
     transform: translate(-50%, -50%) scale(0.5);
     transform-origin: center center;
     box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
@@ -1014,14 +1062,19 @@ svg {
   }
 
   .tooltip.tooltip-phone-centered .tooltip-close {
-    width: 24px;
-    height: 24px;
-    font-size: 16px;
+    width: 22px;
+    height: 22px;
+    font-size: 15px;
+  }
+
+  .site-footer {
+    font-size: 0.72rem;
+    margin-top: 1rem;
   }
 
   #word-cloud {
-    height: clamp(168px, 30dvh, 240px);
-    min-height: clamp(168px, 30dvh, 240px);
+    height: clamp(150px, 26dvh, 210px);
+    min-height: clamp(150px, 26dvh, 210px);
   }
 
   #year-chart,
