@@ -677,9 +677,12 @@ body:not(.sidebar-collapsed) .main-area {
   border-radius: 0.4rem;
   padding: 0.22rem 0.55rem;
   font: inherit;
-  font-size: 0.72rem;
+  font-size: 0.8rem;
   line-height: 1.3;
   cursor: pointer;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .theme-chip.selected {
