@@ -2101,7 +2101,7 @@ function renderEmbeddingYearLegend(svg, years, width, plotHeight, margin) {
     : themeLabelPx(11);
   const marker = isPhoneLayout() ? gs(8) : s(10);
   const itemGapX = isPhoneLayout() ? gs(10) : s(14);
-  const itemGapY = isPhoneLayout() ? legendFont * 1.7 : legendFont * 1.55;
+  const itemGapY = isPhoneLayout() ? legendFont * 1.45 : legendFont * 1.55;
   const titleHeight = legendHeadingFont * 1.55;
   const usableW = Math.max(120, width - margin.left - margin.right);
 
