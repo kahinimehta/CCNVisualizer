@@ -601,8 +601,10 @@ body:not(.sidebar-collapsed) .main-area {
 
 .theme-panel-sub {
   margin: 0.2rem 0 0.6rem;
-  color: var(--muted);
-  font-size: 0.85rem;
+  color: #a8c0d8;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.45;
 }
 
 #embedding-chart {
@@ -803,9 +805,11 @@ body:not(.sidebar-collapsed) .main-area {
 }
 
 .card-sub {
-  margin: 0.2rem 0 0;
-  color: var(--muted);
-  font-size: clamp(0.8rem, 0.74rem + 0.22vw, 0.98rem);
+  margin: 0.25rem 0 0;
+  color: #a8c0d8;
+  font-size: clamp(0.95rem, 0.88rem + 0.28vw, 1.12rem);
+  font-weight: 500;
+  line-height: 1.45;
   overflow-wrap: anywhere;
   max-width: 100%;
 }

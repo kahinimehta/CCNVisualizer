@@ -347,6 +347,10 @@ const PHONE_BAR_VALUE_SIZE = 10.5;
 const PHONE_LEGEND_HEADING_SIZE = 10.5;
 const PHONE_EMBEDDING_LEGEND_HEADING_SIZE = 12.5;
 
+// Desktop chart label bases — larger/heavier so Brave matches Chrome hierarchy.
+const DESKTOP_CHART_LABEL = 12;
+const DESKTOP_CHART_HEADING = 13;
+
 /**
  * Desktop: viewport chart scale + Windows/Brave boost; px+vw root.
  * Phone: fixed PHONE_CHART_SCALE / PHONE_GRAPH_SCALE and browser-normal 100% root
@@ -511,6 +515,14 @@ function themeFs(base) {
   return `${themeLabelPx(base)}px`;
 }
 
+function styleDesktopChartText(selection) {
+  // Brave paints Open Sans muted labels thinner; medium weight keeps them readable.
+  if (isPhoneLayout()) return selection;
+  return selection
+    .style("font-weight", "500")
+    .style("font-family", CHART_FONT);
+}
+
 // DOM measurement — not canvas.measureText(), which Brave Shields / privacy
 // browsers noise or zero out as a fingerprinting surface, collapsing layouts.
 let measureTextEl = null;
@@ -552,7 +564,7 @@ function measureTextWidth(text, fontSizePx, fontFamily = CHART_FONT) {
 
 function themeBarLabelWidth(containerWidth = 0, labels = []) {
   const w = Math.max(containerWidth || viewportWidth(), 320);
-  const labelFont = themeLabelPx(10);
+  const labelFont = themeLabelPx(DESKTOP_CHART_LABEL);
   const gap = s(8);
   const safety = s(18);
 
@@ -580,7 +592,7 @@ function themeBarLabelWidth(containerWidth = 0, labels = []) {
 }
 
 function themeBarRowHeight(labels = [], labelWidth = 0) {
-  const fontPx = themeLabelPx(10);
+  const fontPx = themeLabelPx(DESKTOP_CHART_LABEL);
   const lineHeight = fontPx * 1.15;
   const wrapWidth = Math.max(s(72), labelWidth - s(18));
   const maxLines =
@@ -609,7 +621,7 @@ function appendThemeBarSvg(container, width, height) {
 }
 
 function themeBarPlotWidth(innerW, rows, formatValue) {
-  const valueFont = themeLabelPx(10);
+  const valueFont = themeLabelPx(DESKTOP_CHART_LABEL);
   const maxLabelWidth =
     d3.max(rows, (row) => measureTextWidth(formatValue(row), valueFont)) || measureTextWidth("+0.0%", valueFont);
   const reserve = Math.max(maxLabelWidth + s(12), s(40));
@@ -621,7 +633,7 @@ function themeBarLabelX(gap = 8) {
 }
 
 function drawThemeBarLabels(g, data, y, getLabel, options = {}) {
-  const baseFont = options.baseFont ?? 10;
+  const baseFont = options.baseFont ?? DESKTOP_CHART_LABEL;
   const fill = options.fill ?? CCN_COLORS.muted;
   const gap = options.gap ?? 8;
   const fontPx = themeLabelPx(baseFont);
@@ -645,8 +657,8 @@ function drawThemeBarLabels(g, data, y, getLabel, options = {}) {
         .attr("text-anchor", "end")
         .attr("fill", typeof fill === "function" ? fill(d) : fill)
         .style("font-size", themeFs(baseFont))
-        .style("font-family", CHART_FONT)
         .style("pointer-events", options.pointerEvents || "auto");
+      styleDesktopChartText(text);
 
       lines.forEach((line, i) => {
         const dy = i === 0 ? (lines.length === 1 ? "0.35em" : `${-((lines.length - 1) * 0.58)}em`) : "1.15em";
@@ -656,10 +668,11 @@ function drawThemeBarLabels(g, data, y, getLabel, options = {}) {
 }
 
 function styleThemeAxisLabels(selection) {
-  selection
+  const labels = selection
     .selectAll("text")
     .attr("fill", CCN_COLORS.muted)
-    .style("font-size", isPhoneLayout() ? chartThemeFs(8) : themeFs(10));
+    .style("font-size", isPhoneLayout() ? chartThemeFs(8) : themeFs(DESKTOP_CHART_LABEL));
+  styleDesktopChartText(labels);
 }
 
 const CHART_PALETTE = [
@@ -1693,7 +1706,8 @@ function renderThemeBars(counts) {
     .attr("y", (d) => y(d.text) + y.bandwidth() / 2)
     .attr("dy", "0.35em")
     .attr("fill", CCN_COLORS.white)
-    .style("font-size", themeFs(10))
+    .style("font-size", themeFs(DESKTOP_CHART_LABEL))
+    .call((sel) => styleDesktopChartText(sel))
     .text((d) => d.count);
 }
 
@@ -1706,7 +1720,7 @@ function renderYearChart() {
     .sort((a, b) => a.year - b.year);
 
   const width = chartContainerWidth(container);
-  const axisFont = isPhoneLayout() ? chartThemePx(PHONE_AXIS_LABEL_SIZE) : themeLabelPx(10);
+  const axisFont = isPhoneLayout() ? chartThemePx(PHONE_AXIS_LABEL_SIZE) : themeLabelPx(DESKTOP_CHART_LABEL);
   const extraBottom = Math.max(isPhoneLayout() ? gs(10) : s(14), axisFont * 1.1);
   const plotHeight = isPhoneLayout() ? gs(200) : s(300);
   const height = plotHeight + extraBottom;
@@ -1770,14 +1784,14 @@ function renderYearChart() {
   g.append("g")
     .attr("transform", `translate(0,${height - margin.bottom})`)
     .call(d3.axisBottom(x).tickFormat(d3.format("d")).tickSizeOuter(0))
-    .call((sel) =>
-      sel
+    .call((sel) => {
+      const ticks = sel
         .selectAll("text")
         .attr("fill", CCN_COLORS.muted)
-        .style("font-size", isPhoneLayout() ? chartThemeFs(PHONE_AXIS_LABEL_SIZE) : themeFs(10))
-        .style("font-family", CHART_FONT)
-        .attr("dy", isPhoneLayout() ? null : "0.82em")
-    )
+        .style("font-size", isPhoneLayout() ? chartThemeFs(PHONE_AXIS_LABEL_SIZE) : themeFs(DESKTOP_CHART_LABEL))
+        .attr("dy", isPhoneLayout() ? null : "0.82em");
+      styleDesktopChartText(ticks);
+    })
     .call((sel) => {
       if (isPhoneLayout()) {
         sel
@@ -1793,12 +1807,13 @@ function renderYearChart() {
   g.append("g")
     .attr("transform", `translate(${margin.left},0)`)
     .call(d3.axisLeft(y).ticks(isPhoneLayout() ? 4 : 5))
-    .call((sel) =>
-      sel
+    .call((sel) => {
+      const ticks = sel
         .selectAll("text")
         .attr("fill", CCN_COLORS.muted)
-        .style("font-size", isPhoneLayout() ? chartThemeFs(PHONE_AXIS_LABEL_SIZE) : themeFs(10))
-    )
+        .style("font-size", isPhoneLayout() ? chartThemeFs(PHONE_AXIS_LABEL_SIZE) : themeFs(DESKTOP_CHART_LABEL));
+      styleDesktopChartText(ticks);
+    })
     .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
 }
 
@@ -1839,17 +1854,17 @@ function renderThemeShareByYear() {
 
   const width = chartContainerWidth(container);
   const stackedLegend = useStackedChartLegend(width);
-  const legendFont = isPhoneLayout() ? chartThemePx(PHONE_THEME_TITLE_SIZE) : themeLabelPx(10);
+  const legendFont = isPhoneLayout() ? chartThemePx(PHONE_THEME_TITLE_SIZE) : themeLabelPx(DESKTOP_CHART_LABEL);
   const legendHeadingFont = isPhoneLayout()
     ? chartThemePx(PHONE_THEME_TITLE_SIZE)
-    : themeLabelPx(11);
+    : themeLabelPx(DESKTOP_CHART_HEADING);
   const legendCols = isPhoneLayout() ? 1 : stackedLegend ? (width < 520 ? 1 : 2) : 2;
   const legendItemHeight = isPhoneLayout() ? legendFont * 2.05 : legendFont * 1.55;
   const legendTitleHeight = legendHeadingFont * 1.6;
   const legendRowsCount = Math.ceil(themes.length / legendCols);
   const legendBlock = legendTitleHeight + legendRowsCount * legendItemHeight + (isPhoneLayout() ? gs(12) : s(18));
 
-  const axisFont = isPhoneLayout() ? chartThemePx(PHONE_AXIS_LABEL_SIZE) : themeLabelPx(10);
+  const axisFont = isPhoneLayout() ? chartThemePx(PHONE_AXIS_LABEL_SIZE) : themeLabelPx(DESKTOP_CHART_LABEL);
   const extraBottom = Math.max(isPhoneLayout() ? gs(10) : s(14), axisFont * 1.1);
   const plotHeight = isPhoneLayout() ? gs(220) : s(320);
   const margin = isPhoneLayout()
@@ -1917,14 +1932,14 @@ function renderThemeShareByYear() {
   g.append("g")
     .attr("transform", `translate(0,${plotHeight - margin.bottom})`)
     .call(d3.axisBottom(x).tickFormat(d3.format("d")).tickSizeOuter(0))
-    .call((sel) =>
-      sel
+    .call((sel) => {
+      const ticks = sel
         .selectAll("text")
         .attr("fill", CCN_COLORS.muted)
-        .style("font-size", isPhoneLayout() ? chartThemeFs(PHONE_AXIS_LABEL_SIZE) : themeFs(10))
-        .style("font-family", CHART_FONT)
-        .attr("dy", isPhoneLayout() ? null : "0.82em")
-    )
+        .style("font-size", isPhoneLayout() ? chartThemeFs(PHONE_AXIS_LABEL_SIZE) : themeFs(DESKTOP_CHART_LABEL))
+        .attr("dy", isPhoneLayout() ? null : "0.82em");
+      styleDesktopChartText(ticks);
+    })
     .call((sel) => {
       if (isPhoneLayout()) {
         sel
@@ -1945,30 +1960,31 @@ function renderThemeShareByYear() {
         .ticks(isPhoneLayout() ? 4 : 5)
         .tickFormat((d) => (Number.isInteger(d) ? String(d) : d3.format(".1f")(d)))
     )
-    .call((sel) =>
-      sel
+    .call((sel) => {
+      const ticks = sel
         .selectAll("text")
         .attr("fill", CCN_COLORS.muted)
-        .style("font-size", isPhoneLayout() ? chartThemeFs(PHONE_AXIS_LABEL_SIZE) : themeFs(10))
-    )
+        .style("font-size", isPhoneLayout() ? chartThemeFs(PHONE_AXIS_LABEL_SIZE) : themeFs(DESKTOP_CHART_LABEL));
+      styleDesktopChartText(ticks);
+    })
     .call((sel) => sel.selectAll("line, path").attr("stroke", "rgba(197,224,243,0.2)"));
 
   const legend = svg
     .append("g")
     .attr("transform", `translate(${margin.left}, ${plotHeight + (isPhoneLayout() ? gs(4) : s(6))})`);
   const colWidth = (width - margin.left - margin.right) / legendCols;
-  const legendMarker = isPhoneLayout() ? gs(8) : s(12);
+  const legendMarker = isPhoneLayout() ? gs(8) : s(14);
   const legendTextX = isPhoneLayout() ? gs(12) : s(18);
 
-  legend
+  const legendTitle = legend
     .append("text")
     .attr("class", "theme-share-legend-title")
     .attr("x", 0)
     .attr("y", legendHeadingFont * 0.85)
     .attr("fill", CCN_COLORS.muted)
     .style("font-size", `${legendHeadingFont}px`)
-    .style("font-family", CHART_FONT)
     .text("Research themes (counts)");
+  styleDesktopChartText(legendTitle);
 
   legend
     .selectAll("g.legend-item")
@@ -1989,14 +2005,14 @@ function renderThemeShareByYear() {
         .attr("rx", isPhoneLayout() ? gs(2) : s(3))
         .attr("y", legendFont * 0.15)
         .attr("fill", themeColor(theme));
-      item
+      const legendLabel = item
         .append("text")
         .attr("x", legendTextX)
         .attr("y", legendFont * 0.85)
         .attr("fill", CCN_COLORS.muted)
-        .style("font-size", isPhoneLayout() ? chartThemeFs(PHONE_THEME_TITLE_SIZE) : themeFs(10))
-        .style("font-family", CHART_FONT)
+        .style("font-size", isPhoneLayout() ? chartThemeFs(PHONE_THEME_TITLE_SIZE) : themeFs(DESKTOP_CHART_LABEL))
         .text(fitLegendLabel(theme, colWidth - legendTextX, legendFont));
+      styleDesktopChartText(legendLabel);
     });
 }
 
@@ -2093,7 +2109,8 @@ function renderResearchThemeDeltas(submissions) {
     .attr("y", (d) => y(d.theme) + y.bandwidth() / 2)
     .attr("dy", "0.35em")
     .attr("fill", CCN_COLORS.white)
-    .style("font-size", themeFs(10))
+    .style("font-size", themeFs(DESKTOP_CHART_LABEL))
+    .call((sel) => styleDesktopChartText(sel))
     .text((d) => formatDeltaPct(d.delta));
 }
 
@@ -2112,10 +2129,10 @@ function embeddingPlotDomain(extent, padRatio = 0.06) {
 }
 
 function renderEmbeddingYearLegend(svg, years, width, plotHeight, margin) {
-  const legendFont = isPhoneLayout() ? chartThemePx(PHONE_THEME_TITLE_SIZE) : themeLabelPx(10);
+  const legendFont = isPhoneLayout() ? chartThemePx(PHONE_THEME_TITLE_SIZE) : themeLabelPx(DESKTOP_CHART_LABEL);
   const legendHeadingFont = isPhoneLayout()
     ? chartThemePx(PHONE_EMBEDDING_LEGEND_HEADING_SIZE)
-    : themeLabelPx(11);
+    : themeLabelPx(DESKTOP_CHART_HEADING);
   const marker = isPhoneLayout() ? gs(8) : s(10);
   const itemGapX = isPhoneLayout() ? gs(10) : s(14);
   const itemGapY = isPhoneLayout() ? legendFont * 1.7 : legendFont * 1.55;
