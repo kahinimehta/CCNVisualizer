@@ -352,114 +352,57 @@ const DESKTOP_CHART_LABEL = 10;
 const DESKTOP_CHART_HEADING = 11;
 
 /**
- * Desktop: ONE viewport target for root + charts in Chrome/Safari/Edge/etc.
- * Brave alone gets a modest multiplier (it paints smaller). No Chrome pull-down —
- * opposing multipliers were leaving elements mismatched across browsers.
+ * Browser-agnostic desktop scale: root + charts from viewport width only.
+ * No UA / Brave / Chrome multipliers — CSS px is the same contract everywhere.
  * Phone: unchanged PHONE_* path + 100% root.
  */
 let cachedChartScale = 2.5;
 let cachedChartScaleKey = "";
-let cachedPlatformBoost = null;
 
-function isWindowsPlatform() {
-  if (typeof navigator === "undefined") return false;
-  const uaDataPlatform = navigator.userAgentData?.platform || "";
-  if (/Windows/i.test(uaDataPlatform)) return true;
-  if (/Win/i.test(navigator.platform || "")) return true;
-  return /Windows/i.test(navigator.userAgent || "");
-}
-
-function isBraveBrowser() {
-  if (typeof navigator === "undefined") return false;
-  if (navigator.brave) return true;
-  const brands = navigator.userAgentData?.brands;
-  if (Array.isArray(brands) && brands.some((b) => /Brave/i.test(b?.brand || ""))) return true;
-  return /\bBrave\b/i.test(navigator.userAgent || "");
-}
-
-/** Shared desktop targets — identical CSS px intent in every non-phone browser. */
+/** Desktop root font from layout width (px, not rem/prefs). */
 function desktopRootPxForViewport(w = viewportWidth()) {
   const width = Math.max(320, w);
   return Math.min(19, Math.max(16, 13.5 + width * 0.004));
 }
 
+/** Desktop SVG design scale from layout width. */
 function desktopChartScaleForViewport(w = viewportWidth()) {
   const width = Math.max(320, w);
   return Math.min(2.65, Math.max(2.2, 2.05 + width / 2000));
 }
 
-function platformVisualBoost() {
-  if (cachedPlatformBoost != null) return cachedPlatformBoost;
-  if (isPhoneLayout()) {
-    cachedPlatformBoost = 1;
-    return cachedPlatformBoost;
-  }
-  // Only Brave needs a lift; everyone else shares the same desktop target.
-  let boost = 1;
-  if (isBraveBrowser()) {
-    boost = isWindowsPlatform() ? 1.2 : 1.14;
-  }
-  cachedPlatformBoost = boost;
-  return boost;
-}
-
 function rootFontPxForViewport() {
-  const boost = platformVisualBoost();
-  const px = desktopRootPxForViewport() * boost;
-  return Math.round(Math.min(28, Math.max(16, px)) * 100) / 100;
+  return Math.round(desktopRootPxForViewport() * 100) / 100;
 }
 
 function chartDesignScale() {
   if (isPhoneLayout()) return PHONE_CHART_SCALE;
   const w = Math.max(320, viewportWidth());
-  const boost = platformVisualBoost();
-  const key = `${w}:${boost}:d`;
+  const key = `${w}:d`;
   if (key === cachedChartScaleKey) return cachedChartScale;
   cachedChartScaleKey = key;
-  cachedChartScale = desktopChartScaleForViewport(w) * boost;
+  cachedChartScale = desktopChartScaleForViewport(w);
   return cachedChartScale;
-}
-
-/** Confirm Brave via async API (Shields can hide sync signals) and rescale desktop. */
-async function confirmBraveDesktopScale() {
-  if (isPhoneLayout()) return false;
-  try {
-    if (!navigator.brave || typeof navigator.brave.isBrave !== "function") return false;
-    const yes = await navigator.brave.isBrave();
-    if (!yes) return false;
-    const wasBrave = document.documentElement.classList.contains("is-brave");
-    cachedPlatformBoost = null;
-    cachedChartScaleKey = "";
-    document.documentElement.classList.add("is-brave");
-    applyPageScale();
-    return !wasBrave || platformVisualBoost() > 1;
-  } catch {
-    return false;
-  }
 }
 
 function applyPageScale() {
   const root = document.documentElement;
   if (!root) return;
 
-  cachedPlatformBoost = null;
   cachedChartScaleKey = "";
 
   const phone = isPhoneLayout();
   root.style.zoom = "";
   root.style.removeProperty("--page-zoom");
   root.classList.toggle("is-phone", phone);
-  root.classList.toggle("is-windows", false);
-  root.classList.toggle("is-chrome", false);
-  root.classList.toggle("is-brave", !phone && isBraveBrowser());
-  root.classList.remove("no-css-zoom");
+  root.classList.remove("is-windows", "is-chrome", "is-brave", "no-css-zoom");
 
   if (phone) {
     root.style.fontSize = "100%";
     root.style.setProperty("--ui-scale", "1.12");
   } else {
     root.style.fontSize = `${rootFontPxForViewport()}px`;
-    root.style.setProperty("--ui-scale", String(platformVisualBoost()));
+    root.style.setProperty("--ui-scale", "1");
   }
 
   if (document.body) {
@@ -511,12 +454,8 @@ function themeFs(base) {
 }
 
 function styleDesktopChartText(selection) {
-  // Same family everywhere; only Brave needs a slightly heavier weight.
   if (isPhoneLayout()) return selection;
-  selection.style("font-family", CHART_FONT);
-  if (isBraveBrowser()) selection.style("font-weight", "500");
-  else selection.style("font-weight", "400");
-  return selection;
+  return selection.style("font-family", CHART_FONT).style("font-weight", "400");
 }
 
 // DOM measurement — not canvas.measureText(), which Brave Shields / privacy
@@ -2203,13 +2142,11 @@ function embeddingPointRadii(plotInnerW) {
     };
   }
   const w = Math.max(320, viewportWidth());
-  const boost = platformVisualBoost();
-  // ~0.8% of plot width; Brave/Windows boost so dots match Chrome/Safari.
+  // ~0.8% of plot width — viewport only, no browser multiplier.
   const fromPlot = plotInnerW / 125;
   const fromViewport = w / 200;
   const raw = Math.max(fromPlot, fromViewport * 0.9);
-  const cap = boost > 1.2 ? 13 : 11;
-  const base = Math.min(cap, Math.max(3.8, raw) * boost);
+  const base = Math.min(11, Math.max(3.8, raw));
   return {
     base,
     selected: base * 1.4,
@@ -2530,8 +2467,6 @@ async function init() {
 
   await waitForChartFonts();
   applyPageScale();
-  // Resolve Brave async so desktop type/charts/dots match before first paint.
-  await confirmBraveDesktopScale();
   await loadDataset(state.datasetFile);
 
   setupTooltipDismiss();

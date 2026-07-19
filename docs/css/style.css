@@ -42,18 +42,13 @@
 }
 
 html {
-  /* Shared desktop fallback; JS sets the same viewport px root for all browsers. */
+  /* Shared fallback; JS sets the same viewport px root for every desktop browser. */
   font-size: clamp(16px, 13px + 0.4vw, 19px);
   width: 100%;
   max-width: 100%;
   scrollbar-gutter: stable;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-}
-
-/* Brave-only fallback if JS is late — modest lift, not a separate design scale. */
-html.is-brave:not(.is-phone) {
-  font-size: clamp(18px, 14px + 0.5vw, 22px);
 }
 
 body {
@@ -811,11 +806,6 @@ body:not(.sidebar-collapsed) .main-area {
   line-height: 1.45;
   overflow-wrap: anywhere;
   max-width: 100%;
-}
-
-html.is-brave:not(.is-phone) .card-sub,
-html.is-brave:not(.is-phone) .theme-panel-sub {
-  font-weight: 500;
 }
 
 #submissions-panel {
