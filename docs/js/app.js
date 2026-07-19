@@ -2077,6 +2077,19 @@ function renderEmbeddingYearLegend(svg, years, width, plotHeight, margin) {
   return legendBlock;
 }
 
+/** Dot size tracks plot width so visual density stays stable across devices. */
+function embeddingPointRadii(plotInnerW) {
+  // Tuned so ~2900 points look reasonably separated from ~320px to ~1400px wide.
+  const base = Math.min(4.5, Math.max(1.6, plotInnerW / 220));
+  return {
+    base,
+    selected: base * 1.35,
+    dim: base * 0.78,
+    stroke: Math.max(0.75, base * 0.3),
+    strokeActive: Math.max(1, base * 0.45),
+  };
+}
+
 function renderEmbeddingCluster() {
   const container = d3.select("#embedding-chart");
   container.selectAll("*").remove();
@@ -2112,10 +2125,7 @@ function renderEmbeddingCluster() {
   });
 
   const plotBottom = plotHeight - margin.bottom;
-  const pointRadius = isPhoneLayout()
-    ? { base: 2.4, selected: 3.2, dim: 2.0 }
-    : { base: 3.5, selected: 4.25, dim: 2.75 };
-  const scaleR = (n) => (isPhoneLayout() ? gs(n) : s(n));
+  const pointRadius = embeddingPointRadii(plotInnerW);
 
   const x = d3.scaleLinear().domain(xDomain).range([margin.left, width - margin.right]);
   const y = d3.scaleLinear().domain(yDomain).range([plotBottom, margin.top]);
@@ -2135,20 +2145,14 @@ function renderEmbeddingCluster() {
     const highlighted =
       state.highlightedSubmissionKey && submissionRowKey(point) === state.highlightedSubmissionKey;
     const active = !filtering || themeMatch;
-    let radius = scaleR(active ? pointRadius.base : pointRadius.dim);
-    if (highlighted || (active && filtering)) radius = scaleR(pointRadius.selected);
+    let radius = active ? pointRadius.base : pointRadius.dim;
+    if (highlighted || (active && filtering)) radius = pointRadius.selected;
     const fill = yearColor(point.year);
     return {
       radius,
       opacity: active ? (highlighted ? 1 : 0.9) : 0.14,
       stroke: highlighted || (active && filtering) ? CCN_COLORS.pink : "#0f2238",
-      strokeWidth: highlighted || (active && filtering)
-        ? isPhoneLayout()
-          ? gs(1.75)
-          : s(2)
-        : isPhoneLayout()
-          ? gs(1)
-          : s(1.25),
+      strokeWidth: highlighted || (active && filtering) ? pointRadius.strokeActive : pointRadius.stroke,
       fill,
     };
   };
