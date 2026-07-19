@@ -352,23 +352,49 @@ const DESKTOP_CHART_LABEL = 10;
 const DESKTOP_CHART_HEADING = 11;
 
 /**
- * Browser-agnostic desktop scale: root + charts from viewport width only.
- * No UA / Brave / Chrome multipliers — CSS px is the same contract everywhere.
+ * Desktop scale from viewport width; Chrome gets a modest type lift.
  * Phone: unchanged PHONE_* path + 100% root.
  */
+const CHROME_TYPE_BOOST = 1.08;
 let cachedChartScale = 2.5;
 let cachedChartScaleKey = "";
+
+function isBraveBrowser() {
+  if (typeof navigator === "undefined") return false;
+  if (navigator.brave) return true;
+  const brands = navigator.userAgentData?.brands;
+  if (Array.isArray(brands) && brands.some((b) => /Brave/i.test(b?.brand || ""))) return true;
+  return /\bBrave\b/i.test(navigator.userAgent || "");
+}
+
+/** Google Chrome only — not Brave/Edge (both also contain "Chrome" in UA). */
+function isGoogleChrome() {
+  if (typeof navigator === "undefined" || isBraveBrowser()) return false;
+  const ua = navigator.userAgent || "";
+  if (/\bEdg\//.test(ua) || /\bOPR\//.test(ua) || /\bSamsungBrowser\//.test(ua)) return false;
+  const brands = navigator.userAgentData?.brands;
+  if (Array.isArray(brands) && brands.length) {
+    return brands.some((b) => /Google Chrome/i.test(b?.brand || ""));
+  }
+  return /\bChrome\//.test(ua) && !/\bChromium\//.test(ua);
+}
+
+function chromeTypeBoost() {
+  return !isPhoneLayout() && isGoogleChrome() ? CHROME_TYPE_BOOST : 1;
+}
 
 /** Desktop root font from layout width (px, not rem/prefs). */
 function desktopRootPxForViewport(w = viewportWidth()) {
   const width = Math.max(320, w);
-  return Math.min(19, Math.max(16, 13.5 + width * 0.004));
+  const base = Math.min(19, Math.max(16, 13.5 + width * 0.004));
+  return base * chromeTypeBoost();
 }
 
 /** Desktop SVG design scale from layout width. */
 function desktopChartScaleForViewport(w = viewportWidth()) {
   const width = Math.max(320, w);
-  return Math.min(2.65, Math.max(2.2, 2.05 + width / 2000));
+  const base = Math.min(2.65, Math.max(2.2, 2.05 + width / 2000));
+  return base * chromeTypeBoost();
 }
 
 function rootFontPxForViewport() {
@@ -378,7 +404,8 @@ function rootFontPxForViewport() {
 function chartDesignScale() {
   if (isPhoneLayout()) return PHONE_CHART_SCALE;
   const w = Math.max(320, viewportWidth());
-  const key = `${w}:d`;
+  const chrome = isGoogleChrome();
+  const key = `${w}:d:${chrome ? "c" : "o"}`;
   if (key === cachedChartScaleKey) return cachedChartScale;
   cachedChartScaleKey = key;
   cachedChartScale = desktopChartScaleForViewport(w);
@@ -392,10 +419,12 @@ function applyPageScale() {
   cachedChartScaleKey = "";
 
   const phone = isPhoneLayout();
+  const chrome = !phone && isGoogleChrome();
   root.style.zoom = "";
   root.style.removeProperty("--page-zoom");
   root.classList.toggle("is-phone", phone);
-  root.classList.remove("is-windows", "is-chrome", "is-brave", "no-css-zoom");
+  root.classList.toggle("is-chrome", chrome);
+  root.classList.remove("is-windows", "is-brave", "no-css-zoom");
 
   if (phone) {
     root.style.fontSize = "100%";

@@ -343,11 +343,11 @@ body:not(.sidebar-collapsed) .main-area {
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 0.45rem 0.7rem;
+  padding: 0.65rem 0.85rem;
   font-family: inherit;
-  font-size: 0.92rem;
-  line-height: 1.2;
-  height: 44px;
+  font-size: 1rem;
+  line-height: 1.25;
+  height: 54px;
   width: 100%;
   min-width: 0;
   max-width: 100%;
