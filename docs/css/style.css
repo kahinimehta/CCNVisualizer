@@ -635,25 +635,34 @@ body:not(.sidebar-collapsed) .main-area {
   overflow-wrap: anywhere;
 }
 
+.topic-filter-card {
+  border-color: rgba(244, 199, 195, 0.28);
+  background: linear-gradient(
+    180deg,
+    rgba(244, 199, 195, 0.06) 0%,
+    var(--ccn-navy-card) 42%
+  );
+}
+
 .theme-filter-bar {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
   gap: 0.55rem 0.75rem;
-  margin: 0.85rem 0 0.55rem;
+  margin: 0.35rem 0 0.55rem;
   width: 100%;
   max-width: 100%;
   min-width: 0;
 }
 
-#submissions-panel .theme-filter-bar {
+.topic-filter-card .theme-filter-status {
   margin-top: 0.35rem;
-  margin-bottom: 0.65rem;
+  margin-bottom: 0;
 }
 
-#submissions-panel .theme-filter-status {
-  margin-top: 0;
-  margin-bottom: 0.65rem;
+/* KPIs sit with the filtered block below the topic filter. */
+.dashboard-grid > .kpi-row {
+  margin-bottom: 0;
 }
 
 .theme-filter-mode {
