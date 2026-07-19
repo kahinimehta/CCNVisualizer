@@ -825,11 +825,7 @@ body:not(.sidebar-collapsed) .main-area {
   gap: 0.45rem;
 }
 
-/* Chrome paints this panel small — lift type hard for readability. */
-html.is-chrome #submissions-panel .card-header h2 {
-  font-size: clamp(1.45rem, 1.25rem + 0.7vw, 1.85rem);
-}
-
+/* Chrome: enlarge list body type only — keep h2 aligned with other card headers. */
 html.is-chrome #submissions-panel .card-sub,
 html.is-chrome #submissions-panel #results-count {
   font-size: clamp(1.1rem, 1rem + 0.35vw, 1.3rem);
