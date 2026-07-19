@@ -348,8 +348,9 @@ const PHONE_LEGEND_HEADING_SIZE = 10.5;
 const PHONE_EMBEDDING_LEGEND_HEADING_SIZE = 12.5;
 
 // Shared desktop chart label bases — same in every desktop browser.
-const DESKTOP_CHART_LABEL = 10;
-const DESKTOP_CHART_HEADING = 11;
+// Kept below 10 so axis/legend/topic labels stay readable without crowding.
+const DESKTOP_CHART_LABEL = 8;
+const DESKTOP_CHART_HEADING = 9;
 
 /**
  * Desktop scale from viewport width, with browser type lifts where needed.
