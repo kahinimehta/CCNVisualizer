@@ -184,16 +184,16 @@ function renderPhoneThemeBarChart(container, options) {
 
   container.selectAll("*").remove();
   const width = chartContainerWidth(container);
-  const margin = { top: gs(4), right: gs(4), bottom: gs(4), left: gs(4) };
+  const margin = { top: gs(5), right: gs(5), bottom: gs(5), left: gs(5) };
   const innerW = width - margin.left - margin.right;
   const labelFont = chartThemePx(PHONE_THEME_TITLE_SIZE);
   const valueFont = chartThemePx(PHONE_BAR_VALUE_SIZE);
-  const barH = gs(9);
-  const rowGap = gs(2);
-  const valueBelowGap = gs(4);
-  const valueGap = gs(2);
-  const blockGap = gs(5);
-  const sideGap = gs(4);
+  const barH = gs(8);
+  const rowGap = gs(3);
+  const valueBelowGap = gs(5);
+  const valueGap = gs(3);
+  const blockGap = gs(8);
+  const sideGap = gs(5);
   const valueH = valueFont * 1.15;
   const maxVal = d3.max(data, getValue) || 1;
   const x = d3.scaleLinear().domain([0, maxVal]).range([0, innerW]);
@@ -338,21 +338,19 @@ function readCssNumber(property, fallback) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
-// Phone chart label bases — kept small because chartDesignScale still multiplies them.
-const PHONE_AXIS_LABEL_SIZE = 9;
-const PHONE_THEME_TITLE_SIZE = 10;
-const PHONE_BAR_VALUE_SIZE = 10;
-const PHONE_LEGEND_HEADING_SIZE = 10;
-const PHONE_EMBEDDING_LEGEND_HEADING_SIZE = 11;
+// Yesterday's clean phone chart constants (restored) — do not share desktop scale.
+const PHONE_GRAPH_SCALE = 0.72;
+const PHONE_CHART_SCALE = 1.2;
+const PHONE_AXIS_LABEL_SIZE = 8.5;
+const PHONE_THEME_TITLE_SIZE = 10.5;
+const PHONE_BAR_VALUE_SIZE = 10.5;
+const PHONE_LEGEND_HEADING_SIZE = 10.5;
+const PHONE_EMBEDDING_LEGEND_HEADING_SIZE = 12.5;
 
 /**
- * Two independent, non-compounding systems:
- * 1) Root font-size in px from viewport (+ platform boost) → UI rem type
- * 2) Viewport chart scale (+ same boost) → SVG label/mark sizes
- * SVG scales via viewBox + width:100%. Never multiply (2) by computed rem from (1).
- *
- * Windows/Brave often paint smaller than Safari/Chrome at the same CSS width
- * (DPI / default zoom / font prefs). platformVisualBoost() lifts only those.
+ * Desktop: viewport chart scale + Windows/Brave boost; px+vw root.
+ * Phone: fixed PHONE_CHART_SCALE / PHONE_GRAPH_SCALE and browser-normal 100% root
+ * (the combination that looked clean yesterday — do not mix with desktop boost).
  */
 let cachedChartScale = 3.1;
 let cachedChartScaleKey = "";
@@ -375,7 +373,7 @@ function isBraveBrowser() {
 
 function platformVisualBoost() {
   if (cachedPlatformBoost != null) return cachedPlatformBoost;
-  // Keep phone layout calm; the mismatch is desktop Windows/Brave vs Mac browsers.
+  // Phone keeps yesterday's independent scale — never apply desktop boost there.
   if (isPhoneLayout()) {
     cachedPlatformBoost = 1;
     return cachedPlatformBoost;
@@ -398,28 +396,19 @@ function platformVisualBoost() {
 
 function rootFontPxForViewport() {
   const w = Math.max(320, viewportWidth());
-  // Phones stay near browser-normal type so rem UI does not dominate the width.
-  if (isPhoneLayout()) {
-    return Math.min(16.5, Math.max(15.5, 15 + w * 0.0025));
-  }
-  // Desktop: same curve as CSS fallback clamp(20px, 14px + 0.75vw, 28px), then platform boost.
+  // Desktop only — phones use CSS font-size: 100%.
   const base = Math.min(28, Math.max(20, 14 + w * 0.0075));
   return Math.min(38, Math.round(base * platformVisualBoost() * 100) / 100);
 }
 
 function chartDesignScale() {
+  // Phone uses PHONE_CHART_SCALE via s()/gs() — this path is desktop-only.
+  if (isPhoneLayout()) return PHONE_CHART_SCALE;
   const w = Math.max(320, viewportWidth());
   const boost = platformVisualBoost();
-  const phone = isPhoneLayout();
-  const key = `${w}:${boost}:${phone ? "p" : "d"}`;
+  const key = `${w}:${boost}:d`;
   if (key === cachedChartScaleKey) return cachedChartScale;
   cachedChartScaleKey = key;
-  if (phone) {
-    // Quiet phone chart marks/labels (~18–20px axis text with PHONE_* bases).
-    cachedChartScale = Math.min(2.05, Math.max(1.85, 1.75 + w / 2400));
-    return cachedChartScale;
-  }
-  // Desktop: ~2.95 → ~3.55, then Windows/Brave boost.
   cachedChartScale = Math.min(4.6, Math.max(2.95, 2.7 + w / 1800) * boost);
   return cachedChartScale;
 }
@@ -432,19 +421,21 @@ function applyPageScale() {
   cachedChartScaleKey = "";
 
   const phone = isPhoneLayout();
-  const boost = platformVisualBoost();
-  const rootPx = rootFontPxForViewport();
-
-  // Inline px wins over Brave font-size prefs and stale rem baselines.
-  root.style.fontSize = `${rootPx}px`;
-  root.style.setProperty("--ui-scale", String(boost));
   root.style.zoom = "";
   root.style.removeProperty("--page-zoom");
-  // Desktop-only platform classes — phone CSS must not inherit Windows/Brave floors.
   root.classList.toggle("is-phone", phone);
   root.classList.toggle("is-windows", !phone && isWindowsPlatform());
   root.classList.toggle("is-brave", !phone && isBraveBrowser());
   root.classList.remove("no-css-zoom");
+
+  if (phone) {
+    // Match yesterday: browser-normal root + light ui-scale; CSS sets font-size: 100%.
+    root.style.fontSize = "100%";
+    root.style.setProperty("--ui-scale", "1.12");
+  } else {
+    root.style.fontSize = `${rootFontPxForViewport()}px`;
+    root.style.setProperty("--ui-scale", String(platformVisualBoost()));
+  }
 
   if (document.body) {
     document.body.style.zoom = "";
@@ -458,12 +449,12 @@ function enforceRootFontSize() {
   applyPageScale();
 }
 
-const s = (n) => n * chartDesignScale();
-const gs = (n) => n * chartDesignScale();
+const s = (n) => n * (isPhoneLayout() ? PHONE_CHART_SCALE : chartDesignScale());
+const gs = (n) => (isPhoneLayout() ? n * PHONE_CHART_SCALE * PHONE_GRAPH_SCALE : n * chartDesignScale());
 const fs = (n) => `${s(n)}px`;
 
 function chartThemePx(base) {
-  return s(base);
+  return isPhoneLayout() ? gs(base) : s(base);
 }
 
 function chartThemeFs(base) {
@@ -642,7 +633,7 @@ function styleThemeAxisLabels(selection) {
   selection
     .selectAll("text")
     .attr("fill", CCN_COLORS.muted)
-    .style("font-size", isPhoneLayout() ? chartThemeFs(7) : themeFs(10));
+    .style("font-size", isPhoneLayout() ? chartThemeFs(8) : themeFs(10));
 }
 
 const CHART_PALETTE = [
@@ -1690,11 +1681,11 @@ function renderYearChart() {
 
   const width = chartContainerWidth(container);
   const axisFont = isPhoneLayout() ? chartThemePx(PHONE_AXIS_LABEL_SIZE) : themeLabelPx(10);
-  const extraBottom = Math.max(isPhoneLayout() ? gs(8) : s(14), axisFont * 1.05);
-  const plotHeight = isPhoneLayout() ? gs(175) : s(300);
+  const extraBottom = Math.max(isPhoneLayout() ? gs(10) : s(14), axisFont * 1.1);
+  const plotHeight = isPhoneLayout() ? gs(200) : s(300);
   const height = plotHeight + extraBottom;
   const margin = isPhoneLayout()
-    ? { top: gs(10), right: gs(8), bottom: gs(34) + extraBottom, left: gs(24) }
+    ? { top: gs(12), right: gs(8), bottom: gs(42) + extraBottom, left: gs(28) }
     : { top: s(24), right: s(24), bottom: s(36) + extraBottom, left: s(44) };
   const svg = appendChartSvg(container, width, height);
 
@@ -1824,19 +1815,19 @@ function renderThemeShareByYear() {
   const stackedLegend = useStackedChartLegend(width);
   const legendFont = isPhoneLayout() ? chartThemePx(PHONE_THEME_TITLE_SIZE) : themeLabelPx(10);
   const legendHeadingFont = isPhoneLayout()
-    ? chartThemePx(PHONE_LEGEND_HEADING_SIZE)
+    ? chartThemePx(PHONE_THEME_TITLE_SIZE)
     : themeLabelPx(11);
-  const legendCols = isPhoneLayout() ? (width >= 360 ? 2 : 1) : stackedLegend ? (width < 520 ? 1 : 2) : 2;
-  const legendItemHeight = isPhoneLayout() ? legendFont * 1.55 : legendFont * 1.55;
-  const legendTitleHeight = legendHeadingFont * 1.45;
+  const legendCols = isPhoneLayout() ? 1 : stackedLegend ? (width < 520 ? 1 : 2) : 2;
+  const legendItemHeight = isPhoneLayout() ? legendFont * 2.05 : legendFont * 1.55;
+  const legendTitleHeight = legendHeadingFont * 1.6;
   const legendRowsCount = Math.ceil(themes.length / legendCols);
-  const legendBlock = legendTitleHeight + legendRowsCount * legendItemHeight + (isPhoneLayout() ? gs(8) : s(18));
+  const legendBlock = legendTitleHeight + legendRowsCount * legendItemHeight + (isPhoneLayout() ? gs(12) : s(18));
 
   const axisFont = isPhoneLayout() ? chartThemePx(PHONE_AXIS_LABEL_SIZE) : themeLabelPx(10);
-  const extraBottom = Math.max(isPhoneLayout() ? gs(8) : s(14), axisFont * 1.05);
-  const plotHeight = isPhoneLayout() ? gs(185) : s(320);
+  const extraBottom = Math.max(isPhoneLayout() ? gs(10) : s(14), axisFont * 1.1);
+  const plotHeight = isPhoneLayout() ? gs(220) : s(320);
   const margin = isPhoneLayout()
-    ? { top: gs(10), right: gs(8), bottom: gs(34) + extraBottom, left: gs(34) }
+    ? { top: gs(12), right: gs(10), bottom: gs(42) + extraBottom, left: gs(40) }
     : { top: s(20), right: s(20), bottom: s(36) + extraBottom, left: s(52) };
   const height = plotHeight + legendBlock;
   const svg = appendChartSvg(container, width, height);
@@ -2101,7 +2092,7 @@ function renderEmbeddingYearLegend(svg, years, width, plotHeight, margin) {
     : themeLabelPx(11);
   const marker = isPhoneLayout() ? gs(8) : s(10);
   const itemGapX = isPhoneLayout() ? gs(10) : s(14);
-  const itemGapY = isPhoneLayout() ? legendFont * 1.45 : legendFont * 1.55;
+  const itemGapY = isPhoneLayout() ? legendFont * 1.7 : legendFont * 1.55;
   const titleHeight = legendHeadingFont * 1.55;
   const usableW = Math.max(120, width - margin.left - margin.right);
 
@@ -2160,21 +2151,20 @@ function renderEmbeddingYearLegend(svg, years, width, plotHeight, margin) {
   return legendBlock;
 }
 
-/** Dot size tracks plot + viewport width, with Windows/Brave visual boost. */
+/** Desktop dots track plot/viewport (+ Windows/Brave boost). Phone uses yesterday's gs() radii. */
 function embeddingPointRadii(plotInnerW) {
-  const w = Math.max(320, viewportWidth());
-  const boost = platformVisualBoost();
   if (isPhoneLayout()) {
-    // Readable on phones without filling the map — independent of desktop boost.
-    const base = Math.min(5.2, Math.max(2.6, plotInnerW / 150));
+    const base = gs(2.4);
     return {
       base,
-      selected: base * 1.35,
-      dim: base * 0.8,
-      stroke: Math.max(0.9, base * 0.3),
-      strokeActive: Math.max(1.1, base * 0.45),
+      selected: gs(3.2),
+      dim: gs(2.0),
+      stroke: gs(1),
+      strokeActive: gs(1.75),
     };
   }
+  const w = Math.max(320, viewportWidth());
+  const boost = platformVisualBoost();
   // ~0.8% of plot width; Windows/Brave multiply so dots match Mac Chrome/Safari.
   const fromPlot = plotInnerW / 125;
   const fromViewport = w / 200;
@@ -2213,14 +2203,12 @@ function renderEmbeddingCluster() {
   const xSpan = Math.max(xDomain[1] - xDomain[0], 1e-6);
   const ySpan = Math.max(yDomain[1] - yDomain[0], 1e-6);
 
-  // Broad aspect: full width, compressed height vs isotropic (shorter + wider look).
+  // Phone: isotropic (yesterday's clean map). Desktop: shorter/broader cap.
   const unitsPerPxX = xSpan / plotInnerW;
   const isotropicH = ySpan / unitsPerPxX;
-  const targetH = plotInnerW / (isPhoneLayout() ? 2.35 : 3.25);
-  const plotInnerH = Math.max(
-    isPhoneLayout() ? 160 : 160,
-    Math.min(isotropicH, targetH)
-  );
+  const plotInnerH = isPhoneLayout()
+    ? isotropicH
+    : Math.max(160, Math.min(isotropicH, plotInnerW / 3.25));
   const plotHeight = margin.top + plotInnerH + margin.bottom;
   // Provisional height; expand after measuring the year legend.
   const provisionalLegend = isPhoneLayout() ? gs(70) : s(56);
