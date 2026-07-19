@@ -825,6 +825,30 @@ body:not(.sidebar-collapsed) .main-area {
   gap: 0.45rem;
 }
 
+/* Chrome paints this panel small — lift type hard for readability. */
+html.is-chrome #submissions-panel .card-header h2 {
+  font-size: clamp(1.45rem, 1.25rem + 0.7vw, 1.85rem);
+}
+
+html.is-chrome #submissions-panel .card-sub,
+html.is-chrome #submissions-panel #results-count {
+  font-size: clamp(1.1rem, 1rem + 0.35vw, 1.3rem);
+}
+
+html.is-chrome #submissions-panel .paper-item h3 {
+  font-size: 1.45rem;
+  line-height: 1.35;
+}
+
+html.is-chrome #submissions-panel .paper-item .meta {
+  font-size: 1.15rem;
+}
+
+html.is-chrome #submissions-panel .keyword-tag {
+  font-size: 1.05rem;
+  padding: 0.28rem 0.7rem;
+}
+
 svg {
   width: 100%;
   display: block;
