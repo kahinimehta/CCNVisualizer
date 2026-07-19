@@ -867,7 +867,7 @@ svg {
    Match JS isPhoneLayout: viewport width + touch only. */
 @media (max-width: 639px) and (hover: none) and (pointer: coarse) {
   :root {
-    --ui-scale: 1.1648;
+    --ui-scale: 1.232;
   }
 
   html,
