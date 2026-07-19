@@ -881,8 +881,14 @@ svg {
     padding-inline: 0;
   }
 
+  /* Keep the collapsed menu arrow clear of the title line. */
+  .sidebar.collapsed {
+    top: 0.5rem;
+    left: 0.35rem;
+  }
+
   .main-area {
-    padding: 0.7rem 0.65rem 1.25rem 2.85rem;
+    padding: 0.7rem 0.65rem 1.25rem 3.85rem;
   }
 
   body:not(.sidebar-collapsed) .main-area {
@@ -894,8 +900,13 @@ svg {
     padding: 0.65rem 0 0.75rem;
   }
 
+  .brand-text {
+    min-width: 0;
+  }
+
   .brand h1 {
     font-size: 1.35rem;
+    padding-left: 0.1rem;
   }
 
   .brand-subtitle {
