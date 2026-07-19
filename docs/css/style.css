@@ -32,30 +32,24 @@
   --shadow: 0 24px 84px rgba(0, 0, 0, 0.35);
   /* Kept at 1 — charts no longer multiply geometry by this (avoids double-scale). */
   --ui-scale: 1;
-  --radius-sm: 0.5rem;
-  --radius-md: 0.875rem;
-  --radius-lg: 1rem;
+  /* Fixed chrome radii — not rem tied to fluid root. */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 16px;
   --max-app-width: 100%;
-  --sidebar-width: 18rem;
+  --sidebar-width: 288px;
   --sidebar-collapsed-width: 0;
 }
 
 html {
-  /* Default: respect OS/browser font size. Wider viewports use fluid clamp
-     (viewport-based only — NOT pointer/hover, so touch laptops match mice). */
-  font-size: 100%;
+  /* Tight fluid root everywhere: ~16–18px, no 640px cliff, no 2x swing.
+     Body copy rides this; UI chrome uses fixed px below. */
+  font-size: clamp(1rem, 0.94rem + 0.25vw, 1.125rem);
   width: 100%;
   max-width: 100%;
   scrollbar-gutter: stable;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-}
-
-/* Same scale on Chrome / Edge / Brave / touch laptops at the same width. */
-@media (min-width: 640px) {
-  html {
-    font-size: clamp(1.25rem, 0.65rem + 2vw, 2.75rem);
-  }
 }
 
 body {
@@ -144,8 +138,8 @@ a {
 
 .sidebar-toggle {
   align-self: flex-end;
-  width: 2.45rem;
-  height: 2.45rem;
+  width: 40px;
+  height: 40px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--ccn-navy-card);
@@ -153,7 +147,7 @@ a {
   cursor: pointer;
   display: grid;
   place-items: center;
-  font-size: 1.3rem;
+  font-size: 18px;
   line-height: 1;
   flex-shrink: 0;
   transition: background 0.15s, color 0.15s, box-shadow 0.15s;
@@ -161,7 +155,7 @@ a {
 
 .sidebar-toggle .toggle-icon {
   display: inline-block;
-  font-size: 1.3rem;
+  font-size: 18px;
   line-height: 1;
 }
 
@@ -195,7 +189,7 @@ a {
 }
 
 .sidebar-logo .ccn-logo {
-  width: min(100%, 11.5rem);
+  width: min(100%, 184px);
   height: auto;
   max-width: 100%;
   aspect-ratio: 132 / 36;
@@ -347,7 +341,7 @@ body:not(.sidebar-collapsed) .main-area {
   font-family: inherit;
   font-size: 0.9rem;
   line-height: 1.25;
-  height: 2.75rem;
+  height: 44px;
   width: 100%;
   min-width: 0;
   max-width: 100%;
@@ -392,13 +386,13 @@ body:not(.sidebar-collapsed) .main-area {
 }
 
 .kpi-icon {
-  width: 2.75em;
-  height: 2.75em;
-  border-radius: 0.75em;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  font-size: 1em;
+  font-size: 16px;
 }
 
 .kpi-card > :not(.kpi-icon) {
@@ -407,8 +401,8 @@ body:not(.sidebar-collapsed) .main-area {
 }
 
 .kpi-icon svg {
-  width: 1.25em;
-  height: 1.25em;
+  width: 20px;
+  height: 20px;
   stroke: currentColor;
   fill: none;
   stroke-width: 1.8;
@@ -551,8 +545,8 @@ body:not(.sidebar-collapsed) .main-area {
 }
 
 #word-cloud {
-  height: clamp(12rem, 34dvh, 18.75rem);
-  min-height: clamp(12rem, 34dvh, 18.75rem);
+  height: clamp(192px, 34dvh, 300px);
+  min-height: clamp(192px, 34dvh, 300px);
 }
 
 .theme-analytics {
@@ -744,11 +738,11 @@ body:not(.sidebar-collapsed) .main-area {
 }
 
 .filter-field.compact {
-  min-width: 6.5rem;
+  min-width: 104px;
 }
 
 .filter-field.compact select {
-  min-width: 6.5rem;
+  min-width: 104px;
 }
 
 .card-header h2 {
@@ -806,10 +800,6 @@ svg {
 @media (max-width: 639px) and (hover: none) and (pointer: coarse) {
   :root {
     --ui-scale: 1;
-  }
-
-  html {
-    font-size: 100%;
   }
 
   .app-shell {
@@ -878,11 +868,11 @@ svg {
   }
 
   .paper-list {
-    max-height: min(22rem, 52vh);
+    max-height: min(352px, 52vh);
   }
 
   .tooltip {
-    max-width: min(20rem, 92%);
+    max-width: min(320px, 92%);
     font-size: 0.84rem;
     padding: 0.5rem 0.65rem;
   }
@@ -892,7 +882,7 @@ svg {
     top: 50%;
     right: auto;
     bottom: auto;
-    max-width: min(20rem, 88%);
+    max-width: min(320px, 88%);
     font-size: 0.84rem;
     padding: 0.55rem 0.65rem;
     transform: translate(-50%, -50%) scale(0.5);
@@ -908,9 +898,9 @@ svg {
   }
 
   .tooltip.tooltip-phone-centered .tooltip-close {
-    width: 1.5rem;
-    height: 1.5rem;
-    font-size: 1rem;
+    width: 24px;
+    height: 24px;
+    font-size: 16px;
   }
 
   #year-chart,
@@ -929,7 +919,7 @@ svg {
   border-radius: var(--radius-sm);
   font-size: 0.82rem;
   line-height: 1.45;
-  max-width: min(22rem, 90%);
+  max-width: min(352px, 90%);
   opacity: 0;
   transition: opacity 0.1s;
   z-index: 1000;
@@ -957,13 +947,13 @@ svg {
 .tooltip-close {
   position: static;
   flex-shrink: 0;
-  width: 1.35rem;
-  height: 1.35rem;
+  width: 22px;
+  height: 22px;
   border: 0;
   border-radius: 999px;
   background: rgba(197, 224, 243, 0.12);
   color: var(--muted);
-  font-size: 0.95rem;
+  font-size: 15px;
   line-height: 1;
   cursor: pointer;
   display: grid;
@@ -988,7 +978,7 @@ svg {
 
 .tooltip.tooltip-interactive {
   pointer-events: auto;
-  max-width: min(24rem, 92%);
+  max-width: min(384px, 92%);
 }
 
 .tooltip-year {
@@ -1001,8 +991,8 @@ svg {
 }
 
 .tooltip-year-swatch {
-  width: 0.65rem;
-  height: 0.65rem;
+  width: 10px;
+  height: 10px;
   border-radius: 999px;
   border: 1px solid rgba(15, 34, 56, 0.55);
   flex: 0 0 auto;
@@ -1081,7 +1071,7 @@ svg {
 .paper-list {
   flex: 1 1 auto;
   min-height: 0;
-  max-height: clamp(14rem, 38dvh, 26rem);
+  max-height: clamp(224px, 38dvh, 416px);
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
