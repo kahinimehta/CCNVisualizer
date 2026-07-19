@@ -351,7 +351,7 @@ const PHONE_EMBEDDING_LEGEND_HEADING_SIZE = 13;
  * SVG then scales to the container via viewBox + width:100% in appendChartSvg.
  * Never derive (2) from (1) — that double-scaled and drifted across devices.
  */
-const CHART_DESIGN_SCALE = 2.45;
+const CHART_DESIGN_SCALE = 2.75;
 
 function applyPageScale() {
   const root = document.documentElement;
@@ -2117,9 +2117,9 @@ function renderEmbeddingCluster() {
   // Broad aspect: full width, compressed height vs isotropic (shorter + wider look).
   const unitsPerPxX = xSpan / plotInnerW;
   const isotropicH = ySpan / unitsPerPxX;
-  const targetH = plotInnerW / (isPhoneLayout() ? 2.15 : 2.6);
+  const targetH = plotInnerW / (isPhoneLayout() ? 2.55 : 3.25);
   const plotInnerH = Math.max(
-    isPhoneLayout() ? 150 : 180,
+    isPhoneLayout() ? 140 : 160,
     Math.min(isotropicH, targetH)
   );
   const plotHeight = margin.top + plotInnerH + margin.bottom;
