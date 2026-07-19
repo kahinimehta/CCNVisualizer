@@ -355,12 +355,12 @@ const DESKTOP_CHART_HEADING = 10;
 
 /**
  * Desktop scale from viewport width, with browser type lifts where needed.
- * Chrome: modest (+8%). Brave: larger lift (paints small).
+ * Chrome: modest (+8%). Brave: strong lift (still paints small vs Chrome/Safari).
  * TYPE_NUDGE applies a global type lift on top.
  */
 const CHROME_TYPE_BOOST = 1.08;
-const BRAVE_TYPE_BOOST_MAC = 1.22;
-const BRAVE_TYPE_BOOST_WIN = 1.3;
+const BRAVE_TYPE_BOOST_MAC = 1.48;
+const BRAVE_TYPE_BOOST_WIN = 1.6;
 let cachedChartScale = 2.5;
 let cachedChartScaleKey = "";
 let cachedBrowserTypeBoost = null;
@@ -413,21 +413,26 @@ function browserTypeBoost() {
 /** Desktop root font from layout width (px, not rem/prefs). */
 function desktopRootPxForViewport(w = viewportWidth()) {
   const width = Math.max(320, w);
-  const base = Math.min(19, Math.max(16, 13.5 + width * 0.004));
+  // Brave needs a higher base curve — the shared one still reads zoomed-out there.
+  const base = isBraveBrowser() && !isPhoneLayout()
+    ? Math.min(24, Math.max(18, 15 + width * 0.0055))
+    : Math.min(19, Math.max(16, 13.5 + width * 0.004));
   return base * browserTypeBoost();
 }
 
 /** Desktop SVG design scale from layout width. */
 function desktopChartScaleForViewport(w = viewportWidth()) {
   const width = Math.max(320, w);
-  const base = Math.min(2.65, Math.max(2.2, 2.05 + width / 2000));
+  const base = isBraveBrowser() && !isPhoneLayout()
+    ? Math.min(3.15, Math.max(2.55, 2.35 + width / 1800))
+    : Math.min(2.65, Math.max(2.2, 2.05 + width / 2000));
   return base * browserTypeBoost();
 }
 
 function rootFontPxForViewport() {
   const px = desktopRootPxForViewport();
   const boost = browserTypeBoost();
-  const cap = boost > 1.15 ? 28 : 22;
+  const cap = boost > 1.5 ? 38 : boost > 1.15 ? 32 : 23;
   return Math.round(Math.min(cap, Math.max(16, px)) * 100) / 100;
 }
 
