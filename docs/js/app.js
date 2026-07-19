@@ -397,7 +397,11 @@ function platformVisualBoost() {
 
 function rootFontPxForViewport() {
   const w = Math.max(320, viewportWidth());
-  // Same curve as CSS fallback clamp(20px, 14px + 0.75vw, 28px), then platform boost.
+  // Phones need a calmer root so rem UI/filters/KPIs don't crowd the narrow width.
+  if (isPhoneLayout()) {
+    return Math.min(17.5, Math.max(16, 15.25 + w * 0.0035));
+  }
+  // Desktop: same curve as CSS fallback clamp(20px, 14px + 0.75vw, 28px), then platform boost.
   const base = Math.min(28, Math.max(20, 14 + w * 0.0075));
   return Math.min(38, Math.round(base * platformVisualBoost() * 100) / 100);
 }
@@ -405,10 +409,16 @@ function rootFontPxForViewport() {
 function chartDesignScale() {
   const w = Math.max(320, viewportWidth());
   const boost = platformVisualBoost();
-  const key = `${w}:${boost}`;
+  const phone = isPhoneLayout();
+  const key = `${w}:${boost}:${phone ? "p" : "d"}`;
   if (key === cachedChartScaleKey) return cachedChartScale;
   cachedChartScaleKey = key;
-  // ~2.95 on phones → ~3.55 on wide desktops, then Windows/Brave boost.
+  if (phone) {
+    // Calmer phone chart density — desktop floors were crowding small screens.
+    cachedChartScale = Math.min(2.55, Math.max(2.2, 2.05 + w / 2200));
+    return cachedChartScale;
+  }
+  // Desktop: ~2.95 → ~3.55, then Windows/Brave boost.
   cachedChartScale = Math.min(4.6, Math.max(2.95, 2.7 + w / 1800) * boost);
   return cachedChartScale;
 }
@@ -420,6 +430,7 @@ function applyPageScale() {
   cachedPlatformBoost = null;
   cachedChartScaleKey = "";
 
+  const phone = isPhoneLayout();
   const boost = platformVisualBoost();
   const rootPx = rootFontPxForViewport();
 
@@ -428,8 +439,10 @@ function applyPageScale() {
   root.style.setProperty("--ui-scale", String(boost));
   root.style.zoom = "";
   root.style.removeProperty("--page-zoom");
-  root.classList.toggle("is-windows", isWindowsPlatform());
-  root.classList.toggle("is-brave", isBraveBrowser());
+  // Desktop-only platform classes — phone CSS must not inherit Windows/Brave floors.
+  root.classList.toggle("is-phone", phone);
+  root.classList.toggle("is-windows", !phone && isWindowsPlatform());
+  root.classList.toggle("is-brave", !phone && isBraveBrowser());
   root.classList.remove("no-css-zoom");
 
   if (document.body) {
@@ -2150,6 +2163,17 @@ function renderEmbeddingYearLegend(svg, years, width, plotHeight, margin) {
 function embeddingPointRadii(plotInnerW) {
   const w = Math.max(320, viewportWidth());
   const boost = platformVisualBoost();
+  if (isPhoneLayout()) {
+    // Readable on phones without filling the map — independent of desktop boost.
+    const base = Math.min(5.2, Math.max(2.6, plotInnerW / 150));
+    return {
+      base,
+      selected: base * 1.35,
+      dim: base * 0.8,
+      stroke: Math.max(0.9, base * 0.3),
+      strokeActive: Math.max(1.1, base * 0.45),
+    };
+  }
   // ~0.8% of plot width; Windows/Brave multiply so dots match Mac Chrome/Safari.
   const fromPlot = plotInnerW / 125;
   const fromViewport = w / 200;

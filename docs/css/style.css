@@ -54,9 +54,9 @@ html {
   text-size-adjust: 100%;
 }
 
-/* Extra CSS floor if JS is delayed; JS inline font-size still wins when ready. */
-html.is-windows,
-html.is-brave {
+/* Desktop-only floor if JS is delayed; never apply on phones (see .is-phone). */
+html.is-windows:not(.is-phone),
+html.is-brave:not(.is-phone) {
   font-size: clamp(24px, 18px + 0.9vw, 34px);
 }
 
@@ -843,12 +843,19 @@ svg {
   height: 0.01px;
 }
 
-/* Phone-only: require device width too so a narrow laptop/Brave window
-   does not drop to the phone font scale. */
 /* Match JS isPhoneLayout: viewport width + touch only (no max-device-width). */
 @media (max-width: 639px) and (hover: none) and (pointer: coarse) {
   :root {
     --ui-scale: 1;
+    --sidebar-width: 280px;
+  }
+
+  /* Calm phone root — desktop 20–28px floors were crowding filters/KPIs. */
+  html,
+  html.is-phone,
+  html.is-windows,
+  html.is-brave {
+    font-size: 16.5px;
   }
 
   .app-shell {
@@ -856,74 +863,134 @@ svg {
   }
 
   .main-area {
-    padding: 0.7rem 0.65rem 1.25rem 2.85rem;
+    padding: 0.75rem 0.75rem 1.4rem 2.75rem;
   }
 
   body:not(.sidebar-collapsed) .main-area {
-    padding-left: 0.65rem;
+    padding-left: 0.75rem;
   }
 
   .topbar {
-    gap: 0.7rem;
-    padding: 0.65rem 0 0.75rem;
+    gap: 0.75rem;
+    padding: 0.7rem 0 0.85rem;
   }
 
   .brand h1 {
-    font-size: clamp(1.4rem, 1.2rem + 1.6vw, 1.75rem);
+    font-size: clamp(1.2rem, 1.05rem + 1.2vw, 1.4rem);
   }
 
   .brand-subtitle {
-    font-size: clamp(0.85rem, 0.8rem + 0.45vw, 1rem);
+    font-size: clamp(0.78rem, 0.74rem + 0.3vw, 0.88rem);
   }
 
   .filter-bar {
     grid-template-columns: 1fr;
-    gap: 0.55rem;
+    gap: 0.6rem;
+  }
+
+  .filter-field {
+    font-size: 0.7rem;
+  }
+
+  .filter-field select,
+  .filter-field input {
+    font-size: 0.9rem;
+    height: 42px;
+    padding: 0.45rem 0.7rem;
   }
 
   .theme-filter-bar {
-    margin-top: 0.65rem;
-    gap: 0.4rem 0.5rem;
+    margin-top: 0.7rem;
+    gap: 0.45rem 0.55rem;
   }
 
   .theme-chip {
-    font-size: 0.8rem;
-    padding: 0.24rem 0.5rem;
+    font-size: 0.72rem;
+    padding: 0.2rem 0.48rem;
+  }
+
+  .theme-mode-btn {
+    font-size: 0.78rem;
+    padding: 0.32rem 0.6rem;
   }
 
   .theme-filter-status {
-    font-size: 0.84rem;
-    padding: 0.45rem 0.6rem;
+    font-size: 0.76rem;
+    padding: 0.4rem 0.55rem;
   }
 
   .kpi-row {
-    gap: 0.55rem;
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
   }
 
   .kpi-card {
-    padding: 0.65rem 0.7rem;
+    padding: 0.7rem 0.75rem;
+    gap: 0.65rem;
+  }
+
+  .kpi-card .label {
+    font-size: 0.72rem;
+  }
+
+  .kpi-card .value {
+    font-size: clamp(1.15rem, 1.05rem + 0.8vw, 1.4rem);
+  }
+
+  .year-chip {
+    font-size: 0.84rem;
+    padding: 0.32rem 0.65rem;
   }
 
   .card {
-    padding: 0.8rem 0.75rem;
+    padding: 0.85rem 0.8rem 0.95rem;
   }
 
   .card-header h2 {
-    font-size: 1.05rem;
+    font-size: 0.95rem;
   }
 
   .card-sub {
-    font-size: 0.84rem;
+    font-size: 0.76rem;
+  }
+
+  .theme-panel-title {
+    font-size: 0.92rem;
+  }
+
+  .theme-panel-sub,
+  .chart-note,
+  .chart-disclaimer {
+    font-size: 0.74rem;
+  }
+
+  .dashboard-grid,
+  .viz-stack,
+  .theme-analytics {
+    gap: 0.75rem;
   }
 
   .paper-list {
-    max-height: min(352px, 52vh);
+    max-height: min(320px, 50vh);
+  }
+
+  .paper-item h3 {
+    font-size: 0.92rem;
+  }
+
+  .paper-item .meta {
+    font-size: 0.78rem;
+  }
+
+  .keyword-tag {
+    font-size: 0.72rem;
+    padding: 0.14rem 0.48rem;
   }
 
   .tooltip {
-    max-width: min(320px, 92%);
-    font-size: 0.92rem;
-    padding: 0.55rem 0.7rem;
+    max-width: min(300px, 92%);
+    font-size: 0.84rem;
+    padding: 0.5rem 0.65rem;
   }
 
   .tooltip.tooltip-phone-centered {
@@ -931,9 +998,9 @@ svg {
     top: 50%;
     right: auto;
     bottom: auto;
-    max-width: min(320px, 88%);
-    font-size: 0.92rem;
-    padding: 0.6rem 0.7rem;
+    max-width: min(300px, 88%);
+    font-size: 0.84rem;
+    padding: 0.55rem 0.65rem;
     transform: translate(-50%, -50%) scale(0.5);
     transform-origin: center center;
     box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
@@ -950,6 +1017,11 @@ svg {
     width: 24px;
     height: 24px;
     font-size: 16px;
+  }
+
+  #word-cloud {
+    height: clamp(168px, 30dvh, 240px);
+    min-height: clamp(168px, 30dvh, 240px);
   }
 
   #year-chart,
