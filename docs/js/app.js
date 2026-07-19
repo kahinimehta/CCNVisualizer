@@ -347,9 +347,9 @@ const PHONE_BAR_VALUE_SIZE = 10.5;
 const PHONE_LEGEND_HEADING_SIZE = 10.5;
 const PHONE_EMBEDDING_LEGEND_HEADING_SIZE = 12.5;
 
-// Desktop chart label bases — larger/heavier so Brave matches Chrome hierarchy.
-const DESKTOP_CHART_LABEL = 12;
-const DESKTOP_CHART_HEADING = 13;
+// Desktop chart label bases (Chrome/Safari). Brave/Windows grow via platformVisualBoost.
+const DESKTOP_CHART_LABEL = 10;
+const DESKTOP_CHART_HEADING = 11;
 
 /**
  * Desktop: viewport chart scale + Windows/Brave boost; px+vw root.
@@ -385,17 +385,14 @@ function platformVisualBoost() {
     return cachedPlatformBoost;
   }
 
-  // Chrome/Safari baseline = 1. Brave paints smaller at the same CSS width, so
-  // it always gets an extra multiplier — including on Windows (stacked).
+  // Chrome/Safari stay at 1 (they were reading too large after global bumps).
+  // Brave still paints smaller, so only Brave gets a real lift.
   let boost = 1;
-  if (isWindowsPlatform()) {
-    boost = 1.3;
+  if (isBraveBrowser()) {
+    boost = isWindowsPlatform() ? 1.55 : 1.3;
     const dpr = Number(window.devicePixelRatio) || 1;
     const screenW = Number(window.screen?.width) || 0;
-    if (dpr < 1.2 && screenW >= 1600) boost = 1.4;
-  }
-  if (isBraveBrowser()) {
-    boost *= 1.28;
+    if (isWindowsPlatform() && dpr < 1.2 && screenW >= 1600) boost = 1.65;
   }
 
   cachedPlatformBoost = boost;
