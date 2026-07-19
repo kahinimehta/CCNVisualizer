@@ -9,7 +9,7 @@
   <link rel="icon" href="assets/favicon-32.png?v=2" type="image/png" sizes="32x32" />
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=2" />
   <meta name="theme-color" content="#0f2238" />
-  <link rel="stylesheet" href="css/style.css?v=86" />
+  <link rel="stylesheet" href="css/style.css?v=87" />
   <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 </head>
 <body>
@@ -58,15 +58,6 @@
             <input id="search-input" type="search" placeholder="Title, author, keywords..." />
           </label>
         </div>
-        <div class="theme-filter-bar" aria-label="Research theme filters">
-          <div class="theme-filter-mode" role="group" aria-label="Theme filter mode">
-            <button type="button" class="theme-mode-btn active" data-mode="include" id="theme-mode-include">Include</button>
-            <button type="button" class="theme-mode-btn" data-mode="exclude" id="theme-mode-exclude">Exclude</button>
-          </div>
-          <div id="theme-multi-select" class="theme-multi-select"></div>
-          <button type="button" class="theme-clear-btn" id="theme-clear-btn" hidden>Clear topics</button>
-        </div>
-        <p class="theme-filter-status" id="theme-filter-status" hidden></p>
       </header>
 
       <section class="kpi-row" id="kpi-row" aria-label="Summary statistics"></section>
@@ -93,7 +84,7 @@
         <section class="card card-full">
           <div class="card-header">
             <h2>Research theme ranking</h2>
-            <p class="card-sub">Theme counts in current filter · submissions can appear in multiple topics · click a bar to add/remove that topic (filters match all selected topics)</p>
+            <p class="card-sub">Theme counts for the current year/search/topic filter · submissions can appear in multiple topics · click a bar to add/remove that topic</p>
           </div>
           <div id="theme-bars"></div>
         </section>
@@ -142,6 +133,15 @@
                 <h2>Matching submissions</h2>
                 <p class="card-sub" id="results-count"></p>
               </div>
+              <div class="theme-filter-bar" aria-label="Research theme filters">
+                <div class="theme-filter-mode" role="group" aria-label="Theme filter mode">
+                  <button type="button" class="theme-mode-btn active" data-mode="include" id="theme-mode-include">Include</button>
+                  <button type="button" class="theme-mode-btn" data-mode="exclude" id="theme-mode-exclude">Exclude</button>
+                </div>
+                <div id="theme-multi-select" class="theme-multi-select"></div>
+                <button type="button" class="theme-clear-btn" id="theme-clear-btn" hidden>Clear topics</button>
+              </div>
+              <p class="theme-filter-status" id="theme-filter-status" hidden></p>
               <div class="paper-list" id="paper-list"></div>
             </section>
           </div>
@@ -162,6 +162,6 @@
 
   <div class="tooltip" id="tooltip"></div>
   <script src="js/sidebar.js?v=20"></script>
-  <script src="js/app.js?v=86"></script>
+  <script src="js/app.js?v=87"></script>
 </body>
 </html>

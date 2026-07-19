@@ -640,10 +640,20 @@ body:not(.sidebar-collapsed) .main-area {
   flex-wrap: wrap;
   align-items: flex-start;
   gap: 0.55rem 0.75rem;
-  margin-top: 0.85rem;
+  margin: 0.85rem 0 0.55rem;
   width: 100%;
   max-width: 100%;
   min-width: 0;
+}
+
+#submissions-panel .theme-filter-bar {
+  margin-top: 0.35rem;
+  margin-bottom: 0.65rem;
+}
+
+#submissions-panel .theme-filter-status {
+  margin-top: 0;
+  margin-bottom: 0.65rem;
 }
 
 .theme-filter-mode {
