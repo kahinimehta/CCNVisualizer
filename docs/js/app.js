@@ -355,12 +355,12 @@ const DESKTOP_CHART_HEADING = 10;
 
 /**
  * Desktop scale from viewport width, with browser type lifts where needed.
- * Chrome: modest (+8%). Brave: strong lift (still paints small vs Chrome/Safari).
- * TYPE_NUDGE applies a global type lift on top.
+ * Chrome: modest (+8%). Brave Mac: strong lift. Brave Windows: stronger
+ * (Windows DPI + Brave still reads zoomed-out). TYPE_NUDGE on top.
  */
 const CHROME_TYPE_BOOST = 1.08;
 const BRAVE_TYPE_BOOST_MAC = 1.48;
-const BRAVE_TYPE_BOOST_WIN = 1.6;
+const BRAVE_TYPE_BOOST_WIN = 1.88;
 let cachedChartScale = 2.5;
 let cachedChartScaleKey = "";
 let cachedBrowserTypeBoost = null;
@@ -413,26 +413,32 @@ function browserTypeBoost() {
 /** Desktop root font from layout width (px, not rem/prefs). */
 function desktopRootPxForViewport(w = viewportWidth()) {
   const width = Math.max(320, w);
-  // Brave needs a higher base curve — the shared one still reads zoomed-out there.
-  const base = isBraveBrowser() && !isPhoneLayout()
-    ? Math.min(24, Math.max(18, 15 + width * 0.0055))
-    : Math.min(19, Math.max(16, 13.5 + width * 0.004));
+  let base = Math.min(19, Math.max(16, 13.5 + width * 0.004));
+  if (isBraveBrowser() && !isPhoneLayout()) {
+    // Windows Brave needs an even higher base than Mac Brave.
+    base = isWindowsPlatform()
+      ? Math.min(28, Math.max(21, 17 + width * 0.0065))
+      : Math.min(24, Math.max(18, 15 + width * 0.0055));
+  }
   return base * browserTypeBoost();
 }
 
 /** Desktop SVG design scale from layout width. */
 function desktopChartScaleForViewport(w = viewportWidth()) {
   const width = Math.max(320, w);
-  const base = isBraveBrowser() && !isPhoneLayout()
-    ? Math.min(3.15, Math.max(2.55, 2.35 + width / 1800))
-    : Math.min(2.65, Math.max(2.2, 2.05 + width / 2000));
+  let base = Math.min(2.65, Math.max(2.2, 2.05 + width / 2000));
+  if (isBraveBrowser() && !isPhoneLayout()) {
+    base = isWindowsPlatform()
+      ? Math.min(3.7, Math.max(3.0, 2.75 + width / 1550))
+      : Math.min(3.15, Math.max(2.55, 2.35 + width / 1800));
+  }
   return base * browserTypeBoost();
 }
 
 function rootFontPxForViewport() {
   const px = desktopRootPxForViewport();
   const boost = browserTypeBoost();
-  const cap = boost > 1.5 ? 38 : boost > 1.15 ? 32 : 23;
+  const cap = boost > 1.9 ? 52 : boost > 1.5 ? 42 : boost > 1.15 ? 32 : 23;
   return Math.round(Math.min(cap, Math.max(16, px)) * 100) / 100;
 }
 
@@ -475,12 +481,14 @@ function applyPageScale() {
   const phone = isPhoneLayout();
   const chrome = !phone && isGoogleChrome();
   const brave = !phone && isBraveBrowser();
+  const windows = !phone && isWindowsPlatform();
   root.style.zoom = "";
   root.style.removeProperty("--page-zoom");
   root.classList.toggle("is-phone", phone);
   root.classList.toggle("is-chrome", chrome);
   root.classList.toggle("is-brave", brave);
-  root.classList.remove("is-windows", "no-css-zoom");
+  root.classList.toggle("is-windows", windows);
+  root.classList.remove("no-css-zoom");
 
   if (phone) {
     root.style.fontSize = "100%";
