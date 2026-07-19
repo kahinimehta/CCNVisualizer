@@ -403,10 +403,13 @@ function rootFontPxForViewport() {
   const w = Math.max(320, viewportWidth());
   // Desktop only — phones use CSS font-size: 100%.
   const boost = platformVisualBoost();
-  const base = Math.min(28, Math.max(20, 14 + w * 0.0075));
-  // Brave/Windows need a higher cap so the boost isn't clipped away.
-  const cap = boost > 1.2 ? 46 : 38;
-  return Math.min(cap, Math.round(base * boost * 100) / 100);
+  // Chrome/Safari use a calmer root; Brave keeps the larger curve × boost.
+  const base =
+    boost > 1
+      ? Math.min(28, Math.max(20, 14 + w * 0.0075))
+      : Math.min(22, Math.max(17, 13 + w * 0.0055));
+  const cap = boost > 1.2 ? 46 : 26;
+  return Math.min(cap, Math.round(base * Math.max(boost, 1) * 100) / 100);
 }
 
 function chartDesignScale() {
@@ -417,8 +420,12 @@ function chartDesignScale() {
   const key = `${w}:${boost}:d`;
   if (key === cachedChartScaleKey) return cachedChartScale;
   cachedChartScaleKey = key;
-  const cap = boost > 1.2 ? 5.4 : 4.6;
-  cachedChartScale = Math.min(cap, Math.max(2.95, 2.7 + w / 1800) * boost);
+  if (boost > 1) {
+    cachedChartScale = Math.min(5.4, Math.max(2.95, 2.7 + w / 1800) * boost);
+  } else {
+    // Chrome/Safari — tighter marks so bar labels don't dominate the plot.
+    cachedChartScale = Math.min(3.15, Math.max(2.45, 2.25 + w / 2000));
+  }
   return cachedChartScale;
 }
 
@@ -1970,7 +1977,7 @@ function renderThemeShareByYear() {
     .append("g")
     .attr("transform", `translate(${margin.left}, ${plotHeight + (isPhoneLayout() ? gs(4) : s(6))})`);
   const colWidth = (width - margin.left - margin.right) / legendCols;
-  const legendMarker = isPhoneLayout() ? gs(8) : s(14);
+  const legendMarker = isPhoneLayout() ? gs(8) : s(12);
   const legendTextX = isPhoneLayout() ? gs(12) : s(18);
 
   const legendTitle = legend
