@@ -340,7 +340,7 @@ function readCssNumber(property, fallback) {
 
 // Yesterday's clean phone chart constants (restored) — do not share desktop scale.
 const PHONE_GRAPH_SCALE = 0.72;
-const TYPE_NUDGE = 1.04; // very slight global type lift
+const TYPE_NUDGE = 1.1; // global type lift
 const PHONE_CHART_SCALE = 1.2 * TYPE_NUDGE;
 const PHONE_UI_SCALE = 1.12 * TYPE_NUDGE;
 const PHONE_AXIS_LABEL_SIZE = 8.5;
@@ -350,13 +350,13 @@ const PHONE_LEGEND_HEADING_SIZE = 10.5;
 const PHONE_EMBEDDING_LEGEND_HEADING_SIZE = 12.5;
 
 // Shared desktop chart label bases — same in every desktop browser.
-const DESKTOP_CHART_LABEL = 8.5;
-const DESKTOP_CHART_HEADING = 9.5;
+const DESKTOP_CHART_LABEL = 9;
+const DESKTOP_CHART_HEADING = 10;
 
 /**
  * Desktop scale from viewport width, with browser type lifts where needed.
  * Chrome: modest (+8%). Brave: larger lift (paints small).
- * TYPE_NUDGE applies a very slight extra lift everywhere.
+ * TYPE_NUDGE applies a global type lift on top.
  */
 const CHROME_TYPE_BOOST = 1.08;
 const BRAVE_TYPE_BOOST_MAC = 1.22;
