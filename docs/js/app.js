@@ -355,12 +355,13 @@ const DESKTOP_CHART_HEADING = 10;
 
 /**
  * Desktop scale from viewport width, with browser type lifts where needed.
- * Chrome: modest (+8%). Brave Mac: strong lift. Brave Windows: stronger
- * (Windows DPI + Brave still reads zoomed-out). TYPE_NUDGE on top.
+ * Windows DPI makes type read small — apply WINDOWS_TYPE_BOOST on non-Brave
+ * Windows browsers; Brave Windows uses a dedicated higher boost. TYPE_NUDGE on top.
  */
 const CHROME_TYPE_BOOST = 1.08;
+const WINDOWS_TYPE_BOOST = 1.42;
 const BRAVE_TYPE_BOOST_MAC = 1.48;
-const BRAVE_TYPE_BOOST_WIN = 1.88;
+const BRAVE_TYPE_BOOST_WIN = 2.25;
 let cachedChartScale = 2.5;
 let cachedChartScaleKey = "";
 let cachedBrowserTypeBoost = null;
@@ -402,9 +403,11 @@ function browserTypeBoost() {
   }
   let boost = 1;
   if (isBraveBrowser()) {
+    // Windows Brave boost already includes the Windows DPI gap.
     boost = isWindowsPlatform() ? BRAVE_TYPE_BOOST_WIN : BRAVE_TYPE_BOOST_MAC;
-  } else if (isGoogleChrome()) {
-    boost = CHROME_TYPE_BOOST;
+  } else {
+    if (isGoogleChrome()) boost = CHROME_TYPE_BOOST;
+    if (isWindowsPlatform()) boost *= WINDOWS_TYPE_BOOST;
   }
   cachedBrowserTypeBoost = boost * TYPE_NUDGE;
   return cachedBrowserTypeBoost;
@@ -414,11 +417,12 @@ function browserTypeBoost() {
 function desktopRootPxForViewport(w = viewportWidth()) {
   const width = Math.max(320, w);
   let base = Math.min(19, Math.max(16, 13.5 + width * 0.004));
-  if (isBraveBrowser() && !isPhoneLayout()) {
-    // Windows Brave needs an even higher base than Mac Brave.
-    base = isWindowsPlatform()
-      ? Math.min(28, Math.max(21, 17 + width * 0.0065))
-      : Math.min(24, Math.max(18, 15 + width * 0.0055));
+  if (!isPhoneLayout() && isWindowsPlatform()) {
+    base = isBraveBrowser()
+      ? Math.min(32, Math.max(23, 19 + width * 0.0075))
+      : Math.min(25, Math.max(19, 16 + width * 0.006));
+  } else if (isBraveBrowser() && !isPhoneLayout()) {
+    base = Math.min(24, Math.max(18, 15 + width * 0.0055));
   }
   return base * browserTypeBoost();
 }
@@ -427,10 +431,12 @@ function desktopRootPxForViewport(w = viewportWidth()) {
 function desktopChartScaleForViewport(w = viewportWidth()) {
   const width = Math.max(320, w);
   let base = Math.min(2.65, Math.max(2.2, 2.05 + width / 2000));
-  if (isBraveBrowser() && !isPhoneLayout()) {
-    base = isWindowsPlatform()
-      ? Math.min(3.7, Math.max(3.0, 2.75 + width / 1550))
-      : Math.min(3.15, Math.max(2.55, 2.35 + width / 1800));
+  if (!isPhoneLayout() && isWindowsPlatform()) {
+    base = isBraveBrowser()
+      ? Math.min(4.1, Math.max(3.3, 3.0 + width / 1400))
+      : Math.min(3.2, Math.max(2.6, 2.35 + width / 1700));
+  } else if (isBraveBrowser() && !isPhoneLayout()) {
+    base = Math.min(3.15, Math.max(2.55, 2.35 + width / 1800));
   }
   return base * browserTypeBoost();
 }
@@ -438,7 +444,7 @@ function desktopChartScaleForViewport(w = viewportWidth()) {
 function rootFontPxForViewport() {
   const px = desktopRootPxForViewport();
   const boost = browserTypeBoost();
-  const cap = boost > 1.9 ? 52 : boost > 1.5 ? 42 : boost > 1.15 ? 32 : 23;
+  const cap = boost > 2.2 ? 60 : boost > 1.9 ? 52 : boost > 1.5 ? 42 : boost > 1.15 ? 32 : 23;
   return Math.round(Math.min(cap, Math.max(16, px)) * 100) / 100;
 }
 
