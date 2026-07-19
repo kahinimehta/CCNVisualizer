@@ -346,21 +346,70 @@ const PHONE_EMBEDDING_LEGEND_HEADING_SIZE = 13;
 
 /**
  * Two independent, non-compounding systems:
- * 1) CSS clamp(px + vw) on html → UI type (viewport-relative; not rem/prefs)
- * 2) Viewport-width chart scale → SVG label/mark sizes in viewBox units
- * SVG then scales to the container via viewBox + width:100% in appendChartSvg.
- * Never derive (2) from computed root font-size — that double-scaled across devices.
- * Both track screen width so Brave/Windows match Chrome/Safari at the same viewport.
+ * 1) Root font-size in px from viewport (+ platform boost) → UI rem type
+ * 2) Viewport chart scale (+ same boost) → SVG label/mark sizes
+ * SVG scales via viewBox + width:100%. Never multiply (2) by computed rem from (1).
+ *
+ * Windows/Brave often paint smaller than Safari/Chrome at the same CSS width
+ * (DPI / default zoom / font prefs). platformVisualBoost() lifts only those.
  */
 let cachedChartScale = 3.1;
-let cachedChartScaleForWidth = -1;
+let cachedChartScaleKey = "";
+let cachedPlatformBoost = null;
+
+function isWindowsPlatform() {
+  if (typeof navigator === "undefined") return false;
+  const uaDataPlatform = navigator.userAgentData?.platform || "";
+  if (/Windows/i.test(uaDataPlatform)) return true;
+  if (/Win/i.test(navigator.platform || "")) return true;
+  return /Windows/i.test(navigator.userAgent || "");
+}
+
+function isBraveBrowser() {
+  if (typeof navigator === "undefined") return false;
+  // Presence of navigator.brave is the reliable signal (isBrave() is async).
+  if (navigator.brave) return true;
+  return /\bBrave\b/i.test(navigator.userAgent || "");
+}
+
+function platformVisualBoost() {
+  if (cachedPlatformBoost != null) return cachedPlatformBoost;
+  // Keep phone layout calm; the mismatch is desktop Windows/Brave vs Mac browsers.
+  if (isPhoneLayout()) {
+    cachedPlatformBoost = 1;
+    return cachedPlatformBoost;
+  }
+
+  let boost = 1;
+  if (isWindowsPlatform()) {
+    boost = 1.32;
+    // Low DPR on a wide Windows panel → CSS px look physically tiny.
+    const dpr = Number(window.devicePixelRatio) || 1;
+    const screenW = Number(window.screen?.width) || 0;
+    if (dpr < 1.2 && screenW >= 1600) boost = 1.42;
+  } else if (isBraveBrowser()) {
+    boost = 1.22;
+  }
+
+  cachedPlatformBoost = boost;
+  return boost;
+}
+
+function rootFontPxForViewport() {
+  const w = Math.max(320, viewportWidth());
+  // Same curve as CSS fallback clamp(20px, 14px + 0.75vw, 28px), then platform boost.
+  const base = Math.min(28, Math.max(20, 14 + w * 0.0075));
+  return Math.min(38, Math.round(base * platformVisualBoost() * 100) / 100);
+}
 
 function chartDesignScale() {
   const w = Math.max(320, viewportWidth());
-  if (w === cachedChartScaleForWidth) return cachedChartScale;
-  // ~2.95 on phones → ~3.55 on wide laptops/desktops
-  cachedChartScaleForWidth = w;
-  cachedChartScale = Math.min(3.55, Math.max(2.95, 2.7 + w / 1800));
+  const boost = platformVisualBoost();
+  const key = `${w}:${boost}`;
+  if (key === cachedChartScaleKey) return cachedChartScale;
+  cachedChartScaleKey = key;
+  // ~2.95 on phones → ~3.55 on wide desktops, then Windows/Brave boost.
+  cachedChartScale = Math.min(4.6, Math.max(2.95, 2.7 + w / 1800) * boost);
   return cachedChartScale;
 }
 
@@ -368,14 +417,21 @@ function applyPageScale() {
   const root = document.documentElement;
   if (!root) return;
 
-  // Drop legacy inline locks from older deploys (zoom / forced px root / etc.).
-  // Root type comes from CSS px+vw clamp — do not write rem-tied inline font-size.
-  root.style.removeProperty("font-size");
-  root.classList.remove("is-brave", "no-css-zoom");
+  cachedPlatformBoost = null;
+  cachedChartScaleKey = "";
+
+  const boost = platformVisualBoost();
+  const rootPx = rootFontPxForViewport();
+
+  // Inline px wins over Brave font-size prefs and stale rem baselines.
+  root.style.fontSize = `${rootPx}px`;
+  root.style.setProperty("--ui-scale", String(boost));
   root.style.zoom = "";
   root.style.removeProperty("--page-zoom");
-  root.style.setProperty("--ui-scale", "1");
-  cachedChartScaleForWidth = -1;
+  root.classList.toggle("is-windows", isWindowsPlatform());
+  root.classList.toggle("is-brave", isBraveBrowser());
+  root.classList.remove("no-css-zoom");
+
   if (document.body) {
     document.body.style.zoom = "";
     document.body.style.width = "";
@@ -2090,14 +2146,15 @@ function renderEmbeddingYearLegend(svg, years, width, plotHeight, margin) {
   return legendBlock;
 }
 
-/** Dot size tracks plot + viewport width so Brave/Windows match Chrome/Safari. */
+/** Dot size tracks plot + viewport width, with Windows/Brave visual boost. */
 function embeddingPointRadii(plotInnerW) {
   const w = Math.max(320, viewportWidth());
-  // ~0.75% of plot width, with a higher floor so dots stay visible on large
-  // Windows displays where the same CSS px used to look like pinpricks.
-  const fromPlot = plotInnerW / 135;
-  const fromViewport = w / 220;
-  const base = Math.min(8.5, Math.max(3.4, Math.max(fromPlot, fromViewport * 0.85)));
+  const boost = platformVisualBoost();
+  // ~0.8% of plot width; Windows/Brave multiply so dots match Mac Chrome/Safari.
+  const fromPlot = plotInnerW / 125;
+  const fromViewport = w / 200;
+  const raw = Math.max(fromPlot, fromViewport * 0.9);
+  const base = Math.min(11, Math.max(3.8, raw) * boost);
   return {
     base,
     selected: base * 1.4,

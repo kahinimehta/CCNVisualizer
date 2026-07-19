@@ -43,9 +43,8 @@
 
 html {
   /*
-   * Viewport-relative px (not rem). Brave/Chrome "Font size" prefs change the
-   * rem baseline and were shrinking this UI on Windows/Brave while Safari/Chrome
-   * (Medium) looked fine. vw keeps type proportional to screen width.
+   * Fallback viewport px clamp. JS applyPageScale() sets an inline px root and
+   * boosts Windows/Brave so they match Safari/macOS Chrome at the same width.
    */
   font-size: clamp(20px, 14px + 0.75vw, 28px);
   width: 100%;
@@ -53,6 +52,12 @@ html {
   scrollbar-gutter: stable;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+}
+
+/* Extra CSS floor if JS is delayed; JS inline font-size still wins when ready. */
+html.is-windows,
+html.is-brave {
+  font-size: clamp(24px, 18px + 0.9vw, 34px);
 }
 
 body {
