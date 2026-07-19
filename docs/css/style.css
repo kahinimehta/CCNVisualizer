@@ -833,12 +833,6 @@ html.is-brave #submissions-panel #results-count {
   font-size: clamp(1.1rem, 1rem + 0.35vw, 1.3rem);
 }
 
-html.is-chrome #submissions-panel .paper-item h3,
-html.is-brave #submissions-panel .paper-item h3 {
-  font-size: 1.45rem;
-  line-height: 1.35;
-}
-
 html.is-chrome #submissions-panel .paper-item .meta,
 html.is-brave #submissions-panel .paper-item .meta {
   font-size: 1.15rem;
