@@ -717,38 +717,37 @@ function styleThemeAxisLabels(selection) {
   styleDesktopChartText(labels);
 }
 
-// High-chroma categorical colors for dark navy UI. Hues are spaced to avoid
-// warm-orange and blue-purple clumps that were hard to tell apart.
+// 14 theme + 10 year colors: every hex is unique, and year/theme sets are
+// chosen for high pairwise separation (no shared or near-duplicate colors).
 const CHART_PALETTE = [
-  "#E6194B", // red — Reinforcement learning
-  "#F58231", // orange — Motor control & planning
-  "#FFE119", // yellow — Naturalistic encoding/decoding
-  "#3CB44B", // green — Neural population geometry & dynamics
-  "#42D4F4", // cyan — Decision-making and metacognition
-  "#4363D8", // blue — Vision
-  "#911EB4", // purple — Perception
-  "#F032E6", // magenta — Language/auditory neuroscience
-  "#469990", // teal — AI, LLM, & Neural Networks
-  "#9A6324", // brown — Memory
-  "#FF6F91", // coral pink — Social cognition & theory of mind
-  "#7BDCB5", // mint — Attention & cognitive control
-  "#DCBEFF", // lavender — Clinical / computational psychiatry
-  "#A9A9A9", // gray — Methods and theory
+  "#E67C68", // Reinforcement learning
+  "#F1BB27", // Motor control & planning
+  "#E4EB07", // Naturalistic encoding/decoding
+  "#BAEB57", // Neural population geometry & dynamics
+  "#67E746", // Decision-making and metacognition
+  "#2AFC53", // Vision
+  "#47F3D3", // Perception
+  "#1280E3", // Language/auditory neuroscience
+  "#87A1F2", // AI, LLM, & Neural Networks
+  "#2A2EFC", // Memory
+  "#604AE2", // Social cognition & theory of mind
+  "#6F13F0", // Attention & cognitive control / executive function
+  "#FA8BCC", // Clinical / computational psychiatry
+  "#E21254", // Methods and theory
 ];
 
-// Fixed year→color map (not index-in-list). Missing years like 2020/2021 must
-// not shift later years onto neighboring hues (e.g. 2026 onto 2017-like orange).
+// Absolute year→color map (not list index). Disjoint from CHART_PALETTE.
 const YEAR_COLORS = {
-  2017: "#FF6B00", // vivid orange
-  2018: "#00B4D8", // cyan
-  2019: "#9B5DE5", // purple
-  2020: "#2DC653", // green
-  2021: "#FF006E", // hot pink
-  2022: "#FFD60A", // yellow
-  2023: "#0077B6", // deep blue
-  2024: "#E76F51", // coral
-  2025: "#80ED99", // mint
-  2026: "#C77DFF", // lavender
+  2017: "#10E1EB", // cyan
+  2018: "#D60900", // red
+  2019: "#BD13FF", // magenta-purple
+  2020: "#FFE872", // pale gold
+  2021: "#31D600", // lime
+  2022: "#1D42C6", // royal blue
+  2023: "#C49DF1", // lilac
+  2024: "#F84398", // pink
+  2025: "#BE8318", // ochre
+  2026: "#93EDAD", // mint
 };
 
 const KPI_ICONS = {
