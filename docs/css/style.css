@@ -311,8 +311,8 @@ body:not(.sidebar-collapsed) .main-area {
 
 .filter-bar {
   display: grid;
-  /* px basis — rem would track the fluid html clamp and shift wrap points. */
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 184px), 1fr));
+  /* Year + search sit side-by-side on desktop; stack on narrow viewports. */
+  grid-template-columns: minmax(7.5rem, 10rem) minmax(0, 1fr);
   gap: 0.75rem;
   align-items: end;
   width: 100%;
@@ -321,7 +321,7 @@ body:not(.sidebar-collapsed) .main-area {
 }
 
 .filter-bar .search-field {
-  min-width: min(100%, 224px);
+  min-width: 0;
 }
 
 .filter-field {
@@ -441,30 +441,25 @@ body:not(.sidebar-collapsed) .main-area {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
-  margin-bottom: 0;
+  margin: 0 0 0.65rem;
   width: 100%;
   max-width: 100%;
   min-width: 0;
 }
 
-.year-filter-card {
-  border-color: rgba(197, 224, 243, 0.28);
+.top-topic-filter {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0 0 0.85rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(244, 199, 195, 0.22);
+  border-radius: var(--radius-md);
   background: linear-gradient(
     180deg,
-    rgba(197, 224, 243, 0.06) 0%,
-    var(--ccn-navy-card) 42%
+    rgba(244, 199, 195, 0.06) 0%,
+    rgba(15, 34, 56, 0.35) 100%
   );
-}
-
-.year-filter-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 0.65rem;
-  margin-top: 0.35rem;
-}
-
-.year-filter-controls .year-filter-select {
-  max-width: min(100%, 220px);
 }
 
 .year-chip {
@@ -654,33 +649,19 @@ body:not(.sidebar-collapsed) .main-area {
   overflow-wrap: anywhere;
 }
 
-.topic-filter-card {
-  border-color: rgba(244, 199, 195, 0.28);
-  background: linear-gradient(
-    180deg,
-    rgba(244, 199, 195, 0.06) 0%,
-    var(--ccn-navy-card) 42%
-  );
-}
-
 .theme-filter-bar {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
   gap: 0.55rem 0.75rem;
-  margin: 0.35rem 0 0.55rem;
+  margin: 0;
   width: 100%;
   max-width: 100%;
   min-width: 0;
 }
 
-.topic-filter-card .theme-filter-status {
-  margin-top: 0.35rem;
-  margin-bottom: 0;
-}
-
-/* KPIs sit with the filtered block below the topic filter. */
-.dashboard-grid > .kpi-row {
+.top-topic-filter .theme-filter-status {
+  margin-top: 0.55rem;
   margin-bottom: 0;
 }
 
