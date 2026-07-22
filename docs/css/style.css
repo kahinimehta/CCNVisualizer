@@ -320,8 +320,7 @@ body:not(.sidebar-collapsed) .main-area {
   min-width: 0;
 }
 
-.filter-bar .search-field,
-.filter-bar #dataset-select {
+.filter-bar .search-field {
   min-width: min(100%, 224px);
 }
 
