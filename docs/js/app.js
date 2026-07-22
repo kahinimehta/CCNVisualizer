@@ -736,20 +736,20 @@ const CHART_PALETTE = [
   "#A9A9A9", // gray — Methods and theory
 ];
 
-// Year colors jump around the hue wheel (not a smooth rainbow) so adjacent
-// conference years stay easy to separate on the UMAP map and legend.
-const YEAR_PALETTE = [
-  "#FF6B00", // 2017 vivid orange
-  "#00B4D8", // 2018 cyan
-  "#9B5DE5", // 2019 purple
-  "#2DC653", // 2020 green
-  "#FF006E", // 2021 hot pink
-  "#FFD60A", // 2022 yellow
-  "#0077B6", // 2023 deep blue
-  "#E76F51", // 2024 coral
-  "#80ED99", // 2025 mint
-  "#C77DFF", // 2026 lavender
-];
+// Fixed year→color map (not index-in-list). Missing years like 2020/2021 must
+// not shift later years onto neighboring hues (e.g. 2026 onto 2017-like orange).
+const YEAR_COLORS = {
+  2017: "#FF6B00", // vivid orange
+  2018: "#00B4D8", // cyan
+  2019: "#9B5DE5", // purple
+  2020: "#2DC653", // green
+  2021: "#FF006E", // hot pink
+  2022: "#FFD60A", // yellow
+  2023: "#0077B6", // deep blue
+  2024: "#E76F51", // coral
+  2025: "#80ED99", // mint
+  2026: "#C77DFF", // lavender
+};
 
 const KPI_ICONS = {
   submissions:
@@ -1217,12 +1217,12 @@ function themeColor(theme) {
 }
 
 function yearColor(year) {
-  const fallbackYears = [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026];
-  const years = state.data?.metadata?.years?.length ? state.data.metadata.years : fallbackYears;
-  const index = years.indexOf(Number(year));
-  if (index >= 0) return YEAR_PALETTE[index % YEAR_PALETTE.length];
-  const fallbackIndex = fallbackYears.indexOf(Number(year));
-  return YEAR_PALETTE[(fallbackIndex >= 0 ? fallbackIndex : 0) % YEAR_PALETTE.length];
+  const key = Number(year);
+  if (YEAR_COLORS[key]) return YEAR_COLORS[key];
+  // Fallback for unexpected years: stable hash into the fixed palette.
+  const palette = Object.values(YEAR_COLORS);
+  const index = Number.isFinite(key) ? Math.abs(key) % palette.length : 0;
+  return palette[index];
 }
 
 function appendEmbeddingDot(parent, radius, options = {}) {
