@@ -538,17 +538,23 @@ def scrape_meetingtrakr_year(year: int) -> list[Submission]:
                 submissions.append(future.result())
             except Exception as exc:  # noqa: BLE001
                 print(f"  Warning: failed {year} poster {item.get('id')}: {exc}")
+                title = item.get("title", "")
+                authors = item.get("authors", "")
+                if authors_are_thin(authors):
+                    index_authors = authors_from_abstract_pdf_index(year, title)
+                    if index_authors:
+                        authors = index_authors
                 author_keywords, extracted_keywords, keywords = resolve_keyword_fields(
                     author_keywords=[],
                     topic_area=item.get("topic_area", ""),
-                    title=item.get("title", ""),
+                    title=title,
                 )
                 submissions.append(
                     Submission(
                         id=item["id"],
                         year=year,
-                        title=item.get("title", ""),
-                        authors=item.get("authors", ""),
+                        title=title,
+                        authors=authors,
                         abstract="",
                         author_keywords=author_keywords,
                         extracted_keywords=extracted_keywords,
