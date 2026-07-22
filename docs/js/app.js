@@ -728,10 +728,10 @@ const CHART_PALETTE = [
   "#2AFC53", // Vision
   "#47F3D3", // Perception
   "#1280E3", // Language/auditory neuroscience
-  "#87A1F2", // AI, LLM, & Neural Networks
-  "#2A2EFC", // Memory
-  "#604AE2", // Social cognition & theory of mind
-  "#6F13F0", // Attention & cognitive control / executive function
+  "#5500FF", // AI, LLM, & Neural Networks — vivid violet (not near Attention)
+  "#7461EF", // Memory
+  "#8920B6", // Social cognition & theory of mind
+  "#20B693", // Attention & cognitive control — teal (far from AI/Memory/Social)
   "#FA8BCC", // Clinical / computational psychiatry
   "#E21254", // Methods and theory
 ];
