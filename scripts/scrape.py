@@ -212,14 +212,17 @@ def resolve_keyword_fields(
     return [], extracted, extracted
 
 
-def backfill_keyword_fields(payload: dict) -> dict:
+def backfill_keyword_fields(payload: dict, *, try_pdf: bool = True) -> dict:
     """Populate author_keywords / extracted_keywords on existing JSON without re-scraping."""
 
     for submission in payload.get("submissions", []):
-        if needs_pdf_keyword_refresh(submission):
-            enrich_submission_keywords(submission, try_pdf=True)
-        else:
-            enrich_submission_keywords(submission, try_pdf=False)
+        try:
+            want_pdf = try_pdf and needs_pdf_keyword_refresh(submission)
+            enrich_submission_keywords(submission, try_pdf=want_pdf)
+        except Exception as exc:  # noqa: BLE001
+            print(
+                f"  Warning: keyword backfill failed for {submission.get('id')}: {exc}"
+            )
 
     payload.setdefault("metadata", {})["keyword_source"] = KEYWORD_SOURCE_NOTE
     return payload
@@ -271,6 +274,60 @@ def is_noise_paragraph(text: str) -> bool:
     )
 
 
+def author_block_score(text: str) -> int:
+    """Higher score = more complete author list (vs a lone presenter name)."""
+    if not text:
+        return 0
+    score = 0
+    if ";" in text:
+        score += 4
+    if re.search(r"\d", text):
+        score += 2
+    if re.search(r"\([a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}\)", text, re.I):
+        score += 3
+    # Multiple "First Last" style tokens separated by commas (accent-tolerant).
+    name_token = r"[A-ZÀ-ÖØ-Þ][A-Za-zÀ-ÖØ-öø-ÿ'’´`\-.]*"
+    name_like = re.findall(rf"\b{name_token}(?:\s+{name_token}){{1,3}}\b", text, re.U)
+    if len(name_like) >= 2:
+        score += 5
+    elif len(name_like) == 1:
+        score += 1
+    # Comma/and-separated people even when accents break the name regex.
+    people = [part.strip() for part in re.split(r"\s*,\s*|\s+;\s*|\s+and\s+", text) if part.strip()]
+    if len(people) >= 2:
+        score += 3
+    if "," in text:
+        score += 1
+    score += min(len(text) // 40, 6)
+    return score
+
+
+def looks_like_author_block(text: str, paragraph_html: str = "") -> bool:
+    if not text or text.startswith("Presenter:") or text.startswith("Topic Area:"):
+        return False
+    if len(text) > 700:
+        return False
+    lowered = text.lower()
+    if any(token in lowered for token in ("abstract", "keywords:", "extended abstract", "poster session")):
+        return False
+    if "<sup>" in paragraph_html:
+        return True
+    if re.search(r"\([a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}\)", text, re.I):
+        return True
+    # "Name 1 , Name 2 ; 1 Affiliation"
+    if re.search(r"[A-Za-z]\s+\d+\s*,", text) and ";" in text:
+        return True
+    name_like = re.findall(r"\b[A-Z][A-Za-z'’\-]+(?:\s+[A-Z][A-Za-z'’\-]+){1,3}\b", text)
+    return len(name_like) >= 2 and "," in text
+
+
+def authors_are_thin(authors: str) -> bool:
+    """True when we only have a presenter-style single name."""
+    if not authors or not authors.strip():
+        return True
+    return author_block_score(authors) < 4
+
+
 def parse_meetingtrakr_detail(html: str) -> dict:
     soup = BeautifulSoup(html, "lxml")
     rich = soup.select_one(".fl-rich-text")
@@ -285,6 +342,7 @@ def parse_meetingtrakr_detail(html: str) -> dict:
     poster_number = clean_text(poster_match.group(1)) if poster_match else ""
 
     authors = ""
+    presenter = ""
     abstract = ""
     topic_area = ""
     keywords: list[str] = []
@@ -299,13 +357,15 @@ def parse_meetingtrakr_detail(html: str) -> dict:
         if is_noise_paragraph(text):
             continue
         if text.startswith("Presenter:"):
-            authors = clean_text(text.replace("Presenter:", ""))
+            # Keep as fallback only — never overwrite a fuller author block.
+            presenter = clean_text(text.replace("Presenter:", "", 1))
             continue
         if text.startswith("Topic Area:"):
-            topic_area = clean_text(text.replace("Topic Area:", ""))
+            topic_area = clean_text(text.replace("Topic Area:", "", 1))
             continue
-        if not authors and ("<sup>" in str(p) or re.search(r"\([a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}\)", text, re.I)):
-            authors = text
+        if looks_like_author_block(text, str(p)):
+            if author_block_score(text) >= author_block_score(authors):
+                authors = text
             continue
         if len(text) > 120:
             candidate_abstracts.append(text)
@@ -315,7 +375,8 @@ def parse_meetingtrakr_detail(html: str) -> dict:
 
     return {
         "title": title,
-        "authors": authors,
+        "authors": authors or presenter,
+        "presenter": presenter,
         "abstract": abstract,
         "topic_area": topic_area,
         "keywords": keywords,
@@ -428,6 +489,21 @@ def scrape_meetingtrakr_year(year: int) -> list[Submission]:
         topic_area = detail.get("topic_area") or item.get("topic_area", "")
         title = detail.get("title") or item.get("title", "")
         abstract = detail.get("abstract", "")
+        authors = detail.get("authors") or item.get("authors", "")
+        # 2025/2026 pages often expose the full list before Presenter; if we still
+        # only have a thin presenter string, pull names from the PDF header.
+        if authors_are_thin(authors):
+            pdf_authors = authors_from_pdf(
+                year,
+                source_url=item["detail_url"],
+                html=detail_html,
+            )
+            if pdf_authors and author_block_score(pdf_authors) >= author_block_score(authors):
+                authors = pdf_authors
+        if authors_are_thin(authors):
+            index_authors = authors_from_abstract_pdf_index(year, title)
+            if index_authors and author_block_score(index_authors) >= author_block_score(authors):
+                authors = index_authors
         author_keywords, extracted_keywords, keywords = finalize_submission_keywords(
             year=year,
             title=title,
@@ -436,12 +512,14 @@ def scrape_meetingtrakr_year(year: int) -> list[Submission]:
             html_keywords=detail.get("keywords", []),
             source_url=item["detail_url"],
             detail_html=detail_html,
+            # Keywords from HTML when present; PDF keyword mining is optional via --refresh-keywords.
+            try_pdf=False,
         )
         return Submission(
             id=item["id"],
             year=year,
             title=title,
-            authors=detail.get("authors") or item.get("authors", ""),
+            authors=authors,
             abstract=abstract,
             author_keywords=author_keywords,
             extracted_keywords=extracted_keywords,
@@ -760,6 +838,7 @@ def fetch_2026_listings() -> list[dict]:
 
 
 def scrape_2026_year() -> list[Submission]:
+    """Fetch 2026 search listings, then each poster detail for full author lists."""
     print(f"Fetching CCN 2026 listings from {SEARCH_2026_URL}")
     listings = fetch_2026_listings()
     print(f"  Found {len(listings)} posters for 2026")
@@ -767,43 +846,118 @@ def scrape_2026_year() -> list[Submission]:
     submissions: list[Submission] = []
     carried = 0
     missing = 0
+    year = 2026
 
+    work_items: list[dict] = []
     for item in listings:
         poster = unique_2026_poster_number(item["poster_number"], item["poster_id"])
-        title = item["title"]
-        topic_label = clean_text(item["topic_area"])
-        topic_area = topic_label.lower() if topic_label else ""
-        prior = match_prior_submission(title, prior_by_title)
-        abstract = clean_text(prior.get("abstract", "")) if prior else ""
-        if abstract:
-            carried += 1
-        else:
-            missing += 1
-        author_keywords, extracted_keywords, keywords = resolve_keyword_fields(
-            author_keywords=[topic_label] if topic_label else [],
-            topic_area=topic_area,
-            title=title,
-        )
         poster_id = item["poster_id"]
         detail_url = f"{SEARCH_2026_BASE}/poster/?id={poster_id}" if poster_id else SEARCH_2026_BASE
-        submissions.append(
-            Submission(
-                id=f"2026-{poster or title[:24]}",
-                year=2026,
-                title=title,
-                authors=item["presenter"],
-                abstract=abstract,
-                author_keywords=author_keywords,
-                extracted_keywords=extracted_keywords,
-                keywords=keywords,
-                topic_area=topic_area,
-                poster_number=poster,
-                source_url=detail_url,
-                submission_type="poster",
-            )
+        work_items.append(
+            {
+                "id": f"2026-{poster or item['title'][:24]}",
+                "poster_id": poster_id,
+                "year": year,
+                "title": item["title"],
+                "authors": item.get("presenter", ""),
+                "topic_area": clean_text(item.get("topic_area", "")),
+                "poster_number": poster,
+                "detail_url": detail_url,
+            }
         )
 
-    print(f"  Abstracts carried forward: {carried}; missing: {missing}")
+    def fetch_detail(item: dict) -> tuple[Submission, bool]:
+        detail_html = ""
+        detail: dict = {}
+        if item.get("detail_url") and item["detail_url"] != SEARCH_2026_BASE:
+            detail_html = fetch(item["detail_url"])
+            detail = parse_meetingtrakr_detail(detail_html)
+
+        title = detail.get("title") or item.get("title", "")
+        topic_label = detail.get("topic_area") or item.get("topic_area", "")
+        topic_area = topic_label.lower() if topic_label else ""
+        authors = detail.get("authors") or item.get("authors", "")
+        if authors_are_thin(authors) and detail_html:
+            pdf_authors = authors_from_pdf(year, source_url=item["detail_url"], html=detail_html)
+            if pdf_authors and author_block_score(pdf_authors) >= author_block_score(authors):
+                authors = pdf_authors
+
+        prior = match_prior_submission(title, prior_by_title)
+        abstract = clean_text(detail.get("abstract", "")) or (
+            clean_text(prior.get("abstract", "")) if prior else ""
+        )
+        had_abstract = bool(abstract)
+        author_keywords, extracted_keywords, keywords = finalize_submission_keywords(
+            year=year,
+            title=title,
+            abstract=abstract,
+            topic_area=topic_area,
+            html_keywords=detail.get("keywords") or ([topic_label] if topic_label else []),
+            source_url=item["detail_url"],
+            detail_html=detail_html or None,
+            try_pdf=False,
+        )
+        submission = Submission(
+            id=item["id"],
+            year=year,
+            title=title,
+            authors=authors,
+            abstract=abstract,
+            author_keywords=author_keywords,
+            extracted_keywords=extracted_keywords,
+            keywords=keywords,
+            topic_area=topic_area,
+            poster_number=item.get("poster_number", ""),
+            source_url=item["detail_url"],
+            submission_type="poster",
+        )
+        return submission, had_abstract
+
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        futures = {executor.submit(fetch_detail, item): item for item in work_items}
+        for future in as_completed(futures):
+            item = futures[future]
+            try:
+                submission, had_abstract = future.result()
+                submissions.append(submission)
+                if had_abstract:
+                    carried += 1
+                else:
+                    missing += 1
+            except Exception as exc:  # noqa: BLE001
+                print(f"  Warning: failed 2026 poster {item.get('id')}: {exc}")
+                title = item.get("title", "")
+                topic_label = item.get("topic_area", "")
+                topic_area = topic_label.lower() if topic_label else ""
+                prior = match_prior_submission(title, prior_by_title)
+                abstract = clean_text(prior.get("abstract", "")) if prior else ""
+                if abstract:
+                    carried += 1
+                else:
+                    missing += 1
+                author_keywords, extracted_keywords, keywords = resolve_keyword_fields(
+                    author_keywords=[topic_label] if topic_label else [],
+                    topic_area=topic_area,
+                    title=title,
+                )
+                submissions.append(
+                    Submission(
+                        id=item["id"],
+                        year=year,
+                        title=title,
+                        authors=item.get("authors", ""),
+                        abstract=abstract,
+                        author_keywords=author_keywords,
+                        extracted_keywords=extracted_keywords,
+                        keywords=keywords,
+                        topic_area=topic_area,
+                        poster_number=item.get("poster_number", ""),
+                        source_url=item.get("detail_url", ""),
+                        submission_type="poster",
+                    )
+                )
+
+    print(f"  Abstracts available: {carried}; missing: {missing}")
     submissions.sort(key=lambda s: s.poster_number or s.title)
     kept = [submission for submission in submissions if not is_gac_update(submission.title)]
     excluded = len(submissions) - len(kept)
@@ -903,10 +1057,97 @@ def write_outputs(payload: dict) -> dict:
     return payload
 
 
+def merge_scraped_years(existing: dict, scraped: dict, years: Iterable[int]) -> dict:
+    """Replace only the requested years in an existing submissions.json payload.
+
+    Preserves classification fields (assigned_topics / primary_theme / secondary_topics)
+    from prior rows when titles or ids still match.
+    """
+    year_set = {int(year) for year in years}
+    kept = [sub for sub in existing.get("submissions", []) if int(sub.get("year") or 0) not in year_set]
+
+    prior_by_title: dict[tuple[int, str], dict] = {}
+    prior_by_id: dict[tuple[int, str], dict] = {}
+    for sub in existing.get("submissions", []):
+        year = int(sub.get("year") or 0)
+        if year not in year_set:
+            continue
+        title_key = normalize_match_title(sub.get("title", ""))
+        if title_key:
+            prior_by_title[(year, title_key)] = sub
+        sub_id = str(sub.get("id") or "")
+        if sub_id:
+            prior_by_id[(year, sub_id)] = sub
+
+    preserve_fields = (
+        "primary_theme",
+        "secondary_topics",
+        "assigned_topics",
+        "author_keywords",
+        "extracted_keywords",
+        "keywords",
+    )
+    incoming: list[dict] = []
+    for sub in scraped.get("submissions", []):
+        merged = dict(sub)
+        year = int(merged.get("year") or 0)
+        prior = prior_by_id.get((year, str(merged.get("id") or ""))) or prior_by_title.get(
+            (year, normalize_match_title(merged.get("title", "")))
+        )
+        if prior:
+            for field_name in preserve_fields:
+                if prior.get(field_name) and not merged.get(field_name):
+                    merged[field_name] = prior[field_name]
+            if prior.get("abstract") and not merged.get("abstract"):
+                merged["abstract"] = prior["abstract"]
+            # Keep a fuller prior author list when the new scrape only got a presenter.
+            prior_authors = prior.get("authors") or ""
+            new_authors = merged.get("authors") or ""
+            if author_block_score(prior_authors) > author_block_score(new_authors):
+                merged["authors"] = prior_authors
+        incoming.append(merged)
+
+    merged_subs = kept + incoming
+    as_objs = [
+        Submission(
+            id=str(sub.get("id", "")),
+            year=int(sub.get("year") or 0),
+            title=sub.get("title", ""),
+            authors=sub.get("authors", ""),
+            abstract=sub.get("abstract", ""),
+            author_keywords=list(sub.get("author_keywords") or []),
+            extracted_keywords=list(sub.get("extracted_keywords") or []),
+            keywords=list(sub.get("keywords") or []),
+            topic_area=sub.get("topic_area", ""),
+            track=sub.get("track", ""),
+            poster_number=str(sub.get("poster_number") or ""),
+            source_url=sub.get("source_url", ""),
+            submission_type=sub.get("submission_type", "poster"),
+        )
+        for sub in merged_subs
+    ]
+    stats = compute_stats(as_objs)
+    metadata = dict(existing.get("metadata") or {})
+    metadata.update(
+        {
+            "scraped_at": datetime.now(timezone.utc).isoformat(),
+            "source": metadata.get("source") or "https://ccneuro.org archives (2017-2026)",
+            "years": sorted({int(sub.get("year") or 0) for sub in merged_subs}),
+            "total_count": len(merged_subs),
+            "merged_years": sorted(year_set),
+        }
+    )
+    return {
+        "metadata": metadata,
+        "submissions": merged_subs,
+        "stats": serialize_stats(stats),
+    }
+
+
 CACHE_DIR = ROOT / "data" / "pdf_cache"
 
-# Years where proceedings / authored PDFs may contain a keyword line.
-YEARS_WITH_PDF = (2017, 2018, 2019, 2022, 2023, 2024, 2025)
+# Years where proceedings / authored PDFs may contain keywords or author lines.
+YEARS_WITH_PDF = (2017, 2018, 2019, 2022, 2023, 2024, 2025, 2026)
 
 KEYWORD_SOURCE_NOTE = (
     "author_keywords prefer author-provided fields (poster HTML, proceedings PDF, 2026 topic areas); "
@@ -916,14 +1157,14 @@ KEYWORD_SOURCE_NOTE = (
 
 def parse_pdf_url_from_html(html: str, base_url: str) -> str:
     for match in re.finditer(r'href=["\']([^"\']+\.pdf(?:\?[^"\']*)?)["\']', html, re.I):
-        url = match.group(1)
+        url = unescape(match.group(1))
         lowered = url.lower()
         if any(token in lowered for token in ("proceedings", "abstracts/", "/pdf/")) or lowered.endswith(".pdf"):
             return urljoin(base_url, url)
 
     onclick = re.search(r"window\.open\(['\"]([^'\"]+\.pdf[^'\"]*)['\"]", html, re.I)
     if onclick:
-        return urljoin(base_url, onclick.group(1))
+        return urljoin(base_url, unescape(onclick.group(1)))
     return ""
 
 
@@ -987,6 +1228,289 @@ def parse_keywords_from_pdf_text(text: str) -> list[str]:
     return parse_2017_keywords(text)
 
 
+def parse_authors_from_pdf_text(text: str) -> str:
+    """Best-effort author list from the PDF header (before Abstract/Keywords)."""
+    if not text:
+        return ""
+
+    # Keep a short header window; authors sit under the title.
+    header = text[:3500]
+    cutoff = re.search(
+        r"(?im)^\s*(Abstract|Keywords?|Introduction|1\s+Introduction)\b",
+        header,
+    )
+    if cutoff:
+        header = header[: cutoff.start()]
+    # Some PDFs glue "FranceAbstract" with no word boundary before Abstract.
+    header = re.split(r"(?i)(?<![A-Za-z])Abstract(?![A-Za-z])", header, maxsplit=1)[0]
+
+    # Allow initials like "A." / "U" inside names.
+    name_token = r"(?:[A-ZÀ-ÖØ-Þ]\.?|[A-ZÀ-ÖØ-Þ][A-Za-zÀ-ÖØ-öø-ÿ'’´`\-]+)"
+    name_pattern = rf"{name_token}(?:\s+{name_token}){{1,4}}"
+    skip_names = {"abstract", "keywords", "introduction", "extended abstract"}
+    junk_tokens = {
+        "canada",
+        "france",
+        "usa",
+        "uk",
+        "germany",
+        "israel",
+        "china",
+        "japan",
+        "italy",
+        "spain",
+        "tel",
+        "aviv",
+        "network",
+        "neural",
+        "convolutional",
+        "models",
+        "model",
+        "brain",
+        "human",
+        "system",
+        "layer",
+        "tasks",
+        "task",
+        "data",
+        "collection",
+        "complete",
+        "diverse",
+        "naturalistic",
+        "controlled",
+        "build",
+        "neuroai",
+        "manifold",
+        "riemannian",
+        "encoding",
+        "profile",
+        "profiles",
+        "spectral",
+        "information",
+        "cognitive",
+        "sensory",
+        "primate",
+        "voice",
+        "patches",
+        "neurons",
+        "multilevel",
+        "linguistic",
+        "predictions",
+        "prediction",
+        "the",
+        "and",
+        "for",
+        "of",
+        "in",
+        "to",
+        "a",
+        "an",
+    }
+    affiliation_hints = (
+        "university",
+        "universit",
+        "institute",
+        "institut",
+        "college",
+        "laboratory",
+        "lab ",
+        "school of",
+        "department",
+        "département",
+        "departement",
+        "centre",
+        "center",
+        "hospital",
+        "hôpital",
+        "cnrs",
+        "inria",
+        "umr",
+        "equal contribution",
+        "correspondence",
+        "presenting",
+        "co-author",
+        "mila",
+        "québec",
+        "quebec",
+        "montréal",
+        "montreal",
+        "marseille",
+        "équipe",
+        "team",
+    )
+
+    def add_name(raw: str, bucket: list[str]) -> None:
+        name = clean_text(raw)
+        name = re.sub(r"\s*[\d†‡*#]+\s*$", "", name).strip(" ,;")
+        if not name or name.lower() in skip_names or name in bucket:
+            return
+        parts = [part for part in name.split() if part]
+        while parts and parts[0].lower().strip(".") in junk_tokens:
+            parts.pop(0)
+        while parts and parts[-1].lower().strip(".") in junk_tokens:
+            parts.pop()
+        # Title text sometimes prefixes the first author; keep the trailing name.
+        if len(parts) > 3:
+            parts = parts[-2:]
+        if len(parts) < 2 or len(parts) > 5:
+            return
+        name = " ".join(parts)
+        lowered_name = name.lower()
+        # Use word boundaries so short hints like "mila" do not match "Camila".
+        if any(re.search(rf"(?<![a-z]){re.escape(hint)}(?![a-z])", lowered_name) for hint in affiliation_hints):
+            return
+        if name not in bucket:
+            bucket.append(name)
+
+    compact = re.sub(r"\s+", " ", header)
+    email_names: list[str] = []
+    for match in re.finditer(r"\([^)]+@[^)]+\)", compact):
+        before = compact[: match.start()].rstrip()
+        before = re.sub(r"[\d†‡*#\s]+$", "", before)
+        window = before[-220:]
+        # Comma-separated author list ending at this email (common on 2025 PDFs).
+        list_match = re.search(
+            rf"({name_pattern}(?:\s*,\s*{name_pattern})+)\s*$",
+            window,
+        )
+        if list_match:
+            for part in list_match.group(1).split(","):
+                add_name(part, email_names)
+            continue
+        # Otherwise take only the immediately preceding 2–4 name tokens.
+        imm = re.search(rf"({name_pattern})\s*$", window)
+        if imm:
+            add_name(imm.group(1), email_names)
+
+    if len(email_names) >= 2:
+        return ", ".join(email_names)
+
+    lines = [clean_text(line) for line in header.splitlines()]
+    lines = [line for line in lines if line]
+    if not lines:
+        return ", ".join(email_names) if email_names else ""
+
+    body_lines = lines[1:] if len(lines) > 1 else lines
+    names: list[str] = list(email_names)
+
+    for line in body_lines:
+        lowered = line.lower()
+        if any(hint in lowered for hint in affiliation_hints):
+            continue
+        if re.search(r"https?://|www\.", lowered):
+            continue
+        match = re.match(
+            rf"^({name_pattern})(?:\s*[\d†‡*#]+)?(?:\s*\([^)]+@[^)]+\))?\s*$",
+            line,
+        )
+        if match:
+            add_name(match.group(1), names)
+            continue
+        if looks_like_author_block(line):
+            return line
+
+    if len(names) >= 2:
+        return ", ".join(names)
+    if len(names) == 1:
+        return names[0]
+    return ""
+
+
+_ABSTRACT_PDF_INDEX_CACHE: dict[int, list[str]] = {}
+
+
+def list_abstract_pdf_filenames(year: int) -> list[str]:
+    """Directory listing of /abstract_pdf/ for years that publish per-poster PDFs."""
+    if year in _ABSTRACT_PDF_INDEX_CACHE:
+        return _ABSTRACT_PDF_INDEX_CACHE[year]
+    url = f"https://{year}.ccneuro.org/abstract_pdf/"
+    try:
+        html = fetch(url)
+    except Exception:  # noqa: BLE001
+        _ABSTRACT_PDF_INDEX_CACHE[year] = []
+        return []
+    names = sorted(
+        {
+            unescape(match.group(1))
+            for match in re.finditer(r'href=["\']([^"\']+\.pdf)["\']', html, re.I)
+            if not match.group(1).startswith("?")
+        }
+    )
+    _ABSTRACT_PDF_INDEX_CACHE[year] = names
+    return names
+
+
+def authors_from_abstract_pdf_index(year: int, title: str) -> str:
+    """Match a poster title to /abstract_pdf/ filenames when the detail page is down."""
+    if year not in YEARS_WITH_PDF or not title:
+        return ""
+    files = list_abstract_pdf_filenames(year)
+    if not files:
+        return ""
+
+    def norm(value: str) -> str:
+        return re.sub(r"[^a-z0-9]+", "", (value or "").lower())
+
+    title_norm = norm(title)
+    title_words = re.findall(r"[A-Za-z0-9]+", title)
+    scored: list[tuple[float, int, str]] = []
+    for filename in files:
+        body = re.sub(rf"^[A-Za-z'’\-]+_{year}_", "", filename.rsplit("/", 1)[-1])
+        body = body.rsplit(".", 1)[0]
+        score = difflib.SequenceMatcher(None, title_norm, norm(body)).ratio()
+        file_words = {word.lower() for word in re.findall(r"[A-Za-z0-9]+", body)}
+        title_set = {word.lower() for word in title_words}
+        if title_set:
+            score = max(score, len(file_words & title_set) / len(title_set))
+        scored.append((score, len(filename), filename))
+    scored.sort(key=lambda item: (-item[0], item[1]))
+
+    for score, _, filename in scored[:5]:
+        if score < 0.5:
+            break
+        pdf_url = urljoin(f"https://{year}.ccneuro.org/abstract_pdf/", filename)
+        try:
+            authors = parse_authors_from_pdf_text(pdf_text_from_url(pdf_url))
+        except Exception:  # noqa: BLE001
+            continue
+        if authors and not authors_are_thin(authors):
+            return authors
+    return ""
+
+
+def authors_from_pdf(
+    year: int,
+    source_url: str = "",
+    html: str | None = None,
+    *,
+    fetch_html: bool = False,
+) -> str:
+    if year not in YEARS_WITH_PDF:
+        return ""
+    base_url = f"https://{year}.ccneuro.org/"
+    if year == 2017 and source_url.lower().endswith(".pdf"):
+        try:
+            return parse_authors_from_pdf_text(pdf_text_from_url(source_url))
+        except Exception:  # noqa: BLE001
+            return ""
+
+    if html is None and fetch_html and source_url and not source_url.lower().endswith(".pdf"):
+        try:
+            html = fetch(source_url)
+        except Exception:  # noqa: BLE001
+            html = None
+
+    if not html:
+        return ""
+    pdf_url = parse_pdf_url_from_html(html, base_url)
+    if not pdf_url:
+        return ""
+    try:
+        return parse_authors_from_pdf_text(pdf_text_from_url(pdf_url))
+    except Exception:  # noqa: BLE001
+        return ""
+
+
 def parse_2017_pdf_fields(text: str) -> dict[str, str | list[str]]:
     abstract_match = re.search(
         r"Presentation Abstract Summary\s+(.+?)(?:\nPaper Upload|\nCo-author|\Z)",
@@ -1010,7 +1534,10 @@ def fetch_pdf_bytes(url: str) -> bytes:
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     cache_file = _cache_path(url, ".pdf")
     if cache_file.exists():
-        return cache_file.read_bytes()
+        cached = cache_file.read_bytes()
+        if cached.startswith(b"%PDF"):
+            return cached
+        cache_file.unlink(missing_ok=True)
 
     response = SESSION.get(url, timeout=60)
     response.raise_for_status()
@@ -1026,11 +1553,19 @@ def extract_pdf_text(pdf_bytes: bytes) -> str:
     return "".join((page.extract_text() or "") for page in reader.pages)
 
 
+def sanitize_pdf_text(text: str) -> str:
+    """Drop invalid Unicode surrogates that extracted PDF text sometimes contains."""
+    return text.encode("utf-8", errors="ignore").decode("utf-8", errors="ignore")
+
+
 def pdf_text_from_url(url: str) -> str:
     text_cache = _cache_path(url, ".txt")
     if text_cache.exists():
-        return text_cache.read_text(encoding="utf-8")
-    text = extract_pdf_text(fetch_pdf_bytes(url))
+        try:
+            return text_cache.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            text_cache.unlink(missing_ok=True)
+    text = sanitize_pdf_text(extract_pdf_text(fetch_pdf_bytes(url)))
     text_cache.write_text(text, encoding="utf-8")
     return text
 
@@ -1038,7 +1573,11 @@ def pdf_text_from_url(url: str) -> str:
 def keywords_from_pdf_url(url: str) -> list[str]:
     if not url:
         return []
-    return parse_keywords_from_pdf_text(pdf_text_from_url(url))
+    try:
+        return parse_keywords_from_pdf_text(pdf_text_from_url(url))
+    except Exception as exc:  # noqa: BLE001
+        print(f"    keyword PDF fetch failed: {url} ({exc})")
+        return []
 
 
 def keywords_from_detail_html(html: str, base_url: str) -> list[str]:
@@ -1058,18 +1597,21 @@ def author_keywords_from_pdf(
     if year not in YEARS_WITH_PDF:
         return []
 
-    if year == 2017 and source_url.lower().endswith(".pdf"):
-        return keywords_from_pdf_url(source_url)
+    try:
+        if year == 2017 and source_url.lower().endswith(".pdf"):
+            return keywords_from_pdf_url(source_url)
 
-    base_url = f"https://{year}.ccneuro.org/"
-    html = detail_html
-    if html is None and fetch_html and source_url and not source_url.lower().endswith(".pdf"):
-        html = SESSION.get(source_url, timeout=45).text
+        base_url = f"https://{year}.ccneuro.org/"
+        html = detail_html
+        if html is None and fetch_html and source_url and not source_url.lower().endswith(".pdf"):
+            html = SESSION.get(source_url, timeout=45).text
 
-    if html:
-        pdf_url = parse_pdf_url_from_html(html, base_url)
-        if pdf_url:
-            return keywords_from_pdf_url(pdf_url)
+        if html:
+            pdf_url = parse_pdf_url_from_html(html, base_url)
+            if pdf_url:
+                return keywords_from_pdf_url(pdf_url)
+    except Exception as exc:  # noqa: BLE001
+        print(f"    author keyword PDF failed for {source_url}: {exc}")
     return []
 
 
@@ -1225,7 +1767,19 @@ def main() -> None:
         return
     years = [2024, 2025] if args.quick else args.years
     payload = scrape_all(years)
-    write_outputs(backfill_keyword_fields(payload))
+    path = DATA_DIR / "submissions.json"
+    if years and path.exists():
+        with path.open(encoding="utf-8") as fh:
+            existing = json.load(fh)
+        payload = merge_scraped_years(existing, payload, years)
+        print(
+            f"Merged years {sorted(set(years))} into existing submissions.json "
+            f"({payload['metadata']['total_count']} total)."
+        )
+    # Persist scrape results before keyword normalization so a later failure cannot lose them.
+    write_outputs(payload)
+    # Align keyword list fields without a second PDF crawl (use --refresh-keywords for that).
+    write_outputs(backfill_keyword_fields(payload, try_pdf=False))
     print(f"Done. Scraped {payload['metadata']['total_count']} submissions.")
 
 if __name__ == "__main__":

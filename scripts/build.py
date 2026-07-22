@@ -48,6 +48,8 @@ GOOGLE_TOPICS_PATH = ROOT / "data" / "google_topics.json"
 LLM_CACHE_PATH = ROOT / "data" / "llm_theme_cache.json"
 EMBEDDING_PATH = ROOT / "data" / "embeddings_all.json"
 CSV_OUTPUT_PATHS = (ROOT / "data" / "abstracts.csv", ROOT / "docs" / "data" / "abstracts.csv")
+CSV_TWO_TOPICS_PATH = ROOT / "docs" / "data" / "abstracts_2_topics.csv"
+CSV_V3_PATH = ROOT / "docs" / "data" / "abstract_v_3.csv"
 LIST_DELIMITER = " | "
 
 DEFAULT_TOPICS = [
@@ -657,14 +659,42 @@ def build_csv_rows(payload: dict, embeddings: dict) -> list[dict[str, str]]:
     return rows
 
 
+def derive_two_topic_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
+    derived: list[dict[str, str]] = []
+    for row in rows:
+        topics = [topic for topic in row.get("assigned_topics", "").split(LIST_DELIMITER) if topic]
+        derived.append({**row, "assigned_topics": join_list(topics[:2])})
+    return derived
+
+
+def derive_v3_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
+    """Drop Methods and theory unless it is in the top two assigned topics."""
+    derived: list[dict[str, str]] = []
+    for row in rows:
+        topics = [topic for topic in row.get("assigned_topics", "").split(LIST_DELIMITER) if topic]
+        kept = [
+            topic
+            for index, topic in enumerate(topics)
+            if topic != "Methods and theory" or index < 2
+        ]
+        derived.append({**row, "assigned_topics": join_list(kept)})
+    return derived
+
+
+def write_csv_rows(path: Path, rows: list[dict[str, str]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8", newline="") as fh:
+        writer = csv.DictWriter(fh, fieldnames=CSV_FIELDS)
+        writer.writeheader()
+        writer.writerows(rows)
+    print(f"Wrote {path}")
+
+
 def write_csv(rows: list[dict[str, str]]) -> None:
     for path in CSV_OUTPUT_PATHS:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        with path.open("w", encoding="utf-8", newline="") as fh:
-            writer = csv.DictWriter(fh, fieldnames=CSV_FIELDS)
-            writer.writeheader()
-            writer.writerows(rows)
-        print(f"Wrote {path}")
+        write_csv_rows(path, rows)
+    write_csv_rows(CSV_TWO_TOPICS_PATH, derive_two_topic_rows(rows))
+    write_csv_rows(CSV_V3_PATH, derive_v3_rows(rows))
 
 
 def filter_gac_updates(payload: dict) -> dict:
