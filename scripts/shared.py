@@ -219,6 +219,78 @@ def normalize_field_text(text: str) -> str:
     return re.sub(r"\s+", " ", cleaned).strip()
 
 
+def normalize_author_names(authors: str) -> str:
+    """Keep only person names: drop emails, affiliation numbers, and university footnotes.
+
+    Example:
+      "Ada Lovelace 1 ( ada@x.edu ), Alan Turing 2,3 ; 1 Uni A, 2 Uni B, 3 Lab C"
+      → "Ada Lovelace, Alan Turing"
+    """
+    if not authors:
+        return ""
+
+    text = normalize_field_text(authors)
+    lowered_full = text.lower()
+    # Scrape noise sometimes lands in the author field.
+    if lowered_full.startswith("presentation time"):
+        return ""
+
+    # Name block is before affiliation footnotes ("… ; 1 University…").
+    text = text.split(";", 1)[0].strip()
+    if not text:
+        return ""
+
+    # Drop emails and empty parentheticals (keep nicknames like "Lune (Pierre) Bellec").
+    text = re.sub(r"\([^)]*@[^)]*\)", " ", text)
+    text = re.sub(r"\(\s*\)", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+
+    affiliation_hints = (
+        "university",
+        "université",
+        "institute",
+        "institut",
+        "college",
+        "hospital",
+        "department",
+        "dept.",
+        "school of",
+        "laboratory",
+        "lab ",
+        "centre",
+        "center",
+        "ctr.",
+        "neurosci",
+        "republic of",
+        "united kingdom",
+        "korea",
+    )
+
+    names: list[str] = []
+    for part in re.split(r"\s*,\s*", text):
+        part = part.strip()
+        if not part:
+            continue
+        # Affiliation markers split as their own tokens: "Name 2,3" → "Name 2", "3".
+        if re.fullmatch(r"\d+", part):
+            continue
+        # Glued affiliation start: "1Ctr. for Neurosci…" — stop; rest is not names.
+        if re.match(r"^\d+[A-Za-z]", part):
+            break
+        lowered = part.lower()
+        if any(hint in lowered for hint in affiliation_hints):
+            break
+        # Trailing footnotes / superscripts: "Name 1", "Name 2,3", "Name*", "Name†".
+        part = re.sub(r"(?:\s*[\d†‡*#]+(?:\s*,\s*[\d†‡*#]+)*)+\s*$", "", part)
+        part = re.sub(r"\s+", " ", part).strip(" ,;")
+        if not part or re.fullmatch(r"\d+", part):
+            continue
+        if part not in names:
+            names.append(part)
+
+    return ", ".join(names)
+
+
 def is_plausible_keyword(keyword: str) -> bool:
     normalized = normalize_keyword_phrase(keyword)
     if not normalized:
@@ -431,9 +503,12 @@ def repair_mojibake(text: str) -> str:
 
 
 def repair_submission_text(submission: dict) -> None:
-    for field in ("title", "authors", "abstract", "topic_area", "track"):
+    for field in ("title", "abstract", "topic_area", "track"):
         if field in submission and submission[field]:
             submission[field] = normalize_field_text(str(submission[field]))
+
+    if submission.get("authors"):
+        submission["authors"] = normalize_author_names(str(submission["authors"]))
 
     for field in ("author_keywords", "extracted_keywords", "keywords", "secondary_topics", "assigned_topics"):
         values = submission.get(field)

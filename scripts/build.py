@@ -31,6 +31,7 @@ from shared import (
     dashboard_keywords,
     is_gac_update,
     is_year_id_cache_key,
+    normalize_author_names,
     normalize_field_text,
     reconcile_submission_keywords,
     repair_mojibake,
@@ -106,40 +107,6 @@ CSV_FIELDS = [
     "source_url",
     "poster_number",
 ]
-
-AFFILIATION_HINTS = (
-    "university",
-    "college",
-    "institute",
-    "institut",
-    "laboratory",
-    "laboratoire",
-    "school",
-    "center",
-    "centre",
-    "hospital",
-    "department",
-    "faculty",
-    "academy",
-    "google",
-    "microsoft",
-    "meta",
-    "united states",
-    "united kingdom",
-    "netherlands",
-    "germany",
-    "france",
-    "canada",
-    "australia",
-    "switzerland",
-    "sweden",
-    "israel",
-    "japan",
-    "china",
-    "india",
-    "singapore",
-)
-
 
 def load_dotenv_if_available() -> None:
     env_path = ROOT / ".env"
@@ -578,20 +545,10 @@ def write_embedding_outputs(payload: dict) -> None:
 
 
 def first_author(authors: str) -> str:
-    if not authors:
+    cleaned = normalize_author_names(authors)
+    if not cleaned:
         return ""
-    block = authors.split(";")[0].strip()
-    if not block:
-        return ""
-    parts = [part.strip() for part in block.split(",") if part.strip()]
-    if not parts:
-        return ""
-    if len(parts) == 1:
-        return parts[0]
-    tail = parts[1].lower()
-    if any(hint in tail for hint in AFFILIATION_HINTS) or re.search(r"\b(states|kingdom|republic)\b", tail):
-        return parts[0]
-    return parts[0]
+    return cleaned.split(",", 1)[0].strip()
 
 
 def join_list(values: list[str]) -> str:
@@ -638,7 +595,7 @@ def build_csv_rows(payload: dict, embeddings: dict) -> list[dict[str, str]]:
             embedding_lookup.get(submission_row_key(submission))
             or embedding_lookup.get(f"2026-{poster}")
         )
-        authors = submission.get("authors", "")
+        authors = normalize_author_names(submission.get("authors", ""))
 
         rows.append(
             {
@@ -648,7 +605,7 @@ def build_csv_rows(payload: dict, embeddings: dict) -> list[dict[str, str]]:
                 "author": normalize_field_text(first_author(authors)),
                 "keywords": join_list(dashboard_keywords(submission)),
                 "assigned_topics": join_list(assigned_topics(submission)),
-                "authors": normalize_field_text(authors),
+                "authors": authors,
                 "abstract": normalize_field_text(submission.get("abstract", "")),
                 "umap_x": "" if not point else str(point.get("x", "")),
                 "umap_y": "" if not point else str(point.get("y", "")),

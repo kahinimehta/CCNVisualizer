@@ -34,6 +34,7 @@ from shared import (
     is_gac_update,
     is_metadata_keyword,
     is_plausible_keyword,
+    normalize_author_names,
     normalize_keyword_phrase,
     repair_mojibake,
     strip_citation_fragments,
@@ -1056,6 +1057,8 @@ def scrape_all(years: Iterable[int] | None = None) -> dict:
 
 def write_outputs(payload: dict) -> dict:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
+    for submission in payload.get("submissions", []):
+        submission["authors"] = normalize_author_names(submission.get("authors") or "")
     path = DATA_DIR / "submissions.json"
     with path.open("w", encoding="utf-8") as fh:
         json.dump(payload, fh, indent=2, ensure_ascii=False)
