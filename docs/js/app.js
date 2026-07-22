@@ -717,35 +717,38 @@ function styleThemeAxisLabels(selection) {
   styleDesktopChartText(labels);
 }
 
+// High-chroma categorical colors for dark navy UI. Hues are spaced to avoid
+// warm-orange and blue-purple clumps that were hard to tell apart.
 const CHART_PALETTE = [
-  "#EF4444", // red — Reinforcement learning
-  "#F97316", // orange — Motor control & planning
-  "#FB923C", // light orange — Naturalistic encoding/decoding
-  "#FACC15", // yellow — Neural population geometry & dynamics
-  "#F59E0B", // amber — Decision-making and metacognition
-  "#16A34A", // forest green — Vision
-  "#84CC16", // lime — Perception
-  "#0284C7", // sky blue — Language/auditory neuroscience
-  "#06B6D4", // cyan — AI, LLM, & Neural Networks
-  "#2563EB", // blue — Memory
-  "#6366F1", // indigo — Social cognition & theory of mind
-  "#9333EA", // purple — Attention & cognitive control
-  "#C026D3", // fuchsia — Clinical / computational psychiatry
-  "#EC4899", // pink — Methods and theory
+  "#E6194B", // red — Reinforcement learning
+  "#F58231", // orange — Motor control & planning
+  "#FFE119", // yellow — Naturalistic encoding/decoding
+  "#3CB44B", // green — Neural population geometry & dynamics
+  "#42D4F4", // cyan — Decision-making and metacognition
+  "#4363D8", // blue — Vision
+  "#911EB4", // purple — Perception
+  "#F032E6", // magenta — Language/auditory neuroscience
+  "#469990", // teal — AI, LLM, & Neural Networks
+  "#9A6324", // brown — Memory
+  "#FF6F91", // coral pink — Social cognition & theory of mind
+  "#7BDCB5", // mint — Attention & cognitive control
+  "#DCBEFF", // lavender — Clinical / computational psychiatry
+  "#A9A9A9", // gray — Methods and theory
 ];
 
-// Distinct year colors for the UMAP map (2017–2026).
+// Year colors jump around the hue wheel (not a smooth rainbow) so adjacent
+// conference years stay easy to separate on the UMAP map and legend.
 const YEAR_PALETTE = [
-  "#F97316", // 2017 orange
-  "#EAB308", // 2018 yellow
-  "#84CC16", // 2019 lime
-  "#14B8A6", // 2020 teal
-  "#0EA5E9", // 2021 sky
-  "#3B82F6", // 2022 blue
-  "#8B5CF6", // 2023 violet
-  "#D946EF", // 2024 fuchsia
-  "#F43F5E", // 2025 rose
-  "#F4C7C3", // 2026 CCN pink
+  "#FF6B00", // 2017 vivid orange
+  "#00B4D8", // 2018 cyan
+  "#9B5DE5", // 2019 purple
+  "#2DC653", // 2020 green
+  "#FF006E", // 2021 hot pink
+  "#FFD60A", // 2022 yellow
+  "#0077B6", // 2023 deep blue
+  "#E76F51", // 2024 coral
+  "#80ED99", // 2025 mint
+  "#C77DFF", // 2026 lavender
 ];
 
 const KPI_ICONS = {
@@ -1208,16 +1211,16 @@ function researchThemeNames() {
 }
 
 function themeColor(theme) {
-  const themes = googleTopicNames();
-  const index = themes.indexOf(theme);
+  // Stable index from the fixed topic list (not the filtered/sorted UI order).
+  const index = GOOGLE_FORM_TOPICS.indexOf(theme);
   return CHART_PALETTE[(index >= 0 ? index : 0) % CHART_PALETTE.length];
 }
 
 function yearColor(year) {
-  const years = state.data?.metadata?.years || [];
+  const fallbackYears = [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026];
+  const years = state.data?.metadata?.years?.length ? state.data.metadata.years : fallbackYears;
   const index = years.indexOf(Number(year));
   if (index >= 0) return YEAR_PALETTE[index % YEAR_PALETTE.length];
-  const fallbackYears = [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026];
   const fallbackIndex = fallbackYears.indexOf(Number(year));
   return YEAR_PALETTE[(fallbackIndex >= 0 ? fallbackIndex : 0) % YEAR_PALETTE.length];
 }
@@ -1592,6 +1595,7 @@ function renderYearControls() {
     .data(chipData)
     .join("button")
     .attr("class", (d) => `year-chip${d === state.selectedYear ? " active" : ""}`)
+    .style("--year-color", (d) => (d === "all" ? CCN_COLORS.blue : yearColor(d)))
     .text((d) => (d === "all" ? "All years" : d))
     .on("click", (_, d) => {
       state.selectedYear = d;
@@ -1635,6 +1639,7 @@ function renderThemeMultiSelect() {
       }
       return classes.join(" ");
     })
+    .style("--topic-color", (theme) => themeColor(theme))
     .attr("aria-pressed", (theme) => (selected.has(theme) ? "true" : "false"))
     .text((theme) => theme)
     .on("click", (_, theme) => toggleThemeFilter(theme));
