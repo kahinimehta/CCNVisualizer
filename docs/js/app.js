@@ -1500,6 +1500,30 @@ function escapeHtml(value) {
     .replace(/'/g, "&#39;");
 }
 
+/** Compact author line for embedding popups (drop affiliations / emails). */
+function formatAuthorsForTooltip(submission, { maxNames = 6 } = {}) {
+  const raw = String(submission?.authors || submission?.author || "").trim();
+  if (!raw) return "";
+
+  // Keep the name block before affiliation footnotes ("… ; 1 University…").
+  let block = raw.split(";")[0].trim();
+  block = block.replace(/\([^)]*@[^)]*\)/g, " ");
+  block = block.replace(/\s+/g, " ").trim();
+
+  const names = block
+    .split(/\s*,\s*/)
+    .map((part) => part.replace(/\s+\d+\s*$/g, "").replace(/\s*[\d†‡*#]+\s*$/g, "").trim())
+    .filter((part) => part && !/^\d+$/.test(part) && part.length > 1);
+
+  if (!names.length) {
+    return String(submission?.author || "").trim();
+  }
+  if (names.length <= maxNames) {
+    return names.join(", ");
+  }
+  return `${names.slice(0, maxNames).join(", ")}, et al.`;
+}
+
 function embeddingPointTooltipHtml(point) {
   const submission = submissionForEmbeddingPoint(point);
   const topics = embeddingPointTopics(point);
@@ -1508,6 +1532,7 @@ function embeddingPointTooltipHtml(point) {
   const year = submission?.year ?? point.year;
   const yearLabel = year != null ? escapeHtml(String(year)) : "";
   const yearSwatch = year != null ? yearColor(year) : CCN_COLORS.muted;
+  const authorsLabel = escapeHtml(formatAuthorsForTooltip(submission));
   const topicButtons = topics.length
     ? topics
         .map((theme) => {
@@ -1526,6 +1551,7 @@ function embeddingPointTooltipHtml(point) {
     yearLabel
       ? `<div class="tooltip-year"><span class="tooltip-year-swatch" style="background:${yearSwatch}"></span>${yearLabel}</div>`
       : "",
+    authorsLabel ? `<div class="tooltip-authors">${authorsLabel}</div>` : "",
     `<div class="tooltip-topics">${topicButtons}</div>`,
     `<div class="tooltip-actions"><button type="button" class="tooltip-action tooltip-open-paper">Open paper</button></div>`,
     `<span class="tooltip-hint">${hint}</span>`,
