@@ -719,35 +719,37 @@ function styleThemeAxisLabels(selection) {
 
 // 14 theme + 10 year colors: every hex is unique, and year/theme sets are
 // chosen for high pairwise separation (no shared or near-duplicate colors).
+// Theme colors: hues spread around the wheel so previously-confused clusters
+// (greens / blue-purples / yellows) are far apart. All 24 theme+year hexes unique.
 const CHART_PALETTE = [
-  "#E67C68", // Reinforcement learning
-  "#F1BB27", // Motor control & planning
-  "#E4EB07", // Naturalistic encoding/decoding
-  "#BAEB57", // Neural population geometry & dynamics
-  "#67E746", // Decision-making and metacognition
-  "#2AFC53", // Vision
-  "#47F3D3", // Perception
-  "#1280E3", // Language/auditory neuroscience
-  "#5500FF", // AI, LLM, & Neural Networks — vivid violet (not near Attention)
-  "#7461EF", // Memory
-  "#8920B6", // Social cognition & theory of mind
-  "#20B693", // Attention & cognitive control — teal (far from AI/Memory/Social)
-  "#FA8BCC", // Clinical / computational psychiatry
-  "#E21254", // Methods and theory
+  "#B1571C", // Reinforcement learning — burnt orange
+  "#D39F0F", // Motor control & planning — gold
+  "#B3EE2B", // Naturalistic encoding/decoding — chartreuse
+  "#209BF8", // Neural population geometry & dynamics — sky blue (not green)
+  "#0BDA2E", // Decision-making and metacognition — true green
+  "#A62EFA", // Vision — violet (not green)
+  "#07F7A3", // Perception — aqua
+  "#205CAC", // Language/auditory neuroscience — steel blue
+  "#F91F8C", // AI, LLM, & Neural Networks — hot pink
+  "#594CE6", // Memory — indigo
+  "#E100E2", // Social cognition & theory of mind — magenta
+  "#59FB00", // Attention & cognitive control — neon lime
+  "#F47B8A", // Clinical / computational psychiatry — rose
+  "#DA0B0B", // Methods and theory — crimson
 ];
 
 // Absolute year→color map (not list index). Disjoint from CHART_PALETTE.
 const YEAR_COLORS = {
-  2017: "#10E1EB", // cyan
-  2018: "#D60900", // red
-  2019: "#BD13FF", // magenta-purple
-  2020: "#FFE872", // pale gold
-  2021: "#31D600", // lime
-  2022: "#1D42C6", // royal blue
-  2023: "#C49DF1", // lilac
-  2024: "#F84398", // pink
-  2025: "#BE8318", // ochre
-  2026: "#93EDAD", // mint
+  2017: "#D89F66", // light amber
+  2018: "#43A123", // forest
+  2019: "#7DE8B3", // seafoam
+  2020: "#06F1FD", // electric cyan
+  2021: "#88ABDF", // powder blue
+  2022: "#470AC2", // deep indigo
+  2023: "#F356CC", // orchid
+  2024: "#FE503F", // coral red
+  2025: "#E5DE8E", // pale olive
+  2026: "#932E9E", // plum
 };
 
 const KPI_ICONS = {
