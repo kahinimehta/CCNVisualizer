@@ -721,7 +721,7 @@ function styleThemeAxisLabels(selection) {
 // (low vs high lightness + slight hue offset) so no two hexes sit too close.
 const CHART_PALETTE = [
   "#00C8FF", // 1. Reinforcement learning — super bright blue
-  "#EFC8EC", // 2. light violet
+  "#C2185B", // 2. Motor control & planning — darker pink (away from magenta)
   "#FF2BD6", // 3. Naturalistic encoding/decoding — magenta
   "#6B2BB8", // 4. Neural population geometry — darker indigo
   "#09469F", // 5. dark blue
