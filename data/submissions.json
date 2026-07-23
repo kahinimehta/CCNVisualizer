@@ -18,9 +18,9 @@
       "merged_at": "2026-07-07T14:32:24.252020+00:00",
       "count": 617
     },
-    "research_themes_assigned_at": "2026-07-07T23:30:07.905357+00:00",
+    "research_themes_assigned_at": "2026-07-23T16:03:46.411695+00:00",
     "research_theme_method": "Skipped classification; reused assigned_topics from submissions.json",
-    "keyword_source": "author_keywords prefer author-provided fields (poster HTML, proceedings PDF, 2026 topic areas); extracted_keywords only when no author keywords or conference label is available",
+    "keyword_source": "author_keywords prefer poster HTML, proceedings/authored PDFs (2017-2025), or 2026 topic areas; extracted_keywords only when no author keywords are available; citation fragments and metadata area labels stripped before export",
     "keyword_years": [
       2017,
       2018,
@@ -66808,7 +66808,8 @@
       "primary_theme": "Methods and theory",
       "assigned_topics": [
         "Methods and theory"
-      ]
+      ],
+      "secondary_topics": []
     },
     {
       "id": "eRORU6fqYd",
@@ -67427,7 +67428,8 @@
       "primary_theme": "Methods and theory",
       "assigned_topics": [
         "Methods and theory"
-      ]
+      ],
+      "secondary_topics": []
     },
     {
       "id": "OoQK8Vhkkv",
@@ -69921,7 +69923,8 @@
       "primary_theme": "Decision-making and metacognition",
       "assigned_topics": [
         "Decision-making and metacognition"
-      ]
+      ],
+      "secondary_topics": []
     },
     {
       "id": "z7szgMQjG5",
@@ -79562,7 +79565,8 @@
       "primary_theme": "Decision-making and metacognition",
       "assigned_topics": [
         "Decision-making and metacognition"
-      ]
+      ],
+      "secondary_topics": []
     },
     {
       "id": "LxJ1C9Vuls",
@@ -85153,7 +85157,12 @@
       "track": "",
       "poster_number": "B-ewXhJ9s9a7",
       "source_url": "https://2026.ccneuro.org/poster/?id=ewXhJ9s9a7",
-      "submission_type": "poster"
+      "submission_type": "poster",
+      "assigned_topics": [
+        "Methods and theory"
+      ],
+      "primary_theme": "Methods and theory",
+      "secondary_topics": []
     },
     {
       "id": "2026-B-gXhRXicYGW",
@@ -93616,7 +93625,8 @@
       "primary_theme": "Methods and theory",
       "assigned_topics": [
         "Methods and theory"
-      ]
+      ],
+      "secondary_topics": []
     },
     {
       "id": "2026-E-PY3qwXocaq",
@@ -96256,6 +96266,7 @@
       "submission_type": "poster",
       "primary_theme": "Neural population geometry & dynamics",
       "secondary_topics": [
+        "AI, LLM, & Neural Networks",
         "Methods and theory",
         "Motor control & planning",
         "Memory"
@@ -98241,7 +98252,8 @@
       "primary_theme": "Methods and theory",
       "assigned_topics": [
         "Methods and theory"
-      ]
+      ],
+      "secondary_topics": []
     },
     {
       "id": "2026-F-uNIElmUht5",
@@ -101409,6 +101421,606 @@
       "2024": 471,
       "2025": 550,
       "2026": 577
+    },
+    "research_themes": {
+      "research_themes": [
+        "Reinforcement learning",
+        "Motor control & planning",
+        "Naturalistic encoding/decoding",
+        "Neural population geometry & dynamics",
+        "Decision-making and metacognition",
+        "Vision",
+        "Perception",
+        "Language/auditory neuroscience",
+        "AI, LLM, & Neural Networks",
+        "Memory",
+        "Social cognition & theory of mind",
+        "Attention & cognitive control / executive function",
+        "Clinical / computational psychiatry",
+        "Methods and theory"
+      ],
+      "primary_by_year": {
+        "2017": [
+          [
+            "Vision",
+            47
+          ],
+          [
+            "Methods and theory",
+            35
+          ],
+          [
+            "Decision-making and metacognition",
+            30
+          ],
+          [
+            "Memory",
+            27
+          ],
+          [
+            "Reinforcement learning",
+            21
+          ],
+          [
+            "AI, LLM, & Neural Networks",
+            19
+          ],
+          [
+            "Language/auditory neuroscience",
+            17
+          ],
+          [
+            "Perception",
+            13
+          ],
+          [
+            "Attention & cognitive control / executive function",
+            7
+          ],
+          [
+            "Naturalistic encoding/decoding",
+            6
+          ],
+          [
+            "Neural population geometry & dynamics",
+            6
+          ],
+          [
+            "Clinical / computational psychiatry",
+            5
+          ],
+          [
+            "Motor control & planning",
+            4
+          ],
+          [
+            "Social cognition & theory of mind",
+            4
+          ]
+        ],
+        "2018": [
+          [
+            "Vision",
+            52
+          ],
+          [
+            "Methods and theory",
+            26
+          ],
+          [
+            "Decision-making and metacognition",
+            20
+          ],
+          [
+            "AI, LLM, & Neural Networks",
+            19
+          ],
+          [
+            "Memory",
+            16
+          ],
+          [
+            "Language/auditory neuroscience",
+            12
+          ],
+          [
+            "Perception",
+            10
+          ],
+          [
+            "Reinforcement learning",
+            10
+          ],
+          [
+            "Attention & cognitive control / executive function",
+            8
+          ],
+          [
+            "Social cognition & theory of mind",
+            7
+          ],
+          [
+            "Neural population geometry & dynamics",
+            6
+          ],
+          [
+            "Clinical / computational psychiatry",
+            6
+          ],
+          [
+            "Naturalistic encoding/decoding",
+            6
+          ],
+          [
+            "Motor control & planning",
+            6
+          ]
+        ],
+        "2019": [
+          [
+            "Vision",
+            55
+          ],
+          [
+            "Decision-making and metacognition",
+            44
+          ],
+          [
+            "Methods and theory",
+            39
+          ],
+          [
+            "Memory",
+            30
+          ],
+          [
+            "Attention & cognitive control / executive function",
+            24
+          ],
+          [
+            "Reinforcement learning",
+            21
+          ],
+          [
+            "Perception",
+            20
+          ],
+          [
+            "Language/auditory neuroscience",
+            18
+          ],
+          [
+            "AI, LLM, & Neural Networks",
+            15
+          ],
+          [
+            "Naturalistic encoding/decoding",
+            11
+          ],
+          [
+            "Social cognition & theory of mind",
+            8
+          ],
+          [
+            "Clinical / computational psychiatry",
+            8
+          ],
+          [
+            "Neural population geometry & dynamics",
+            7
+          ],
+          [
+            "Motor control & planning",
+            6
+          ]
+        ],
+        "2022": [
+          [
+            "Vision",
+            49
+          ],
+          [
+            "Methods and theory",
+            30
+          ],
+          [
+            "Decision-making and metacognition",
+            27
+          ],
+          [
+            "Perception",
+            19
+          ],
+          [
+            "Memory",
+            18
+          ],
+          [
+            "Reinforcement learning",
+            16
+          ],
+          [
+            "Language/auditory neuroscience",
+            14
+          ],
+          [
+            "AI, LLM, & Neural Networks",
+            14
+          ],
+          [
+            "Attention & cognitive control / executive function",
+            9
+          ],
+          [
+            "Naturalistic encoding/decoding",
+            7
+          ],
+          [
+            "Social cognition & theory of mind",
+            6
+          ],
+          [
+            "Neural population geometry & dynamics",
+            4
+          ],
+          [
+            "Motor control & planning",
+            3
+          ],
+          [
+            "Clinical / computational psychiatry",
+            1
+          ]
+        ],
+        "2023": [
+          [
+            "Decision-making and metacognition",
+            61
+          ],
+          [
+            "Memory",
+            54
+          ],
+          [
+            "Vision",
+            47
+          ],
+          [
+            "Reinforcement learning",
+            36
+          ],
+          [
+            "Methods and theory",
+            29
+          ],
+          [
+            "AI, LLM, & Neural Networks",
+            21
+          ],
+          [
+            "Perception",
+            20
+          ],
+          [
+            "Social cognition & theory of mind",
+            16
+          ],
+          [
+            "Clinical / computational psychiatry",
+            16
+          ],
+          [
+            "Language/auditory neuroscience",
+            16
+          ],
+          [
+            "Attention & cognitive control / executive function",
+            15
+          ],
+          [
+            "Neural population geometry & dynamics",
+            13
+          ],
+          [
+            "Naturalistic encoding/decoding",
+            8
+          ],
+          [
+            "Motor control & planning",
+            7
+          ]
+        ],
+        "2024": [
+          [
+            "Vision",
+            90
+          ],
+          [
+            "Decision-making and metacognition",
+            58
+          ],
+          [
+            "Memory",
+            51
+          ],
+          [
+            "Language/auditory neuroscience",
+            45
+          ],
+          [
+            "Methods and theory",
+            39
+          ],
+          [
+            "AI, LLM, & Neural Networks",
+            38
+          ],
+          [
+            "Reinforcement learning",
+            34
+          ],
+          [
+            "Attention & cognitive control / executive function",
+            29
+          ],
+          [
+            "Neural population geometry & dynamics",
+            20
+          ],
+          [
+            "Social cognition & theory of mind",
+            20
+          ],
+          [
+            "Perception",
+            16
+          ],
+          [
+            "Naturalistic encoding/decoding",
+            15
+          ],
+          [
+            "Clinical / computational psychiatry",
+            14
+          ],
+          [
+            "Motor control & planning",
+            2
+          ]
+        ],
+        "2025": [
+          [
+            "Vision",
+            113
+          ],
+          [
+            "Decision-making and metacognition",
+            78
+          ],
+          [
+            "Memory",
+            73
+          ],
+          [
+            "Language/auditory neuroscience",
+            63
+          ],
+          [
+            "Methods and theory",
+            52
+          ],
+          [
+            "AI, LLM, & Neural Networks",
+            27
+          ],
+          [
+            "Perception",
+            25
+          ],
+          [
+            "Neural population geometry & dynamics",
+            24
+          ],
+          [
+            "Clinical / computational psychiatry",
+            21
+          ],
+          [
+            "Attention & cognitive control / executive function",
+            19
+          ],
+          [
+            "Reinforcement learning",
+            18
+          ],
+          [
+            "Social cognition & theory of mind",
+            17
+          ],
+          [
+            "Naturalistic encoding/decoding",
+            12
+          ],
+          [
+            "Motor control & planning",
+            8
+          ]
+        ],
+        "2026": [
+          [
+            "Methods and theory",
+            123
+          ],
+          [
+            "Vision",
+            110
+          ],
+          [
+            "Memory",
+            101
+          ],
+          [
+            "Decision-making and metacognition",
+            72
+          ],
+          [
+            "Language/auditory neuroscience",
+            43
+          ],
+          [
+            "Clinical / computational psychiatry",
+            27
+          ],
+          [
+            "Neural population geometry & dynamics",
+            24
+          ],
+          [
+            "Naturalistic encoding/decoding",
+            16
+          ],
+          [
+            "Social cognition & theory of mind",
+            15
+          ],
+          [
+            "AI, LLM, & Neural Networks",
+            14
+          ],
+          [
+            "Reinforcement learning",
+            13
+          ],
+          [
+            "Attention & cognitive control / executive function",
+            11
+          ],
+          [
+            "Motor control & planning",
+            7
+          ],
+          [
+            "Perception",
+            1
+          ]
+        ]
+      },
+      "primary_totals": [
+        [
+          "Vision",
+          563
+        ],
+        [
+          "Decision-making and metacognition",
+          390
+        ],
+        [
+          "Methods and theory",
+          373
+        ],
+        [
+          "Memory",
+          370
+        ],
+        [
+          "Language/auditory neuroscience",
+          228
+        ],
+        [
+          "Reinforcement learning",
+          169
+        ],
+        [
+          "AI, LLM, & Neural Networks",
+          167
+        ],
+        [
+          "Perception",
+          124
+        ],
+        [
+          "Attention & cognitive control / executive function",
+          122
+        ],
+        [
+          "Neural population geometry & dynamics",
+          104
+        ],
+        [
+          "Clinical / computational psychiatry",
+          98
+        ],
+        [
+          "Social cognition & theory of mind",
+          93
+        ],
+        [
+          "Naturalistic encoding/decoding",
+          81
+        ],
+        [
+          "Motor control & planning",
+          43
+        ]
+      ],
+      "secondary_totals": [
+        [
+          "AI, LLM, & Neural Networks",
+          1258
+        ],
+        [
+          "Methods and theory",
+          1212
+        ],
+        [
+          "Neural population geometry & dynamics",
+          690
+        ],
+        [
+          "Perception",
+          643
+        ],
+        [
+          "Naturalistic encoding/decoding",
+          537
+        ],
+        [
+          "Vision",
+          489
+        ],
+        [
+          "Decision-making and metacognition",
+          423
+        ],
+        [
+          "Attention & cognitive control / executive function",
+          409
+        ],
+        [
+          "Reinforcement learning",
+          295
+        ],
+        [
+          "Memory",
+          257
+        ],
+        [
+          "Language/auditory neuroscience",
+          159
+        ],
+        [
+          "Motor control & planning",
+          123
+        ],
+        [
+          "Clinical / computational psychiatry",
+          93
+        ],
+        [
+          "Social cognition & theory of mind",
+          74
+        ]
+      ]
     }
   }
 }
