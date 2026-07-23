@@ -453,6 +453,8 @@ _AFFILIATION_HINTS = (
     "saclay",
     "cea ",
     " cea",
+    "zentrum",
+    "spielsucht",
 )
 
 # Campus / city shorthands and orgs that appear as whole trailing author tokens.
@@ -499,6 +501,9 @@ _PLACE_OR_ORG_TOKENS = frozenset(
         "meta ai",
         "facebook ai",
         "microsoft research",
+        "benevolent ai",
+        "neuromatch",
+        "tu dublin",
         "brain and language",
         "centrum wiskunde & informatica",
         "centrum wiskunde and informatica",
