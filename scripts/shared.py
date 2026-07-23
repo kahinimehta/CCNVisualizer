@@ -271,6 +271,104 @@ _COUNTRY_NAMES = frozenset(
         "wales",
         "england",
         "republic of korea",
+        "luxembourg",
+        "estonia",
+        "latvia",
+        "lithuania",
+        "romania",
+        "bulgaria",
+        "croatia",
+        "serbia",
+        "slovenia",
+        "iceland",
+        "ukraine",
+        "pakistan",
+        "thailand",
+        "vietnam",
+        "indonesia",
+        "malaysia",
+        "philippines",
+        "south africa",
+        "egypt",
+        "saudi arabia",
+        "uae",
+        "united arab emirates",
+        "qatar",
+        "iran",
+        "iraq",
+        "peru",
+        "uruguay",
+        "venezuela",
+        "cuba",
+        "jamaica",
+        "cyprus",
+        "malta",
+        "liechtenstein",
+        "monaco",
+        "andorra",
+        "san marino",
+        "vatican",
+        "vatican city",
+        "north macedonia",
+        "bosnia",
+        "bosnia and herzegovina",
+        "albania",
+        "georgia",
+        "armenia",
+        "azerbaijan",
+        "kazakhstan",
+        "morocco",
+        "tunisia",
+        "algeria",
+        "nigeria",
+        "kenya",
+        "ghana",
+        "ethiopia",
+        "tanzania",
+        "uganda",
+        "nepal",
+        "sri lanka",
+        "bangladesh",
+        "myanmar",
+        "cambodia",
+        "laos",
+        "mongolia",
+        "uzbekistan",
+        "belarus",
+        "moldova",
+        "montenegro",
+        "kosovo",
+        "palestine",
+        "lebanon",
+        "jordan",
+        "syria",
+        "yemen",
+        "oman",
+        "kuwait",
+        "bahrain",
+        "brunei",
+        "fiji",
+        "papua new guinea",
+        "new caledonia",
+        "puerto rico",
+        "costa rica",
+        "panama",
+        "guatemala",
+        "honduras",
+        "el salvador",
+        "nicaragua",
+        "dominican republic",
+        "ecuador",
+        "bolivia",
+        "paraguay",
+        "suriname",
+        "guyana",
+        "trinidad and tobago",
+        "barbados",
+        "bahamas",
+        "iceland",
+        "greenland",
+        "faroe islands",
     }
 )
 
@@ -320,11 +418,59 @@ _AFFILIATION_HINTS = (
     "johns hopkins",
     "tuebingen",
     "tübingen",
+    "international",
+    "neurospin",
+    "kuleuven",
+    "birkbeck",
+    "vanderbilt",
+    "amherst",
+)
+
+# Campus / city shorthands and orgs that appear as whole trailing author tokens.
+_PLACE_OR_ORG_TOKENS = frozenset(
+    {
+        "davis",
+        "daivs",  # common typo in CCN listings
+        "san diego",
+        "riverside",
+        "los angeles",
+        "irvine",
+        "santa barbara",
+        "santa cruz",
+        "berkeley",
+        "new york",
+        "california",
+        "massachusetts",
+        "amherst",
+        "hyderabad",
+        "bangalore",
+        "bengaluru",
+        "kuleuven",
+        "birkbeck",
+        "vanderbilt",
+        "neurospin",
+        "cerco",
+        "atr international",
+        "vicarious ai",
+        "idibaps",
+        "mta wigner rcp",
+        "wigner rcp",
+        "deepmind",
+        "google deepmind",
+        "google brain",
+        "openai",
+        "meta ai",
+        "facebook ai",
+        "microsoft research",
+    }
 )
 
 
 def _is_country_token(part: str) -> bool:
-    return part.lower().strip(" .") in _COUNTRY_NAMES
+    cleaned = part.lower().strip(" .")
+    if cleaned.startswith("the "):
+        cleaned = cleaned[4:].strip()
+    return cleaned in _COUNTRY_NAMES
 
 
 def _is_affiliation_token(part: str) -> bool:
@@ -334,7 +480,9 @@ def _is_affiliation_token(part: str) -> bool:
         return False
     if _is_country_token(cleaned):
         return True
-    lowered = cleaned.lower()
+    lowered = cleaned.lower().strip(" .")
+    if lowered in _PLACE_OR_ORG_TOKENS:
+        return True
     if any(hint in lowered for hint in _AFFILIATION_HINTS):
         return True
     # Short org acronyms commonly appended after author lists.
