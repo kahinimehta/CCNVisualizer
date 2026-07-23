@@ -6521,7 +6521,7 @@
       "id": "3000167",
       "year": 2017,
       "title": "Relating Brain Structures to Open-Ended Descriptions of Cognition",
-      "authors": "Jérôme Dockès, Olivier Grisel, Joan Massich, Fabian Suchanek, Bertr, Thirion, Gaël Varoquaux",
+      "authors": "Jérôme Dockès, Olivier Grisel, Joan Massich, Fabian Suchanek, Bertrand Thirion, Gaël Varoquaux",
       "abstract": "Finding correspondences between mental processes and brain structures is a central goal in cognitive neuroscience. Neuroimaging provides brain-activity maps associated with cognitive task, however each study explores only a handful of mental processes. Here we use literature mining to bridge results across studies, establishing a bidirectional mapping between brain and mind. Our goal is to work on an open-ended set of terms describing cognitive processes. Moreover we introduce a validation framework using information retrieval metrics to ensure the accuracy of such correspondences, with a clear focus on relative frequencies, ignored in previous studies, to capture the relative importance of cognitive concepts. We show that this approach enables open-ended encoding and decoding.",
       "author_keywords": [
         "brain mapping",
@@ -10573,7 +10573,7 @@
       "id": "1096",
       "year": 2018,
       "title": "Cortical Mirror-System Activation During Real-Life Game Playing: An Intracranial Electroencephalography (EEG) Study",
-      "authors": "Markus Kern, Translational Neurotechnology Lab",
+      "authors": "Markus Kern",
       "abstract": "Analogous to the mirror neuron system repeatedly described in monkeys as a possible substrate for imitation learning and/or action understanding, a neuronal execution/observation matching system (OEMS) is assumed in humans, but little is known to what extent this system is activated in non-experimental, real-life conditions. In the present case study, we investigated brain activity of this system during natural, non-experimental motor behavior as it occurred during playing of the board game ”Malefiz”. We compared spectral modulations of the high-gamma band related to ipsilateral reaching movement execution and observation of the same kind of movement using electrocorticography (ECoG) in one participant. Spatially coincident activity during both conditions execution and observation was recorded at electrode contacts over the premotor/primary motor cortex. The topography and amplitude of the high-gamma modulations related to both, movement observation and execution were clearly spatially correlated over several fronto-parietal brain areas. Thus, our findings indicate that a network of cortical areas contributes to the human OEMS, beyond primary/premotor cortex including Brocas area and the temporo-parieto-occipital junction area, in real-life conditions.",
       "author_keywords": [
         "mirror system",
@@ -10645,7 +10645,7 @@
       "id": "1136",
       "year": 2018,
       "title": "Data-driven methods reveal the generalizing mechanisms of speech processing in naturally varying soundscapes",
-      "authors": "Moritz Boos, Applied Neurocognitive Psychology Lab",
+      "authors": "Moritz Boos",
       "abstract": "Humans rarely encounter speech without background noise. However, research on the cortical mechanisms of speech processing mostly focusses on individual speech features in isolation, which might not generalize to a more naturalistic environment. To examine the mechanisms of speech processing in natural soundscapes, we use unsupervised learning to infer spectro-temporal patterns that are adapted to the statistics of speech in noise. Using these patterns, we predict fMRI activity (n=20) evoked by a long auditory stimulus with voxel-wise encoding models and find a latent space of predicted brain activity that is shared between participants and represents the perceived noise level of the stimulus. Activity in the latent space forms two clusters, one representing stimuli with varying noise level related to the presence of simple, time-frequency separable patterns, and another consisting of stimuli with uniformly low perceived noise level. The cluster representing noisy stimuli explains variance in secondary auditory areas, through reduced activation for very noisy stimuli, while the cluster consisting of clear speech explains variance in both primary and secondary auditory areas. This shows how features adapted to speech in a natural soundscape relate to differences in the subjective percept of noise and the resulting dichotomy in brain activity.",
       "author_keywords": [
         "auditory",
@@ -13364,7 +13364,7 @@
       "id": "1219",
       "year": 2018,
       "title": "Neural mechanisms of human decision-making",
-      "authors": "Kai Krueger, Seth Herd, Ananta Nair, ECortex Inc",
+      "authors": "Kai Krueger, Seth Herd, Ananta Nair",
       "abstract": "This work presents a neural network model and theory of cognitive decision-making. It attempts to explain the interactions of cortical and subcortical mechanisms and how these may lead to some of the behavioral properties of flexible complex decision-making. Specifically, we model the interactions among several layers of cortex, basal ganglia and the dopamine system. Key to our theory is that all cognitive decisions result from corticostriatal-thalamus loops akin to those heavily studied in animal motor action selection. Relevant areas of cortex propose a plan of action using associative mechanisms, driven by reinforcement learning; then other cortical areas use that information from sensory input, contextual information and internal goal states to make a prediction about outcome. That prediction is used by striatum to make a go/nogo decision on that plan. Cortical areas thereby learn in a supervised way from actual observed outcomes, whereas the basal ganglia learns its go/nogo decision based on dopaminergic reinforcement signals. By breaking up complex decisions into sequential, simple go/nogo decisions, the same canonical decision-making circuit, as used in basic action selection, can scale up to flexible complex decisions. Furthermore, we postulate that model-free and model-based decision-making are different modes of the same canonical decision-making circuit.",
       "author_keywords": [
         "decision-making",
@@ -13670,7 +13670,7 @@
       "id": "1071",
       "year": 2018,
       "title": "Optimizing deep video representation to match brain activity",
-      "authors": "Hugo Richard, Ana Luisa Pinho, Bertr, Thirion, Guillaume Charpiat",
+      "authors": "Hugo Richard, Ana Luisa Pinho, Bertrand Thirion, Guillaume Charpiat",
       "abstract": "The comparison of observed brain activity with the statis- tics generated by artificial intelligence systems is useful to probe brain functional organization under ecological condi- tions. Here we study fMRI activity in ten subjects watching color natural movies and compute deep representations of these movies with an architecture that relies on optical flow and image content. The association of activity in visual ar- eas with the different layers of the deep architecture displays complexity-related contrasts across visual areas and reveals a striking foveal/peripheral dichotomy.",
       "author_keywords": [
         "deep learning",
@@ -19342,7 +19342,7 @@
       "id": "1283",
       "year": 2019,
       "title": "Disambiguating planning from heuristics in rodent spatial navigation",
-      "authors": "Michael Pereira, Christian K. MacHens, Champalimaud Research",
+      "authors": "Michael Pereira, Christian K. MacHens",
       "abstract": "A longstanding question in neuroscience is how animals and humans select actions in complex decision trees. Planning, the evaluation of action sequences by anticipating their outcomes, is thought to coexist in the brain with simpler decision-making strategies, such as habit learning and heuristics. Though planning is often required for optimal choice, for many problems simpler strategies yield similar decisions, making them difficult to disambiguate. The scarcity of behavioral tasks that can dissociate planning from other decision mechanisms while generating rich decision data has hindered our understanding of the neural basis of planning. We developed a novel navigation task in which mice navigate to cued goal locations in a complex maze. A targeted search through the large space of possible maze layouts in that environment maximizes the number of decisions that are informative about the use of planning. Over the course of training mice learn shorter paths to goals, and the individual decisions composing these paths are better accounted for by planning than vector navigation. With hundreds of informative decisions per behavioral session, this paradigm opens the door to the study of the neural basis of route planning.",
       "author_keywords": [
         "planning",
@@ -23168,7 +23168,7 @@
       "id": "1293",
       "year": 2019,
       "title": "Neural signatures of coping with multiple tasks in mouse visual cortex",
-      "authors": "Márton Hajnal, Hungarian Academy Of Sciences",
+      "authors": "Márton Hajnal",
       "abstract": "Flexibly adapting to different task requirements is a key challenge of the visual system. In particular, depending on a potentially unobserved context the same stimuli might require different behavior. While task-related activity has been identified as early as the primary visual cortical (V1) activity in mice, it remained unknown if and how the visual cortex primarily dealing with feed-forward input contributes to efficient arbitration between tasks. Mice were trained to perform a multimodal task-switching paradigm where animals were required to make decisions either based on the identity of visual or that of auditory stimuli. Neural activity was recorded from all layers of V1 on 128 channels with extracellular electrodes. Our analysis has identified task-related variables in population responses. Importantly, while task-related variables could be identified mostly during stimulus presentation, the variable that could identify the specific task being performed could be reliably decoded from intertrial intervals, indicating a representation which is aware of the across trial contingency of task context. These results provide insights into how continual learning, the major challenge concerning the acquisition of multiple tasks relying on the same neural circuitry, can be achieved in biological agents.",
       "author_keywords": [
         "multiple task",
@@ -30542,7 +30542,7 @@
       "id": "1277",
       "year": 2022,
       "title": "Humans learning a complex task are picky and sticky",
-      "authors": "Tiago Quendera, Zachary F. Mainen, Champalimaud Foundation",
+      "authors": "Tiago Quendera, Zachary F. Mainen",
       "abstract": "While neural networks approach human levels of perfor- mance in many complex tasks, they require much more training than humans. This may be because only humans can infer and apply generalizable principles from prior ex- perience (Lake, Ullman, Tenenbaum, & Gershman, 2017). However, the statistics that underlie the human learning process are poorly understood and hard to investigate in the large state spaces found in most complex tasks (van Opheusden & Ma, 2019). We thus designed a cog- nitive task whose potential solutions are few enough for subjects to densely sample policy space, but complex enough to compel intelligent search. We launched the game as a smartphone-based app (hexxed.io) to collect data from 10k human participants. We find that unlike re- inforcement learning agents (Deep-Q Networks ; DQNs), humans (1) search a highly restricted subset of the pol- icy space; (2) attempt even poor solutions many times before discarding them; (3) arrive at the optimal policy suddenly and unpredictably with a “leap of insight”. Our data suggest a “top-down” learning process by which hu- mans propose explanatory solutions which they replace only upon collecting sufficient evidence to the contrary, in contrast to the “bottom-up” learning of DQNs that as- sociates states with rewarding actions",
       "author_keywords": [
         "problem solving",
@@ -30731,7 +30731,7 @@
       "id": "1197",
       "year": 2022,
       "title": "Information coding in frontoparietal regions reflects individual differences in uncertainty-driven choices",
-      "authors": "Alexander Paunov, Maëva L’Hôtellier, Florent Meyniel, CEA Paris-Saclay",
+      "authors": "Alexander Paunov, Maëva L’Hôtellier, Florent Meyniel",
       "abstract": "Adaptive decision-making in noisy and changing environments must be jointly constrained by reward and uncertainty. Whereas rewards have robust behavioral effects in sequential decision-making, effects of uncertainty tend to be smaller and heterogeneous across subjects. Here we use a novel two-armed bandit task, which dissociates unexpected uncertainty from reward and expected uncertainty, and fMRI, to study the neural bases of individual differences in the neural representations of unexpected uncertainty. We find that (i) contributions of unexpected uncertainty to choice are heterogeneous across individuals but stable within individuals and (ii) variability in the neural representation of unexpected uncertainty corresponds to variability in its use during choices, in frontoparietal cortical regions previously implicated in uncertainty-related computations, but not in reward regions.",
       "author_keywords": [
         "sequential decision -making",
@@ -36462,7 +36462,7 @@
       "id": "1726",
       "year": 2023,
       "title": "Auditory Cortex Inhibition Affects Performance in a Sound Lateralization Task",
-      "authors": "Mafalda Valente, Juan R. Castiñeiras de Saa, Alfonso Renart, Champalimaud Foundation",
+      "authors": "Mafalda Valente, Juan R. Castiñeiras de Saa, Alfonso Renart",
       "abstract": "A recently proposed mechanistic explanation for Weber’s Law (WL) showed that sound lateralization can be a useful behaviour in the study of fundamental psychophysical regularities (Pardo-Vazquez et al., 2019) and allowed the creation of a model capable of simulating the effects of precise manipulations on different behavioural measures. This work aims at exploring the involvement of auditory cortex (ACx) as a sensory processing region in a sound lateralization task. While, in accordance to the literature, lesion studies show ACx is not a necessary structure for lateralization tasks such as the one in study, optogenetic inhibition creates profound deficits in performance. This indicates ACx might in fact have a role in the decision under natural circumstances and creates an opportunity for the study of its function in the context of this task.",
       "author_keywords": [
         "sound lateralization",
@@ -37772,7 +37772,7 @@
       "id": "1725",
       "year": 2023,
       "title": "Control Limited Perceptual Decision Making",
-      "authors": "Juan R. Castiñeiras de Saa, Alfonso Renart, Champalimaud Foundation",
+      "authors": "Juan R. Castiñeiras de Saa, Alfonso Renart",
       "abstract": "Periods of disengagement are generally observed during perceptual decision-making tasks, but a normative understanding is lacking. Here, we develop a theory that frames disengagement as a problem in cognitive control. Good performance through task engagement requires control, which is costly, establishing a performance-control tradeoff. We derive decision policies that optimize this tradeoff as a function of the agent's cognitive control capacity. When it is sufficiently low, agents lapse. For intermediate control limitations, a new decision-making regime appears where agents do not lapse, but their behavior is still shaped by control. We identify hidden signatures of control-limited behavior at the level of accuracy, reaction time and decision confidence which are often observed experimentally, but had not been normatively explained. Our findings provide a path to the study of normative decision strategies in real biological agents.",
       "author_keywords": [
         "perceptual decision-making",
@@ -45006,7 +45006,7 @@
       "id": "1539",
       "year": 2023,
       "title": "Real-time virtual physical deformations: a continuous design paradigm for interactive reasoning",
-      "authors": "Sara Monteiro, Daniel McNamee, Champalimaud Foundation",
+      "authors": "Sara Monteiro, Daniel McNamee",
       "abstract": "We developed a 3D virtual environment with realistic physical dynamics in which deformable objects must be continuously manipulated into a form which solves for task objectives. Based on preliminary experiments, we report that human participants intuitively engaged with minimal task training, adapted their behavior based on experience both within and across task conditions, and their performance was modulated according to task difficulty. In the future, we aim to develop this experimental paradigm further e.g. with augmented reality and hand-tracking. We suggest that such immersive experiences for complex naturalistic problem-solving with high-dimensional and continuous motor readouts may provide a robust and informative platform for tracing the complexities of internal reasoning processes.",
       "author_keywords": [
         "design",
@@ -68047,7 +68047,7 @@
       "id": "I3lv6fhudD",
       "year": 2025,
       "title": "Optimizing fMRI Data Acquisition for Decoding Natural Speech with Limited Participants",
-      "authors": "Louis Jalouzot, Alexis Thual, Yair Lakretz, Christophe Pallier, Bertr, Thirion",
+      "authors": "Louis Jalouzot, Alexis Thual, Yair Lakretz, Christophe Pallier, Bertrand Thirion",
       "abstract": "We investigate optimal strategies for decoding natural speech from fMRI data with limited participants. Using data from Lebel et al. (2023) from 8 participants, we show that deep neural networks can effectively predict LLM-derived text representations with performance directly scaling with the amount of training data. Then, in this data regime, we observe that multi-subject training does not improve decoding accuracy compared to a single-subject approach. Furthermore, we find that our decoders better model syntactic than semantic features. Our results highlight deep phenotyping benefits and suggest multi-subject decoding needs more data per subject or a substantially larger cohort.",
       "author_keywords": [],
       "extracted_keywords": [],
@@ -68543,7 +68543,7 @@
       "id": "1zaynMtbME",
       "year": 2025,
       "title": "A Virtual Manipulation Task to Probe Human Interactions with Diverse Physical Objects",
-      "authors": "Giacomo Aldegheri, Rol, Fleming",
+      "authors": "Giacomo Aldegheri, Roland Fleming",
       "abstract": "Humans are able to successfully interact with objects with vastly different physical characteristics. For example, hard objects, such as boxes, and soft objects, such as cloth or rope, behave in entirely different ways when manipulated. We designed a controlled yet ecological behavioral task to probe how human subjects interact with objects with diverse physical characteristics. Subjects are shown, on a computer screen, an 'arena' including an object, a simple manipulator (a rectangular pusher) and a goal indicated by a location within the arena. Using the keyboard, they can rotate and translate the pusher, and their task is to use it to push the object into the goal. On each trial, the object to be moved belongs to one of three categories: box, rope, or cloth. This task allows systematically comparing human behavior across object categories in a simplified scenario, providing an ideal testing ground for computational models of object manipulation and intuitive physics.",
       "author_keywords": [],
       "extracted_keywords": [],
@@ -70432,7 +70432,7 @@
       "id": "nDNjnfv2Se",
       "year": 2025,
       "title": "Exploring the Cognitive Space: A Framework for Cognitive Function Mapping",
-      "authors": "Ana Fernanda Ponce, Demian Wassermann, Bertr, Thirion",
+      "authors": "Ana Fernanda Ponce, Demian Wassermann, Bertrand Thirion",
       "abstract": "Obtaining an accurate topography of cognitive functions is a major endeavour in human brain imaging. Recent advancements have been driven by intensive within-subject scanning, known as deep phenotyping, to address inter-subject variability. However, work is still needed to quantify how speciﬁc cognitive functions contribute to brain activation. In this study, we integrate statistical summaries from the Individual Brain Charting project (IBC) with the Cognitive Atlas. Each fMRI contrast map was annotated with cognitive components derived from its associated concepts. We then applied dictionary learning to estimate the contribution, or weight, of each component to a given contrast map. The resulting weights were used as regressors in a General Linear Model (GLM) analysis that incorporated contrast maps from all IBC tasks. This approach provided a more sensitive cognitive mapping of brain functions at the individual level.",
       "author_keywords": [],
       "extracted_keywords": [],
@@ -72677,7 +72677,7 @@
       "id": "vihlui7Rpw",
       "year": 2025,
       "title": "Functional Templates in fMRI: Building Accurate and Interpretable Group-Level Decoders",
-      "authors": "Pierre-Louis Barbarant, Florent Meyniel, Bertr, Thirion",
+      "authors": "Pierre-Louis Barbarant, Florent Meyniel, Bertrand Thirion",
       "abstract": "Anatomical and functional inter-individual variability poses a significant challenge for group analyzes in neuroimaging studies. While anatomical templates help mitigate morphological differences by coregistering subjects in fMRI, they fail to account for functional variability, often leading to blurred activation patterns on the template due to group-level averaging. To address this, hyperalignment identifies fine-grained correspondences between functional brain maps of different subjects, with Procrustes analysis and optimal transport being among the most effective approaches. However many hyperalignment-based imaging studies rely on selecting a single target subject as the reference for aligning all other subjects’ data. We argue that a functional template obviates the need for this arbitrary selection, effectively encapsulating population similarities while preserving anatomical coherence. Using the Individual Brain Charting dataset, we assess the benefit of hyperalignment in template estimation, and the classification accuracy on template aligned-data. Our results show that (a) functional templates produce more localized activation clusters than traditional anatomical averaging, improving the interpretability of population-level studies, and (b) they preserve or enhance the semantic content of brain activations, leading to comparable or higher classification accuracies across most tasks compared to anatomical or pairwise functional alignment.",
       "author_keywords": [],
       "extracted_keywords": [],
@@ -80074,7 +80074,7 @@
       "id": "2026-A-0bNxjZFusB",
       "year": 2026,
       "title": "Fast Whole-Brain, Geometry-Aware Functional Alignment for Cross-Subject Decoding",
-      "authors": "Pierre-Louis Barbarant, Florent Meyniel, Bertr, Thirion",
+      "authors": "Pierre-Louis Barbarant, Florent Meyniel, Bertrand Thirion",
       "abstract": "Decoding brain activity is useful for characterizing brain processes and understanding the functional architecture underlying cognition. However, variability in brain response patterns among individuals poses a significant challenge to developing powerful, generalizable decoders. To build these decoders, we create population-level models of brain responses based on functional alignment. The core issue is to strike the right balance between sensitivity to functional features and anatomical consistency while maintaining computational efficiency. We introduce a new functional alignment method that embeds cortical geometry directly into the functional domain using Laplace-Beltrami eigenmodes. Our approach achieves higher decoding accuracy than anatomical alignment and converges several orders of magnitude faster than state-of-the-art methods at the whole-brain scale.",
       "author_keywords": [
         "methods",

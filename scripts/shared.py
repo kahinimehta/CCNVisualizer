@@ -446,6 +446,13 @@ _AFFILIATION_HINTS = (
     "centrum",
     "wiskunde",
     "informatica",
+    "champalimaud",
+    "ecortex",
+    "neurotechnology",
+    "neurocognitive",
+    "saclay",
+    "cea ",
+    " cea",
 )
 
 # Campus / city shorthands and orgs that appear as whole trailing author tokens.
@@ -495,6 +502,14 @@ _PLACE_OR_ORG_TOKENS = frozenset(
         "brain and language",
         "centrum wiskunde & informatica",
         "centrum wiskunde and informatica",
+        "champalimaud research",
+        "champalimaud foundation",
+        "hungarian academy of sciences",
+        "cea paris-saclay",
+        "cea paris saclay",
+        "ecortex inc",
+        "translational neurotechnology lab",
+        "applied neurocognitive psychology lab",
     }
 )
 
@@ -521,15 +536,47 @@ def _is_affiliation_token(part: str) -> bool:
         return True
     if any(hint in lowered for hint in _AFFILIATION_HINTS):
         return True
-    # Trailing "… Unit" / "… Group" department labels
-    if re.search(r"\b(unit|group|campus|hospital|clinic)\b", lowered):
+    # Trailing org/department labels (Lab, Inc, Foundation, …)
+    if re.search(
+        r"\b("
+        r"labs?|inc|llc|ltd|gmbh|corp|foundation|academy|sciences?|"
+        r"research|unit|group|campus|hospital|clinic|company"
+        r")\b",
+        lowered,
+    ):
         return True
     # Short org acronyms commonly appended after author lists.
     if re.fullmatch(r"[A-Z]{2,6}", cleaned):
         return True
     if re.match(r"^UC\b", cleaned):
         return True
+    if re.match(r"^CEA\b", cleaned):
+        return True
     return False
+
+
+# Known scrape artifacts where a first name was truncated across a comma.
+_SPLIT_NAME_REPAIRS = {
+    ("bertr", "thirion"): "Bertrand Thirion",
+    ("rol", "fleming"): "Roland Fleming",
+}
+
+
+def _repair_split_person_names(parts: list[str]) -> list[str]:
+    """Merge truncated 'Bertr, Thirion' / 'Rol, Fleming' into full person names."""
+    repaired: list[str] = []
+    index = 0
+    while index < len(parts):
+        if index + 1 < len(parts):
+            key = (parts[index].strip().lower(), parts[index + 1].strip().lower())
+            full = _SPLIT_NAME_REPAIRS.get(key)
+            if full:
+                repaired.append(full)
+                index += 2
+                continue
+        repaired.append(parts[index])
+        index += 1
+    return repaired
 
 
 _NAME_PARTICLES = frozenset(
@@ -690,16 +737,21 @@ def normalize_author_names(authors: str) -> str:
         if _is_affiliation_token(part):
             break
         # Author separators must be commas only — split "A & B" / "A and B".
-        for person in re.split(r"\s*(?:&|and)\s+", part, flags=re.IGNORECASE):
+        # Require whitespace around "and" so names like "Bertrand" are preserved.
+        for person in re.split(r"\s+and\s+|\s*&\s*", part, flags=re.IGNORECASE):
             person = person.strip(" ,;")
             if not person or _is_affiliation_token(person):
                 continue
             if person not in names:
                 names.append(person)
 
+    names = _repair_split_person_names(names)
+    # Drop any residual non-person tokens that slipped through.
+    names = [name for name in names if name and not _is_affiliation_token(name)]
+
     cleaned = capitalize_author_names(", ".join(names))
     # Final guard: never leave "&" or "and" as list joiners in the author field.
-    cleaned = re.sub(r"\s*(?:&|and)\s+", ", ", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r"\s+and\s+|\s*&\s*", ", ", cleaned, flags=re.IGNORECASE)
     cleaned = re.sub(r"\s*,\s*", ", ", cleaned).strip(" ,")
     return capitalize_author_names(cleaned)
 
