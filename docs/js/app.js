@@ -717,29 +717,42 @@ function styleThemeAxisLabels(selection) {
   styleDesktopChartText(labels);
 }
 
-// Theme colors in VIBGYOR order: dark then light for each hue (14 total).
-// Years reuse the first N entries of the same palette (one per year).
+// Topics: VIBGYOR order, dark then light per hue (14). Shades pushed apart
+// (low vs high lightness + slight hue offset) so no two hexes sit too close.
 const CHART_PALETTE = [
-  "#70148F", // 1. dark violet
-  "#DBA0EE", // 2. light violet
-  "#33148F", // 3. dark indigo
-  "#B3A0EE", // 4. light indigo
-  "#143D8F", // 5. dark blue
-  "#A0BAEE", // 6. light blue
-  "#148F33", // 7. dark green
-  "#A0EEB3", // 8. light green
-  "#B8A10A", // 9. dark yellow
-  "#EADC86", // 10. light yellow
-  "#AA5C18", // 11. dark orange
-  "#EEC4A0", // 12. light orange
-  "#8F1F14", // 13. dark red
-  "#EEA6A0", // 14. light red
+  "#66016E", // 1. dark violet
+  "#EFC8EC", // 2. light violet
+  "#2608A1", // 3. dark indigo
+  "#BE92E9", // 4. light indigo
+  "#09469F", // 5. dark blue
+  "#C0C9EE", // 6. light blue
+  "#08AB54", // 7. dark green
+  "#A2E9D5", // 8. light green
+  "#9AA815", // 9. dark yellow
+  "#C5DEA4", // 10. light yellow
+  "#A34F08", // 11. dark orange (lifted for dark-bg readability)
+  "#F4E4BD", // 12. light orange
+  "#8E0B12", // 13. dark red
+  "#E5AE9C", // 14. light red
+];
+
+// Years: 7 hexes only, equally spaced around the wheel (~51° apart) so every
+// pair is far. Mapped onto conference years in chronological order (8th wraps).
+const YEAR_PALETTE = [
+  "#F92BCC", // violet / magenta
+  "#5504F7", // indigo
+  "#0A82F5", // blue
+  "#2AFDAD", // spring green
+  "#39F212", // green
+  "#F5E120", // yellow
+  "#F63E29", // red-orange
 ];
 
 const YEAR_COLORS = Object.fromEntries(
-  [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026].map(
-    (year, i) => [year, CHART_PALETTE[i]]
-  )
+  [2017, 2018, 2019, 2022, 2023, 2024, 2025, 2026].map((year, i) => [
+    year,
+    YEAR_PALETTE[i % YEAR_PALETTE.length],
+  ])
 );
 
 const KPI_ICONS = {
