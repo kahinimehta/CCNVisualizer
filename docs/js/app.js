@@ -717,40 +717,30 @@ function styleThemeAxisLabels(selection) {
   styleDesktopChartText(labels);
 }
 
-// 14 theme + 10 year colors: every hex is unique, and year/theme sets are
-// chosen for high pairwise separation (no shared or near-duplicate colors).
-// Theme colors: hues spread around the wheel so previously-confused clusters
-// (greens / blue-purples / yellows) are far apart. All 24 theme+year hexes unique.
+// Theme colors = VIBGYOR × 2 opposite shades (deep + light) per hue → 14.
+// Years reuse the first N entries of the same palette (one per year).
 const CHART_PALETTE = [
-  "#B1571C", // Reinforcement learning — burnt orange
-  "#D39F0F", // Motor control & planning — gold
-  "#B3EE2B", // Naturalistic encoding/decoding — chartreuse
-  "#209BF8", // Neural population geometry & dynamics — sky blue (not green)
-  "#0BDA2E", // Decision-making and metacognition — true green
-  "#A62EFA", // Vision — violet (not green)
-  "#07F7A3", // Perception — aqua
-  "#205CAC", // Language/auditory neuroscience — steel blue
-  "#F91F8C", // AI, LLM, & Neural Networks — hot pink
-  "#594CE6", // Memory — indigo
-  "#E100E2", // Social cognition & theory of mind — magenta
-  "#59FB00", // Attention & cognitive control — neon lime
-  "#F47B8A", // Clinical / computational psychiatry — rose
-  "#DA0B0B", // Methods and theory — crimson
+  "#5B21B6", // Violet deep
+  "#C4B5FD", // Violet light
+  "#312E81", // Indigo deep
+  "#A5B4FC", // Indigo light
+  "#1D4ED8", // Blue deep
+  "#93C5FD", // Blue light
+  "#15803D", // Green deep
+  "#86EFAC", // Green light
+  "#CA8A04", // Yellow deep
+  "#FDE047", // Yellow light
+  "#C2410C", // Orange deep
+  "#FDBA74", // Orange light
+  "#B91C1C", // Red deep
+  "#FCA5A5", // Red light
 ];
 
-// Absolute year→color map (not list index). Disjoint from CHART_PALETTE.
-const YEAR_COLORS = {
-  2017: "#D89F66", // light amber
-  2018: "#43A123", // forest
-  2019: "#7DE8B3", // seafoam
-  2020: "#06F1FD", // electric cyan
-  2021: "#88ABDF", // powder blue
-  2022: "#470AC2", // deep indigo
-  2023: "#F356CC", // orchid
-  2024: "#FE503F", // coral red
-  2025: "#E5DE8E", // pale olive
-  2026: "#932E9E", // plum
-};
+const YEAR_COLORS = Object.fromEntries(
+  [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026].map(
+    (year, i) => [year, CHART_PALETTE[i]]
+  )
+);
 
 const KPI_ICONS = {
   submissions:
