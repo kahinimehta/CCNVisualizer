@@ -722,7 +722,7 @@ function styleThemeAxisLabels(selection) {
 const CHART_PALETTE = [
   "#00C8FF", // 1. Reinforcement learning — super bright blue
   "#EFC8EC", // 2. light violet
-  "#2608A1", // 3. dark indigo
+  "#FF2BD6", // 3. Naturalistic encoding/decoding — magenta
   "#6B2BB8", // 4. Neural population geometry — darker indigo
   "#09469F", // 5. dark blue
   "#C0C9EE", // 6. light blue
