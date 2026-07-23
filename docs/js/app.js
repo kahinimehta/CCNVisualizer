@@ -720,7 +720,7 @@ function styleThemeAxisLabels(selection) {
 // Topics: VIBGYOR order, dark then light per hue (14). Shades pushed apart
 // (low vs high lightness + slight hue offset) so no two hexes sit too close.
 const CHART_PALETTE = [
-  "#000000", // 1. Reinforcement learning — black
+  "#00C8FF", // 1. Reinforcement learning — super bright blue
   "#EFC8EC", // 2. light violet
   "#2608A1", // 3. dark indigo
   "#BE92E9", // 4. light indigo
