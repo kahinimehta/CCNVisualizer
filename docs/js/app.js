@@ -717,23 +717,23 @@ function styleThemeAxisLabels(selection) {
   styleDesktopChartText(labels);
 }
 
-// Theme colors = VIBGYOR × 2 opposite shades (deep + light) per hue → 14.
+// Theme colors in VIBGYOR order: dark then light for each hue (14 total).
 // Years reuse the first N entries of the same palette (one per year).
 const CHART_PALETTE = [
-  "#5B21B6", // Violet deep
-  "#C4B5FD", // Violet light
-  "#312E81", // Indigo deep
-  "#A5B4FC", // Indigo light
-  "#1D4ED8", // Blue deep
-  "#93C5FD", // Blue light
-  "#15803D", // Green deep
-  "#86EFAC", // Green light
-  "#CA8A04", // Yellow deep
-  "#FDE047", // Yellow light
-  "#C2410C", // Orange deep
-  "#FDBA74", // Orange light
-  "#B91C1C", // Red deep
-  "#FCA5A5", // Red light
+  "#70148F", // 1. dark violet
+  "#DBA0EE", // 2. light violet
+  "#33148F", // 3. dark indigo
+  "#B3A0EE", // 4. light indigo
+  "#143D8F", // 5. dark blue
+  "#A0BAEE", // 6. light blue
+  "#148F33", // 7. dark green
+  "#A0EEB3", // 8. light green
+  "#B8A10A", // 9. dark yellow
+  "#EADC86", // 10. light yellow
+  "#AA5C18", // 11. dark orange
+  "#EEC4A0", // 12. light orange
+  "#8F1F14", // 13. dark red
+  "#EEA6A0", // 14. light red
 ];
 
 const YEAR_COLORS = Object.fromEntries(
