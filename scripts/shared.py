@@ -442,6 +442,10 @@ _AFFILIATION_HINTS = (
     "upf",
     "cognition and behaviour",
     "cognition and behavior",
+    "brain and language",
+    "centrum",
+    "wiskunde",
+    "informatica",
 )
 
 # Campus / city shorthands and orgs that appear as whole trailing author tokens.
@@ -488,6 +492,9 @@ _PLACE_OR_ORG_TOKENS = frozenset(
         "meta ai",
         "facebook ai",
         "microsoft research",
+        "brain and language",
+        "centrum wiskunde & informatica",
+        "centrum wiskunde and informatica",
     }
 )
 
@@ -682,10 +689,19 @@ def normalize_author_names(authors: str) -> str:
             continue
         if _is_affiliation_token(part):
             break
-        if part not in names:
-            names.append(part)
+        # Author separators must be commas only — split "A & B" / "A and B".
+        for person in re.split(r"\s*(?:&|and)\s+", part, flags=re.IGNORECASE):
+            person = person.strip(" ,;")
+            if not person or _is_affiliation_token(person):
+                continue
+            if person not in names:
+                names.append(person)
 
-    return capitalize_author_names(", ".join(names))
+    cleaned = capitalize_author_names(", ".join(names))
+    # Final guard: never leave "&" or "and" as list joiners in the author field.
+    cleaned = re.sub(r"\s*(?:&|and)\s+", ", ", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r"\s*,\s*", ", ", cleaned).strip(" ,")
+    return capitalize_author_names(cleaned)
 
 
 def is_plausible_keyword(keyword: str) -> bool:
