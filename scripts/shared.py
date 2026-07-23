@@ -373,11 +373,8 @@ _COUNTRY_NAMES = frozenset(
 )
 
 _AFFILIATION_HINTS = (
-    "university",
-    "université",
-    "universiteit",
-    "universidad",
-    "universität",
+    # "univer" covers university / université / universitat / univeristy typo / universitaet
+    "univer",
     "institute",
     "institut",
     "college",
@@ -391,7 +388,10 @@ _AFFILIATION_HINTS = (
     "centre",
     "center",
     "ctr.",
+    "campus",
     "neurosci",
+    "neuroinfo",
+    "neuromodulation",
     "republic of",
     "berkeley",
     "stanford",
@@ -424,6 +424,24 @@ _AFFILIATION_HINTS = (
     "birkbeck",
     "vanderbilt",
     "amherst",
+    "janelia",
+    "hyderabad",
+    "stuttgart",
+    "charité",
+    "charite",
+    "sorbonne",
+    "pompeu",
+    "jaume",
+    "osnabr",
+    "freie",
+    "école",
+    "ecole",
+    "normale",
+    "iiit",
+    "hhmi",
+    "upf",
+    "cognition and behaviour",
+    "cognition and behavior",
 )
 
 # Campus / city shorthands and orgs that appear as whole trailing author tokens.
@@ -445,11 +463,19 @@ _PLACE_OR_ORG_TOKENS = frozenset(
         "hyderabad",
         "bangalore",
         "bengaluru",
+        "stuttgart",
+        "berlin",
+        "paris",
         "kuleuven",
         "birkbeck",
         "vanderbilt",
         "neurospin",
         "cerco",
+        "charité",
+        "charite",
+        "cognition",  # Donders department fragment ("Cognition, and Behaviour")
+        "and behaviour",
+        "and behavior",
         "atr international",
         "vicarious ai",
         "idibaps",
@@ -475,15 +501,21 @@ def _is_country_token(part: str) -> bool:
 
 def _is_affiliation_token(part: str) -> bool:
     """True for countries, labs, universities, and short org acronyms (MIT, NYU, …)."""
-    cleaned = part.strip()
+    cleaned = part.strip().strip("()")
     if not cleaned:
         return False
     if _is_country_token(cleaned):
         return True
     lowered = cleaned.lower().strip(" .")
+    # Department-name fragments split on commas: "Cognition, and Behaviour"
+    if lowered.startswith("and "):
+        return True
     if lowered in _PLACE_OR_ORG_TOKENS:
         return True
     if any(hint in lowered for hint in _AFFILIATION_HINTS):
+        return True
+    # Trailing "… Unit" / "… Group" department labels
+    if re.search(r"\b(unit|group|campus|hospital|clinic)\b", lowered):
         return True
     # Short org acronyms commonly appended after author lists.
     if re.fullmatch(r"[A-Z]{2,6}", cleaned):

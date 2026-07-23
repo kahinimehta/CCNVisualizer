@@ -9445,7 +9445,7 @@
       "id": "1285",
       "year": 2018,
       "title": "Active sampling decreases the perceived volatility of uncertain environments and associated neural representations",
-      "authors": "Aurelien Weiss, Valentin Wyart, Valerian Chambon, Ecole Normale Superieure",
+      "authors": "Aurelien Weiss, Valentin Wyart, Valerian Chambon",
       "abstract": "Beside obvious differences in input, perceptual and reward-guided decisions diverge in the degree of control conferred to the decision-maker in the sampling of evidence. We thus asked whether humans learn differently from the same uncertain evidence when the evidence in question corresponds either to cues sampled passively as in perceptual decisions, or to outcomes sampled actively as in reward-guided decisions. We designed a probabilistic reversal learning paradigm with two conditions, in which subjects have to track a latent state of their environment: either the category (A or B) from which presented stimuli are drawn (cue-based condition), or the action (left or right) which draws stimuli from a target category (outcome-based condition). Computational modeling of human behavior showed a lower perceived rate of reversals (volatility) in the outcome-based condition. Multivariate analyses of magnetoencephalographic (MEG) signals revealed that stimuli were coded in relation to their assigned latent state more strongly in the outcome-based condition, an effect originating from the right medial temporal lobe (MTL). Together, these findings demonstrate that humans rely more strongly on their internal model of the environment when they learn about its current state through active sampling rather than by observation.",
       "author_keywords": [],
       "extracted_keywords": [
@@ -13547,7 +13547,7 @@
       "id": "1286",
       "year": 2018,
       "title": "NMDA receptor inactivation destabilizes neural representations of decision signals during probabilistic reasoning",
-      "authors": "Valentin Wyart, Ecole Normale Superieure",
+      "authors": "Valentin Wyart",
       "abstract": "In schizophrenia, early stages of psychosis are characterized by a state of pathological uncertainty (or ‘strangeness’) which is difficult to study in patients due to its transitional nature. Therefore, the alterations of decision processes which lead to full-blown delusions remain largely unknown. Here we studied a pharmacological model of this condition using ketamine, an NMDA receptor antagonist, in healthy subjects performing a probabilistic reasoning task. Computational modeling of human behavior revealed a selective decrease in the precision of probabilistic inference under ketamine. The analysis of simultaneously recorded electroencephalographic (EEG) signals provided support for this selective alteration, by showing unstable neural representations of decision evidence under ketamine. In particular, upcoming decisions could be decoded earlier from brain signals under ketamine, and evidence inconsistent with upcoming decisions were progressively discarded in the inference process. Together, these findings indicate a premature and irrational commitment to uncertain decisions under ketamine, a selective alteration of decision-making which may explain the stabilization of aberrant beliefs characteristic of psychosis.",
       "author_keywords": [],
       "extracted_keywords": [
@@ -13586,7 +13586,7 @@
       "id": "1196",
       "year": 2018,
       "title": "Noisy inference of value signals in frontal cortex drives exploration during reward-guided learning",
-      "authors": "Charles Findling, Vasilisa Skvortsova, Ecole normale supérieure",
+      "authors": "Charles Findling, Vasilisa Skvortsova",
       "abstract": "When tracking rewarded stimulus-response associations in volatile environments, humans make a surprisingly large number of seemingly suboptimal decisions, which do not maximize expected outcome. These ‘exploratory’ decisions have been assigned either to information seeking or to stochasticity in response selection. We reasoned that a fraction of exploratory decisions could be due to random noise in the inference process driving learning, noise which is otherwise assumed to be negligible. Accounting simultaneously for these different sources of exploration in reinforcement learning revealed that more than half of exploratory decisions are due to inference noise alone. This computational dissection of exploration is supported by neuroimaging data, which shows a dissociation in the relationship between choice behavior and two brain regions associated with exploration: fluctuations in anterior cingulate activity co-vary with inference noise during learning, whereas frontopolar activity drives exploration during choice. Together, these findings indicate that exploration in reward-guided learning is driven to a large part by random errors in inference, unbeknownst to the decision-maker.",
       "author_keywords": [
         "reinforcement leaning",
@@ -15108,7 +15108,7 @@
       "id": "1044",
       "year": 2018,
       "title": "The functional role of cue-driven feature-based feedback in object recognition",
-      "authors": "Sushrut Thorat, Marcel van Gerven, Marius Peelen, Cognition and Behaviour",
+      "authors": "Sushrut Thorat, Marcel van Gerven, Marius Peelen",
       "abstract": "Visual object recognition is not a trivial task, especially when the objects are degraded or surrounded by clutter or presented briefly. External cues (such as verbal cues or visual context) can boost recognition performance in such conditions. In this work, we build an artificial neural network to model the interaction between the object processing stream (OPS) and the cue. We study the effects of varying neural and representational capacities of the OPS on the performance boost provided by cue-driven feature- based feedback in the OPS. We observe that the feedback provides performance boosts only if the category-specific features about the objects cannot be fully represented in the OPS. This representational limit is more dependent on task demands than neural capacity. We also observe that the feedback scheme trained to maximise recognition performance boost is not the same as tuning-based feedback, and actually performs better than tuning-based feedback.",
       "author_keywords": [
         "feature-based feedback",
@@ -15367,7 +15367,7 @@
       "id": "1098",
       "year": 2018,
       "title": "Theta phase at encoding leads to successful memory formation",
-      "authors": "Josefina Cruzat, Mireia Torralba, Manuela Ruzzoli, Gustavo Deco, Salvador Soto-Faraco, Universitat Pompeu Fabra",
+      "authors": "Josefina Cruzat, Mireia Torralba, Manuela Ruzzoli, Gustavo Deco, Salvador Soto-Faraco",
       "abstract": "Several studies in perception and attention have shown cyclic alternations in behavioural performance (Busch, Dubois, & VanRullen, 2009; de Graaf et al., 2013; Klimesch, Sauseng, & Hanslmayr, 2007; Mathewson, Gratton, Fabiani, Beck, & Ro, 2009; Palva & Palva, 2007; VanRullen, 2016). The main idea behind this phenomenon is that spontaneous low frequency oscillations in neural activity gate incoming sensory information, producing peaks and troughs that correlate with cycles of favorable and unfavorable states for perceptual and attentional processing. Hence, variability in behavioural performance could depend on the particular oscillation phase at which the stimulus is presented. In this study, we extend this idea to the memory domain. We used an audio-visual cue as a resetting signal to pace the moment of presentation of associated pairs of images in a memory encoding block. We found that memory success (hit rate) in a subsequent recognition block fluctuated at ~5 Hz, as a function of the moment at which the memory item had been encoded with respect to the cue.",
       "author_keywords": [
         "visual memory",
@@ -18978,7 +18978,7 @@
       "id": "1433",
       "year": 2019,
       "title": "Confirmation Bias is explained by Descending Loops in the Cortical Hierarchy",
-      "authors": "Vincent Bouttier, Sophie Denève, Ecole Normale Supérieure",
+      "authors": "Vincent Bouttier, Sophie Denève",
       "abstract": "In order to carry decision-making based on several pieces of evidence, one must integrate information over time. An optimal Bayesian observer would simply use Bayes' rule to combine the past knowledge with the new evidence. In this work, we tackle malfunctioning of inference, motivated by biological considerations and the recurrent structure of the brain. Allowing for loops of information when excitation and inhibition are unbalanced, we derive a functional Bayesian model of suboptimal inference, where the likelihood is corrupted by the prior knowledge. We show that, depending on the level of reverberation of the prior information, this \"circular inference\" model can explain cognitive biases often observed experimentally as the recency effect, the primacy effect, and the confirmation bias. The model is able to fit behavioural data on a task where healthy subjects were injected low doses of ketamine, a hallucinogenic drug thought to modify the E/I balance in favor of excitation. This work could allow to relate the microscale anomalies (E/I imbalance), the mesoscale anomalies (anomalies in frequency bands) and the macroscale anomalies (behavioural suboptimality and cognitive biases) observed in the psychotic state and under hallucinogenic drugs.",
       "author_keywords": [
         "ketamine",
@@ -19632,7 +19632,7 @@
       "id": "1172",
       "year": 2019,
       "title": "Do sleep and anesthesia share common multifractal EEG dynamics? Insights from adversarial domain adaptation",
-      "authors": "Louis Leconte, Ecole Normale Supérieure Paris-Saclay",
+      "authors": "Louis Leconte",
       "abstract": "The brain displays scale-free and multifractal dynamics that change across different states of consciousness. Whether the multifractal properties of EEG data change in a similar way when shifting from a conscious to an unconscious state compared to shifting from wakefulness to sleep is still largely unknown. To address this we ask a slightly different question: How well can we use a classifier trained on sleep EEG multifractality data to correctly discriminate conscious and unconscious states. To this end, we used a Domain Adversarial Neural Network (DANN) framework geared towards discriminating neural signals recorded during conscious vs unconscious states (target domain), based on classification of brain signals recorded during wakefulness vs sleep (source domain). We compare results obtained with naïve transfer learning (no domain adaptation), with supervised and unsupervised domain adaptation. The input data consisted of multifractal parameters computed from EEG recordings. This paper reports two important findings: First, our analyses provide evidence for the feasibility of creating a DANN architecture that can learn to discriminate consciousness from anesthetic-induced unconsciousness via adversarial adaptation of sleep/wakefulness discrimination. Second, by exploring the topographies of the successful classification rates across the EEG array, we were able to identify functional similarities of EEG multifractality patterns across sleep and anesthesia.",
       "author_keywords": [
         "multifractality",
@@ -21367,7 +21367,7 @@
       "id": "1088",
       "year": 2019,
       "title": "How the brain encodes meaning: Comparing word embedding and computer vision models to predict fMRI data during visual word recognition",
-      "authors": "Ning Mei, Usman Sheikh, Cognition, and Language",
+      "authors": "Ning Mei, Usman Sheikh",
       "abstract": "The brain representational spaces of conceptual knowledge remain unclear. We addressed this question in a functional MRI study in which 27 participants were required to either read visual words or think about the concepts that words represented. To examine the properties of the semantic representations in the brain, we tested different encoding models based on word embeddings models -FastText (Bojanowski, Grave, Joulin, & Mikolov, 2017), GloVe (Pennington, Socher, & Manning, 2014), word2vec (Mikolov, Sutskever, Chen, Corrado, & Dean, 2013)-, and, image vision models -VGG19 (Simonyan & Zisserman, 2014), MobileNetV2 (Howard et al., 2017), DenseNet121 (Huang, Liu, Van Der Maaten, & Weinberger, 2017)- fitted with the image referents of the words. These models were used to predict BOLD responses in putative substrates of the semantic network. We fitted and predicted the brain response using the feature representations extracted from the word embedding and computer vision models. Our results showed that computer vision models outperformed word embedding models in explaining brain responses during semantic processing tasks. Intriguingly, this pattern occurred independently of the task demand (reading vs thinking about the words). The results indicated that the abstract representations from the embedding layer of computer vision models provide a better semantic model of how the brain encodes word meaning.",
       "author_keywords": [
         "semantics",
@@ -21752,7 +21752,7 @@
       "id": "1314",
       "year": 2019,
       "title": "Influence of Musical Expertise on the processing of Musical Features in a Naturalistic Setting",
-      "authors": "Dipankar Niranjan, IIIT Hyderabad",
+      "authors": "Dipankar Niranjan",
       "abstract": "Musical training causes structural and functional changes in the brain due to its sensory-motor demands, but the modulatory effect of musical training on music feature processing in the brain in a continuous music listening paradigm, has not been investigated thus far. In this work, we investigate the differences between musicians and non-musicians in the encoding of musical features encompassing musical timbre, rhythm and tone. 18 musicians and 18 non-musicians were scanned using fMRI while listening to 3 varied stimuli. Acoustic features corresponding to timbre, rhythm and tone were computationally extracted from the stimuli and correlated with brain responses, followed by t-tests on group level maps to uncover encoding differences between the two groups. The musicians demonstrated greater involvement of limbic and reward regions, and regions possessing adaptations to music processing due to training, indicating greater analytic processing. However, as a group, they did not exhibit large regions of consistent correlation patterns, especially in processing high-level features, due to differences in processing strategies arising out of their varied training. The non-musicians exhibited broader regions of correlations, implying greater similarities in bottom-up sensory processing.",
       "author_keywords": [
         "musicians vs non-musicians",
@@ -21981,7 +21981,7 @@
       "id": "1124",
       "year": 2019,
       "title": "Learning to evoke complex motor outputs with spatiotemporal neurostimulation using a hierarchical and adaptive optimization algorithm.",
-      "authors": "Samuel Laferriere, Guillaume Lajoie, Universite de Montreal",
+      "authors": "Samuel Laferriere, Guillaume Lajoie",
       "abstract": "The development of neurostimulation techniques to evoke motor patterns is an active area of research. It serves as a crucial experimental tool to probe computation in neural circuits, and it has applications in neuroprostheses used to aid recovery of function after stroke or injury. There are two important challenges when designing algorithms to unveil and control neurostimulation-to-motor mappings, thereby linking spatiotemporal patterns of neural stimulation to muscle activation: (1) the exploration of motor maps needs to be fast and efficient (exhaustive search is to be avoided for clinical and experimental reasons) (2) online learning needs to be flexible enough to track ongoing changes in these maps. We propose a stimulation search algorithm to address these issues, and demonstrate its efficacy with experiments in non-human primate models. Our solution is a novel iterative process using Bayesian Optimization via Gaussian Processes on increasingly complex signal spaces. We show that our algorithm can successfully and rapidly learn mappings between complex stimulation patterns and evoked muscle activation patterns, where standard approaches fail. Importantly, we uncover nonlinear circuit-level computations in M1 that would not have been possible to identify using conventional mapping techniques.",
       "author_keywords": [],
       "extracted_keywords": [
@@ -22294,7 +22294,7 @@
       "id": "1095",
       "year": 2019,
       "title": "Mechanisms of the non-linear interactions between the neuronal and neurotransmitter systems explained by causal whole-brain modeling",
-      "authors": "Josephine Cruzat, Universitat Pompeu Fabra",
+      "authors": "Josephine Cruzat",
       "abstract": "Although a variety of studies have shown the role of neurotransmitters at the neuronal level, their impact on the dynamics of the system at a macroscopic scale is poorly understood. Here, we provide a causal explanation using the ​first whole-brain model integrating multimodal imaging in healthy human participants undergoing manipulation of the serotonin system. Specifically, we combined anatomical and functional data with a detailed map of the serotonin 2A receptor (5-HT​2AR​) densities obtained with positron emission tomography (PET). This allowed us to model the resting state and mechanistically explain the functional effects of 5-HT​2AR​ stimulation with lysergic acid diethylamide (LSD). The whole-brain model used a dynamical mean-field quantitative description of populations of excitatory and inhibitory neurons as well as the associated synaptic dynamics, where the neuronal gain function of the model is modulated by the 5-HT​2AR​ density. The results show that the precise distribution of 5-HT​2AR​ is crucial to predict the neuromodulatory effects of LSD. The model identified the causative mechanisms for the non-linear interactions between the neuronal and neurotransmitter system, which are uniquely linked to the underlying neuroanatomical network, the modulation by the specific brain-wide distribution of neurotransmitter receptors, and the non-linear interactions between the two.",
       "author_keywords": [],
       "extracted_keywords": [
@@ -22985,7 +22985,7 @@
       "id": "1010",
       "year": 2019,
       "title": "Neural Information Flow: Learning neural information processing systems from brain activity",
-      "authors": "K. Seeliger, L. Ambrogioni, U. Güçlü, M. A. J. van Gerven, Cognition and Behaviour",
+      "authors": "K. Seeliger, L. Ambrogioni, U. Güçlü, M. A. J. van Gerven",
       "abstract": "Neural information flow (NIF) is a new framework for system identification in neuroscience. NIF models represent neural information processing systems as coupled brain regions that each embody neural computations. These brain regions are coupled to observed data specific to that region via linear observation models. NIF models are trained via backpropagation, directly leveraging the neural signal as the loss. Trained NIF models are accessible for in silico analyses. Using a large-scale fMRI video stimulation dataset and a feed-forward convolutional neural network-based NIF model as an example we show that, in this manner, we can estimate models that learn meaningful neural computations and representations. Our framework is general in the sense that it can be used in conjunction with any neural recording techniques. It is also scalable, providing neuroscientists with a principled approach to make sense of high-dimensional neural datasets.",
       "author_keywords": [
         "system identiﬁcation",
@@ -26290,7 +26290,7 @@
       "id": "1096",
       "year": 2019,
       "title": "Tracking Naturalistic Linguistic Predictions with Deep Neural Language Models",
-      "authors": "Micha Heilbron, Benedikt Ehinger, Peter Hagoort, Floris de Lange, Cognition, and Behaviour",
+      "authors": "Micha Heilbron, Benedikt Ehinger, Peter Hagoort, Floris de Lange",
       "abstract": "Prediction in language has traditionally been studied using simple designs in which neural responses to expected and unexpected words are compared in a categorical fashion. However, these designs have been contested as being `prediction encouraging', potentially exaggerating the importance of prediction in language understanding. A few recent studies have begun to address these worries by using model-based approaches to probe the effects of linguistic predictability in naturalistic stimuli (e.g. continuous narrative). However, these studies so far only looked at very local forms of prediction, using models that take no more than the prior two words into account when computing a word's predictability. Here, we extend this approach using a state-of-the-art neural language model that can take roughly 500 times longer linguistic contexts into account. Predictability estimates from the neural network offer a much better fit to EEG data from subjects listening to naturalistic narrative than simpler models, and reveal strong surprise responses akin to the P200 and N400. These results show that predictability effects in language are not a side-effect of simple designs, and demonstrate the practical use of recent advances in AI for the cognitive neuroscience of language.",
       "author_keywords": [
         "prediction",
@@ -27841,7 +27841,7 @@
       "id": "1037",
       "year": 2022,
       "title": "An Efficient Search for Novel Behavioral Strategies in a Vast Program Space",
-      "authors": "Tzuhsuan Ma, Ann Hermundstad, HHMI Janelia Research Campus",
+      "authors": "Tzuhsuan Ma, Ann Hermundstad",
       "abstract": "To forage in a changing and uncertain environment, animals need to gather information about hidden states of the world to guide decisions. To understand the strategies that animals use in such settings, typical theoretical approaches combine Bayesian inference and value iteration to derive optimal behavioral policies that maximize total reward given changing beliefs about the environment. However, specifying these beliefs requires infinite numerical precision; with limited resources, this problem is no longer cleanly separable into components of inference and action selection. To understand the space of behavioral policies in this constrained setting, we enumerate and evaluate all possible behavioral programs that can be constructed from just a handful of states. We show that only 65 (1.4%) of the 4492 top-performing programs can be constructed by approximating Bayesian inference; the remaining programs are structurally or even functionally distinct from Bayesian. We develop a novel tree embedding to understand relationships between these programs. This embedding reveals hidden structures within the space of programs—with nearly all of the top-performing programs connected through single mutations—that can be used to efficiently search for good programs via evolutionary algorithms.",
       "author_keywords": [
         "decision making",
@@ -32830,7 +32830,7 @@
       "id": "1233",
       "year": 2022,
       "title": "Predicting Individual Differences from Brain Responses to Music using Functional Network Centrality",
-      "authors": "Arihant Jain, Vinoo Alluri, IIIT Hyderabad",
+      "authors": "Arihant Jain, Vinoo Alluri",
       "abstract": "Individual differences are known to modulate brain responses to music. Recent neuroscience research suggests that each individual has unique and fundamentally stable functional brain connections irrespective of the task they perform. 77 participants' functional Magnetic Resonance Imaging (fMRI) responses were measured while continuously listening to music. Using a graph-theory-based approach, we modeled whole-brain functional connectivity. We then calculate voxel-wise eigenvector centrality and subsequently use it to classify gender and musical expertise using binary Support Vector Machine (SVM). We achieved a cross-validated classification accuracy of 97% and 96% for gender and musical expertise, respectively. We also identify regions that contribute most to this classification. Thus, this study demonstrates that individual differences can be decoded from brain responses to music using a graph-based method with near-perfect precision.",
       "author_keywords": [
         "individual differences",
@@ -33703,7 +33703,7 @@
       "id": "1143",
       "year": 2022,
       "title": "Simulated voxels from the tuned inhibition model of perceptual metacognition to drive model validation via fMRI",
-      "authors": "Shaida Abachi, Brian Maniscalco, Megan Peters, Univeristy of California",
+      "authors": "Shaida Abachi, Brian Maniscalco, Megan Peters",
       "abstract": "When we make perceptual decisions, confidence usually co-varies with decisional accuracy. However, sometimes this correspondence breaks down, e.g. in atypical environments or clinical populations. This raises an important question: what are the neural computations of perceptual metacognition if their output can diverge from perceptual decisions themselves? In a recent paper, we argued that tuned inhibition (TI)—i.e., the degree to which a neuron is inhibited by neighboring neurons with opposing tuning preferences, which varies from neuron to neuron—is a crucial part of the underlying mechanism. Here we explore how we might validate the TI model using fMRI data, by simulating the activity of 'voxels' of different compositions in the presence of evidence for and against a perceptual decision in a decision+confidence task. We show that we can quantify how a voxel's TI level dictates its predictive power for confidence judgments, providing support for use of these stimuli and analyses in fMRI data to validate the TI model of perceptual metacognition.",
       "author_keywords": [
         "perceptual decision making",
@@ -34472,7 +34472,7 @@
       "id": "1203",
       "year": 2022,
       "title": "The Representational Manifold",
-      "authors": "Manolo Martínez, Universitat de Barcelona",
+      "authors": "Manolo Martínez",
       "abstract": "The question about the nature of representations (that is, about which kinds of entities or processes can be said to be about or stand for other entities or processes) is a central theoretical problem in cognitive science. I present a framework aimed at systematizing the debate around this question. I claim, first, that representations are primarily signals tailored for information transmission, for the sake of information transmission---as opposed to entities that merely happen to carry information. Second, I argue that a way to establish empirically that some entity is a representation, therefore, is to show that it is adapted for information transmission---that it aims at optimally trading-off three key information-transmission budgets: 1) rate (or transmission and storage costs); 2) distortion (or faithfulness of the transmitted information); and 3) computational complexity. Paradigmatic examples of representational phenomena typically sit close to the Pareto frontier of a Rate-Distortion-Complexity multiobjective optimization: the representational manifold of the title.",
       "author_keywords": [
         "rate-distortion theory",
@@ -37445,7 +37445,7 @@
       "id": "1086",
       "year": 2023,
       "title": "Computational Modeling of Traveling Waves Using MEG-EEG in Human",
-      "authors": "Laetitia Grabot, Garance Merholz, Université Paris Cité",
+      "authors": "Laetitia Grabot, Garance Merholz",
       "abstract": "Recent studies suggest that brain oscillations are traveling waves in cortex. Yet, studying oscillations propagating within single cortical areas has so far been restricted by the need for invasive measurements. Non-invasive techniques such as MEG or EEG are limited by technical and biophysical constraints (e.g., source summation, volume conduction, low signal-to-noise ratios). To overcome these issues, we developed a novel model-based neuroimaging approach. (1) The putative neural sources of a propagating oscillation were modeled within the primary visual region (V1) via retinotopic mapping from functional MRI recordings (encoding model); and (2) the modeled sources were projected onto the M-EEG sensor space to predict the resulting signal (forward biophysical head model). We tested our model by comparing its predictions against the M-EEG signal obtained when participants viewed visual stimuli designed to elicit either fovea-to-periphery or periphery-to-fovea traveling waves, or standing waves in V1. Correlations on pairwise sensor relationships between predicted and measured data revealed good model performance. Crucially, the model was able to distinguish M-EEG recordings while participants viewed traveling stimuli in one direction compared to the opposite direction. Our model aims at recovering the spatio-temporal dynamics of cerebral activity from non-invasive measurements to better apprehend the neurophysiological bases of cognition.",
       "author_keywords": [
         "cortical oscillations",
@@ -37704,7 +37704,7 @@
       "id": "1061",
       "year": 2023,
       "title": "Consistency or Fluctuations? How Humans Manage Limited Search Capacity Over Consecutive Uncertain Choices",
-      "authors": "Alice Vidal, Salvador Soto-Faraco, Ruben Moreno-Bote, Universitat Pompeu Fabra",
+      "authors": "Alice Vidal, Salvador Soto-Faraco, Ruben Moreno-Bote",
       "abstract": "Many everyday situations, such as investing money, or allocating attention in exams, involve making uncertain choices using limited resources. In these cases, both choices and the resource allocation fluctuate over time. However, the mechanisms underlying such variability and its impact on performance remain poorly understood. Here, we employ a novel ecological paradigm to test the presence of a consistency bias in sequential multiple-choice scenarios with limited search capacity. We manipulated the environment so that homogenous resource allocation was not always the optimal search regime. The results showed that humans follow search strategies characterised by intentional fluctuations that exceed those predicted by the optimal model, but they have little impact on performance. By extending the optimal model, we show that, overall, the observed variations in resource allocation strike a balance between the gathering of sufficient relevant information for some choices and the risk to leaving some others to chance. These fluctuations prioritise anticipation and information gathering, both beneficial behaviours in a highly dynamical world.",
       "author_keywords": [
         "search capacity",
@@ -37735,7 +37735,7 @@
       "id": "1257",
       "year": 2023,
       "title": "Constructing and deconstructing bias: modeling privilege and mentorship in agent-based simulations",
-      "authors": "Andria Smith, Stuttgart",
+      "authors": "Andria Smith",
       "abstract": "Bias exists in how we pick leaders, who we perceive as being influential, and who we interact with, not only in society, but in organizational contexts. Drawing from leadership emergence and social influence theories, we investigate potential interventions that support diverse leaders. Using agent-based simulations, we model a collective search process on a fitness landscape. Agents combine individual and social learning, and are represented as a feature vector blending relevant (e.g., individual learning characteristics) and irrelevant (e.g., race or gender) features. Agents use rational principles of learning to estimate feature weights on the basis of performance predictions, which are used to dynamically define social influence in their network. We show how biases arise based on historic privilege, but can be drastically reduced through the use of an intervention (e.g. mentorship). This work provides important insights into the cognitive mechanisms underlying bias construction and deconstruction, while pointing towards real-world interventions to be tested in future empirical work.",
       "author_keywords": [
         "social influence",
@@ -38888,7 +38888,7 @@
       "id": "1039",
       "year": 2023,
       "title": "Dynamic range adaptation in vast decision spaces: experimental evidence in humans",
-      "authors": "Nicolas Yax, Stefano Palminteri, Ecole Normale Superieure",
+      "authors": "Nicolas Yax, Stefano Palminteri",
       "abstract": "An increasing wealth of evidence in experimental psychology (both in humans and animals) indicates that rewards are learned on a relative scale. More specifically, results are consistent with a range adaptation process, that therefore requires tracking plausible expectations for the maximum and the minimum rewards (together forming the range) to be expected in a given context. Nonetheless, how range variables are tracked in situations where they change dynamically and outcome information is scarce is still unclear. To address this issue we designed a new reinforcement learning task where range variables change unpredictably across learning episodes. This allowed us to validate a psychologically plausible model which postulates that contextual ranges expand quicker than they contract. By using a task with a vast decision space, our experiments also showed that, in ecological situations, range adaptation can be useful to adjust the exploration / exploitation trade-off, when options cannot be sampled efficiently.",
       "author_keywords": [
         "reinforcement learning",
@@ -39299,7 +39299,7 @@
       "id": "1170",
       "year": 2023,
       "title": "Emergence of neuronal ensembles in a chaotic corticostriatal circuit",
-      "authors": "Alessia Cavallo, Interventional and Cognitive Neuromodulation, Movement Disorder and Neuromodulation Unit, Charité",
+      "authors": "Alessia Cavallo",
       "abstract": "Reinforcement learning in corticostriatal models is usually implemented using stochastic noise to drive exploration. In this framework, noise is added to so-called action channels, pre-defined groups of a few neural units that are associated with a specific action. The biological plausibility of this paradigm is questionable. We show here that stochastic neuronal activity fails to promote exploration when applied to a model devoid of action channels and with hundreds of neurons organized in a recurrent neural network. Instead, we demonstrate that deterministic chaos supports reinforcement learning and the autonomous emergence of striatal action channels. Importantly, the proposed chaotic corticostriatal circuit is able to transition between phases of exploration and exploitation allowing flexible learning to occur.",
       "author_keywords": [
         "deterministic chaos",
@@ -39406,7 +39406,7 @@
       "id": "1217",
       "year": 2023,
       "title": "Enumerating and discovering highly discriminative tasks for probing the cognitive architecture underlying complex behavior",
-      "authors": "Tzuhsuan Ma, Rishika Mohanta, Glenn Turner, Ann Hermundstad, HHMI Janelia Research Campus",
+      "authors": "Tzuhsuan Ma, Rishika Mohanta, Glenn Turner, Ann Hermundstad",
       "abstract": "To guide effective behavior in the face of uncertainty and change, animals can efficiently use their limited computational resources by adopting widely generalizable behavioral strategies. To gain a holistic understanding of the space of generalizable strategies, it is important to use a diversity of tasks to probe animal behavior. However, we lack principled methods for designing such tasks. Here, we combine enumeration with task design in order to probe the space of strategies that an animal uses to dynamically select among multiple options that can deliver different rewards. We consider a class of strategies in which an animal’s choices depend locally on the outcomes of previous actions. We then design and enumerate a class of tasks that best discriminate between individual strategies. Through this enumeration, we discover a set of highly discriminative tasks that would not have been devised by typical handcrafted methods. We show that these tasks can evoke and identify nearly all possible groupings of strategies, and can thus be combined to iteratively localize decision strategies from behavioral observations. Moving forward, we plan to use these tasks to uncover the cognitive architectures that guide decisions across different species—from flies to humans.",
       "author_keywords": [
         "decision making",
@@ -39515,7 +39515,7 @@
       "id": "1126",
       "year": 2023,
       "title": "Evidence for macroscopic traveling waves from sEEG",
-      "authors": "David Alexander, Laura Dugué, Université Paris Cité",
+      "authors": "David Alexander, Laura Dugué",
       "abstract": "Macroscopic traveling waves (MTWs) in the cortex (>15cm) have been associated with cognitive processes such as perception, attention and working memory, as well as revealing single-trial relationships to event-related potentials (ERPs). However, their status remains unresolved, with some studies suggesting they result from localized oscillatory sources and blurring artifact from extra-cranial measurements. We apply a novel method to estimate the spatial frequency (SF, i.e., the characteristic scales) of phase-gradients in sEEG (stereotactic electro-encephalography). In humans, these intra-cranial depth contacts offer good spatial resolution and often-times good spatial coverage of the cortex with minimal blurring artifact. We find the spectral power of phase-gradients is highest at the longest wavelengths, up to the size of the measurement array (40cm). This means that MTWs dominate activity in the cortex and suggests that M/EEG are suitable tools for their study since they primarily distort high (and not low) SF components. We interpret this large-scale coherent field as evidence for phase-gradients maintaining a distinct global organization.",
       "author_keywords": [
         "macroscopic cortex",
@@ -40970,7 +40970,7 @@
       "id": "1364",
       "year": 2023,
       "title": "Higher-level spatial prediction during natural scene perception in mouse primary visual cortex",
-      "authors": "Micha Heilbron, Floris de Lange, Cognition, and Behaviour",
+      "authors": "Micha Heilbron, Floris de Lange",
       "abstract": "Predictive processing models postulate that perception involves the comparison of bottom-up signals with top- down (reconstructive) predictions. Building on recent work, we test this idea in natural scene perception. We use a reconstructing auto-encoder (UNet) to quantify the spatial predictability of natural image patches, and com- pare those predictability estimates to brain responses in the mouse visual system, using a large scale survey of high-density extra-cellular recordings provided by the Allen Institute Brain Observatory. Initial results in V1 re- veal a clear modulation of spiking activity by high (but not low) level visual predictability, suggesting V1 is sensitive to low-level visual features, but high-level predictability. This sensitivity bears striking similarities to recent, self-supervised predictive objectives from machine learning.",
       "author_keywords": [
         "predictiveprocessing",
@@ -41947,7 +41947,7 @@
       "id": "1466",
       "year": 2023,
       "title": "Inverse Reflection Effect During Context-Dependent Learning of Risky Choices",
-      "authors": "Ali Shiravand, École Normale Supérieure",
+      "authors": "Ali Shiravand",
       "abstract": "Economic choices are known to be strongly influenced by both outcome valence (i.e., whether an outcome entails gain or loss) and risk (the variance of outcomes). It has been shown in previous studies that people have different risk preferences when the prospects’ information is described explicitly and when they are learning it by experience, known as the experience-description gap. However, the effect of valence on behavioral performance in an experienced-based learning task has been less investigated. To address this question, we used a novel instrumental learning task in 2 online behavioral experiments designed to manipulate risk and valence independently. Consistent results in both experiments show a significant effect of a prospect’s riskiness on behavioral performance. Moreover, our results indicate during experience-based risky choices, people are more risk-seeking in gains and risk-averse in losses, which is in contrast with their preferences in a description-based risky choice and contrary to the reflection effect discussed in the prospect theory. Our results reveal the importance of context-dependent learning in shaping risk preferences in experience-based choices.",
       "author_keywords": [
         "decision-making",
@@ -42204,7 +42204,7 @@
       "id": "1089",
       "year": 2023,
       "title": "Learning Cognitive State Representations from Neuronal and Behavioural Data",
-      "authors": "Akshey Kumar, Research Group Neuroinformatics",
+      "authors": "Akshey Kumar",
       "abstract": "Explaining how neuronal activity gives rise to behaviour and cognition is a central goal of cognitive neuroscience. With the proliferation of larger neuronal datasets, there have been various attempts to abstract representations of the neuronal data. Some methods consider behavioural decoding to be important while other unsupervised methods like PCA and autoencoder disregard behaviour altogether. Here, we propose an architecture to learn cognitive state representations which preserve information of both the dynamics and behaviour. We present a neural network implementation (BunDLe Net) and apply it on calcium imaging neuronal data of the roundworm C. elegans. Our method reveals clear orbit-like trajectories which are recurrent and structured. It also outperforms conventional methods in the field such as PCA, autoencoders and autoregressors with regards to the dynamical predictability and behavioural decoding accuracy.",
       "author_keywords": [
         "representation learning",
@@ -43244,7 +43244,7 @@
       "id": "1062",
       "year": 2023,
       "title": "Multimodal units extract comodulated information",
-      "authors": "Marcus Ghosh, Sorbonne Universite",
+      "authors": "Marcus Ghosh",
       "abstract": "We continuously detect sensory data, like sights and sounds, and use this information to guide our behaviour. However, rather than relying on single sensory channels, which are noisy and can be ambiguous alone, we merge information across our senses and leverage this combined signal. In biological networks, this process (multisensory integration) is implemented by multimodal neurons which are thought to receive the information accumulated by unimodal areas, and to fuse this across channels; an algorithm we term accumulate-then-fuse. However, is implementing this algorithm their main function? Here, we explore this question by developing novel multimodal tasks and deploying probabilistic and spiking neural network models. Using these models we demonstrate that multimodal units are not necessary for accuracy or balancing speed/accuracy in classical multimodal tasks, but are critical in a novel set of tasks in which we comodulate signals across channels. We show that these comodulation tasks require multimodal units to implement an alternative fuse-then-accumulate algorithm, and we demonstrate that this algorithm excels in naturalistic settings like predator-prey interactions. Ultimately, our work suggests that multimodal neurons are critical for extracting comodulated information, and provides novel tasks and models for exploring this in biological systems.",
       "author_keywords": [
         "multisensory integration",
@@ -44833,7 +44833,7 @@
       "id": "1454",
       "year": 2023,
       "title": "Probing Next-Word and Long-Distance Prediction Using Encoding Modelling and MEG",
-      "authors": "Inés Schönmann, Floris P. de Lange, Micha Heilbron, Cognition and Behaviour",
+      "authors": "Inés Schönmann, Floris P. de Lange, Micha Heilbron",
       "abstract": "Encoding approaches relying on Large Language Models (LLMs) have found evidence for next-word prediction in ECoG and fMRI. Here, using non- invasive MEG, we show that contextualised as well as non-contextualised word embeddings can predict brain responses well before word onset. We find that encoding performance is sensitive to predictions, but—contrary to findings from fMRI—we do not observe signatures of predictions of multiple words ahead.",
       "author_keywords": [],
       "extracted_keywords": [],
@@ -45148,7 +45148,7 @@
       "id": "1408",
       "year": 2023,
       "title": "Relational Episodic Inference for Fictive Planning",
-      "authors": "Aleix Alcacer, Marina Martínez Garcia, Universitat Jaume I",
+      "authors": "Aleix Alcacer, Marina Martínez Garcia",
       "abstract": "The neural computations guiding pattern completion of related similar episodes are typically investigated separately from fictive planning. In the relatively few mechanistic models integrating episodic memory and planning, memories are passively sampled during decision-making in a unitary fashion insensitive to their granular structure. This limited approach encounters difficulty when attempting to capture how humans make inferences about fictive scenarios for which individual episodic memories may be only partially relevant. Addressing this issue, we develop a sample-based approximate inference approach, called relational episodic inference. We find that our relational episodic inference model captures how efficient fictive planning is facilitated by the flexible integration of fragmentary elements of episodic memories. We compare the relational episodic inference approach to an episodic RL sampling model. Under time constraints, we observe that our model results in more effective future inference than extant episodic RL approaches. Furthermore, the model exhibits the capacity to flexibly sample within and across episodes in a recurrent network model of the entorhinal-hippocampal circuit. Taken together, these preliminary simulations lend support to the idea that relational episodic inference could serve as a potential computational framework for flexible and generalizable episodic memory-guided inference.",
       "author_keywords": [
         "episodic memory",
@@ -46045,7 +46045,7 @@
       "id": "1568",
       "year": 2023,
       "title": "Spike synchrony as a measure of Gestalt structure",
-      "authors": "Viktoria Zemliak, Gordon Pipa, Univeristy of Osnabrück",
+      "authors": "Viktoria Zemliak, Gordon Pipa",
       "abstract": "The nature of spike synchrony has long been debatable in the neuroscience community. Some researchers view synchrony as a byproduct of brain activity, while others argue that it serves as a mechanism for binding perceptual features. We argue that synchrony can serve as a mechanism for estimating a prior probability of incoming stimuli. In V1, this estimation depends on the acquired visual experience, which is manifested in intracortical connections. Since the aggregate statistics of natural images tend to follow the Gestalt principles, we can assume that V1 is more often exposed to Gestalt-like stimuli, and this is manifested in its connectivity structure. Therefore, we show how spike synchrony in networks with specific connectivity can reflect the Gestalt structure of a stimulus.",
       "author_keywords": [
         "gestalt principles",
@@ -46662,7 +46662,7 @@
       "id": "1284",
       "year": 2023,
       "title": "The brain can’t copy-paste: End-to-end topographic neural networks as a way forward for modelling cortical map formation and behaviour",
-      "authors": "Zejin Lu, Freie Universitaet Berlin",
+      "authors": "Zejin Lu",
       "abstract": "Artificial neural networks have helped investigate questions that were previously beyond the scope of neuroscience. However, the most commonly used model architecture, convolutional neural networks (CNNs), are limited in the questions they can answer. One such question concerns the emergence of cortical topography and its relation with visual behaviour. CNNs as a model class cannot address this question, as their units share features invariantly of their locations. Here, we overcome this limitation by introducing end-to-end Topographic Neural Networks (All-TNNs). Similar to the brain, units of All-TNNs have varying selectivity and are all arranged in a 2D cortical sheet. Trained on an object classification task, the neural network develops several topographical features reminiscent of the human visual system: the first model layer displays smooth orientation selectivity maps, while category-selective areas emerge in later layers. We test the alignment between ANN models (All-TNNs and CNNs) and the brain by conducting a psychophysical experiment in which we characterise humans' positional dependence during object classification. We show that All-TNNs display a more human-like dependence on spatial location for object recognition. Together, these results pave the way towards biologically more faithful modelling of the biological visual system via All-TNNs.",
       "author_keywords": [
         "topographic neural networks",
@@ -46955,7 +46955,7 @@
       "id": "1056",
       "year": 2023,
       "title": "The Elusive Relationship between Mental Health Profiles and Valence-related Biases in Reinforcement Learning",
-      "authors": "Zoe Koopmans, Sophie Bavard, Stefano Palminteri, École normale supérieure",
+      "authors": "Zoe Koopmans, Sophie Bavard, Stefano Palminteri",
       "abstract": "Learning to maximise reward, and minimise punishment, is the theoretical premise of reinforcement learning (RL). Although both might seem computationally similar, their contrasting affect modulates learning behaviour. Humans tend to integrate incoming feedback with a positive valence more than feedback with a negative valence. In this study, we investigate how RL-based valence biases might be related to mental health profiles characterised by three novel psychiatric dimensions (Anxious Depression (AD), Compulsivity (C) and Substance Abuse (SA)), while accounting for context-dependent value encoding. This positivity bias is hypothesised to be further altered by mental health states. Additionally, we posit context-dependent value encoding as a relevant modulator valence biased behaviour. While we find a correlation between our SA dimension and value encoding transfer between experimental phases, the correlation between our psychiatric dimensions and both valence bias and context dependency remain elusive. We propose these behavioural traits might lack temporal robustness. This is supported by our findings showing thorough replicability but poor interindividual reliability. In contrast questionnaire derived results show good reliability. In conclusion, we present a rationale for a reappraisal of task elicited mental health studies without reliability analysis. Furthermore, we advocate for systematic state versus trait analysis in task-related mental health approaches.",
       "author_keywords": [
         "reinforcement learning",
@@ -47171,7 +47171,7 @@
       "id": "1122",
       "year": 2023,
       "title": "The role of gaze for value encoding and recollection in orbitofrontal cortex",
-      "authors": "Demetrio Ferro, Anna Rifé Mata, Universitat Pompeu Fabra (UPF)",
+      "authors": "Demetrio Ferro, Anna Rifé Mata",
       "abstract": "In value-based decision-making tasks, we tend to perform overt visual search for visually displayed reward offers during the sampling of options, followed by alternation between them, until a choice is committed. For this kind of tasks, neurons in orbitofrontal cortex (OFC) have been reported to encode offer value, bringing up questions about the dynamics of value-based computation. However, the neural basis of how gaze aids at value-based decisions is unknown. We recorded simultaneous gaze and OFC activity of two macaque monkeys performing a two-alternative reward gambling task. The offers were sequentially presented at opposite sides of the screen, each followed by a blank screen delay time. Interestingly, we found that the looking time of either offer was predictive of the final choice during the whole task time, including delay times. We found that cells encode expected value (EV) of the offers, predominantly during their respective presentation and at subsequent delay time. We found that fixation gates the encoding of ipsilateral EV, even when the offer is not visible. In addition, looking back to the first offer side during second delay re-activated the encoding of first offer EV, even if the subjects looked to opposite side during second offer presentation.",
       "author_keywords": [
         "value-based decision making",
@@ -47236,7 +47236,7 @@
       "id": "1516",
       "year": 2023,
       "title": "The Role of Mid-Frontal Oscillations in Value-biased Objective Decisions",
-      "authors": "Alice Vidal, Rubén Moreno-Bote, Salvador Soto-Faraco, universitat Pompeu Fabra",
+      "authors": "Alice Vidal, Rubén Moreno-Bote, Salvador Soto-Faraco",
       "abstract": "Subjective value can impact early stages of the perceptual decision-making process, leading to biased choices that prioritize subjective incentives over sensory evidence. Here we aim to understand how the decision process integrates goal-relevant evidence in the face of competing subjective information. We propose that this integration requires higher cognitive control, reflected by increases in frontal theta band oscillations. Using complex realistic stimuli, we observed that subjective preference influenced decision latency and choices independently of sensory evidence and motor anticipation, suggesting automatic integration of value-based evidence. Consistent with our hypothesis, incongruent trials, where subjective value and sensory information conflicted, were associated with higher theta activity, indicating heightened cognitive conflict. Furthermore, our results demonstrated that variations in theta activity accounted for individual differences in behaviour, and point out the role of participants' prior in conflict perception.",
       "author_keywords": [
         "value-biased decision",
@@ -93604,7 +93604,7 @@
       "id": "2026-E-PIQJHpdTU4",
       "year": 2026,
       "title": "Bayesian calibration for conference reviews",
-      "authors": "Selecting among high-quality submissions is a challenge for universities, funders, and conferences. A major difficulty in these evaluations is accounting for idiosyncrasies in reviewers' assessments. Classical psychometric methods from Item Response Theory (IRT) can help mitigate these reviewer effects",
+      "authors": "",
       "abstract": "Choosing between high-quality applications is a challenge for universities, funders, and conferences. A core difficulty is accounting for the idiosyncrasies in how reviewers assess the qualities of an application. Classic psychometric procedures from Item Response Theory (IRT) help mitigate the effects of idiosyncratic assessment, however, they are rarely used in peer review. Here, we leverage Bayesian IRT to reanalyze the open-access reviews from CCN2023. We find that IRT methods offer a promising approach for fairer assessments of conference papers.",
       "author_keywords": [
         "methods",
