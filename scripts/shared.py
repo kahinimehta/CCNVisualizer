@@ -219,12 +219,139 @@ def normalize_field_text(text: str) -> str:
     return re.sub(r"\s+", " ", cleaned).strip()
 
 
+_COUNTRY_NAMES = frozenset(
+    {
+        "united states",
+        "united kingdom",
+        "usa",
+        "uk",
+        "u.s.",
+        "u.s.a.",
+        "u.k.",
+        "netherlands",
+        "germany",
+        "france",
+        "canada",
+        "china",
+        "japan",
+        "switzerland",
+        "australia",
+        "italy",
+        "spain",
+        "israel",
+        "belgium",
+        "india",
+        "hungary",
+        "ireland",
+        "turkey",
+        "sweden",
+        "austria",
+        "denmark",
+        "norway",
+        "brazil",
+        "korea",
+        "south korea",
+        "taiwan",
+        "singapore",
+        "mexico",
+        "poland",
+        "portugal",
+        "finland",
+        "russia",
+        "new zealand",
+        "czech republic",
+        "czech",
+        "slovakia",
+        "greece",
+        "chile",
+        "argentina",
+        "colombia",
+        "hong kong",
+        "scotland",
+        "wales",
+        "england",
+        "republic of korea",
+    }
+)
+
+_AFFILIATION_HINTS = (
+    "university",
+    "université",
+    "universiteit",
+    "universidad",
+    "universität",
+    "institute",
+    "institut",
+    "college",
+    "hospital",
+    "department",
+    "dept.",
+    "school of",
+    "laboratory",
+    "lab ",
+    "labs",
+    "centre",
+    "center",
+    "ctr.",
+    "neurosci",
+    "republic of",
+    "berkeley",
+    "stanford",
+    "harvard",
+    "oxford",
+    "cambridge",
+    "deepmind",
+    "google",
+    "max planck",
+    "cnrs",
+    "inria",
+    "eth zurich",
+    "eth zürich",
+    "epfl",
+    "caltech",
+    "princeton",
+    "columbia",
+    "carnegie",
+    "weizmann",
+    "technion",
+    "imperial college",
+    "university college",
+    "vrije",
+    "johns hopkins",
+    "tuebingen",
+    "tübingen",
+)
+
+
+def _is_country_token(part: str) -> bool:
+    return part.lower().strip(" .") in _COUNTRY_NAMES
+
+
+def _is_affiliation_token(part: str) -> bool:
+    """True for countries, labs, universities, and short org acronyms (MIT, NYU, …)."""
+    cleaned = part.strip()
+    if not cleaned:
+        return False
+    if _is_country_token(cleaned):
+        return True
+    lowered = cleaned.lower()
+    if any(hint in lowered for hint in _AFFILIATION_HINTS):
+        return True
+    # Short org acronyms commonly appended after author lists.
+    if re.fullmatch(r"[A-Z]{2,6}", cleaned):
+        return True
+    if re.match(r"^UC\b", cleaned):
+        return True
+    return False
+
+
 def normalize_author_names(authors: str) -> str:
-    """Keep only person names: drop emails, affiliation numbers, and university footnotes.
+    """Keep only person names: drop emails, labs, countries, and university footnotes.
 
     Example:
       "Ada Lovelace 1 ( ada@x.edu ), Alan Turing 2,3 ; 1 Uni A, 2 Uni B, 3 Lab C"
       → "Ada Lovelace, Alan Turing"
+      "Jane Doe, MIT, United States" → "Jane Doe"
     """
     if not authors:
         return ""
@@ -245,46 +372,28 @@ def normalize_author_names(authors: str) -> str:
     text = re.sub(r"\(\s*\)", " ", text)
     text = re.sub(r"\s+", " ", text).strip()
 
-    affiliation_hints = (
-        "university",
-        "université",
-        "institute",
-        "institut",
-        "college",
-        "hospital",
-        "department",
-        "dept.",
-        "school of",
-        "laboratory",
-        "lab ",
-        "centre",
-        "center",
-        "ctr.",
-        "neurosci",
-        "republic of",
-        "united kingdom",
-        "korea",
-    )
+    parts = [part.strip() for part in re.split(r"\s*,\s*", text) if part.strip()]
+    # 2018–2022 listings often append ", Lab/Uni, Country" after the name list.
+    while parts and _is_affiliation_token(parts[-1]):
+        parts.pop()
 
     names: list[str] = []
-    for part in re.split(r"\s*,\s*", text):
-        part = part.strip()
-        if not part:
-            continue
+    for part in parts:
         # Affiliation markers split as their own tokens: "Name 2,3" → "Name 2", "3".
         if re.fullmatch(r"\d+", part):
             continue
         # Glued affiliation start: "1Ctr. for Neurosci…" — stop; rest is not names.
         if re.match(r"^\d+[A-Za-z]", part):
             break
-        lowered = part.lower()
-        if any(hint in lowered for hint in affiliation_hints):
+        if _is_affiliation_token(part):
             break
         # Trailing footnotes / superscripts: "Name 1", "Name 2,3", "Name*", "Name†".
         part = re.sub(r"(?:\s*[\d†‡*#]+(?:\s*,\s*[\d†‡*#]+)*)+\s*$", "", part)
         part = re.sub(r"\s+", " ", part).strip(" ,;")
         if not part or re.fullmatch(r"\d+", part):
             continue
+        if _is_affiliation_token(part):
+            break
         if part not in names:
             names.append(part)
 

@@ -724,7 +724,7 @@ const CHART_PALETTE = [
   "#C2185B", // 2. Motor control & planning — darker pink (away from magenta)
   "#FF2BD6", // 3. Naturalistic encoding/decoding — magenta
   "#6B2BB8", // 4. Neural population geometry — darker indigo
-  "#09469F", // 5. dark blue
+  "#FFE600", // 5. Decision-making and metacognition — bright yellow
   "#C0C9EE", // 6. light blue
   "#08AB54", // 7. dark green
   "#A2E9D5", // 8. light green
@@ -1074,7 +1074,7 @@ function buildStateFromCsv(rows, source = FIXED_DATASET) {
 async function loadDataset(options = {}) {
   const { resetFilters = false } = options;
   const datasetFile = FIXED_DATASET;
-  const csvRows = await d3.csv(`data/${datasetFile}?v=108`);
+  const csvRows = await d3.csv(`data/${datasetFile}?v=109`);
   if (!csvRows?.length) {
     throw new Error(`Could not load data/${datasetFile}`);
   }
