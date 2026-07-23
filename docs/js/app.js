@@ -754,6 +754,7 @@ const YEAR_COLORS = Object.fromEntries(
     YEAR_PALETTE[i % YEAR_PALETTE.length],
   ])
 );
+YEAR_COLORS[2026] = "#FFFFFF"; // white
 
 const KPI_ICONS = {
   submissions:
