@@ -1074,7 +1074,7 @@ function buildStateFromCsv(rows, source = FIXED_DATASET) {
 async function loadDataset(options = {}) {
   const { resetFilters = false } = options;
   const datasetFile = FIXED_DATASET;
-  const csvRows = await d3.csv(`data/${datasetFile}?v=114`);
+  const csvRows = await d3.csv(`data/${datasetFile}?v=115`);
   if (!csvRows?.length) {
     throw new Error(`Could not load data/${datasetFile}`);
   }

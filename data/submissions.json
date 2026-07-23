@@ -37262,7 +37262,7 @@
       "id": "1183",
       "year": 2023,
       "title": "Combining Different Response Data Modalities for Robust Inference in the Hierarchical Gaussian Filter",
-      "authors": "",
+      "authors": "Alexander J. Hess, Sandra Iglesias, Stefan Frässle, Laura Köchli, Stephanie Marino, Matthias Müller-Schrader, Jakob Heinzle, Olivia K. Harrison, Lionel Rigoux, Christoph Mathys, Klaas Enno Stephan",
       "abstract": "High quality and robust statistical inference is crucial in science. Particularly in disciplines focusing on computational modelling, parameters controlling the model need to be inferred accurately. The Hierarchical Gaussian Filter (HGF) is a computational model for hierarchical Bayesian belief updating, which can be fit to behavioural data when extended with a suitable response model. HGF models are typically fit to responses from a single data modality such as binary response data. This poses challenges for statistical inference due to the limited information contained in such data. Here, we present a novel set of response models that allow for simultaneous inference from two different data modalities. Using both simulations and empirical data from a speed-incentivised associative learning (SPIRL) task, we show that harnessing information from two different data streams (binary responses and response times) improves the accuracy of inference. Moreover, we find a linear relationship between log-transformed response times in the SPIRL task and participants' uncertainty about the outcome.",
       "author_keywords": [
         "hgf",
@@ -39369,7 +39369,7 @@
       "id": "1564",
       "year": 2023,
       "title": "End-to-end reconstruction of natural images from multi-unit recordings with Brain2Pix",
-      "authors": "",
+      "authors": "Lynn Le, Paolo Papale, Antonio Lozano, Thirza Dado, Feng Wang, Marcel van Gerven, Pieter Roelfsema, Yağmur Güçlütürk, Umut Güçlü",
       "abstract": "Reconstructing naturalistic images from brain signals has been a challenging task for scientists, with successful results largely limited to large human fMRI datasets. In this study, we apply the brain2pix reconstruction model to multi-unit activity (MUA) data from the macaque brain, providing a novel extension of the model. This approach allows for investigation of information representation in different brain regions and time windows with greater spatial and temporal precision. Our results offer insights into the neural basis of visual perception, showing that V1 neurons represent texture and color, V4 neurons exhibit symmetric representations, and IT neurons reveal concept-like features. We also demonstrate that the model can be used to decode features at different layers of a neural network, with V1 more strongly correlated with initial layers and V4 and IT with deeper layers. Overall, our approach provides a valuable tool for studying brain representations in high temporal and spatial detail.",
       "author_keywords": [
         "neural decoding",
@@ -39864,7 +39864,7 @@
       "id": "1188",
       "year": 2023,
       "title": "Factorization of graphs in the compositional reuse of experience",
-      "authors": "",
+      "authors": "Lennart Luettgau, Rani Moran, Tore Erdmann, Sebastijan Veselic, Kimberly L. Stachenfeld, Zeb Kurth-Nelson, Raymond J. Dolan",
       "abstract": "Real-world experiences are often the product of multiple dynamic sub-processes. Discovering these affords strong generalization in case of partial overlap or abstract resemblance between previous and current experience. Using a sequence learning task and computational modeling, we test whether humans (N=238) factorize experienced state spaces and subsequently reuse these in new contexts. In prior learning, we exposed some participants to sequences of compound images produced by the interaction of a 4-state cyclic graph and a 6-state path-graph, while another group experienced an interaction of a 4-state path-graph and a 6-state cyclic graph. During transfer learning, all participants experienced the product of a 4-state cyclic graph and a 6-state cyclic graph with new stimuli. Participants’ predictions about inferred unobserved transitions were used to assess knowledge of graph factors. We found that prediction accuracy in transfer learning for the 4-cycle graph was higher in the 4-cycle prior group and the 6-cycle graph prior group showed improved 6-cycle performance. Successor feature models did not explain this transfer effect. Instead, a Bayesian hypothesis testing model best captured the behavioral data. Our results support the idea that humans discover and decompose the factors generating their experience and reuse these sub-processes to generalize within new contexts.",
       "author_keywords": [
         "structure learning",
@@ -40090,7 +40090,7 @@
       "id": "1511",
       "year": 2023,
       "title": "Fluctuating responses evoked by multiple objects: a general feature of visual representations",
-      "authors": "",
+      "authors": "Meredith Schmehl, Valeria Caruso, Shawn Willett, Yunran Chen, Na Young Jun, Jeff Mohl, Douglas Ruff, Marlene Cohen, Akinori Ebihara, Winrich Freiwald, Surya Tokdar, Jennifer Groh",
       "abstract": "How neural representations preserve information about multiple stimuli is mysterious because tuning of individual neurons is coarse and the populations of neurons tasked with encoding each individual stimulus must in principle overlap. Here we show that when two perceptually distinguishable stimuli are presented, a subpopulation of neurons in MT and the IT face patch system exhibit fluctuating firing patterns, as if they responded to only one individual stimulus at a time. Furthermore, consistent with our previous results in the early visual area V1, the fluctuations in MT were only observed when the two stimuli formed distinguishable objects but not when they fused into one perceived object. In the face patches, fluctuations were observed for both face-face and face-object stimulus combinations. Taken together, these findings point toward an updated model of how the brain preserves sensory information about multiple stimuli for subsequent processing and behavioral action.",
       "author_keywords": [
         "neural representation",
@@ -41159,7 +41159,7 @@
       "id": "1528",
       "year": 2023,
       "title": "Human Multi-Task Learning: the Why and What",
-      "authors": "",
+      "authors": "Tobias Ludwig, Markus Siegel, Eric Schulz",
       "abstract": "Cognitive flexibility allows us to switch and learn different tasks simultaneously. But why does it help to learn tasks together, and what type of tasks can benefit from co-learning? We study these questions in a paradigm, in which we use tasks that are geometrically related. In a tree environment, subjects learn to find the best policies for different tasks. However, similar tasks sometimes lead to similar policies and sometimes require very different policies. We manipulate this congruence between tasks and policies as well as the number of co-trained tasks. N=46 subjects did our experiment on Prolific, and two reinforcement learning models were trained on their choices. We find that, the more tasks were learned together, the better was generalisation to new tasks in our model-based agent, but not in subjects or in the model- free agent. People and models were better at generalising to new tasks the more congruent these were to the training tasks. Hence, this has implications for curriculum design for humans and machines alike.",
       "author_keywords": [
         "multi-task learning",
@@ -41529,7 +41529,7 @@
       "id": "1189",
       "year": 2023,
       "title": "Illusion of control differentially affects outcome predictions in pathological and recreational gamblers",
-      "authors": "",
+      "authors": "Frederike H. Petzschner, Saee Paliwal, Gina Paolini, Stephanie Olaiya, Chloe Zimmerman, Nicole Zahnd, Helen Schmidt, Katharina Wellstein, Ines Bodmer, Franz Eidenbenz, Karinna Schärli, Till Siegrist, Klaas Enno Stephan",
       "abstract": "Disordered gambling is the first-ever disorder classified as a behavioural addiction, offering a unique model to study addiction mechanisms in the absence of neurotoxic effects from substances. Previous research suggests that maladaptive reward processing and altered perceptions of control may be key drivers in the development and persistence of gambling behaviour. However, the mechanisms that underlie this association are not well understood. In this study, we tested 43 pathological and 43 recreational gamblers using a naturalistic slot machine task which manipulated reward magnitude and illusion of control in a 2x2 factorial design. We also used a computational reinforcement learning model to examine differences in reward and control processing between addicted and recreational gamblers. Our findings suggest that reward and control have distinct effects on gambling behaviour, with reward magnitude primarily influencing bet behaviour, while illusions of control additionally influence the anticipation of winning. This distortion of expected odds due to an illusion of control may drive continued gambling despite unfavourable outcomes and enhanced risk-taking. Moreover, the illusion of control differentially affected pathological and recreational gamblers and may thus provide a window into the nature of risk-taking across gamblers.",
       "author_keywords": [
         "pathological gambling",
@@ -43988,7 +43988,7 @@
       "id": "1197",
       "year": 2023,
       "title": "Opening Computational Neuroscience to a Wider Audience: Virtual Escape Room for Kids",
-      "authors": "",
+      "authors": "Isabelle Hoxha, Noga Mudrik, Anne E. Urai, Dante Kienigiel, Jeremy Forest, Mohamed Abdelhack, Megan Peters, Nick Halper, Ru-Yuan Zhang, Xinquan Lu, John S Butler",
       "abstract": "As researchers it is vital that we increase the accessibility, transparency, diversity, and inclusivity of our work. One-way Neuromatch has championed this is by having outreach sessions for children (8+) to explain computational-neuroscience concepts. For the 2022 Neuromatch conference we designed an online escape room with the two goals 1) to show who is a neuroscience researcher and what they do and 2) to explain a research topic. To show who/what is a researcher, the escape room began with a video describing the day-to-day life of a researcher. The subsequent videos discussed how mathematics and neuroscience are combined to model decision-making. We framed the videos around the question “Will I walk or bike to school?” to describe the concepts of the drift-diffusion equation and how its application. At the end of each video there was a multiple-choice question, a correct response gave clues to the next image and a letter for the keyword needed to complete the escape room. The escape room was translated into six languages: Arabic, Chinese, French, English, Hebrew and Spanish. The materials have been made open access and can be easily adapted to create content to communicate other scientific research questions to a broad audience.",
       "author_keywords": [
         "computational neuroscience",
@@ -44176,7 +44176,7 @@
       "id": "1450",
       "year": 2023,
       "title": "Parvalbumin-Positive Neurons in the Globus Pallidus Externus Modulate Task-Irrelevant Behaviors to Balance Exploration and Exploitation",
-      "authors": "",
+      "authors": "Minryung Song, Shinwoo Kang, Minsu Yang, Robert Bruce, Doo-Sup Choi, Sang Wan Lee",
       "abstract": "Task-irrelevant behaviors, such as rearing, play a critical role in optimizing the exploration-exploitation tradeoff during learning. This study investigates the role of parvalbumin-positive (PV+) neurons in the globus pallidus externus (GPe) in modulating task-irrelevant behaviors. We monitored task-irrelevant behaviors and measured GPe PV+ neural activity while mice performed a reversal task. Our results demonstrated an increase in task-irrelevant behaviors during early learning stages and upon reversal. Furthermore, GPe PV+ neural activity correlated with the time spent on task-irrelevant behaviors. We employed a SARSA model incorporating task-irrelevant behaviors and PV+ neural activity to simulate animal behavior. The model with PV+ neural activity significantly outperformed the basic SARSA model with a constant softmax temperature, highlighting the importance of GPe PV+ neurons in regulating task-irrelevant behaviors and exploration during learning.",
       "author_keywords": [
         "exploration",
@@ -47481,7 +47481,7 @@
       "id": "1314",
       "year": 2023,
       "title": "Theta Phase Separates Object Features in Human Hippocampus during an Associative Memory Task",
-      "authors": "",
+      "authors": "Marije ter Wal, Juan Linde Domingo, Frederic Roux, Luca Kolibius, Stephanie Gollwitzer, Johannes Lang, Katrin Walther, Hajo Hamer, David Rollings, Vijay Sawlani, Ramesh Chelvarajah, Bernhard Staresina, Simon Hanslmayr, Maria Wimber",
       "abstract": "It has recently been reported that representations of task goals in spatial navigation tasks are separated in time by locking to the theta rhythm. Here, we explore whether task demand influences the representation of non-spatial dimensions as well. We record spiking activity in the hippocampus of epilepsy patients, while they perform an associative memory task, and analyze whether representations of perceptual and semantic object dimensions in the spike trains are locked to the theta rhythm of the local field potential. We show that opposing non-spatial task dimensions are temporally separated in human hippocampus, by representing opposing goals at different theta phases, suggesting an important role of phase coding in associative memory.",
       "author_keywords": [
         "theta oscillations",
@@ -93604,7 +93604,7 @@
       "id": "2026-E-PIQJHpdTU4",
       "year": 2026,
       "title": "Bayesian calibration for conference reviews",
-      "authors": "",
+      "authors": "Harrison Ritz",
       "abstract": "Choosing between high-quality applications is a challenge for universities, funders, and conferences. A core difficulty is accounting for the idiosyncrasies in how reviewers assess the qualities of an application. Classic psychometric procedures from Item Response Theory (IRT) help mitigate the effects of idiosyncratic assessment, however, they are rarely used in peer review. Here, we leverage Bayesian IRT to reanalyze the open-access reviews from CCN2023. We find that IRT methods offer a promising approach for fairer assessments of conference papers.",
       "author_keywords": [
         "methods",
