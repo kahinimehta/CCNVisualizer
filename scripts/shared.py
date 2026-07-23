@@ -525,6 +525,114 @@ def _is_affiliation_token(part: str) -> bool:
     return False
 
 
+_NAME_PARTICLES = frozenset(
+    {
+        "van",
+        "von",
+        "de",
+        "da",
+        "di",
+        "del",
+        "della",
+        "der",
+        "den",
+        "la",
+        "le",
+        "du",
+        "des",
+        "af",
+        "av",
+        "y",
+        "ten",
+        "ter",
+        "te",
+        "bin",
+        "ibn",
+        "al",
+        "dos",
+        "das",
+        "do",
+    }
+)
+
+
+def _capitalize_name_token(token: str, *, allow_particle: bool) -> str:
+    """Capitalize a single name token (first/last/initial); keep mid-name particles lower."""
+    if not token:
+        return token
+    match = re.match(r"^([\"'(]*)(.*?)([\"')]*)$", token)
+    prefix, core, suffix = match.group(1), match.group(2), match.group(3)
+    if not core:
+        return token
+
+    lower = core.lower()
+    if allow_particle and lower in _NAME_PARTICLES:
+        return f"{prefix}{lower}{suffix}"
+
+    # Single-letter initial: "j" / "j."
+    if re.fullmatch(r"[A-Za-z]\.?", core):
+        letter = core[0].upper()
+        dotted = f"{letter}." if core.endswith(".") else letter
+        return f"{prefix}{dotted}{suffix}"
+
+    # Compact initials: "J.D." / "i.a."
+    if re.fullmatch(r"(?:[A-Za-z]\.){2,}", core):
+        compact = "".join(ch.upper() if ch.isalpha() else ch for ch in core)
+        return f"{prefix}{compact}{suffix}"
+
+    # Hyphenated: Jean-rémi → Jean-Rémi
+    if "-" in core:
+        pieces = [
+            _capitalize_name_token(piece, allow_particle=False) if piece else piece
+            for piece in core.split("-")
+        ]
+        return f"{prefix}{'-'.join(pieces)}{suffix}"
+
+    # Apostrophe names: o'brien → O'Brien
+    if "'" in core:
+        bits = []
+        for piece in core.split("'"):
+            if not piece:
+                bits.append(piece)
+            else:
+                bits.append(piece[0].upper() + piece[1:].lower())
+        return f"{prefix}{chr(39).join(bits)}{suffix}"
+
+    # Mc / Mac
+    mac = re.match(r"^(Mc|Mac|MC|MAC|mc|mac)([A-Za-z].*)$", core)
+    if mac:
+        pref, rest = mac.group(1), mac.group(2)
+        pref_out = "Mc" if pref.lower() == "mc" else "Mac"
+        return f"{prefix}{pref_out}{rest[0].upper()}{rest[1:].lower()}{suffix}"
+
+    # Already has internal capitals (AlRoumi): capitalize first char only
+    if any(ch.isupper() for ch in core[1:]):
+        return f"{prefix}{core[0].upper()}{core[1:]}{suffix}"
+
+    return f"{prefix}{core[0].upper()}{core[1:].lower()}{suffix}"
+
+
+def capitalize_author_names(authors: str) -> str:
+    """Ensure first/last names and middle initials are capitalized."""
+    if not authors:
+        return ""
+    people = []
+    for person in re.split(r"\s*,\s*", authors):
+        person = person.strip()
+        if not person:
+            continue
+        tokens = person.split()
+        last_index = len(tokens) - 1
+        capped = []
+        for index, token in enumerate(tokens):
+            # Particles stay lower only in the middle (e.g. Marcel van Gerven),
+            # never when they are the surname (e.g. Quan Do).
+            allow_particle = 0 < index < last_index
+            capped.append(_capitalize_name_token(token, allow_particle=allow_particle))
+        people.append(" ".join(capped))
+    return ", ".join(people)
+
+
 def normalize_author_names(authors: str) -> str:
     """Keep only person names: drop emails, labs, countries, and university footnotes.
 
@@ -577,7 +685,7 @@ def normalize_author_names(authors: str) -> str:
         if part not in names:
             names.append(part)
 
-    return ", ".join(names)
+    return capitalize_author_names(", ".join(names))
 
 
 def is_plausible_keyword(keyword: str) -> bool:
