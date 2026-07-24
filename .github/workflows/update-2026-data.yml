@@ -31,7 +31,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/submissions.json data/abstracts.csv docs/data/abstracts.csv data/embeddings_all.json
+          git add data/submissions.json data/abstracts_old.csv docs/data/abstracts_2_topics.csv docs/data/abstracts_old.csv docs/data/abstract_v_3_old.csv data/embeddings_all.json
           if git diff --staged --quiet; then
             echo "No data changes to commit."
           else

@@ -22,6 +22,6 @@ python -m http.server 8080 --directory docs
 
 ## Deploy
 
-Pushes to `main` deploy the static `docs/` folder on Vercel. Rebuild and commit `docs/data/abstracts.csv` locally or via GitHub Actions; see the guide.
+Pushes to `main` deploy the static `docs/` folder on Vercel. Rebuild and commit `docs/data/abstracts_2_topics.csv` locally or via GitHub Actions; see the guide.
 
 Production data was manually cleaned before deployment (text repair, theme spot-checks).

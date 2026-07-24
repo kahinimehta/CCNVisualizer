@@ -3,7 +3,7 @@
 
 Pipeline:
   scrape.py  →  submissions.json  (excludes [GAC update] posters)
-  build.py   →  Anthropic themes + UMAP + abstracts.csv
+  build.py   →  Anthropic themes + UMAP + abstracts_2_topics.csv
 
 Dependencies:
   pip install -r requirements.txt

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Step 2: Classify themes (Anthropic Claude), compute UMAP, export abstracts.csv.
+"""Step 2: Classify themes (Anthropic Claude), compute UMAP, export CSVs.
 
 Pipeline:
   scrape.py  →  submissions.json
-  build.py   →  filter GAC updates + Anthropic themes + UMAP + abstracts.csv
-  dashboard  →  reads docs/data/abstracts.csv
+  build.py   →  filter GAC updates + Anthropic themes + UMAP + CSVs
+  dashboard  →  reads docs/data/abstracts_2_topics.csv
 
 Dependencies:
   pip install -r requirements.txt
@@ -48,9 +48,13 @@ DATA_PATH = ROOT / "data" / "submissions.json"
 GOOGLE_TOPICS_PATH = ROOT / "data" / "google_topics.json"
 LLM_CACHE_PATH = ROOT / "data" / "llm_theme_cache.json"
 EMBEDDING_PATH = ROOT / "data" / "embeddings_all.json"
-CSV_OUTPUT_PATHS = (ROOT / "data" / "abstracts.csv", ROOT / "docs" / "data" / "abstracts.csv")
-CSV_TWO_TOPICS_PATH = ROOT / "docs" / "data" / "abstracts_2_topics.csv"
-CSV_V3_PATH = ROOT / "docs" / "data" / "abstract_v_3.csv"
+CSV_ACTIVE_PATH = ROOT / "docs" / "data" / "abstracts_2_topics.csv"
+# Legacy exports kept for reference; not loaded by the dashboard.
+CSV_OLD_PATHS = (
+    ROOT / "data" / "abstracts_old.csv",
+    ROOT / "docs" / "data" / "abstracts_old.csv",
+    ROOT / "docs" / "data" / "abstract_v_3_old.csv",
+)
 LIST_DELIMITER = " | "
 
 DEFAULT_TOPICS = [
@@ -648,10 +652,13 @@ def write_csv_rows(path: Path, rows: list[dict[str, str]]) -> None:
 
 
 def write_csv(rows: list[dict[str, str]]) -> None:
-    for path in CSV_OUTPUT_PATHS:
-        write_csv_rows(path, rows)
-    write_csv_rows(CSV_TWO_TOPICS_PATH, derive_two_topic_rows(rows))
-    write_csv_rows(CSV_V3_PATH, derive_v3_rows(rows))
+    # Active dashboard dataset (first two topics only).
+    write_csv_rows(CSV_ACTIVE_PATH, derive_two_topic_rows(rows))
+    # Legacy full / v3 exports retained as *_old.csv.
+    full_rows = rows
+    write_csv_rows(CSV_OLD_PATHS[0], full_rows)
+    write_csv_rows(CSV_OLD_PATHS[1], full_rows)
+    write_csv_rows(CSV_OLD_PATHS[2], derive_v3_rows(rows))
 
 
 def filter_gac_updates(payload: dict) -> dict:
@@ -729,7 +736,7 @@ def main() -> None:
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Classify themes (Anthropic), compute UMAP, write abstracts.csv"
+        description="Classify themes (Anthropic), compute UMAP, write abstracts_2_topics.csv"
     )
     parser.add_argument(
         "--skip-classify",
@@ -751,7 +758,7 @@ def main() -> None:
     parser.add_argument(
         "--repair-only",
         action="store_true",
-        help="Sanitize keywords/abstracts in submissions.json and rewrite abstracts.csv (no API/UMAP)",
+        help="Sanitize keywords/abstracts in submissions.json and rewrite abstracts_2_topics.csv (no API/UMAP)",
     )
     args = parser.parse_args()
     if args.repair_only:
