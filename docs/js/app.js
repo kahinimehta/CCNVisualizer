@@ -340,9 +340,8 @@ function readCssNumber(property, fallback) {
 
 // Yesterday's clean phone chart constants (restored) — do not share desktop scale.
 const PHONE_GRAPH_SCALE = 0.72;
-const TYPE_NUDGE = 1.1; // global type lift
-const PHONE_CHART_SCALE = 1.2 * TYPE_NUDGE;
-const PHONE_UI_SCALE = 1.12 * TYPE_NUDGE;
+const PHONE_CHART_SCALE = 1.2;
+const PHONE_UI_SCALE = 1.12;
 const PHONE_AXIS_LABEL_SIZE = 8.5;
 const PHONE_THEME_TITLE_SIZE = 10.5;
 const PHONE_BAR_VALUE_SIZE = 10.5;
@@ -354,26 +353,12 @@ const DESKTOP_CHART_LABEL = 9;
 const DESKTOP_CHART_HEADING = 10;
 
 /**
- * Desktop scale from viewport width, with browser type lifts where needed.
- * Windows DPI makes type read small — apply WINDOWS_TYPE_BOOST on non-Brave
- * Windows browsers; Brave Windows uses a dedicated higher boost. TYPE_NUDGE on top.
- *
- * Those Windows lifts overshot: at 100% browser zoom, Windows looked ~30% too
- * large vs Mac/Linux. WINDOWS_ZOOM_CORRECTION pulls desktop Windows back so
- * users do not need to zoom the browser out.
+ * Browser-agnostic desktop scale from viewport width only.
+ * Prior Brave/Chrome/Windows multipliers stacked up so Mac Chrome needed ~50%
+ * browser zoom and Windows needed ~70%. One CSS-px contract everywhere.
  */
-const CHROME_TYPE_BOOST = 1.08;
-const WINDOWS_TYPE_BOOST = 1.42;
-const BRAVE_TYPE_BOOST_MAC = 1.48;
-const BRAVE_TYPE_BOOST_WIN = 2.25;
-const WINDOWS_ZOOM_CORRECTION = 0.7;
-let cachedChartScale = 2.5;
+let cachedChartScale = 1.25;
 let cachedChartScaleKey = "";
-let cachedBrowserTypeBoost = null;
-
-function windowsZoomCorrection() {
-  return !isPhoneLayout() && isWindowsPlatform() ? WINDOWS_ZOOM_CORRECTION : 1;
-}
 
 function isWindowsPlatform() {
   if (typeof navigator === "undefined") return false;
@@ -404,73 +389,35 @@ function isGoogleChrome() {
   return /\bChrome\//.test(ua) && !/\bChromium\//.test(ua);
 }
 
-function browserTypeBoost() {
-  if (cachedBrowserTypeBoost != null) return cachedBrowserTypeBoost;
-  if (isPhoneLayout()) {
-    cachedBrowserTypeBoost = 1;
-    return cachedBrowserTypeBoost;
-  }
-  let boost = 1;
-  if (isBraveBrowser()) {
-    // Windows Brave boost already includes the Windows DPI gap.
-    boost = isWindowsPlatform() ? BRAVE_TYPE_BOOST_WIN : BRAVE_TYPE_BOOST_MAC;
-  } else {
-    if (isGoogleChrome()) boost = CHROME_TYPE_BOOST;
-    if (isWindowsPlatform()) boost *= WINDOWS_TYPE_BOOST;
-  }
-  cachedBrowserTypeBoost = boost * TYPE_NUDGE;
-  return cachedBrowserTypeBoost;
-}
-
 /** Desktop root font from layout width (px, not rem/prefs). */
 function desktopRootPxForViewport(w = viewportWidth()) {
   const width = Math.max(320, w);
-  let base = Math.min(19, Math.max(16, 13.5 + width * 0.004));
-  if (!isPhoneLayout() && isWindowsPlatform()) {
-    base = isBraveBrowser()
-      ? Math.min(32, Math.max(23, 19 + width * 0.0075))
-      : Math.min(25, Math.max(19, 16 + width * 0.006));
-  } else if (isBraveBrowser() && !isPhoneLayout()) {
-    base = Math.min(24, Math.max(18, 15 + width * 0.0055));
-  }
-  return base * browserTypeBoost();
+  // ~16px on typical laptops; slight lift on very wide screens only.
+  return Math.min(18, Math.max(16, 15.2 + width * 0.0012));
 }
 
 /** Desktop SVG design scale from layout width. */
 function desktopChartScaleForViewport(w = viewportWidth()) {
   const width = Math.max(320, w);
-  let base = Math.min(2.65, Math.max(2.2, 2.05 + width / 2000));
-  if (!isPhoneLayout() && isWindowsPlatform()) {
-    base = isBraveBrowser()
-      ? Math.min(4.1, Math.max(3.3, 3.0 + width / 1400))
-      : Math.min(3.2, Math.max(2.6, 2.35 + width / 1700));
-  } else if (isBraveBrowser() && !isPhoneLayout()) {
-    base = Math.min(3.15, Math.max(2.55, 2.35 + width / 1800));
-  }
-  return base * browserTypeBoost();
+  // ~1.25 on laptops — about half the old boosted ~2.5–3.2 chart scale.
+  return Math.min(1.45, Math.max(1.15, 1.08 + width / 5000));
 }
 
 function rootFontPxForViewport() {
-  const px = desktopRootPxForViewport();
-  const boost = browserTypeBoost();
-  const cap = boost > 2.2 ? 60 : boost > 1.9 ? 52 : boost > 1.5 ? 42 : boost > 1.15 ? 32 : 23;
-  const corrected = Math.min(cap, Math.max(16, px)) * windowsZoomCorrection();
-  return Math.round(corrected * 100) / 100;
+  return Math.round(desktopRootPxForViewport() * 100) / 100;
 }
 
 function chartDesignScale() {
   if (isPhoneLayout()) return PHONE_CHART_SCALE;
   const w = Math.max(320, viewportWidth());
-  const boost = browserTypeBoost();
-  const win = windowsZoomCorrection();
-  const key = `${w}:d:${boost}:${win}`;
+  const key = `${w}:d`;
   if (key === cachedChartScaleKey) return cachedChartScale;
   cachedChartScaleKey = key;
-  cachedChartScale = desktopChartScaleForViewport(w) * win;
+  cachedChartScale = desktopChartScaleForViewport(w);
   return cachedChartScale;
 }
 
-/** Confirm Brave via async API (Shields can hide sync signals) and rescale desktop. */
+/** Confirm Brave via async API (Shields can hide sync signals) for CSS class only. */
 async function confirmBraveDesktopScale() {
   if (isPhoneLayout()) return false;
   try {
@@ -478,11 +425,9 @@ async function confirmBraveDesktopScale() {
     const yes = await navigator.brave.isBrave();
     if (!yes) return false;
     const wasBrave = document.documentElement.classList.contains("is-brave");
-    cachedBrowserTypeBoost = null;
-    cachedChartScaleKey = "";
     document.documentElement.classList.add("is-brave");
     applyPageScale();
-    return !wasBrave || browserTypeBoost() > 1;
+    return !wasBrave;
   } catch {
     return false;
   }
@@ -492,7 +437,6 @@ function applyPageScale() {
   const root = document.documentElement;
   if (!root) return;
 
-  cachedBrowserTypeBoost = null;
   cachedChartScaleKey = "";
 
   const phone = isPhoneLayout();
@@ -512,7 +456,7 @@ function applyPageScale() {
     root.style.setProperty("--ui-scale", String(PHONE_UI_SCALE));
   } else {
     root.style.fontSize = `${rootFontPxForViewport()}px`;
-    root.style.setProperty("--ui-scale", String(browserTypeBoost() * windowsZoomCorrection()));
+    root.style.setProperty("--ui-scale", "1");
   }
 
   if (document.body) {
@@ -1085,7 +1029,7 @@ function buildStateFromCsv(rows, source = FIXED_DATASET) {
 async function loadDataset(options = {}) {
   const { resetFilters = false } = options;
   const datasetFile = FIXED_DATASET;
-  const csvRows = await d3.csv(`data/${datasetFile}?v=116`);
+  const csvRows = await d3.csv(`data/${datasetFile}?v=117`);
   if (!csvRows?.length) {
     throw new Error(`Could not load data/${datasetFile}`);
   }
