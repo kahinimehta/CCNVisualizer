@@ -1029,7 +1029,7 @@ function buildStateFromCsv(rows, source = FIXED_DATASET) {
 async function loadDataset(options = {}) {
   const { resetFilters = false } = options;
   const datasetFile = FIXED_DATASET;
-  const csvRows = await d3.csv(`data/${datasetFile}?v=117`);
+  const csvRows = await d3.csv(`data/${datasetFile}?v=118`);
   if (!csvRows?.length) {
     throw new Error(`Could not load data/${datasetFile}`);
   }
@@ -1107,12 +1107,29 @@ function hasThemeFilter() {
   return state.selectedThemes.length > 0;
 }
 
+function hasSearchFilter() {
+  return Boolean(state.search.trim());
+}
+
+/** Theme chips and/or text search — used to highlight matching UMAP dots. */
+function hasMapHighlightFilter() {
+  return hasThemeFilter() || hasSearchFilter();
+}
+
 function submissionMatchesThemeFilter(submission) {
   if (!hasThemeFilter()) return true;
   const assigned = assignedTopics(submission);
   // Multi-topic filters require all selected topics ("all of"), not any-of.
   const hitsAll = state.selectedThemes.every((theme) => assigned.includes(theme));
   return state.themeFilterMode === "exclude" ? !hitsAll : hitsAll;
+}
+
+function submissionMatchesMapHighlight(submission) {
+  if (!submission) return !hasMapHighlightFilter();
+  const search = state.search.trim().toLowerCase();
+  const searchOk = !search || submissionMatchesSearch(submission, search);
+  const themeOk = submissionMatchesThemeFilter(submission);
+  return searchOk && themeOk;
 }
 
 function filteredSubmissions() {
@@ -1434,8 +1451,15 @@ function embeddingDefaultNote() {
   if (state.highlightedSubmissionKey) {
     return "Jumped to highlighted submission below — topic tags are shown on the card";
   }
-  if (hasThemeFilter()) {
-    return `${count} papers on map · ${highlighted} highlighted · ${themeFilterDisplayText()}`;
+  if (hasMapHighlightFilter()) {
+    const parts = [];
+    if (hasSearchFilter()) {
+      parts.push(`search “${state.search.trim()}”`);
+    }
+    if (hasThemeFilter()) {
+      parts.push(themeFilterDisplayText());
+    }
+    return `${count} papers on map · ${highlighted} highlighted · ${parts.join(" · ")}`;
   }
   return isTouchLike()
     ? `${count} submissions · colored by year · tap a dot to see topics and filter · or open the paper`
@@ -1538,7 +1562,7 @@ function showEmbeddingPointTooltip(event, point, mode = "hover") {
 }
 
 function embeddingHighlightCount() {
-  return embeddingDisplayPoints().filter((point) => pointMatchesThemeFilter(point)).length;
+  return embeddingDisplayPoints().filter((point) => pointMatchesMapHighlight(point)).length;
 }
 
 function renderKpis(filtered) {
@@ -2126,6 +2150,11 @@ function pointMatchesThemeFilter(point) {
   return submissionMatchesThemeFilter(submission);
 }
 
+function pointMatchesMapHighlight(point) {
+  const submission = submissionForEmbeddingPoint(point);
+  return submissionMatchesMapHighlight(submission);
+}
+
 function embeddingPlotDomain(extent, padRatio = 0.06) {
   const [min, max] = extent;
   if (min === undefined || max === undefined) return [0, 1];
@@ -2282,11 +2311,11 @@ function renderEmbeddingCluster() {
     .attr("rx", isPhoneLayout() ? gs(8) : s(12));
 
   const pointStyle = (point) => {
-    const themeMatch = pointMatchesThemeFilter(point);
-    const filtering = hasThemeFilter();
+    const match = pointMatchesMapHighlight(point);
+    const filtering = hasMapHighlightFilter();
     const highlighted =
       state.highlightedSubmissionKey && submissionRowKey(point) === state.highlightedSubmissionKey;
-    const active = !filtering || themeMatch;
+    const active = !filtering || match;
     let radius = active ? pointRadius.base : pointRadius.dim;
     if (highlighted || (active && filtering)) radius = pointRadius.selected;
     const fill = yearColor(point.year);
@@ -2301,8 +2330,8 @@ function renderEmbeddingCluster() {
 
   // Draw dimmed points first so highlighted matches stay on top.
   const ordered = [...points].sort((a, b) => {
-    const aActive = pointMatchesThemeFilter(a) ? 1 : 0;
-    const bActive = pointMatchesThemeFilter(b) ? 1 : 0;
+    const aActive = pointMatchesMapHighlight(a) ? 1 : 0;
+    const bActive = pointMatchesMapHighlight(b) ? 1 : 0;
     return aActive - bActive;
   });
 
