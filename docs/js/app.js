@@ -678,7 +678,7 @@ const CHART_PALETTE = [
   "#00C8FF", // 1. Reinforcement learning — super bright blue
   "#C2185B", // 2. Motor control & planning — darker pink (away from magenta)
   "#FF2BD6", // 3. Naturalistic encoding/decoding — magenta
-  "#6B2BB8", // 4. Neural population geometry — darker indigo
+  "#9B5FD9", // 4. Neural population geometry — indigo (lifted for dark-bg visibility)
   "#FFE600", // 5. Decision-making and metacognition — bright yellow
   "#C0C9EE", // 6. light blue
   "#08AB54", // 7. dark green
