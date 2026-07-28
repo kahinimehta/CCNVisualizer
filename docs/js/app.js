@@ -731,7 +731,7 @@ const GOOGLE_FORM_TOPICS = [
   "Vision",
   "Perception",
   "Language/auditory neuroscience",
-  "AI, LLM, & Neural Networks",
+  "AI, LLM, & neural networks",
   "Memory",
   "Social cognition & theory of mind",
   "Attention & cognitive control / executive function",
@@ -1029,7 +1029,7 @@ function buildStateFromCsv(rows, source = FIXED_DATASET) {
 async function loadDataset(options = {}) {
   const { resetFilters = false } = options;
   const datasetFile = FIXED_DATASET;
-  const csvRows = await d3.csv(`data/${datasetFile}?v=118`);
+  const csvRows = await d3.csv(`data/${datasetFile}?v=120`);
   if (!csvRows?.length) {
     throw new Error(`Could not load data/${datasetFile}`);
   }

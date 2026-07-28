@@ -66,7 +66,7 @@ DEFAULT_TOPICS = [
     "Vision",
     "Perception",
     "Language/auditory neuroscience",
-    "AI, LLM, & Neural Networks",
+    "AI, LLM, & neural networks",
     "Memory",
     "Social cognition & theory of mind",
     "Attention & cognitive control / executive function",
