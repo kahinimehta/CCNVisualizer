@@ -694,17 +694,17 @@ const CHART_PALETTE = [
   "#B81476", // 14. Methods and theory
 ];
 
-// Years: muted warm-grey sequential (rising lightness). Soft, low-saturation
-// hues so chronology stays readable without colliding with the vivid topics.
+// Years: black → white greyscale (rising lightness). High step-to-step contrast
+// for chronology; stays fully separate from the vivid topic hues.
 const YEAR_PALETTE = [
-  "#6E6253", // 2017
-  "#837664", // 2018
-  "#968978", // 2019
-  "#A69C8E", // 2022
-  "#B6AFA3", // 2023
-  "#C6C1B9", // 2024
-  "#D7D4CE", // 2025
-  "#E8E6E3", // 2026
+  "#000000", // 2017
+  "#555555", // 2018
+  "#777777", // 2019
+  "#999999", // 2022
+  "#B3B3B3", // 2023
+  "#CCCCCC", // 2024
+  "#E6E6E6", // 2025
+  "#FFFFFF", // 2026
 ];
 
 const YEAR_COLORS = Object.fromEntries(
