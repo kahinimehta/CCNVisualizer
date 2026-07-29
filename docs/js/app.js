@@ -672,35 +672,37 @@ function styleThemeAxisLabels(selection) {
   styleDesktopChartText(labels);
 }
 
-// Topics: VIBGYOR order, dark then light per hue (14). Shades pushed apart
-// (low vs high lightness + slight hue offset) so no two hexes sit too close.
+// Topics: matplotlib turbo samples (t≈0.18→0.88). Skip turbo's dark blues so
+// they do not collide with the cool bone year ramp; keep saturated hues for
+// categorical salience across the 14 themes.
 const CHART_PALETTE = [
-  "#00C8FF", // 1. Reinforcement learning — super bright blue
-  "#C2185B", // 2. Motor control & planning — darker pink (away from magenta)
-  "#FF2BD6", // 3. Naturalistic encoding/decoding — magenta
-  "#9B5FD9", // 4. Neural population geometry — indigo (lifted for dark-bg visibility)
-  "#FFE600", // 5. Decision-making and metacognition — bright yellow
-  "#C0C9EE", // 6. light blue
-  "#08AB54", // 7. dark green
-  "#A2E9D5", // 8. light green
-  "#9AA815", // 9. dark yellow
-  "#C5DEA4", // 10. light yellow
-  "#A34F08", // 11. dark orange (lifted for dark-bg readability)
-  "#F4E4BD", // 12. light orange
-  "#8E0B12", // 13. dark red
-  "#E5AE9C", // 14. light red
+  "#448FFE", // 1. Reinforcement learning
+  "#31AFF5", // 2. Motor control & planning
+  "#1BD0D5", // 3. Naturalistic encoding/decoding
+  "#1DE7B2", // 4. Neural population geometry & dynamics
+  "#43F787", // 5. Decision-making and metacognition
+  "#79FE59", // 6. Vision
+  "#A4FC3C", // 7. Perception
+  "#C8EF34", // 8. Language/auditory neuroscience
+  "#E7D739", // 9. AI, LLM, & neural networks
+  "#FABA39", // 10. Memory
+  "#FE992C", // 11. Social cognition & theory of mind
+  "#F76F1A", // 12. Attention & cognitive control / executive function
+  "#E7490C", // 13. Clinical / computational psychiatry
+  "#CE2D04", // 14. Methods and theory
 ];
 
-// Years: 7 hexes only, equally spaced around the wheel (~51° apart) so every
-// pair is far. Mapped onto conference years in chronological order (8th wraps).
+// Years: matplotlib bone sequential (t≈0.48→0.96). Low-salience cool gray→
+// white blend for chronological time — distinct from turbo topic hues.
 const YEAR_PALETTE = [
-  "#F92BCC", // violet / magenta
-  "#5504F7", // indigo
-  "#0A82F5", // blue
-  "#2AFDAD", // spring green
-  "#39F212", // green
-  "#F5E120", // yellow
-  "#F63E29", // red-orange
+  "#6B748B", // 2017
+  "#7A8A9A", // 2018
+  "#899EA9", // 2019
+  "#99B4B9", // 2022
+  "#AAC9C9", // 2023
+  "#C1D8D8", // 2024
+  "#DAE7E7", // 2025
+  "#F1F6F6", // 2026
 ];
 
 const YEAR_COLORS = Object.fromEntries(
@@ -709,7 +711,6 @@ const YEAR_COLORS = Object.fromEntries(
     YEAR_PALETTE[i % YEAR_PALETTE.length],
   ])
 );
-YEAR_COLORS[2026] = "#FFFFFF"; // white
 
 const KPI_ICONS = {
   submissions:
