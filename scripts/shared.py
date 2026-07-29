@@ -407,6 +407,11 @@ BAD_KEYWORD_EXACT = frozenset(
         "ratcliff and mckoon",
         "simonyan and zisserman",
         "kemp and tenenbaum",
+        # Prose / grant / typo debris
+        "on the other hand",
+        "exactly how that organization",
+        "depending on context",
+        "fask fmri",
         # Citation / author crumbs commonly scraped into keyword fields
         "shepard",
         "naselaris",
@@ -429,6 +434,13 @@ BAD_KEYWORD_EXACT = frozenset(
         "dimitrios pantazis",
         "antonio torralba",
         "johanni brea",
+        "gollo",
+        "zalesky",
+        "breakspear",
+        "de magalhães",
+        "de magalhaes",
+        "clare kelly",
+        "xavier castellanos",
     }
 )
 
@@ -504,9 +516,11 @@ BAD_KEYWORD_PATTERN_RES = (
     re.compile(r"\bstate\s+\d+\b"),
     re.compile(r"\b(memory|behavior|projects)\s+\S*\d"),
     re.compile(r"\bdo\s+\d"),  # grant crumbs
+    re.compile(r"\br0\d\b"),  # NIH-style grant ids (r01 mh112847)
     re.compile(r"\bsummary\b"),  # "foraging summary whether..."
     re.compile(r"\bwhether\b"),
     re.compile(r"\bwant to\b"),
+    re.compile(r"\bother hand\b"),
     re.compile(r"[^\w\s\-/&'+]{2,}"),  # runs of odd punctuation/symbols
 )
 
@@ -1238,7 +1252,11 @@ def is_plausible_keyword(keyword: str) -> bool:
     if len(words) >= 5 and any(marker in f" {normalized} " for marker in prose_markers):
         return False
     # Lone citation-style surname crumbs / broken OCR tokens.
-    if len(words) <= 2 and re.search(r"(^|\s)(van|de|del|da|di|le|la|el|al)\s+[a-z]{2,}$", normalized):
+    if len(words) <= 2 and re.search(
+        r"(^|\s)(van|de|del|da|di|le|la|el|al)\s+\w{2,}$",
+        normalized,
+        flags=re.UNICODE,
+    ):
         return False
     if re.search(r"\b[a-z]\s+[a-z]{2,}\b", normalized) and " " in normalized:
         # "y oo", "g ¨ardenfors", "s ¨orensen" style broken tokens

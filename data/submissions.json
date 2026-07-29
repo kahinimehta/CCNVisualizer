@@ -8785,10 +8785,7 @@
         "dynamical systems",
         "network modeling",
         "moment-to-moment variability",
-        "electroencephalography (eeg)",
-        "gollo",
-        "zalesky",
-        "breakspear"
+        "electroencephalography (eeg)"
       ],
       "extracted_keywords": [],
       "keywords": [
@@ -8796,10 +8793,7 @@
         "dynamical systems",
         "network modeling",
         "moment-to-moment variability",
-        "electroencephalography (eeg)",
-        "gollo",
-        "zalesky",
-        "breakspear"
+        "electroencephalography (eeg)"
       ],
       "topic_area": "",
       "track": "",
@@ -9907,16 +9901,12 @@
       "abstract": "The network organization of human brain functional connectivity is strikingly similar to that of inter-regional gene coexpression. Yet, whether gene coexpression explains functional connectivity with an accuracy that is equivalent across the cortex, or whether different sets of genes explain distinct aspects of functional connectivity remains unknown. Furthermore, it is unclear how the relationship between gene coexpression and brain connectivity might change over development, relate to heritability, and track behavior. Here, we leverage several large multimodal data sets to demonstrate that different sets of genes statistically account for different aspects of brain network architecture. Critically, gene coexpression is more strongly related to functional connectivity than to structural connectivity. Brain regions whose connections are well fit by gene coexpression also tend to have connections whose strengths are commonly shared across humans, co-vary with behavior, and display stereotyped development over adolescence. In contrast, brain regions whose connections are not well fit by gene coexpression tend to connect diverse functional network modules and be strongly heritable. Our results lend support to the notion that functional connectivity is modularly represented in the genome and mediates between genotypes and cognitive phenotypes.",
       "author_keywords": [
         "network neuroscience",
-        "gene expression",
-        "exactly how that organization",
-        "de magalhães"
+        "gene expression"
       ],
       "extracted_keywords": [],
       "keywords": [
         "network neuroscience",
-        "gene expression",
-        "exactly how that organization",
-        "de magalhães"
+        "gene expression"
       ],
       "topic_area": "",
       "track": "",
@@ -12363,15 +12353,13 @@
       "author_keywords": [
         "biological vision",
         "recurrent networks",
-        "horizontal connections",
-        "on the other hand"
+        "horizontal connections"
       ],
       "extracted_keywords": [],
       "keywords": [
         "biological vision",
         "recurrent networks",
-        "horizontal connections",
-        "on the other hand"
+        "horizontal connections"
       ],
       "topic_area": "",
       "track": "",
@@ -12399,14 +12387,12 @@
       "abstract": "The ability to store, represent, and manipulate information is a crucial element of processing systems. While computers are carefully engineered and manufactured to perform mathematical operations on data, neurobiological systems robustly provide similar functions with substantially more variability in physical brain connectivity across species and development. In addition, neural systems can recognize largely unstructured patterns of sensory inputs that cannot always be nicely represented as discrete static pieces of information. Here we present a dynamical system that can represent chaotic attractors, and learn a simple translation operation by example. Specifically, we train a sparse and randomly connected reservoir computer system to evolve along two translated chaotic Lorenz attractors with different initial conditions embedded in 3 dimensions. During training, we apply a fourth input that takes a unique constant value for each attractor. We demonstrate that by driving the trained reservoir with new values of this fourth input, the reservoir is able to extrapolate the translation of the Lorenz attractor. Together, our results provide a simple but powerful mechanism by which a general dynamical system can learn to manipulate internal representations of complex information.",
       "author_keywords": [
         "dynamical systems",
-        "neural network",
-        "r01 mh112847"
+        "neural network"
       ],
       "extracted_keywords": [],
       "keywords": [
         "dynamical systems",
-        "neural network",
-        "r01 mh112847"
+        "neural network"
       ],
       "topic_area": "",
       "track": "",
@@ -13054,16 +13040,14 @@
         "graph learning",
         "statistical learning",
         "motor sequence learning",
-        "graph theory",
-        "depending on context"
+        "graph theory"
       ],
       "extracted_keywords": [],
       "keywords": [
         "graph learning",
         "statistical learning",
         "motor sequence learning",
-        "graph theory",
-        "depending on context"
+        "graph theory"
       ],
       "topic_area": "",
       "track": "",
@@ -15038,25 +15022,21 @@
       "authors": "Andrew Murphy, Maxwell Bertolero, Danielle Bassett",
       "abstract": "n/a",
       "author_keywords": [
-        "fask fmri",
+        "task fmri",
         "functional connectivity",
         "frontoparietal system",
         "relational processing",
         "emotion processing",
-        "language processing",
-        "clare kelly",
-        "xavier castellanos"
+        "language processing"
       ],
       "extracted_keywords": [],
       "keywords": [
-        "fask fmri",
+        "task fmri",
         "functional connectivity",
         "frontoparietal system",
         "relational processing",
         "emotion processing",
-        "language processing",
-        "clare kelly",
-        "xavier castellanos"
+        "language processing"
       ],
       "topic_area": "",
       "track": "",
