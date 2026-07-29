@@ -391,6 +391,22 @@ function isGoogleChrome() {
   return /\bChrome\//.test(ua) && !/\bChromium\//.test(ua);
 }
 
+/** Microsoft Edge (Chromium). */
+function isEdgeBrowser() {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent || "";
+  if (/\bEdg\//.test(ua)) return true;
+  const brands = navigator.userAgentData?.brands;
+  if (Array.isArray(brands) && brands.some((b) => /Microsoft Edge/i.test(b?.brand || ""))) {
+    return true;
+  }
+  return false;
+}
+
+// Windows Edge often paints ~25% large at 100% zoom on laptop displays
+// (Lenovo etc.). Match the user’s working 80% browser zoom for that pair only.
+const WINDOWS_EDGE_PAGE_ZOOM = 0.8;
+
 /** Desktop root font from layout width (px, not rem/prefs). */
 function desktopRootPxForViewport(w = viewportWidth()) {
   const width = Math.max(320, w);
@@ -444,12 +460,15 @@ function applyPageScale() {
   const phone = isPhoneLayout();
   const chrome = !phone && isGoogleChrome();
   const brave = !phone && isBraveBrowser();
+  const edge = !phone && isEdgeBrowser();
   const windows = !phone && isWindowsPlatform();
+  const windowsEdge = windows && edge;
   root.style.zoom = "";
   root.style.removeProperty("--page-zoom");
   root.classList.toggle("is-phone", phone);
   root.classList.toggle("is-chrome", chrome);
   root.classList.toggle("is-brave", brave);
+  root.classList.toggle("is-edge", edge);
   root.classList.toggle("is-windows", windows);
   root.classList.remove("no-css-zoom");
 
@@ -459,6 +478,12 @@ function applyPageScale() {
   } else {
     root.style.fontSize = `${rootFontPxForViewport()}px`;
     root.style.setProperty("--ui-scale", "1");
+  }
+
+  // Desktop Windows Edge only — leave Mac/other browsers at native 100%.
+  if (windowsEdge) {
+    root.style.zoom = String(WINDOWS_EDGE_PAGE_ZOOM);
+    root.style.setProperty("--page-zoom", String(WINDOWS_EDGE_PAGE_ZOOM));
   }
 
   if (document.body) {
