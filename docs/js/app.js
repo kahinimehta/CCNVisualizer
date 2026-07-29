@@ -674,37 +674,37 @@ function styleThemeAxisLabels(selection) {
   styleDesktopChartText(labels);
 }
 
-// Topics: matplotlib turbo samples (t≈0.08→0.92), evenly spaced for wider
-// hue gaps between adjacent themes. Avoids turbo's darkest blues so colors
-// stay distinct from the cool bone year ramp.
+// Topics: maximally spaced categorical hues (high chroma, alternating
+// lightness). Chosen to maximize minimum pairwise RGB distance so adjacent
+// theme chips/bars stay visually distinct.
 const CHART_PALETTE = [
-  "#424BB5", // 1. Reinforcement learning
-  "#4778F0", // 2. Motor control & planning
-  "#3BA0FD", // 3. Naturalistic encoding/decoding
-  "#1FC9DD", // 4. Neural population geometry & dynamics
-  "#1CE6B4", // 5. Decision-making and metacognition
-  "#4AF880", // 6. Vision
-  "#88FF4E", // 7. Perception
-  "#B9F635", // 8. Language/auditory neuroscience
-  "#DFDF37", // 9. AI, LLM, & neural networks
-  "#F9BC39", // 10. Memory
-  "#FE932A", // 11. Social cognition & theory of mind
-  "#F26014", // 12. Attention & cognitive control / executive function
-  "#DC3B07", // 13. Clinical / computational psychiatry
-  "#B71D02", // 14. Methods and theory
+  "#EF0606", // 1. Reinforcement learning
+  "#FC8888", // 2. Motor control & planning
+  "#F97D10", // 3. Naturalistic encoding/decoding
+  "#F9F910", // 4. Neural population geometry & dynamics
+  "#809720", // 5. Decision-making and metacognition
+  "#A1FB74", // 6. Vision
+  "#06EF06", // 7. Perception
+  "#06EFA1", // 8. Language/auditory neuroscience
+  "#78B1E2", // 9. AI, LLM, & neural networks
+  "#0654EF", // 10. Memory
+  "#7D35E9", // 11. Social cognition & theory of mind
+  "#F3AFFD", // 12. Attention & cognitive control / executive function
+  "#EF06EF", // 13. Clinical / computational psychiatry
+  "#B81476", // 14. Methods and theory
 ];
 
-// Years: matplotlib bone sequential (t≈0.32→1.0). Wider lightness steps so
-// adjacent conference years read apart, still a quiet cool gray→white blend.
+// Years: maximally spaced categorical colors, ordered by rising lightness so
+// chronology is still readable while adjacent years stay far apart in color.
 const YEAR_PALETTE = [
-  "#474763", // 2017
-  "#5D617D", // 2018
-  "#737F92", // 2019
-  "#889DA8", // 2022
-  "#9EBBBE", // 2023
-  "#BCD4D4", // 2024
-  "#DEEAEA", // 2025
-  "#FFFFFF", // 2026
+  "#209760", // 2017
+  "#A54312", // 2018
+  "#10BBF9", // 2019
+  "#6DF910", // 2022
+  "#D8BB46", // 2023
+  "#CF5AED", // 2024
+  "#88FCF4", // 2025
+  "#FDFDAF", // 2026
 ];
 
 const YEAR_COLORS = Object.fromEntries(
