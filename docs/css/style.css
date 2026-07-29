@@ -949,6 +949,26 @@ body:not(.sidebar-collapsed) .main-area {
   flex-shrink: 0;
 }
 
+/* Phone: JS sets html.is-phone — size titles just under the section header
+   (media-query-only rules can miss some phones). */
+html.is-phone #submissions-panel .card-header h2 {
+  font-size: 0.95rem;
+}
+
+html.is-phone #submissions-panel .paper-item h3 {
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+html.is-phone #submissions-panel .paper-item .meta {
+  font-size: 0.74rem;
+}
+
+html.is-phone #submissions-panel .keyword-tag {
+  font-size: 0.68rem;
+}
+
 #results-count {
   display: flex;
   flex-wrap: wrap;
@@ -1130,15 +1150,15 @@ svg {
   }
 
   .paper-item h3 {
-    font-size: 0.7rem;
+    font-size: 0.84rem;
   }
 
   .paper-item .meta {
-    font-size: 0.76rem;
+    font-size: 0.74rem;
   }
 
   .keyword-tag {
-    font-size: 0.7rem;
+    font-size: 0.68rem;
   }
 
   .tooltip {
