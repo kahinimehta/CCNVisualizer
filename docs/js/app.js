@@ -2386,11 +2386,11 @@ function embeddingPointRadii(plotInnerW) {
     };
   }
   const w = Math.max(320, viewportWidth());
-  // ~0.8% of plot width — viewport only, no browser multiplier.
-  const fromPlot = plotInnerW / 125;
-  const fromViewport = w / 200;
+  // Slightly tighter than before on laptop/desktop; phone radii unchanged above.
+  const fromPlot = plotInnerW / 145;
+  const fromViewport = w / 230;
   const raw = Math.max(fromPlot, fromViewport * 0.9);
-  const base = Math.min(11, Math.max(3.8, raw));
+  const base = Math.min(9.5, Math.max(3.4, raw));
   return {
     base,
     selected: base * 1.4,
