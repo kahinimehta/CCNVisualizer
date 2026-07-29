@@ -441,6 +441,14 @@ BAD_KEYWORD_EXACT = frozenset(
         "de magalhaes",
         "clare kelly",
         "xavier castellanos",
+        "b1* etc",
+        "aware of this rule",
+        "von kriegstein",
+        "u ˘gurbil",
+        "u gurbil",
+        "⃗y is output",
+        "y is output",
+        "dkl is kl divergence",
     }
 )
 
@@ -521,6 +529,9 @@ BAD_KEYWORD_PATTERN_RES = (
     re.compile(r"\bwhether\b"),
     re.compile(r"\bwant to\b"),
     re.compile(r"\bother hand\b"),
+    re.compile(r"\betc\b"),
+    re.compile(r"\bis (output|kl|the)\b"),
+    re.compile(r"[*~`^|\\{}[\]<>#$%@!;:=]"),  # odd symbols (keep + for pv+)
     re.compile(r"[^\w\s\-/&'+]{2,}"),  # runs of odd punctuation/symbols
 )
 
@@ -631,8 +642,17 @@ def strip_citation_fragments(text: str) -> str:
     return cleaned.strip()
 
 
+# Zero-width / format / stray combining marks often pasted from PDFs.
+_KEYWORD_INVISIBLE_RE = re.compile(
+    r"[\u200b\u200c\u200d\u2060\ufeff\u00ad\u200e\u200f"
+    r"\u0300-\u036f\u20d0-\u20ff\u02d8\u02c6\u02c7\u02d9\u02da\u02dc]"
+)
+
+
 def normalize_keyword_phrase(keyword: str) -> str:
-    return strip_citation_fragments(re.sub(r"\s+", " ", (keyword or "").strip().lower()))
+    cleaned = _KEYWORD_INVISIBLE_RE.sub("", keyword or "")
+    cleaned = re.sub(r"\s+", " ", cleaned.strip().lower())
+    return strip_citation_fragments(cleaned)
 
 
 def is_metadata_keyword(keyword: str) -> bool:

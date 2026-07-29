@@ -19919,14 +19919,14 @@
       "authors": "Ryan Blything",
       "abstract": "What mechanism supports our ability to recognize objects over a wide range of different retinal locations? Most research in psychology and neuroscience suggests that learning to identify a novel object at one retinal location only supports the ability to identify that object at nearby retinal locations, and to date, neural network models of object identification show a similar restriction in generalization. As a consequence, it is widely assumed that objects need to be learned at multiple locations. We challenge this view and show the capacity to generalize across retinal locations (what we call on-line translation tolerance) has been underestimated in humans and artificial neural networks. Two eye tracking studies demonstrate that novel objects can be recognized following translations of 9Â° and even 18Â°. Additionally, computational studies showed that convolutional neural networks can achieve similarly robust generalization when a mechanism (Global Average Pooling) was built in to generate larger receptive fields.",
       "author_keywords": [
-        "​translationtolerance",
+        "translation tolerance",
         "translation invariance",
         "object recognition",
         "vision"
       ],
       "extracted_keywords": [],
       "keywords": [
-        "​translationtolerance",
+        "translation tolerance",
         "translation invariance",
         "object recognition",
         "vision"
@@ -20230,13 +20230,13 @@
       "authors": "Tyler Bonnen, Daniel L. K. Yamins, Anthony D. Wagner",
       "abstract": "Animals rapidly transform sensory experience into memory. How the mammalian brain supports these transformations has been subject to an enduring debate: Do medial temporal lobe (MTL) structures, typically implicated in memory-related behaviors, also play a role in perception? A rich experimental literature exists, yet reliance on descriptive accounts of stimulus properties (e.g. “feature ambiguity”) has made it difficult to synthesize results. In order to formalize perceptual demands on the MTL, in particular, the role of perirhinal cortex (PRC), here we adopt a combination of meta-analytic and computational approaches. We begin by designing a null model of PRC function in visual discrimination tasks, building from a computational proxy for the primate ventral visual system (VVS). With this model, we identify stimuli from previous studies that may not be diagnostic of PRC’s role in perception. We then demonstrate a striking correspondence between model and PRC-lesioned behavior across ten experiments (r=.80). Critically, the model and PRC-lesioned subjects fail on the same visual discrimination tasks, unlike controls. This approach formalizes the MTL’s role in perception by providing a tractable, stimulus-computable proxy for visual discrimination tasks in a PRC-lesioned state.",
       "author_keywords": [
-        "​ ​perirhinal cortex",
+        "perirhinal cortex",
         "perceptual-mnemonic",
         "mtl"
       ],
       "extracted_keywords": [],
       "keywords": [
-        "​ ​perirhinal cortex",
+        "perirhinal cortex",
         "perceptual-mnemonic",
         "mtl"
       ],
@@ -27678,14 +27678,12 @@
       "author_keywords": [
         "cognitive tests",
         "reinforcement learning",
-        "rt is the reward",
         "event streams"
       ],
       "extracted_keywords": [],
       "keywords": [
         "cognitive tests",
         "reinforcement learning",
-        "rt is the reward",
         "event streams"
       ],
       "topic_area": "Cognitive science",
@@ -32558,14 +32556,12 @@
       "abstract": "Cognitive maps represent relational structures and are taken to be important for generalization and optimal decision-making in spatial as well as non-spatial domains. While many studies have investigated the benefits of cognitive maps, how these maps are learned from experience has remained less clear. We introduce a new graph-structured sequence task to better understand how cognitive maps are learned. Participants observed sequences of episodes followed by a reward, thereby learning about the underlying transition structure and fluctuating reward contingencies. Importantly, the task structure allowed participants to generalize value from some episode sequences to others, and generalizability was either signaled by episode similarity or had to be inferred more indirectly. Behavioral data demonstrated participants` ability to learn about signaled and unsignaled generalizability with different speed, indicating that the formation of cognitive maps partially relies on exploiting observable similarities across episodes. We hypothesize that a possible neural mechanism involved in learning cognitive maps as described here is experience replay.",
       "author_keywords": [
         "representation learning",
-        "cognitive maps",
-        "b1* etc"
+        "cognitive maps"
       ],
       "extracted_keywords": [],
       "keywords": [
         "representation learning",
-        "cognitive maps",
-        "b1* etc"
+        "cognitive maps"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -33136,20 +33132,14 @@
         "predictive processing",
         "auditory system",
         "auditory thalamus",
-        "auditory midbrain",
-        "aware of this rule",
-        "von kriegstein",
-        "u ˘gurbil"
+        "auditory midbrain"
       ],
       "extracted_keywords": [],
       "keywords": [
         "predictive processing",
         "auditory system",
         "auditory thalamus",
-        "auditory midbrain",
-        "aware of this rule",
-        "von kriegstein",
-        "u ˘gurbil"
+        "auditory midbrain"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -44876,17 +44866,13 @@
       "author_keywords": [
         "speech perception",
         "rate distortion theory",
-        "feature weighting",
-        "⃗y is output",
-        "dkl is kl divergence"
+        "feature weighting"
       ],
       "extracted_keywords": [],
       "keywords": [
         "speech perception",
         "rate distortion theory",
-        "feature weighting",
-        "⃗y is output",
-        "dkl is kl divergence"
+        "feature weighting"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
