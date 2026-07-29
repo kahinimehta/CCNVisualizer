@@ -2391,12 +2391,10 @@ function renderEmbeddingCluster() {
   const xSpan = Math.max(xDomain[1] - xDomain[0], 1e-6);
   const ySpan = Math.max(yDomain[1] - yDomain[0], 1e-6);
 
-  // Phone: isotropic (yesterday's clean map). Desktop: shorter/broader cap.
+  // Keep equal data-units per pixel in x and y so the UMAP cloud keeps its
+  // true shape (no vertical squeeze into a fixed wide rectangle).
   const unitsPerPxX = xSpan / plotInnerW;
-  const isotropicH = ySpan / unitsPerPxX;
-  const plotInnerH = isPhoneLayout()
-    ? isotropicH
-    : Math.max(160, Math.min(isotropicH, plotInnerW / 3.25));
+  const plotInnerH = Math.max(120, ySpan / unitsPerPxX);
   const plotHeight = margin.top + plotInnerH + margin.bottom;
   // Provisional height; expand after measuring the year legend.
   const provisionalLegend = isPhoneLayout() ? gs(70) : s(56);
