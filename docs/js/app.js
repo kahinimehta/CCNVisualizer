@@ -342,14 +342,16 @@ function readCssNumber(property, fallback) {
 const PHONE_GRAPH_SCALE = 0.72;
 const PHONE_CHART_SCALE = 1.2;
 const PHONE_UI_SCALE = 1.12;
-const PHONE_AXIS_LABEL_SIZE = 8.5;
-const PHONE_THEME_TITLE_SIZE = 10.5;
-const PHONE_BAR_VALUE_SIZE = 10.5;
+const PHONE_AXIS_LABEL_SIZE = 10;
+const PHONE_THEME_TITLE_SIZE = 12;
+const PHONE_BAR_VALUE_SIZE = 12;
 const PHONE_LEGEND_HEADING_SIZE = 10.5;
 const PHONE_EMBEDDING_LEGEND_HEADING_SIZE = 12.5;
 
 // Shared desktop chart label bases — same in every desktop browser.
-const DESKTOP_CHART_LABEL = 9;
+// Labels (axes, bar names, legend items) sit slightly above headings so
+// in-chart text matches the graphics; card headers stay CSS-driven.
+const DESKTOP_CHART_LABEL = 11;
 const DESKTOP_CHART_HEADING = 10;
 
 /**
@@ -672,37 +674,37 @@ function styleThemeAxisLabels(selection) {
   styleDesktopChartText(labels);
 }
 
-// Topics: matplotlib turbo samples (t≈0.18→0.88). Skip turbo's dark blues so
-// they do not collide with the cool bone year ramp; keep saturated hues for
-// categorical salience across the 14 themes.
+// Topics: matplotlib turbo samples (t≈0.08→0.92), evenly spaced for wider
+// hue gaps between adjacent themes. Avoids turbo's darkest blues so colors
+// stay distinct from the cool bone year ramp.
 const CHART_PALETTE = [
-  "#448FFE", // 1. Reinforcement learning
-  "#31AFF5", // 2. Motor control & planning
-  "#1BD0D5", // 3. Naturalistic encoding/decoding
-  "#1DE7B2", // 4. Neural population geometry & dynamics
-  "#43F787", // 5. Decision-making and metacognition
-  "#79FE59", // 6. Vision
-  "#A4FC3C", // 7. Perception
-  "#C8EF34", // 8. Language/auditory neuroscience
-  "#E7D739", // 9. AI, LLM, & neural networks
-  "#FABA39", // 10. Memory
-  "#FE992C", // 11. Social cognition & theory of mind
-  "#F76F1A", // 12. Attention & cognitive control / executive function
-  "#E7490C", // 13. Clinical / computational psychiatry
-  "#CE2D04", // 14. Methods and theory
+  "#424BB5", // 1. Reinforcement learning
+  "#4778F0", // 2. Motor control & planning
+  "#3BA0FD", // 3. Naturalistic encoding/decoding
+  "#1FC9DD", // 4. Neural population geometry & dynamics
+  "#1CE6B4", // 5. Decision-making and metacognition
+  "#4AF880", // 6. Vision
+  "#88FF4E", // 7. Perception
+  "#B9F635", // 8. Language/auditory neuroscience
+  "#DFDF37", // 9. AI, LLM, & neural networks
+  "#F9BC39", // 10. Memory
+  "#FE932A", // 11. Social cognition & theory of mind
+  "#F26014", // 12. Attention & cognitive control / executive function
+  "#DC3B07", // 13. Clinical / computational psychiatry
+  "#B71D02", // 14. Methods and theory
 ];
 
-// Years: matplotlib bone sequential (t≈0.48→0.96). Low-salience cool gray→
-// white blend for chronological time — distinct from turbo topic hues.
+// Years: matplotlib bone sequential (t≈0.32→1.0). Wider lightness steps so
+// adjacent conference years read apart, still a quiet cool gray→white blend.
 const YEAR_PALETTE = [
-  "#6B748B", // 2017
-  "#7A8A9A", // 2018
-  "#899EA9", // 2019
-  "#99B4B9", // 2022
-  "#AAC9C9", // 2023
-  "#C1D8D8", // 2024
-  "#DAE7E7", // 2025
-  "#F1F6F6", // 2026
+  "#474763", // 2017
+  "#5D617D", // 2018
+  "#737F92", // 2019
+  "#889DA8", // 2022
+  "#9EBBBE", // 2023
+  "#BCD4D4", // 2024
+  "#DEEAEA", // 2025
+  "#FFFFFF", // 2026
 ];
 
 const YEAR_COLORS = Object.fromEntries(
