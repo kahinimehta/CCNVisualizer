@@ -1894,9 +1894,17 @@ function renderYearChart() {
           ? gs(3.5)
           : s(5)
     )
-    .attr("fill", (d) => (selected.has(String(d.year)) ? CCN_COLORS.pink : CCN_COLORS.green))
-    .attr("stroke", CCN_COLORS.navy)
-    .attr("stroke-width", isPhoneLayout() ? gs(1.5) : s(2))
+    .attr("fill", (d) => yearColor(d.year))
+    .attr("stroke", (d) => (selected.has(String(d.year)) ? CCN_COLORS.pink : CCN_COLORS.navy))
+    .attr("stroke-width", (d) =>
+      selected.has(String(d.year))
+        ? isPhoneLayout()
+          ? gs(2)
+          : s(2.5)
+        : isPhoneLayout()
+          ? gs(1.5)
+          : s(2)
+    )
     .style("cursor", "pointer")
     .on("click", (event, d) => {
       toggleYearFilter(d.year);
