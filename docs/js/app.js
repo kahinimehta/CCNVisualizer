@@ -694,17 +694,17 @@ const CHART_PALETTE = [
   "#B81476", // 14. Methods and theory
 ];
 
-// Years: maximally spaced categorical colors, ordered by rising lightness so
-// chronology is still readable while adjacent years stay far apart in color.
+// Years: muted warm-grey sequential (rising lightness). Soft, low-saturation
+// hues so chronology stays readable without colliding with the vivid topics.
 const YEAR_PALETTE = [
-  "#209760", // 2017
-  "#A54312", // 2018
-  "#10BBF9", // 2019
-  "#6DF910", // 2022
-  "#D8BB46", // 2023
-  "#CF5AED", // 2024
-  "#88FCF4", // 2025
-  "#FDFDAF", // 2026
+  "#6E6253", // 2017
+  "#837664", // 2018
+  "#968978", // 2019
+  "#A69C8E", // 2022
+  "#B6AFA3", // 2023
+  "#C6C1B9", // 2024
+  "#D7D4CE", // 2025
+  "#E8E6E3", // 2026
 ];
 
 const YEAR_COLORS = Object.fromEntries(
