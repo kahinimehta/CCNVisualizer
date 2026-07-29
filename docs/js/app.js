@@ -693,17 +693,17 @@ const CHART_PALETTE = [
   "#A50026", // 14. Methods and theory
 ];
 
-// Years: light blue → black → white. Early years cool/light, mid years black,
-// recent years rise to white — separate from the green–red topic ramp.
+// Years: muted earthy maroon → khaki ramp (equal-arc samples so adjacent
+// years stay as far apart as the gradation allows). Quiet vs RdYlGn topics.
 const YEAR_PALETTE = [
-  "#B8DEF5", // 2017 light blue
-  "#6E9AB8", // 2018
-  "#2F4555", // 2019
-  "#000000", // 2022 black
-  "#4A4A4A", // 2023
-  "#8A8A8A", // 2024
-  "#C8C8C8", // 2025
-  "#FFFFFF", // 2026 white
+  "#583F3E", // 2017
+  "#6A4C4B", // 2018
+  "#7A5A59", // 2019
+  "#886A67", // 2022
+  "#957B74", // 2023
+  "#A28E80", // 2024
+  "#AFA18A", // 2025
+  "#BCB68D", // 2026
 ];
 
 const YEAR_COLORS = Object.fromEntries(
