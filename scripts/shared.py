@@ -97,16 +97,340 @@ KEYWORD_VERBS = frozenset(
         "provides",
         "suggest",
         "suggests",
+        "suggesting",
         "demonstrate",
         "demonstrates",
         "maintain",
         "asked",
         "chairing",
         "inhibit",
+        "confirming",
+        "recruiting",
+        "reflecting",
+        "controlling",
+        "requiring",
+        "following",
+        "starting",
+        "mutated",
+        "optimized",
+        "spanned",
+        "called",
+        "proposed",
+        "presented",
+        "selected",
+        "defined",
+        "cannot",
+        "are",
+        "was",
+        "were",
+        "been",
+        "being",
+        "have",
+        "has",
+        "had",
+        "does",
+        "did",
+        "can",
+        "could",
+        "would",
+        "should",
+        "may",
+        "might",
     }
 )
 
-BAD_KEYWORD_FIRST_WORDS = frozenset({"they", "this", "these", "those", "as", "we", "our", "it", "its", "blue"})
+BAD_KEYWORD_FIRST_WORDS = frozenset(
+    {
+        "a",
+        "an",
+        "the",
+        "they",
+        "this",
+        "these",
+        "those",
+        "as",
+        "we",
+        "our",
+        "it",
+        "its",
+        "blue",
+        "for",
+        "in",
+        "of",
+        "or",
+        "but",
+        "when",
+        "while",
+        "during",
+        "after",
+        "before",
+        "among",
+        "under",
+        "like",
+        "which",
+        "where",
+        "what",
+        "that",
+        "if",
+        "from",
+        "to",
+        "via",
+        "across",
+        "relative",
+        "contrary",
+        "instead",
+        "according",
+        "even",
+        "more",
+        "most",
+        "less",
+        "also",
+        "only",
+        "just",
+        "then",
+        "thus",
+        "hence",
+        "yet",
+        "still",
+        "already",
+        "again",
+        "once",
+        "both",
+        "either",
+        "neither",
+        "whether",
+        "whose",
+        "whom",
+        "who",
+        "how",
+        "why",
+        "here",
+        "there",
+        "namely",
+        "however",
+        "therefore",
+        "although",
+        "whereas",
+        "because",
+        "since",
+        "about",
+        "into",
+        "onto",
+        "over",
+        "above",
+        "below",
+        "between",
+        "within",
+        "without",
+        "through",
+        "against",
+        "toward",
+        "towards",
+        "upon",
+        "per",
+        "vs",
+        "versus",
+        "such",
+        "so",
+        "not",
+        "no",
+        "yes",
+        "all",
+        "any",
+        "each",
+        "every",
+        "other",
+        "another",
+        "same",
+        "own",
+        "few",
+        "many",
+        "several",
+        "some",
+        "visit",  # PDF extraction debris
+        "figure",
+        "table",
+        "supplementary",
+        "article",
+        "https",
+        "http",
+        "doi",
+        "pp",
+        "vol",
+        "ii",
+        "iii",
+        "iv",
+    }
+)
+
+# Legitimate scientific phrases that start with an otherwise-banned first word.
+ALLOWED_KEYWORD_PREFIXES = (
+    "in vivo",
+    "in vitro",
+    "in silico",
+    "in situ",
+    "in phase",
+)
+
+BAD_KEYWORD_EXACT = frozenset(
+    {
+        "however",
+        "namely",
+        "i.e",
+        "i.e.",
+        "e.g",
+        "e.g.",
+        "etc",
+        "etc.",
+        "there is",
+        "that is",
+        "of course",
+        "in general",
+        "in particular",
+        "in effect",
+        "in principle",
+        "in contrast",
+        "in time",
+        "on average",
+        "at this moment",
+        "to our knowledge",
+        "to some extent",
+        "for example",
+        "for others",
+        "by so",
+        "by extrapolation",
+        "and so on",
+        "in the present work",
+        "in the current work",
+        "in our model",
+        "in both task contexts",
+        "in applied settings",
+        "in untrained alexnet",
+        "in all trials",
+        "in one-sided mice",
+        "during expert behavior",
+        "during event processing",
+        "during retrieval",
+        "during both task phases",
+        "during the pre scan",
+        "at the same time",
+        "more strongly",
+        "even though",
+        "strictly speaking",
+        "more likely",
+        "more precisely",
+        "but ultimately",
+        "but not across",
+        "but not irrelevant",
+        "but also in humans",
+        "or alternatively",
+        "or explicit",
+        "or cold",
+        "or color",
+        "of course",
+        "which are",
+        "2afc",
+        "arthur and belle",
+        "eight candles",
+        "now sixteen",
+        "pot sizes",
+        "physical sense",
+        "beat and so on",
+        "dining room",
+        "human labelers",
+        "travel to",
+        "solving puzzles",
+        "softer attack",
+        "treasure locations",
+        "data treatment",
+        "activity level",
+        "combining structures",
+        "ve stibular",
+        "square waves",
+        "welwyn garden city",
+        "titled gradient descent",
+        "tree d",
+        "subject",
+        "plant or not",
+        "biobehavioral reviews",
+        "machine learning group",
+        "goal location",
+        "vertical line",
+        "choices ci",
+        "one after another",
+        "m2 and ind",
+        "withina block",
+        "motivation in real life",
+        "hydration and energy",
+        "anticipatory or consummatory",
+        "temporally blurred hr",
+        "decreasing to a",
+        "situated agents",
+        "cmm and field l",
+        "birdsong in sensory processing",
+        "ely aniv",
+        "el-y aniv",
+        "highly simpliﬁed approximation",
+        "highly simplified approximation",
+        "models that meaningfully generalize",
+        "fmri in uncertain environments",
+        "lower spectral centroid",
+        "navarro schröder",
+        "navarro schroder",
+        "ben-y akov",
+        "hit attend visual",
+        "miss attend visual",
+        "multiple stimulus",
+        "auditory stimulus identity",
+        "memories, respectively",
+        "norman et",
+        "motion sdm",
+        "color cdm",
+        "facial geometry",
+        "functional homomorphisms",
+        "multiband factor 3",
+        "standard deviation grill-spector",
+        "state 1",
+        "state 2",
+        "bra em",
+        "one untrained alexnet",
+        "central areas",
+        "quality assessments",
+        "oleggio castello",
+        "lower case for realisations",
+        "datasets and analysis methods",
+        "random seed",
+        "russinet al",
+        "four behavioural actionsa",
+        "samanez -larkin",
+        "konkle and alvarez",
+        "ratcliff and mckoon",
+        "simonyan and zisserman",
+        "kemp and tenenbaum",
+        # Citation / author crumbs commonly scraped into keyword fields
+        "shepard",
+        "naselaris",
+        "st-yves",
+        "huth",
+        "lescroart",
+        "gallant",
+        "griffiths",
+        "grifﬁths",
+        "theunissen",
+        "axmacher",
+        "dubois",
+        "vanrullen",
+        "arduini",
+        "habenschuss",
+        "reddy",
+        "mnih",
+        "radoslaw martin",
+        "aditya khosla",
+        "dimitrios pantazis",
+        "antonio torralba",
+        "johanni brea",
+    }
+)
 
 BAD_KEYWORD_PREFIXES = (
     "including ",
@@ -121,6 +445,69 @@ BAD_KEYWORD_PREFIXES = (
     "consistent with ",
     "previous work ",
     "in contrast ",
+    "goals such as ",
+    "instead of ",
+    "similar to ",
+    "relative to ",
+    "contrary to ",
+    "due to ",
+    "based on ",
+)
+
+# Equation / stats / demographics / citation debris.
+BAD_KEYWORD_PATTERN_RES = (
+    re.compile(r"[=≠≈≤≥<>]=?"),  # equations / comparisons
+    re.compile(r"[∑∫√∞∈∉⊂⊃∪∩∀∃∇∂]"),  # math operators
+    re.compile(r"[α-ωΑ-Ωµμσρηλθφψτωκ]"),  # greek letters (stats/math debris)
+    re.compile(r"\bp\s*[<>=]"),  # p-values
+    re.compile(r"\b[rtfn]\s*=\s*"),  # r=/t=/n=/f= stats
+    re.compile(r"\bcohen"),
+    re.compile(r"\bsd\s*="),
+    re.compile(r"\bmean age\b"),
+    re.compile(r"\b\d+\s*(male|female|men|women|subjects?|participants?)\b"),
+    re.compile(r"\b(male|female|men|women)\b"),
+    re.compile(r"^\d+(\.\d+)?$"),  # bare numbers
+    re.compile(r"^[\d\s.+:-]+$"),  # numeric-only crumbs ("0 1", "1 12 2")
+    re.compile(r"^\d+\s"),  # leading counts ("40 non-faces", "4 directions")
+    re.compile(r"^\d+(?!d\b|/f\b)[a-z]"),  # "1following finzi" but keep 3d / 1/f
+    re.compile(r"\b\d+t/\d+t\b"),  # 3t/7t scanner debris
+    re.compile(r"^\d+\)"),  # numbered-list debris
+    re.compile(r"\d{4}\)\s"),  # year) citation mash
+    re.compile(r"\d{4}\)\."),  # 2018).in
+    re.compile(r"\d{4}\):"),  # 2019): sustained
+    re.compile(r"^\d{4}\)?$"),  # bare year or year)
+    re.compile(r"\d+%"),  # 20% validation
+    re.compile(r"\d+\s*ms\b"),  # 100ms on / tr timings
+    re.compile(r"\btr\s*="),
+    re.compile(r"\bte\s*="),
+    re.compile(r"\bhttps?://"),
+    re.compile(r"\bdoi\b"),
+    re.compile(r"\bfigure\s+\d"),
+    re.compile(r"\bet\s*al\b"),
+    re.compile(r"\b\d{4}$"),  # trailing citation year
+    re.compile(r"\b(op de|del|van der|van den|van de)\b"),  # name particles
+    re.compile(r"\band so on\b"),
+    re.compile(r":"),  # parameter / label debris
+    re.compile(r"[●…•]"),
+    re.compile(r"[\[\]{}]"),
+    re.compile(r"\brecently\b"),
+    re.compile(r"\bhttps?\b"),
+    re.compile(r"[¨´`ˆ^ˇ¯−]"),  # mojibake / stray diacritic crumbs
+    re.compile(r"\s-"),  # "fernández -ruiz" style name debris (keep explore-exploit)
+    re.compile(r"^[\"'“”‘’]+|[\"'“”‘’]+$"),  # wrapping quotes
+    re.compile(r"^[a-z]+\s+and\s+[a-z]+$"),  # "arthur and belle"
+    re.compile(r"\b(to|of|for|with|from|by|into|onto|at|as)$"),  # trailing preposition
+    re.compile(r"^[a-z]{3,}\s+[a-z]$"),  # "jade b" / first-name + initial
+    re.compile(r"[a-z]{28,}"),  # smashed PDF tokens (no spaces/hyphens)
+    re.compile(r"[º°]"),  # degree debris in keywords
+    re.compile(r"\brespectively\b"),
+    re.compile(r"\bstate\s+\d+\b"),
+    re.compile(r"\b(memory|behavior|projects)\s+\S*\d"),
+    re.compile(r"\bdo\s+\d"),  # grant crumbs
+    re.compile(r"\bsummary\b"),  # "foraging summary whether..."
+    re.compile(r"\bwhether\b"),
+    re.compile(r"\bwant to\b"),
+    re.compile(r"[^\w\s\-/&'+]{2,}"),  # runs of odd punctuation/symbols
 )
 
 TITLE_KEYWORD_STOPWORDS = frozenset(
@@ -155,6 +542,44 @@ TITLE_KEYWORD_STOPWORDS = frozenset(
         "based",
         "new",
         "novel",
+        "how",
+        "why",
+        "what",
+        "who",
+        "when",
+        "where",
+        "which",
+        "whose",
+        "two",
+        "three",
+        "four",
+        "five",
+        "six",
+        "seven",
+        "eight",
+        "nine",
+        "ten",
+        "people",
+        "human",
+        "humans",
+        "do",
+        "does",
+        "are",
+        "is",
+        "its",
+        "their",
+        "our",
+        "more",
+        "than",
+        "over",
+        "under",
+        "about",
+        "after",
+        "before",
+        "against",
+        "revisited",
+        "review",
+        "perspective",
     }
 )
 
@@ -767,26 +1192,58 @@ def is_plausible_keyword(keyword: str) -> bool:
         return False
     if len(normalized) > MAX_KEYWORD_CHARS:
         return False
+    if normalized in BAD_KEYWORD_EXACT:
+        return False
     words = normalized.split()
-    if len(words) > MAX_KEYWORD_WORDS:
+    if not words or len(words) > MAX_KEYWORD_WORDS:
         return False
     if len(words) == 1 and re.fullmatch(r"\d{4}", words[0]):
         return False
-    if words[0] in BAD_KEYWORD_FIRST_WORDS:
-        return False
-    if any(word in KEYWORD_VERBS for word in words):
-        return False
-    if re.search(r"[.!?]\s", normalized):
-        return False
-    if "(" in normalized and ")" not in normalized:
+
+    allowed_prefix = any(normalized == prefix or normalized.startswith(prefix + " ") for prefix in ALLOWED_KEYWORD_PREFIXES)
+    if not allowed_prefix and words[0] in BAD_KEYWORD_FIRST_WORDS:
         return False
     if any(normalized.startswith(prefix) for prefix in BAD_KEYWORD_PREFIXES):
         return False
+    if any(word in KEYWORD_VERBS for word in words):
+        return False
+    if re.search(r"[.!?]", normalized):
+        return False
+    if normalized.count("(") != normalized.count(")"):
+        return False
+    if normalized.startswith(")") or normalized.endswith("("):
+        return False
+    if any(pattern.search(normalized) for pattern in BAD_KEYWORD_PATTERN_RES):
+        return False
     if len(normalized) > 36 and ("," in normalized or ";" in normalized):
         return False
-    prose_markers = (" the ", " and ", " that ", " which ", " with ", " from ", " into ", " their ")
-    if len(words) >= 6 and any(marker in f" {normalized} " for marker in prose_markers):
+    prose_markers = (
+        " the ",
+        " and ",
+        " that ",
+        " which ",
+        " with ",
+        " from ",
+        " into ",
+        " their ",
+        " there ",
+        " this ",
+        " these ",
+        " those ",
+        " than ",
+        " then ",
+        " also ",
+        " such ",
+    )
+    if len(words) >= 5 and any(marker in f" {normalized} " for marker in prose_markers):
         return False
+    # Lone citation-style surname crumbs / broken OCR tokens.
+    if len(words) <= 2 and re.search(r"(^|\s)(van|de|del|da|di|le|la|el|al)\s+[a-z]{2,}$", normalized):
+        return False
+    if re.search(r"\b[a-z]\s+[a-z]{2,}\b", normalized) and " " in normalized:
+        # "y oo", "g ¨ardenfors", "s ¨orensen" style broken tokens
+        if any(len(w) == 1 for w in words if w.isalpha()):
+            return False
     return True
 
 
@@ -798,6 +1255,8 @@ def derive_title_keywords(title: str, limit: int = 5) -> list[str]:
         if token in TITLE_KEYWORD_STOPWORDS or token in seen:
             continue
         if is_metadata_keyword(token):
+            continue
+        if not is_plausible_keyword(token):
             continue
         seen.add(token)
         cleaned.append(token)
@@ -877,7 +1336,11 @@ def conference_topic_label(submission: dict) -> str | None:
 
 def conference_topic_keywords(submission: dict) -> list[str]:
     label = conference_topic_label(submission)
-    return [label] if label else []
+    if not label or is_metadata_keyword(label):
+        return []
+    if not is_plausible_keyword(label):
+        return []
+    return [label]
 
 
 def reconcile_submission_keywords(submission: dict) -> None:
@@ -903,14 +1366,14 @@ def reconcile_submission_keywords(submission: dict) -> None:
         submission["keywords"] = extracted[:MAX_KEYWORD_LIST_SIZE]
         return
 
-    topic_kw = conference_topic_keywords(submission)
-    if topic_kw:
-        submission["keywords"] = topic_kw
-        return
-
     title_kw = derive_title_keywords(str(submission.get("title") or ""))
     if title_kw:
         submission["keywords"] = title_kw
+        return
+
+    topic_kw = conference_topic_keywords(submission)
+    if topic_kw:
+        submission["keywords"] = topic_kw
 
 
 def dashboard_keywords(submission: dict) -> list[str]:
