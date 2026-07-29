@@ -674,23 +674,23 @@ function styleThemeAxisLabels(selection) {
   styleDesktopChartText(labels);
 }
 
-// Topics: matplotlib RdYlGn_r (green → yellow → red), farthest-point samples
-// so neighboring themes stay as far apart as the ramp allows.
+// Topics: blue → teal → green → yellow → orange → red ramp (matplotlib turbo
+// farthest-point samples) so neighboring themes stay far apart.
 const CHART_PALETTE = [
-  "#006837", // 1. Reinforcement learning
-  "#138C4A", // 2. Motor control & planning
-  "#33A456", // 3. Naturalistic encoding/decoding
-  "#5AB760", // 4. Neural population geometry & dynamics
-  "#7DC765", // 5. Decision-making and metacognition
-  "#A7D96B", // 6. Vision
-  "#C9E881", // 7. Perception
-  "#FFFDBC", // 8. Language/auditory neuroscience
-  "#FEE18D", // 9. AI, LLM, & neural networks
-  "#FDAF62", // 10. Memory
-  "#F57748", // 11. Social cognition & theory of mind
-  "#E14430", // 12. Attention & cognitive control / executive function
-  "#C62027", // 13. Clinical / computational psychiatry
-  "#A50026", // 14. Methods and theory
+  "#477BF2", // 1. Reinforcement learning
+  "#3D9EFE", // 2. Motor control & planning
+  "#28BCEB", // 3. Naturalistic encoding/decoding
+  "#19D5CD", // 4. Neural population geometry & dynamics
+  "#1FE9AF", // 5. Decision-making and metacognition
+  "#4EF97D", // 6. Vision
+  "#84FF51", // 7. Perception
+  "#C1F334", // 8. Language/auditory neuroscience
+  "#E1DD37", // 9. AI, LLM, & neural networks
+  "#F7C13A", // 10. Memory
+  "#FB8122", // 11. Social cognition & theory of mind
+  "#F36315", // 12. Attention & cognitive control / executive function
+  "#E4450A", // 13. Clinical / computational psychiatry
+  "#B71D02", // 14. Methods and theory
 ];
 
 // Years: black → cool blue-gray ramp (equal-ish steps along the gradation).
