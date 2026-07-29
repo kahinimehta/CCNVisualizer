@@ -12417,13 +12417,11 @@
       "abstract": "Recent machine learning models have shown that including attention as a component results in improved model accuracy and interpretability, despite the concept of attention in these approaches only loosely approximating the brain’s attention mechanism. Here we extend this work by building a more brain-inspired deep network model of the primate ATTention Network (ATTNet) that learns to shift its attention so as to maximize the reward. Using deep reinforcement learning, ATTNet learned to shift its attention to the visual features of a target category in the context of a search task. ATTNet’s dorsal layers also learned to prioritize these shifts of attention so as to maximize success of the ventral pathway classification and receive greater reward. Model behavior was tested against the fixations made by subjects searching images for the same cued category. Both subjects and ATTNet showed evidence for attention being preferentially directed to target goals, behaviorally measured as oculomotor guidance to targets. More fundamentally, ATTNet learned to shift its attention to target like objects and spatially route its visual inputs to accomplish the task. This work makes a step toward a better understanding of the role of attention in the brain and other computational systems.",
       "author_keywords": [
         "attention",
-        "deep rl",
         "selective routing"
       ],
       "extracted_keywords": [],
       "keywords": [
         "attention",
-        "deep rl",
         "selective routing"
       ],
       "topic_area": "",
@@ -13866,7 +13864,6 @@
       "authors": "Rufin VanRullen, Leila Reddy",
       "abstract": "Recent years have seen steady improvements in our ability to read out sensory inputs from fMRI brain response patterns –so-called “fMRI mind-reading”. While visually distinct inputs, such as objects from different categories, can be accurately decoded and partially reconstructed from fMRI patterns, it has proved more difficult to distinguish visually similar inputs, such as different instances of the same category. Here, we apply a recently developed deep learning system to the reconstruction of face images from human fMRI patterns. We trained a variational auto-encoder (VAE) neural network using a GAN (Generative Adversarial Network) unsupervised training procedure over a dataset of > 200K celebrity faces. The auto-encoder latent space provided a meaningful (topologically organized) 1024-dimensional description of each image. We then presented > 4000 face images to a human subject in the scanner, and learned a simple linear mapping between the multi-voxel fMRI activation patterns and the 1024 latent dimensions. Then we applied this mapping to novel test images, turning the obtained fMRI patterns into VAE latent codes, and ultimately the codes into face reconstructions. Qualitative and quantitative evaluation of the reconstructions reveal robust pairwise decoding (>90% correct), and a strong improvement relative to a baseline model relying on PCA decomposition.",
       "author_keywords": [
-        "faces",
         "deep lear ning",
         "gan",
         "vae",
@@ -13875,7 +13872,6 @@
       ],
       "extracted_keywords": [],
       "keywords": [
-        "faces",
         "deep lear ning",
         "gan",
         "vae",
@@ -14691,7 +14687,6 @@
         "facial",
         "motion",
         "voice",
-        "faces",
         "dynamic"
       ],
       "keywords": [
@@ -14699,7 +14694,6 @@
         "facial",
         "motion",
         "voice",
-        "faces",
         "dynamic"
       ],
       "topic_area": "",
@@ -16112,22 +16106,20 @@
       "title": "A Model for Perception and Memory",
       "authors": "Volker Tresp, Sah, Sharifzadeh, Dario Konopatzki",
       "abstract": "We analyze the close link between perception and memory. Our main hypothesis is that some of the main memory systems of the human brain, e.g., the episodic memory, the semantic memory, and to some degree also the working memory, are by-products of the need for humans to extract more meaningful and more complex information from sensory inputs. Our model is an extension to the tensor memory approach. The key notions are index representations for entities, concepts, relationships and time instances, embeddings associated with the indices, a working memory processing layer, and a sensory memory layer. Perception and memory is realized as an interplay between the different layers. Our model is both competitive to other technical solutions and, as we argue, biologically plausible. Our experiments demonstrate that semantic memory can evolve from perception as a distinguishable functional module.",
-      "author_keywords": [],
-      "extracted_keywords": [
+      "author_keywords": [
         "perception",
-        "memory",
-        "main",
-        "semantic",
-        "working",
-        "sensory"
+        "episodic memory",
+        "semantic memory",
+        "working memory",
+        "tensor memory"
       ],
+      "extracted_keywords": [],
       "keywords": [
         "perception",
-        "memory",
-        "main",
-        "semantic",
-        "working",
-        "sensory"
+        "episodic memory",
+        "semantic memory",
+        "working memory",
+        "tensor memory"
       ],
       "topic_area": "",
       "track": "",
@@ -16295,22 +16287,18 @@
       "title": "A Neuro-Computational Characterization of Theory of Mind Processes during Cooperative Interaction",
       "authors": "Tessa Rusch",
       "abstract": "Humans are distinctly skilled at cooperation. To successfully engage with others they apply Theory of Mind (ToM). Here, we investigate neuro-computational mechanisms underlying ToM during real-time dyadic coordination in a probabilistic social decision game. To effectively coordinate participants have to represent the surrounding they interacted in and simultaneously simulate their partner’s representation of the world. These cognitive computations are formalized with a decision framework that combines decision-making under uncertainty with intentional models of other agents. Using model-based EEG analyses, we identify oscillatory signals related to errors experienced by players when own expectations towards the surroundings are violated and simulations of errors experienced by the partner when the partner’s predictions fail. Consistent with previous studies, we find positive correlations between power in frontal delta and theta oscillations and experienced errors. Most strikingly, these signals are also found in relation to simulations of the partner’s error, at times when participants themselves experience no prediction error themselves. These findings unveil the neural signature of a crucial computational component of the mental model of a partner and demonstrate that the brain recruits similar mechanisms for simulation the decisions of others as for computing one’s own decision.",
-      "author_keywords": [],
-      "extracted_keywords": [
-        "neuro-computational",
-        "characterization",
-        "theory",
-        "mind",
-        "partner",
-        "decision"
+      "author_keywords": [
+        "theory of mind",
+        "cooperative interaction",
+        "decision making",
+        "social cognition"
       ],
+      "extracted_keywords": [],
       "keywords": [
-        "neuro-computational",
-        "characterization",
-        "theory",
-        "mind",
-        "partner",
-        "decision"
+        "theory of mind",
+        "cooperative interaction",
+        "decision making",
+        "social cognition"
       ],
       "topic_area": "",
       "track": "",
@@ -16687,7 +16675,6 @@
         "calcium imaging",
         "dentate gyrus",
         "spatial representations",
-        "palo alto",
         "granule cell layer"
       ],
       "extracted_keywords": [],
@@ -16695,7 +16682,6 @@
         "calcium imaging",
         "dentate gyrus",
         "spatial representations",
-        "palo alto",
         "granule cell layer"
       ],
       "topic_area": "",
@@ -16895,22 +16881,18 @@
       "title": "Adding biological constraints to CNNs makes image classification more human-like and robust",
       "authors": "Gaurav Malhotra, Benjamin Evans, Jeffrey Bowers",
       "abstract": "In this study, we show that when standard convolutional neural networks (CNNs) are trained end-to-end on datasets containing low-level and spatially high-frequency features, they are susceptible to learning these potentially idiosyncratic features if they are predictive of the output class. Such features are extremely unlikely to play a major role in human object recognition, where instead a strong preference for shape is observed. Through a series of empirical studies, we show that standard CNNs cannot overcome this reliance on non-shape features merely by making training more ecologically plausible or using standard regularisation methods. However, we show that these problems can be ameliorated by forgoing end-to-end learning and processing images initially with Gabor filters, in a manner that more closely resembles biological vision.",
-      "author_keywords": [],
-      "extracted_keywords": [
-        "adding",
-        "biological",
-        "constraints",
-        "cnns",
-        "features",
-        "standard"
+      "author_keywords": [
+        "convolutional neural networks",
+        "biological constraints",
+        "object recognition",
+        "shape bias"
       ],
+      "extracted_keywords": [],
       "keywords": [
-        "adding",
-        "biological",
-        "constraints",
-        "cnns",
-        "features",
-        "standard"
+        "convolutional neural networks",
+        "biological constraints",
+        "object recognition",
+        "shape bias"
       ],
       "topic_area": "",
       "track": "",
@@ -18833,14 +18815,12 @@
       "author_keywords": [
         "decoding",
         "deep learning",
-        "faces",
         "searchlight analysis"
       ],
       "extracted_keywords": [],
       "keywords": [
         "decoding",
         "deep learning",
-        "faces",
         "searchlight analysis"
       ],
       "topic_area": "",
@@ -18939,14 +18919,14 @@
       "abstract": "A longstanding question in neuroscience is how animals and humans select actions in complex decision trees. Planning, the evaluation of action sequences by anticipating their outcomes, is thought to coexist in the brain with simpler decision-making strategies, such as habit learning and heuristics. Though planning is often required for optimal choice, for many problems simpler strategies yield similar decisions, making them difficult to disambiguate. The scarcity of behavioral tasks that can dissociate planning from other decision mechanisms while generating rich decision data has hindered our understanding of the neural basis of planning. We developed a novel navigation task in which mice navigate to cued goal locations in a complex maze. A targeted search through the large space of possible maze layouts in that environment maximizes the number of decisions that are informative about the use of planning. Over the course of training mice learn shorter paths to goals, and the individual decisions composing these paths are better accounted for by planning than vector navigation. With hundreds of informative decisions per behavioral session, this paradigm opens the door to the study of the neural basis of route planning.",
       "author_keywords": [
         "planning",
-        "navigation",
-        "currently under way"
+        "spatial navigation",
+        "heuristics"
       ],
       "extracted_keywords": [],
       "keywords": [
         "planning",
-        "navigation",
-        "currently under way"
+        "spatial navigation",
+        "heuristics"
       ],
       "topic_area": "",
       "track": "",
@@ -19322,14 +19302,14 @@
       "abstract": "To decide which goal to prioritize at what point in time, one has to evaluate the consequences of future actions by forward planning. However, when the goal is still temporally distant, detailed forward planning can be prohibitively costly. One way to select actions at minimal computational costs is to use heuristics. It is an open question how humans mix heuristics with forward planning to balance computational costs with goal reaching performance. To test a hypothesis about dy-namic mixing of heuristics with forward planning, we used a novel stochastic sequential two-goal task. We found that participants’ decisions substantially deviated from an optimal full planning agent at the early stages of goal-reaching sequences. Only towards the end of the sequence, participant’s behavior converged to near optimal performance. Subsequent model-based anal-yses showed that participants used heuristic prefer-ences when the goal was temporally distant and switched to forward planning, when the goal was close.",
       "author_keywords": [
         "goal pursuit",
-        "sonder forschungsbereich 940/2",
-        "soko l-hessner"
+        "forward planning",
+        "heuristics"
       ],
       "extracted_keywords": [],
       "keywords": [
         "goal pursuit",
-        "sonder forschungsbereich 940/2",
-        "soko l-hessner"
+        "forward planning",
+        "heuristics"
       ],
       "topic_area": "",
       "track": "",
@@ -19536,22 +19516,18 @@
       "title": "Episodic memory retrieval is supported by rapid replay of episode content",
       "authors": "G. Elliott Wimmer, Yunzhe Liu, Neža Vehar",
       "abstract": "Episodic memory retrieval entails the reactivation of neural representations that reflect elements of an experience. The characteristics of retrieval and whether and how it is supported by time-compressed reactivation or ‘replay’ of the sequential episode components remain unknown. We studied participants who had been exposed to unique episodes followed by a memory test the next day using magnetoencephalography (MEG). When the goal was to retrieve subsequent elements of an episode, accuracy for weaker memories was supported by reverse sequential replay with a compression factor greater than 60. However, when the goal was to retrieve elements preceding a cue, retrieval was supported instead by forward replay. Replay effects were the strongest in participants with lower mean performance. In participants with strong memories, we found evidence for repeated brief clustered reactivation of episode elements. Our results demonstrate novel mechanisms underlying episodic memory retrieval that inform how the brain constructs world models and how memory may be used in decision making.",
-      "author_keywords": [],
-      "extracted_keywords": [
-        "episodic",
-        "memory",
-        "retrieval",
-        "supported",
-        "elements",
-        "replay"
+      "author_keywords": [
+        "episodic memory",
+        "memory retrieval",
+        "neural replay",
+        "magnetoencephalography"
       ],
+      "extracted_keywords": [],
       "keywords": [
-        "episodic",
-        "memory",
-        "retrieval",
-        "supported",
-        "elements",
-        "replay"
+        "episodic memory",
+        "memory retrieval",
+        "neural replay",
+        "magnetoencephalography"
       ],
       "topic_area": "",
       "track": "",
@@ -20438,15 +20414,13 @@
       "authors": "Lea Kampermann, Christian Büchel",
       "abstract": "Placebo pain relief refers to perceived pain relief due to cognitive modulation induced by mechanisms such as expectation and experience. Here, we study the transfer of previous treatment experiences to novel situations, investigating how similarity between original and novel situation can explain carry-over effects. Using a placebo pain paradigm in healthy human volunteers during functional MRI, we treated heat pain on capsaicin pretreated skin by cooling. We conditioned participants to expect better treatment from one face cue, CS+, by associating it with more cooling, i.e. pain relief, than treatment from another face cue (CS-). We tested participants on a total of eight perceptually highly similar faces from a circular similarity continuum from CS+ to CS-. Pain relief ratings in the test phase showed a significant placebo effect as well as decaying placebo effects with increasing dissimilarity to the CS+, i.e. generalization of placebo relief. Modelling these profiles by a Gaussian curve explained data better than a flat null-model. On the neuronal level, we observed Gaussian generalization gradients in the rostral anterior cingulate cortex and the right hippocampus. Our results indicate that experienced treatment success generalizes to novel situations as a function of its perceptual similarity to previous experience.",
       "author_keywords": [
-        "pain relief",
-        "b üchel",
-        "hindi attar"
+        "placebo",
+        "pain relief"
       ],
       "extracted_keywords": [],
       "keywords": [
-        "pain relief",
-        "b üchel",
-        "hindi attar"
+        "placebo",
+        "pain relief"
       ],
       "topic_area": "",
       "track": "",
@@ -20612,16 +20586,14 @@
         "hexadirectional coding",
         "entorhinal cortex",
         "default mode network",
-        "intraparietal area",
-        "marslen wilson"
+        "intraparietal area"
       ],
       "extracted_keywords": [],
       "keywords": [
         "hexadirectional coding",
         "entorhinal cortex",
         "default mode network",
-        "intraparietal area",
-        "marslen wilson"
+        "intraparietal area"
       ],
       "topic_area": "",
       "track": "",
@@ -20939,22 +20911,16 @@
       "title": "How the Human Brain Solves the Symbol-Grounding Problem",
       "authors": "Simone Viganò",
       "abstract": "Humans construct linguistic meanings by grounding symbols to classes of perceptual objects, actions, or events, yet the brain mechanisms underlying this process are poorly understood. Using functional magnetic resonance imaging and a longitudinal training design, we studied the neural correlates of symbol- grounding in adults who learned to classify objects in categories using words. We found that learning was paired with the development of a bi-directional functional mapping between the neural representations of the objects and of the associated symbols that, after learning, encoded the newly learnt object-name associations. A key node supporting this bi-directional mapping was the hippocampus, which activity encoded the abstract symbol-to-object mapping rule, and was predictive of learning performance. Finally, we also observed concurrent changes in the representational geometries of object features in low-level sensory areas. Thus, the process of grounding a symbol to its meaning entails orchestrated changes in the neural activity of both memory and perceptual systems.",
-      "author_keywords": [],
-      "extracted_keywords": [
-        "solves",
-        "symbol-grounding",
-        "problem",
-        "grounding",
-        "objects",
-        "learning"
+      "author_keywords": [
+        "symbol grounding",
+        "language",
+        "object categorization"
       ],
+      "extracted_keywords": [],
       "keywords": [
-        "solves",
-        "symbol-grounding",
-        "problem",
-        "grounding",
-        "objects",
-        "learning"
+        "symbol grounding",
+        "language",
+        "object categorization"
       ],
       "topic_area": "",
       "track": "",
@@ -21420,13 +21386,13 @@
       "author_keywords": [
         "reinforcement learning",
         "representational similarity analyses",
-        "medial prefrontal cortex 1 corresponding author"
+        "medial prefrontal cortex"
       ],
       "extracted_keywords": [],
       "keywords": [
         "reinforcement learning",
         "representational similarity analyses",
-        "medial prefrontal cortex 1 corresponding author"
+        "medial prefrontal cortex"
       ],
       "topic_area": "",
       "track": "",
@@ -21518,22 +21484,18 @@
       "title": "Learning to evoke complex motor outputs with spatiotemporal neurostimulation using a hierarchical and adaptive optimization algorithm.",
       "authors": "Samuel Laferriere, Guillaume Lajoie",
       "abstract": "The development of neurostimulation techniques to evoke motor patterns is an active area of research. It serves as a crucial experimental tool to probe computation in neural circuits, and it has applications in neuroprostheses used to aid recovery of function after stroke or injury. There are two important challenges when designing algorithms to unveil and control neurostimulation-to-motor mappings, thereby linking spatiotemporal patterns of neural stimulation to muscle activation: (1) the exploration of motor maps needs to be fast and efficient (exhaustive search is to be avoided for clinical and experimental reasons) (2) online learning needs to be flexible enough to track ongoing changes in these maps. We propose a stimulation search algorithm to address these issues, and demonstrate its efficacy with experiments in non-human primate models. Our solution is a novel iterative process using Bayesian Optimization via Gaussian Processes on increasingly complex signal spaces. We show that our algorithm can successfully and rapidly learn mappings between complex stimulation patterns and evoked muscle activation patterns, where standard approaches fail. Importantly, we uncover nonlinear circuit-level computations in M1 that would not have been possible to identify using conventional mapping techniques.",
-      "author_keywords": [],
-      "extracted_keywords": [
-        "learning",
-        "evoke",
-        "complex",
-        "motor",
-        "patterns",
-        "stimulation"
+      "author_keywords": [
+        "neurostimulation",
+        "motor control",
+        "optimization",
+        "neuroprostheses"
       ],
+      "extracted_keywords": [],
       "keywords": [
-        "learning",
-        "evoke",
-        "complex",
-        "motor",
-        "patterns",
-        "stimulation"
+        "neurostimulation",
+        "motor control",
+        "optimization",
+        "neuroprostheses"
       ],
       "topic_area": "",
       "track": "",
@@ -21829,22 +21791,18 @@
       "title": "Mechanisms of the non-linear interactions between the neuronal and neurotransmitter systems explained by causal whole-brain modeling",
       "authors": "Josephine Cruzat",
       "abstract": "Although a variety of studies have shown the role of neurotransmitters at the neuronal level, their impact on the dynamics of the system at a macroscopic scale is poorly understood. Here, we provide a causal explanation using the ​first whole-brain model integrating multimodal imaging in healthy human participants undergoing manipulation of the serotonin system. Specifically, we combined anatomical and functional data with a detailed map of the serotonin 2A receptor (5-HT​2AR​) densities obtained with positron emission tomography (PET). This allowed us to model the resting state and mechanistically explain the functional effects of 5-HT​2AR​ stimulation with lysergic acid diethylamide (LSD). The whole-brain model used a dynamical mean-field quantitative description of populations of excitatory and inhibitory neurons as well as the associated synaptic dynamics, where the neuronal gain function of the model is modulated by the 5-HT​2AR​ density. The results show that the precise distribution of 5-HT​2AR​ is crucial to predict the neuromodulatory effects of LSD. The model identified the causative mechanisms for the non-linear interactions between the neuronal and neurotransmitter system, which are uniquely linked to the underlying neuroanatomical network, the modulation by the specific brain-wide distribution of neurotransmitter receptors, and the non-linear interactions between the two.",
-      "author_keywords": [],
-      "extracted_keywords": [
-        "mechanisms",
-        "non-linear",
-        "interactions",
-        "neuronal",
-        "system",
-        "dynamics"
+      "author_keywords": [
+        "whole-brain modeling",
+        "serotonin",
+        "neurotransmitter systems",
+        "multimodal imaging"
       ],
+      "extracted_keywords": [],
       "keywords": [
-        "mechanisms",
-        "non-linear",
-        "interactions",
-        "neuronal",
-        "system",
-        "dynamics"
+        "whole-brain modeling",
+        "serotonin",
+        "neurotransmitter systems",
+        "multimodal imaging"
       ],
       "topic_area": "",
       "track": "",
@@ -21971,14 +21929,12 @@
       "abstract": "How the human brain represents multiple models of the environment for decision-making (model-based reinforcement learning, MB-RL) is not well understood. We hypothesized that models are efficiently represented based on the similarity among them, to reduce redundancy, and this technique is called ‘model abstraction’ in the field of AI research. We designed a novel sequential learning task in which participants were required to simultaneously learn multiple models with a hidden latent structure, and studied corresponding brain activity using fMRI. By using an MVPA, we found that human OFC encodes the models reflecting the similarity among them. The degree of this ‘model abstraction’ ability was correlated with individual behavioral performance. Our results suggest that the human brains represent multiple models in a compact space, and this allows us to efficiently learn complex environments.",
       "author_keywords": [
         "decision-making",
-        "model-based rl",
         "mental simulation",
         "orbitofrontal cortex"
       ],
       "extracted_keywords": [],
       "keywords": [
         "decision-making",
-        "model-based rl",
         "mental simulation",
         "orbitofrontal cortex"
       ],
@@ -22248,7 +22204,6 @@
       "authors": "Parisa Abedi Khoozani",
       "abstract": "To reach to objects, humans rely on relative positions of target objects to surrounding objects (allocentric) as well as to their own bodies (egocentric). Previous studies demonstrated that scene configuration and object relevancy to the task modulates the combination weights of allocentric and egocentric information. Egocentric coding for reaching is studied extensively; however, how allocentric information is coupled and used in reaching is unknown. Using a computational approach, we show that clustering mechanisms for allocentric coding combined with causal Bayesian integration of allocentric and egocentric information can account for the observed reaching behavior. To further understand allocentric coding, we propose two strategies, global vs. distributed landmark clustering (GLC vs. DLC). Both models can replicate the current data but each has distinct implications. GLC efficiently encodes the scene relative to a single virtual reference but loses all the local structure information. In contrary, DLC stores more redundant inter-object relationship information. Consequently, DLC is more sensitive to the changes of the scene. Further experiments must differentiate between the two proposed strategies.",
       "author_keywords": [
-        "reference frames",
         "scene configuration",
         "clustering",
         "statistical ensemble",
@@ -22256,7 +22211,6 @@
       ],
       "extracted_keywords": [],
       "keywords": [
-        "reference frames",
         "scene configuration",
         "clustering",
         "statistical ensemble",
@@ -22286,22 +22240,16 @@
       "title": "Modular RL for Real-Time Learning in Physical Environments",
       "authors": "Per R. Leikanger",
       "abstract": "Reinforcement Learning is a powerful approach to a machine learning from interaction with the environment. Recent impressive achievements show the potency of combining Deep Learning with RL for board games and simple visually oriented tasks, but similar feats seem to wait for physical systems. We ask ourself for the reason(s) for this apparent hole in the science, on our path toward adaptive automata for physical domains. Inspired by computational systems in biology, revisiting conceptual fundamentals of Reinforcement Learning, and dividing complex tasks into numerous parallel learners, we aim to lessen this effect for physical interaction. A simple demonstration of an algorithmic framework is implemented, creating an agent that learns complex reactive behavior in a continuous parameter space by tabular RL methods. We conclude with a discussion on possible implications from this work for adaptive agents in the physical world, and plausible further directions toward life-long learning.",
-      "author_keywords": [],
-      "extracted_keywords": [
-        "modular",
-        "real-time",
-        "learning",
-        "physical",
-        "reinforcement",
-        "interaction"
+      "author_keywords": [
+        "reinforcement learning",
+        "modular learning",
+        "physical environments"
       ],
+      "extracted_keywords": [],
       "keywords": [
-        "modular",
-        "real-time",
-        "learning",
-        "physical",
-        "reinforcement",
-        "interaction"
+        "reinforcement learning",
+        "modular learning",
+        "physical environments"
       ],
       "topic_area": "",
       "track": "",
@@ -23142,20 +23090,18 @@
       "title": "Pattern recognition of deep and superficial layers of the macaque brain using large-scale local field potentials",
       "authors": "Omar Costilla-Reyes, Andre M Bastos, Earl K Miller",
       "abstract": "Robust identification of cortical deep (layers 5 and 6) and superficial (layer 2 and 3) layers of the brain based on neurophysiological recordings is a challenging and unsolved problem in neuroscience. We still lack a complete understanding of the fine-grained neural computations in these layers. In this paper, we introduce a machine learning approach to identify deep and superficial layers patterns. We use multilaminar probes to capture local field potentials (LFP) data in cortical layers of the macaque brain. Here we present experimental modeling results of deep and superficial layers in the prefrontal cortex (PFC) and visual area four (V4) during a delayed match to sample task. Recordings spanned all six cortical layers simultaneously over 10 experimental sessions in these 2 areas. Our experimental results demonstrate that an ensemble machine learning approach applied to the LFP data is able to provide robust levels of identification of the layers with an optimal f-score of 0.8 and 0.84 for areas V4 and PFC respectively in combined data of 10 experimental sessions and across two monkeys.",
-      "author_keywords": [],
-      "extracted_keywords": [
-        "pattern",
-        "recognition",
-        "deep",
-        "superficial",
-        "layers"
+      "author_keywords": [
+        "local field potentials",
+        "cortical layers",
+        "macaque",
+        "machine learning"
       ],
+      "extracted_keywords": [],
       "keywords": [
-        "pattern",
-        "recognition",
-        "deep",
-        "superficial",
-        "layers"
+        "local field potentials",
+        "cortical layers",
+        "macaque",
+        "machine learning"
       ],
       "topic_area": "",
       "track": "",
@@ -23182,7 +23128,6 @@
       "author_keywords": [
         "neural motion integration",
         "spiking model",
-        "area mt",
         "cortical feedback",
         "motion illusion"
       ],
@@ -23190,7 +23135,6 @@
       "keywords": [
         "neural motion integration",
         "spiking model",
-        "area mt",
         "cortical feedback",
         "motion illusion"
       ],
@@ -24205,16 +24149,14 @@
         "barrel cortex",
         "encoding models",
         "contact timing and position",
-        "contact kinematics",
-        "von heimendahl"
+        "contact kinematics"
       ],
       "extracted_keywords": [],
       "keywords": [
         "barrel cortex",
         "encoding models",
         "contact timing and position",
-        "contact kinematics",
-        "von heimendahl"
+        "contact kinematics"
       ],
       "topic_area": "",
       "track": "",
@@ -24451,17 +24393,13 @@
       "author_keywords": [
         "behavioural inhibition",
         "basal ganglia",
-        "dendritic plateau potentials",
-        "swedish e-science research center",
-        "hellgren kotaleski"
+        "dendritic plateau potentials"
       ],
       "extracted_keywords": [],
       "keywords": [
         "behavioural inhibition",
         "basal ganglia",
-        "dendritic plateau potentials",
-        "swedish e-science research center",
-        "hellgren kotaleski"
+        "dendritic plateau potentials"
       ],
       "topic_area": "",
       "track": "",
@@ -24587,14 +24525,12 @@
       "author_keywords": [
         "mode switching",
         "auditory hierarchy",
-        "red brace",
         "network neuroscience"
       ],
       "extracted_keywords": [],
       "keywords": [
         "mode switching",
         "auditory hierarchy",
-        "red brace",
         "network neuroscience"
       ],
       "topic_area": "",
@@ -24658,20 +24594,12 @@
       "abstract": "Natural stimuli like speech and music are structured at many timescales. But it remains unclear how these diverse timescales are neurally coded. Do neural processing timescales increase along the cortical hierarchy? Are there distinct timescales for particular stimulus categories? What information is coded at each timescale? Answering these questions has been challenging because there is no general method for estimating sensory integration periods: the temporal window within which stimulus features alter the neural response. Here, we introduce a simple experimental paradigm for inferring the integration period of any time-varying response. We present segments of natural stimuli in a sequence, such that same segment occurs in two different contexts (different surrounding segments). We then measure how long the segments need to be for the response to become invariant to the context. We apply this paradigm to map temporal integration periods in human auditory cortex using electrocorticography data from epilepsy patients. Our map reveals a clear gradient in which integration periods grow as one moves away from primary auditory cortex, providing support for hierarchical models. We also show that selectivity for sound categories first emerges at timescales of ~200 ms, approximately the duration of speech syllables and musical notes.",
       "author_keywords": [
         "temporal integration",
-        "auditory cortex",
-        "donner th",
-        "silbert lj",
-        "carlson ce",
-        "doyle wk"
+        "auditory cortex"
       ],
       "extracted_keywords": [],
       "keywords": [
         "temporal integration",
-        "auditory cortex",
-        "donner th",
-        "silbert lj",
-        "carlson ce",
-        "doyle wk"
+        "auditory cortex"
       ],
       "topic_area": "",
       "track": "",
@@ -24907,14 +24835,14 @@
         "circuit models",
         "fano factor",
         "persistent activity",
-        "working memory references brunel"
+        "working memory"
       ],
       "extracted_keywords": [],
       "keywords": [
         "circuit models",
         "fano factor",
         "persistent activity",
-        "working memory references brunel"
+        "working memory"
       ],
       "topic_area": "",
       "track": "",
@@ -26204,22 +26132,18 @@
       "title": "Visual Expertise and the Familiar Face Advantage",
       "authors": "Nicholas Blauch, Marlene Behrmann, David Plaut",
       "abstract": "Human expertise for recognizing unfamiliar faces has recently been called into question, highlighting a deficit when compared to familiar face recognition. We present simulations of a fixed-architecture deep convolutional neural network (DCNN) with different training regimens, highlighting the extent to which learning to recognize many \"familiar\" faces allows for robust, but incomplete, generalization to new \"unfamiliar\" faces as compared to performance after familiarization. With some training, verification performance for previously unfamiliar faces improves modestly, but the performance difference between unfamiliar and familiar faces is much smaller than the performance boost from pre-training on faces as compared to objects in the ImageNet 1000-way image classification database. We also assess the generalization performance of our networks to other fine-grained visual tasks such as bird species and car model verification. We find that expert face recognition does not improve generalization to birds or cars compared to a network trained on a subset of ImageNet with all vehicles and birds removed. We conclude that the specific learned statistics within a domain of visual expertise determine its generalization to other domains, in contrast with domain-general accounts which highlight level of processing over domain-specific statistics.",
-      "author_keywords": [],
-      "extracted_keywords": [
-        "visual",
-        "expertise",
-        "familiar",
-        "face",
-        "faces",
-        "performance"
+      "author_keywords": [
+        "face recognition",
+        "visual expertise",
+        "familiar faces",
+        "deep convolutional neural network"
       ],
+      "extracted_keywords": [],
       "keywords": [
-        "visual",
-        "expertise",
-        "familiar",
-        "face",
-        "faces",
-        "performance"
+        "face recognition",
+        "visual expertise",
+        "familiar faces",
+        "deep convolutional neural network"
       ],
       "topic_area": "",
       "track": "",
@@ -27847,7 +27771,6 @@
       "author_keywords": [
         "structure learning",
         "compositional generalization",
-        "model-based rl",
         "hierarchical non-parametric bayesian models",
         "planning"
       ],
@@ -27855,7 +27778,6 @@
       "keywords": [
         "structure learning",
         "compositional generalization",
-        "model-based rl",
         "hierarchical non-parametric bayesian models",
         "planning"
       ],
@@ -29347,7 +29269,6 @@
       "authors": "Zitong Lu, Julie Golomb",
       "abstract": "As we move our eyes around the world, we are able to integrate visual input and achieve a stable visual percept across eye movements. However, previous studies have found that our visual system, from primary visual cortex to higher level visual regions, represents object locations in natively retinotopic (gaze-centered) but not spatiotopic (gaze-independent) coordinates. Is spatiotopic information represented elsewhere in the brain, or might we achieve gaze-independent behavior via other means? Two key properties of the hippocampus make it an ideal candidate area to search for spatiotopic information: its responsiveness to visual information and its role in other types of complex spatial processing. In this study, we manipulated fixation and stimulus locations in an object perception task and used functional fMRI to record participants’ brain activity. Here, we use correlation-based multi-voxel pattern analysis (MVPA) and representational similarity analysis (RSA) to explore the representation of object location and investigate a potential role for the human hippocampus in visual stability. We found significant retinotopic instead of spatiotopic information not only in LOC and PPA (consistent with prior findings), but also in hippocampus. These results reveal that hippocampus also encodes gaze-centered spatial information, extending findings that the native coordinate system of vision might be retinotopic throughout the brain, with other mechanisms responsible for achieving gaze-independent behavior.",
       "author_keywords": [
-        "spatial reference frames",
         "retinotopic",
         "spatiotopic",
         "mvpa",
@@ -29356,7 +29277,6 @@
       ],
       "extracted_keywords": [],
       "keywords": [
-        "spatial reference frames",
         "retinotopic",
         "spatiotopic",
         "mvpa",
@@ -29389,7 +29309,6 @@
       "abstract": "Although both use reward-based learning, it is still unclear why deep reinforcement learning (RL) agents, in general, perform worse than the brain in novel out-of-distribution (OOD) tasks. Here, we propose one reason: generalization requires task-appropriate modular neural architectures like the brain; inferior generalization abilities result from using architectures without task-appropriate modules. To verify this hypothesis, we used a spatial navigation task to train RL agents with different neural architectures varying in modularity, then compared their generalization abilities in a novel task presenting novel sensorimotor mappings. We found that, although all agents could master the training task, only those with highly modular architectures separating computations of task variables learned a robust state representation, which supported generalization in the novel task. Our work exemplifies the rationale of the architectural modularity, i.e., supporting generalization.",
       "author_keywords": [
         "generalization",
-        "deep rl",
         "structural knowledge",
         "neural architecture",
         "spatial navigation"
@@ -29397,7 +29316,6 @@
       "extracted_keywords": [],
       "keywords": [
         "generalization",
-        "deep rl",
         "structural knowledge",
         "neural architecture",
         "spatial navigation"
@@ -30014,13 +29932,11 @@
       "abstract": "Adaptive decision-making in noisy and changing environments must be jointly constrained by reward and uncertainty. Whereas rewards have robust behavioral effects in sequential decision-making, effects of uncertainty tend to be smaller and heterogeneous across subjects. Here we use a novel two-armed bandit task, which dissociates unexpected uncertainty from reward and expected uncertainty, and fMRI, to study the neural bases of individual differences in the neural representations of unexpected uncertainty. We find that (i) contributions of unexpected uncertainty to choice are heterogeneous across individuals but stable within individuals and (ii) variability in the neural representation of unexpected uncertainty corresponds to variability in its use during choices, in frontoparietal cortical regions previously implicated in uncertainty-related computations, but not in reward regions.",
       "author_keywords": [
         "unexpected uncertainty",
-        "individual difference s",
         "frontoparietal network"
       ],
       "extracted_keywords": [],
       "keywords": [
         "unexpected uncertainty",
-        "individual difference s",
         "frontoparietal network"
       ],
       "topic_area": "Cognitive science",
@@ -32648,14 +32564,12 @@
       "authors": "Zuzanna Kabulska, Angelika Lingnau",
       "abstract": "We are constantly surrounded by people performing various actions. Although understanding them appears to come effortlessly, this task is complex and relies on multiple sources of information. Here we aimed to reveal dimensions underlying the organization of actions and the corresponding patterns of brain activity. First, we used principal component analysis (PCA) to reduce 44 action features identified in a recent study (Kabulska & Lingnau, accepted) to four dimensions related to general movements, arm movement kinematics, goal-directedness, and context. Second, representational similarity analysis (RSA) of fMRI data collected during the observation of 100 different actions revealed that three of the four dimensions evoked specific brain patterns in the lateral occipitotemporal cortex, while the Context dimension was located in the supramarginal gyrus. These results give novel insights into the representation of actions and suggest which types of information human participants extract to understand others’ actions.",
       "author_keywords": [
-        "action representation s",
         "action features",
         "representational similarity",
         "lotc"
       ],
       "extracted_keywords": [],
       "keywords": [
-        "action representation s",
         "action features",
         "representational similarity",
         "lotc"
@@ -33311,7 +33225,6 @@
         "deep reinforcement learning",
         "vision",
         "perceptual grouping",
-        "object-oriented rl",
         "reward sparsity"
       ],
       "extracted_keywords": [],
@@ -33319,7 +33232,6 @@
         "deep reinforcement learning",
         "vision",
         "perceptual grouping",
-        "object-oriented rl",
         "reward sparsity"
       ],
       "topic_area": "Cognitive science",
@@ -40410,17 +40322,13 @@
       "author_keywords": [
         "eye movements",
         "naturalistic stimuli",
-        "deepgaze ii",
-        "rather than scrambled",
-        "weeks jr"
+        "rather than scrambled"
       ],
       "extracted_keywords": [],
       "keywords": [
         "eye movements",
         "naturalistic stimuli",
-        "deepgaze ii",
-        "rather than scrambled",
-        "weeks jr"
+        "rather than scrambled"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -40867,14 +40775,12 @@
       "author_keywords": [
         "intuitive physics",
         "image generation",
-        "generative ai",
         "machine learning"
       ],
       "extracted_keywords": [],
       "keywords": [
         "intuitive physics",
         "image generation",
-        "generative ai",
         "machine learning"
       ],
       "topic_area": "Cognitive science",
@@ -42116,14 +42022,12 @@
       "authors": "Astrid Zeman",
       "abstract": "Deep Convolutional Neural Networks (CNNs) are criticised for their reliance on local shape features and texture. We test whether CNNs process global shape information in the absence of local shape cues and texture by testing their performance on Mooney stimuli, which are face images thresholded to binary values. More specifically, we assess whether CNNs detect faces in these abstract stimuli, and whether they exhibit the face inversion effect (FIE), where upright stimuli are classified positively at a higher rate compared to inverted. We found that a standard face recognition network (DeepFace) performs perceptual completion and exhibits the FIE, which is present over all levels of specificity. By matching the false positive rate of DeepFace to humans, we found that the network performed closer to the human average for both conditions (62.70% for upright and 42.26% for inverted). Rank order correlation between DeepFace and humans across individual stimuli shows a significant correlation in upright and inverted conditions, indicating a relationship in image difficulty between observers and the model. We conclude that despite the texture and local shape bias of CNNs, which makes their performance distinct from humans, they are still able to process face images holistically.",
       "author_keywords": [
-        "faces",
         "convolutional neural networks",
         "texture bias",
         "mooney stimuli"
       ],
       "extracted_keywords": [],
       "keywords": [
-        "faces",
         "convolutional neural networks",
         "texture bias",
         "mooney stimuli"
@@ -42572,8 +42476,7 @@
         "visual awareness",
         "event-related potential",
         "vui lleumier",
-        "abrupt onset",
-        "hedgeret al"
+        "abrupt onset"
       ],
       "extracted_keywords": [],
       "keywords": [
@@ -42582,8 +42485,7 @@
         "visual awareness",
         "event-related potential",
         "vui lleumier",
-        "abrupt onset",
-        "hedgeret al"
+        "abrupt onset"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -42795,19 +42697,15 @@
       "authors": "Rex Liu, Bowen He, Michael Frank",
       "abstract": "Distributional reinforcement learning (RL) enables agents to learn entire distributions of returns rather than just their expected values. In neuroscience, this property offers an explanation for the heterogeneity of dopaminergic neuronal responses. But what is the advantage of such a scheme? Theoretical results indicate that when used to maximise expected returns, distributional algorithms are equivalent to expectational ones in tabular settings. But in deep RL, learning distributions improve performance on complex games like Atari. To better understand these advantages, we used a pixelized ``puddle world'' task that affords ground truth-tabular representations of latent states that must be discovered from high-dimensional pixel representations. We first confirmed that the deep distributional agent C51 outperformed the deep expectational agent DQN in this setting. However, we find C51's advantages can be explained by two factors, neither of which require distributions per se. First, Q-values in DQN are unbounded, leading to instabilities reminiscent of Sutton and Barto's ``deadly triad'', whereas C51's values are naturally bounded. Bounding DQN with a tanh non-linearity improves performance. Second, distributional targets provide an auxiliary objective that can regularize learning; this can be mimicked by other non-distributional objectives.",
       "author_keywords": [
-        "distributional rl",
         "q-learning",
         "ventral tegmental area",
-        "dopamine",
-        "deep rl"
+        "dopamine"
       ],
       "extracted_keywords": [],
       "keywords": [
-        "distributional rl",
         "q-learning",
         "ventral tegmental area",
-        "dopamine",
-        "deep rl"
+        "dopamine"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -45281,7 +45179,6 @@
       "authors": "Florian Fiebig, Nikolaos Chrysanthidis, Anders Lansner, Pawel Herman",
       "abstract": "Working memory (WM) is a key component of most cognitive models, and biologically detailed models of its underlying computational mechanisms become more important as neuroscientific constraints become clearer and AI models become more brain-like. Various WM models based on a diverse set of biologically plausible synaptic and neural plasticity mechanisms have been proposed. Computational models thereof often evaluate a singular mechanism and solve a singular working memory task category. We show that these proposed short-term plasticity mechanisms may not necessarily be competing explanations, but instead yield interesting functional interactions on a wide set of WM tasks and enhance the biological plausibility of spiking neural network models of synaptic WM.",
       "author_keywords": [
-        "working memor y",
         "spiking neural ne twork",
         "synaptic plasticity",
         "neural plasticity",
@@ -45290,7 +45187,6 @@
       ],
       "extracted_keywords": [],
       "keywords": [
-        "working memor y",
         "spiking neural ne twork",
         "synaptic plasticity",
         "neural plasticity",
@@ -49487,16 +49383,12 @@
       "authors": "Daisy Lin, Brenden Lake, Wei Ji Ma",
       "abstract": "AlphaZero, a deep reinforcement learning algorithm, has achieved superhuman performance in complex games like Chess and Go. However, its strategic planning ability beyond winning games remains unclear. We investigated this using 4-in-a-row, a game used to study human planning. We analyzed AlphaZero's feature learning and puzzle-solving abilities. Despite strong gameplay, AlphaZero exhibited a 45% failure rate in puzzles. Feature analysis revealed limitations in its learned knowledge during self-play. We incorporated human-inspired features into its policy and value outputs, leading to a 13% improvement in puzzle-solving accuracy. Our findings highlight the potential for human insights to enhance AI strategic planning beyond self-play.",
       "author_keywords": [
-        "explainable ai",
         "deep reinforcement learning",
-        "human-inspired ai",
         "planning"
       ],
       "extracted_keywords": [],
       "keywords": [
-        "explainable ai",
         "deep reinforcement learning",
-        "human-inspired ai",
         "planning"
       ],
       "topic_area": "View PDF",
@@ -52106,14 +51998,10 @@
       "authors": "Gregory Zelinsky, Ritik Raina, Abraham Leite, Seoyoung Ahn",
       "abstract": "Despite recent advances, a persistent weakness of current AI models is that they are each still far from achieving the flexibility of human thought. Here we suggest a psychologically-inspired framework for approximating thought that is embodied, multi-modal, and at its core-- generative. Core processes of object generation, world generation, and query generation are each served by sub-processes aimed at improving core process efficiency and exchanging information with other sub-processes. The model's goal-driven interaction with the world is fueled by a sequence of generations, culminating in the generation of a query to test a hypothesis that it has made about the world based on the objects that it has generated in it. We propose that this iterative cycle of generative questioning will result in this model achieving a milestone of human thought, learning that there is a self that is distinguishable from an other, and that this other is an entity in the world that can be understood by asking it questions.",
       "author_keywords": [
-        "psychologically-inspired ai",
-        "generative ai",
         "vision-language models"
       ],
       "extracted_keywords": [],
       "keywords": [
-        "psychologically-inspired ai",
-        "generative ai",
         "vision-language models"
       ],
       "topic_area": "View PDF",
@@ -58688,13 +58576,11 @@
       "abstract": "The ability to estimate temporal relationships is critical for both animals and artificial agents. Cognitive science and neuroscience studies provide remarkable insights into behavioral and neural aspects of interval timing. In particular, scale-invariance observed in behavior and supported by neural data is one of the key principles that goes beyond interval timing and governs animal perception. Furthermore, once they learn a task, humans and other animals can rapidly adapt to temporally rescaled versions at a wide range of scales. We show that using a scale-invariant cognitive model of working memory combined with convolutional and max-pool layers gives rise to reinforcement learning (RL) agents that are invariant to temporal rescaling in the environment. We illustrate this using a simple interval bisection task and show that this property is specific to scale-invariant memory and not observed in commonly used recurrent networks.",
       "author_keywords": [
         "scale-invariance",
-        "deep rl",
         "interval timing"
       ],
       "extracted_keywords": [],
       "keywords": [
         "scale-invariance",
-        "deep rl",
         "interval timing"
       ],
       "topic_area": "View PDF",
@@ -58724,14 +58610,12 @@
       "author_keywords": [
         "evidence accumulation",
         "cognitive model",
-        "deep rl",
         "neural sequences"
       ],
       "extracted_keywords": [],
       "keywords": [
         "evidence accumulation",
         "cognitive model",
-        "deep rl",
         "neural sequences"
       ],
       "topic_area": "View PDF",
@@ -61263,15 +61147,13 @@
       "author_keywords": [
         "experience-driven attention",
         "neurostimulation",
-        "recurrent neural networks",
-        "explainable ai"
+        "recurrent neural networks"
       ],
       "extracted_keywords": [],
       "keywords": [
         "experience-driven attention",
         "neurostimulation",
-        "recurrent neural networks",
-        "explainable ai"
+        "recurrent neural networks"
       ],
       "topic_area": "View PDF",
       "track": "",
@@ -61930,14 +61812,12 @@
       "author_keywords": [
         "brain encoding",
         "brain decoding",
-        "generative ai",
         "cortical hierarchy"
       ],
       "extracted_keywords": [],
       "keywords": [
         "brain encoding",
         "brain decoding",
-        "generative ai",
         "cortical hierarchy"
       ],
       "topic_area": "View PDF",
@@ -65859,10 +65739,10 @@
       "extracted_keywords": [],
       "keywords": [
         "automated",
-        "characterization",
         "naturalistic",
         "behaviors",
-        "chronic"
+        "chronic",
+        "epilepsy"
       ],
       "topic_area": "Brain Networks & Neural Dynamics",
       "track": "",
@@ -69248,10 +69128,10 @@
       "extracted_keywords": [],
       "keywords": [
         "decision-making",
-        "reference",
         "point",
         "biases",
-        "dorsal"
+        "dorsal",
+        "anterior"
       ],
       "topic_area": "Reward, Value & Social Decision Making",
       "track": "",
@@ -73570,7 +73450,7 @@
         "autoencoders",
         "agree",
         "attractive",
-        "faces"
+        "average"
       ],
       "topic_area": "Object Recognition & Visual Attention",
       "track": "",

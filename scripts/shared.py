@@ -449,6 +449,23 @@ BAD_KEYWORD_EXACT = frozenset(
         "⃗y is output",
         "y is output",
         "dkl is kl divergence",
+        "main",
+        "faces",
+        "currently under way",
+        "red brace",
+        "palo alto",
+        "marslen wilson",
+        "von heimendahl",
+        "hellgren kotaleski",
+        "soko l-hessner",
+        "hindi attar",
+        "b üchel",
+        "büchel",
+        "adding",
+        "supported",
+        "solves",
+        "evoke",
+        "characterization",
     }
 )
 
@@ -531,6 +548,10 @@ BAD_KEYWORD_PATTERN_RES = (
     re.compile(r"\bother hand\b"),
     re.compile(r"\betc\b"),
     re.compile(r"\bis (output|kl|the)\b"),
+    re.compile(r"\bcorresponding author\b"),
+    re.compile(r"\breferences?\b"),  # "working memory references brunel"
+    re.compile(r"\b(forschungsbereich|e-science research|research center|funding)\b"),
+    re.compile(r"\b[a-z]+(?:\s+[a-z]+)?\s+[a-z]{1,2}$"),  # "donner th", "silbert lj"
     re.compile(r"[*~`^|\\{}[\]<>#$%@!;:=]"),  # odd symbols (keep + for pv+)
     re.compile(r"[^\w\s\-/&'+]{2,}"),  # runs of odd punctuation/symbols
 )
