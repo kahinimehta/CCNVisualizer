@@ -693,17 +693,16 @@ const CHART_PALETTE = [
   "#A50026", // 14. Methods and theory
 ];
 
-// Years: muted earthy maroon → khaki ramp (equal-arc samples so adjacent
-// years stay as far apart as the gradation allows). Quiet vs RdYlGn topics.
+// Years: black → cool blue-gray ramp (equal-ish steps along the gradation).
 const YEAR_PALETTE = [
-  "#583F3E", // 2017
-  "#6A4C4B", // 2018
-  "#7A5A59", // 2019
-  "#886A67", // 2022
-  "#957B74", // 2023
-  "#A28E80", // 2024
-  "#AFA18A", // 2025
-  "#BCB68D", // 2026
+  "#000000", // 2017
+  "#2A4058", // 2018
+  "#3E566E", // 2019
+  "#556E84", // 2022
+  "#6F879A", // 2023
+  "#8FA0B0", // 2024
+  "#B0BCC8", // 2025
+  "#D4DAE0", // 2026
 ];
 
 const YEAR_COLORS = Object.fromEntries(
