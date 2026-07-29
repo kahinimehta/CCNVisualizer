@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Step 2: Classify themes (Anthropic Claude), compute UMAP, export CSVs.
+"""Step 2: Classify themes (Anthropic Claude), compute UMAP, export CSV.
 
 Pipeline:
   scrape.py  →  submissions.json
-  build.py   →  filter GAC updates + Anthropic themes + UMAP + CSVs
+  build.py   →  filter GAC updates + Anthropic themes + UMAP + abstracts_2_topics.csv
   dashboard  →  reads docs/data/abstracts_2_topics.csv
 
 Dependencies:
@@ -49,12 +49,6 @@ GOOGLE_TOPICS_PATH = ROOT / "data" / "google_topics.json"
 LLM_CACHE_PATH = ROOT / "data" / "llm_theme_cache.json"
 EMBEDDING_PATH = ROOT / "data" / "embeddings_all.json"
 CSV_ACTIVE_PATH = ROOT / "docs" / "data" / "abstracts_2_topics.csv"
-# Legacy exports kept for reference; not loaded by the dashboard.
-CSV_OLD_PATHS = (
-    ROOT / "data" / "abstracts_old.csv",
-    ROOT / "docs" / "data" / "abstracts_old.csv",
-    ROOT / "docs" / "data" / "abstract_v_3_old.csv",
-)
 LIST_DELIMITER = " | "
 
 DEFAULT_TOPICS = [
@@ -628,20 +622,6 @@ def derive_two_topic_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
     return derived
 
 
-def derive_v3_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
-    """Drop Methods and theory unless it is in the top two assigned topics."""
-    derived: list[dict[str, str]] = []
-    for row in rows:
-        topics = [topic for topic in row.get("assigned_topics", "").split(LIST_DELIMITER) if topic]
-        kept = [
-            topic
-            for index, topic in enumerate(topics)
-            if topic != "Methods and theory" or index < 2
-        ]
-        derived.append({**row, "assigned_topics": join_list(kept)})
-    return derived
-
-
 def write_csv_rows(path: Path, rows: list[dict[str, str]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as fh:
@@ -652,13 +632,8 @@ def write_csv_rows(path: Path, rows: list[dict[str, str]]) -> None:
 
 
 def write_csv(rows: list[dict[str, str]]) -> None:
-    # Active dashboard dataset (first two topics only).
+    """Write the active dashboard dataset (first two topics only)."""
     write_csv_rows(CSV_ACTIVE_PATH, derive_two_topic_rows(rows))
-    # Legacy full / v3 exports retained as *_old.csv.
-    full_rows = rows
-    write_csv_rows(CSV_OLD_PATHS[0], full_rows)
-    write_csv_rows(CSV_OLD_PATHS[1], full_rows)
-    write_csv_rows(CSV_OLD_PATHS[2], derive_v3_rows(rows))
 
 
 def filter_gac_updates(payload: dict) -> dict:

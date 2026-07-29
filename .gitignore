@@ -9,5 +9,8 @@ data/backups/
 data/pdf_cache/
 data/ccn-2026-pending-posters.csv
 data/llm_theme_cache.json
+data/abstracts_old.csv
+docs/data/abstracts_old.csv
+docs/data/abstract_v_3_old.csv
 scripts/ccn_embeddings.npy
 .DS_Store
