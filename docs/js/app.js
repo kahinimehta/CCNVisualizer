@@ -674,37 +674,36 @@ function styleThemeAxisLabels(selection) {
   styleDesktopChartText(labels);
 }
 
-// Topics: maximally spaced categorical hues (high chroma, alternating
-// lightness). Chosen to maximize minimum pairwise RGB distance so adjacent
-// theme chips/bars stay visually distinct.
+// Topics: matplotlib RdYlGn_r (green → yellow → red), farthest-point samples
+// so neighboring themes stay as far apart as the ramp allows.
 const CHART_PALETTE = [
-  "#EF0606", // 1. Reinforcement learning
-  "#FC8888", // 2. Motor control & planning
-  "#F97D10", // 3. Naturalistic encoding/decoding
-  "#F9F910", // 4. Neural population geometry & dynamics
-  "#809720", // 5. Decision-making and metacognition
-  "#A1FB74", // 6. Vision
-  "#06EF06", // 7. Perception
-  "#06EFA1", // 8. Language/auditory neuroscience
-  "#78B1E2", // 9. AI, LLM, & neural networks
-  "#0654EF", // 10. Memory
-  "#7D35E9", // 11. Social cognition & theory of mind
-  "#F3AFFD", // 12. Attention & cognitive control / executive function
-  "#EF06EF", // 13. Clinical / computational psychiatry
-  "#B81476", // 14. Methods and theory
+  "#006837", // 1. Reinforcement learning
+  "#138C4A", // 2. Motor control & planning
+  "#33A456", // 3. Naturalistic encoding/decoding
+  "#5AB760", // 4. Neural population geometry & dynamics
+  "#7DC765", // 5. Decision-making and metacognition
+  "#A7D96B", // 6. Vision
+  "#C9E881", // 7. Perception
+  "#FFFDBC", // 8. Language/auditory neuroscience
+  "#FEE18D", // 9. AI, LLM, & neural networks
+  "#FDAF62", // 10. Memory
+  "#F57748", // 11. Social cognition & theory of mind
+  "#E14430", // 12. Attention & cognitive control / executive function
+  "#C62027", // 13. Clinical / computational psychiatry
+  "#A50026", // 14. Methods and theory
 ];
 
-// Years: black → white greyscale (rising lightness). High step-to-step contrast
-// for chronology; stays fully separate from the vivid topic hues.
+// Years: light blue → black → white. Early years cool/light, mid years black,
+// recent years rise to white — separate from the green–red topic ramp.
 const YEAR_PALETTE = [
-  "#000000", // 2017
-  "#555555", // 2018
-  "#777777", // 2019
-  "#999999", // 2022
-  "#B3B3B3", // 2023
-  "#CCCCCC", // 2024
-  "#E6E6E6", // 2025
-  "#FFFFFF", // 2026
+  "#B8DEF5", // 2017 light blue
+  "#6E9AB8", // 2018
+  "#2F4555", // 2019
+  "#000000", // 2022 black
+  "#4A4A4A", // 2023
+  "#8A8A8A", // 2024
+  "#C8C8C8", // 2025
+  "#FFFFFF", // 2026 white
 ];
 
 const YEAR_COLORS = Object.fromEntries(
