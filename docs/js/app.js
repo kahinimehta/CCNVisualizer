@@ -670,7 +670,7 @@ function styleThemeAxisLabels(selection) {
     .selectAll("text")
     .attr("fill", CCN_COLORS.muted)
     .attr("dominant-baseline", "central")
-    .style("font-size", isPhoneLayout() ? chartThemeFs(8) : themeFs(DESKTOP_CHART_LABEL));
+    .style("font-size", isPhoneLayout() ? chartThemeFs(PHONE_AXIS_LABEL_SIZE) : themeFs(DESKTOP_CHART_LABEL));
   styleDesktopChartText(labels);
 }
 
