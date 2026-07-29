@@ -746,7 +746,7 @@ const FIXED_DATASET = "abstracts_2_topics.csv";
 const state = {
   data: null,
   datasetFile: FIXED_DATASET,
-  selectedYear: "all",
+  selectedYears: [],
   search: "",
   selectedThemes: [],
   themeFilterMode: "include",
@@ -1039,7 +1039,7 @@ async function loadDataset(options = {}) {
   state.data = buildStateFromCsv(csvRows, datasetFile);
 
   if (resetFilters) {
-    state.selectedYear = "all";
+    state.selectedYears = [];
     state.search = "";
     state.selectedThemes = [];
     state.themeFilterMode = "include";
@@ -1047,12 +1047,10 @@ async function loadDataset(options = {}) {
     state.deltaFromYear = "";
     state.deltaToYear = "";
     d3.select("#search-input").property("value", "");
-    d3.select("#year-select").property("value", "all");
-  } else if (
-    state.selectedYear !== "all" &&
-    !state.data.metadata.years.map(String).includes(String(state.selectedYear))
-  ) {
-    state.selectedYear = "all";
+    closeYearMultiSelect();
+  } else if (hasYearFilter()) {
+    const available = new Set(state.data.metadata.years.map(String));
+    state.selectedYears = state.selectedYears.filter((year) => available.has(String(year)));
   }
 
   renderYearControls();
@@ -1112,9 +1110,28 @@ function hasSearchFilter() {
   return Boolean(state.search.trim());
 }
 
-/** Theme chips and/or text search — used to highlight matching UMAP dots. */
+function hasYearFilter() {
+  return state.selectedYears.length > 0;
+}
+
+function hasAnyFilter() {
+  return hasYearFilter() || hasSearchFilter() || hasThemeFilter();
+}
+
+function sortedSelectedYears() {
+  return [...state.selectedYears]
+    .map(String)
+    .sort((a, b) => Number(a) - Number(b));
+}
+
+function submissionMatchesYearFilter(submission) {
+  if (!hasYearFilter()) return true;
+  return state.selectedYears.map(String).includes(String(submission.year));
+}
+
+/** Theme chips, text search, and/or years — used to highlight matching UMAP dots. */
 function hasMapHighlightFilter() {
-  return hasThemeFilter() || hasSearchFilter();
+  return hasThemeFilter() || hasSearchFilter() || hasYearFilter();
 }
 
 function submissionMatchesThemeFilter(submission) {
@@ -1128,9 +1145,10 @@ function submissionMatchesThemeFilter(submission) {
 function submissionMatchesMapHighlight(submission) {
   if (!submission) return !hasMapHighlightFilter();
   const search = state.search.trim().toLowerCase();
+  const yearOk = submissionMatchesYearFilter(submission);
   const searchOk = !search || submissionMatchesSearch(submission, search);
   const themeOk = submissionMatchesThemeFilter(submission);
-  return searchOk && themeOk;
+  return yearOk && searchOk && themeOk;
 }
 
 function filteredSubmissions() {
@@ -1138,7 +1156,7 @@ function filteredSubmissions() {
   const search = state.search.trim().toLowerCase();
 
   return submissions.filter((item) => {
-    const yearOk = state.selectedYear === "all" || String(item.year) === state.selectedYear;
+    const yearOk = submissionMatchesYearFilter(item);
     const searchOk = !search || submissionMatchesSearch(item, search);
     const themeOk = submissionMatchesThemeFilter(item);
     return yearOk && searchOk && themeOk;
@@ -1146,6 +1164,7 @@ function filteredSubmissions() {
 }
 
 function submissionsForThemeTrends() {
+  // YoY comparison keeps its own from/to year controls; apply search + topics only.
   const { submissions } = state.data;
   const search = state.search.trim().toLowerCase();
 
@@ -1320,7 +1339,7 @@ function defaultDeltaYearPair() {
 }
 
 function syncDeltaYearState() {
-  if (state.selectedYear !== "all") {
+  if (state.selectedYears.length === 1) {
     syncDeltaYearsForYearFilter();
     return;
   }
@@ -1343,8 +1362,8 @@ function conferenceYearPairForSelection(selectedYear) {
 }
 
 function syncDeltaYearsForYearFilter() {
-  if (state.selectedYear === "all") return;
-  const pair = conferenceYearPairForSelection(state.selectedYear);
+  if (state.selectedYears.length !== 1) return;
+  const pair = conferenceYearPairForSelection(state.selectedYears[0]);
   if (!pair) return;
   state.deltaFromYear = pair.fromYear;
   state.deltaToYear = pair.toYear;
@@ -1377,9 +1396,32 @@ function toggleThemeFilter(theme, options = {}) {
   if (rerender) renderAll();
 }
 
+function toggleYearFilter(year, options = {}) {
+  if (year == null || year === "") return;
+  const { rerender = true } = options;
+  const key = String(year);
+  const selected = new Set(state.selectedYears.map(String));
+  if (selected.has(key)) selected.delete(key);
+  else selected.add(key);
+  state.selectedYears = [...selected].sort((a, b) => Number(a) - Number(b));
+  state.highlightedSubmissionKey = "";
+  if (rerender) renderAll();
+}
+
 function clearThemeFilters() {
   state.selectedThemes = [];
   state.highlightedSubmissionKey = "";
+  renderAll();
+}
+
+function clearAllFilters() {
+  state.selectedYears = [];
+  state.search = "";
+  state.selectedThemes = [];
+  state.themeFilterMode = "include";
+  state.highlightedSubmissionKey = "";
+  d3.select("#search-input").property("value", "");
+  closeYearMultiSelect();
   renderAll();
 }
 
@@ -1397,9 +1439,8 @@ function ensureSubmissionVisible(submission) {
 
   state.selectedThemes = [];
 
-  if (state.selectedYear !== "all" && String(submission.year) !== state.selectedYear) {
-    state.selectedYear = String(submission.year);
-    d3.select("#year-select").property("value", state.selectedYear);
+  if (hasYearFilter() && !submissionMatchesYearFilter(submission)) {
+    state.selectedYears = [String(submission.year)];
   }
 
   const search = state.search.trim().toLowerCase();
@@ -1430,6 +1471,19 @@ function scrollToHighlightedSubmission() {
   }
 }
 
+function yearFilterDisplayText() {
+  if (!hasYearFilter()) return "";
+  const years = sortedSelectedYears();
+  if (years.length === 1) return `Year ${years[0]}`;
+  if (years.length === 2) return `Years ${years[0]} and ${years[1]}`;
+  return `Years ${years.slice(0, -1).join(", ")}, and ${years[years.length - 1]}`;
+}
+
+function searchFilterDisplayText() {
+  if (!hasSearchFilter()) return "";
+  return `Search “${state.search.trim()}”`;
+}
+
 function themeFilterDisplayText() {
   if (!hasThemeFilter()) return "";
   const topics = sortedTopics(state.selectedThemes);
@@ -1446,6 +1500,21 @@ function themeFilterDisplayText() {
   return `Include papers with ${allLabel}`;
 }
 
+function activeFilterParts() {
+  return [yearFilterDisplayText(), searchFilterDisplayText(), themeFilterDisplayText()].filter(Boolean);
+}
+
+function activeFilterDisplayText() {
+  return activeFilterParts().join(" · ");
+}
+
+function yearMultiSelectLabel() {
+  if (!hasYearFilter()) return "All years";
+  const years = sortedSelectedYears();
+  if (years.length <= 2) return years.join(", ");
+  return `${years.length} years`;
+}
+
 function embeddingDefaultNote() {
   const count = embeddingDisplayPoints().length;
   const highlighted = embeddingHighlightCount();
@@ -1453,14 +1522,7 @@ function embeddingDefaultNote() {
     return "Jumped to highlighted submission below — topic tags are shown on the card";
   }
   if (hasMapHighlightFilter()) {
-    const parts = [];
-    if (hasSearchFilter()) {
-      parts.push(`search “${state.search.trim()}”`);
-    }
-    if (hasThemeFilter()) {
-      parts.push(themeFilterDisplayText());
-    }
-    return `${count} papers on map · ${highlighted} highlighted · ${parts.join(" · ")}`;
+    return `${count} papers on map · ${highlighted} highlighted · ${activeFilterDisplayText()}`;
   }
   return isTouchLike()
     ? `${count} submissions · colored by year · tap a dot to see topics and filter · or open the paper`
@@ -1587,46 +1649,70 @@ function renderKpis(filtered) {
   body.append("div").attr("class", "value").text((d) => d.value);
 }
 
-function renderYearControls() {
-  const years = state.data.metadata.years;
-  const yearSelect = d3.select("#year-select");
-  yearSelect.selectAll("option:not(:first-child)").remove();
-  yearSelect
-    .selectAll("option.year")
-    .data(years)
-    .join("option")
-    .attr("class", "year")
-    .attr("value", (d) => String(d))
-    .text((d) => d);
+function closeYearMultiSelect() {
+  const menuNode = document.getElementById("year-multi-menu");
+  const toggle = d3.select("#year-multi-toggle");
+  if (menuNode) menuNode.hidden = true;
+  if (!toggle.empty()) toggle.attr("aria-expanded", "false");
+}
 
-  const chips = d3.select("#year-chips");
-  const chipData = ["all", ...years.map(String)];
-  chips
-    .selectAll(".year-chip")
-    .data(chipData)
+function toggleYearMultiSelectMenu(forceOpen) {
+  const menuNode = document.getElementById("year-multi-menu");
+  const toggle = d3.select("#year-multi-toggle");
+  if (!menuNode || toggle.empty()) return;
+  const currentlyOpen = !menuNode.hidden;
+  const shouldOpen = forceOpen != null ? Boolean(forceOpen) : !currentlyOpen;
+  menuNode.hidden = !shouldOpen;
+  toggle.attr("aria-expanded", shouldOpen ? "true" : "false");
+}
+
+function renderYearControls() {
+  const years = (state.data?.metadata?.years || []).map(String);
+  const selected = new Set(state.selectedYears.map(String));
+  const toggle = d3.select("#year-multi-toggle");
+  const menu = d3.select("#year-multi-menu");
+  if (toggle.empty() || menu.empty()) return;
+
+  toggle.html(`<span class="year-multi-toggle-label">${escapeHtml(yearMultiSelectLabel())}</span>`);
+
+  menu
+    .selectAll("button.year-option")
+    .data(years, (d) => d)
     .join("button")
-    .attr("class", (d) => `year-chip${d === state.selectedYear ? " active" : ""}`)
-    .style("--year-color", (d) => (d === "all" ? CCN_COLORS.blue : yearColor(d)))
-    .text((d) => (d === "all" ? "All years" : d))
-    .on("click", (_, d) => {
-      state.selectedYear = d;
-      state.highlightedSubmissionKey = "";
-      d3.select("#year-select").property("value", d);
-      renderAll();
+    .attr("type", "button")
+    .attr("class", "year-option")
+    .attr("role", "option")
+    .attr("aria-selected", (year) => (selected.has(year) ? "true" : "false"))
+    .style("--year-color", (year) => yearColor(year))
+    .html(
+      (year) =>
+        `<span class="year-option-check" aria-hidden="true">${selected.has(year) ? "✓" : ""}</span>` +
+        `<span class="year-option-swatch" aria-hidden="true"></span>` +
+        `<span>${escapeHtml(year)}</span>`
+    )
+    .on("click", (event, year) => {
+      event.preventDefault();
+      event.stopPropagation();
+      toggleYearFilter(year);
+      // Keep the menu open for multi-select.
+      toggleYearMultiSelectMenu(true);
     });
 }
 
-function renderThemeFilterStatus() {
+function renderFilterStatus() {
   const status = d3.select("#theme-filter-status");
   if (status.empty()) return;
   const node = status.node();
-  if (!hasThemeFilter()) {
+  const clearAll = d3.select("#clear-all-filters-btn");
+  if (!clearAll.empty()) clearAll.node().hidden = !hasAnyFilter();
+
+  if (!hasAnyFilter()) {
     if (node) node.hidden = true;
     status.text("");
     return;
   }
   if (node) node.hidden = false;
-  status.html(`<strong>Active filter:</strong> ${escapeHtml(themeFilterDisplayText())}`);
+  status.html(`<strong>Active filter:</strong> ${escapeHtml(activeFilterDisplayText())}`);
 }
 
 function renderThemeMultiSelect() {
@@ -1660,7 +1746,8 @@ function renderThemeMultiSelect() {
 
   const clearBtn = d3.select("#theme-clear-btn");
   if (!clearBtn.empty()) clearBtn.node().hidden = !hasThemeFilter();
-  renderThemeFilterStatus();
+  renderYearControls();
+  renderFilterStatus();
 }
 
 function renderThemeBars(counts) {
@@ -1736,13 +1823,24 @@ function renderThemeBars(counts) {
     .text((d) => d.count);
 }
 
+function submissionsOverTimeCounts() {
+  const filtered = filteredSubmissions();
+  const countsMap = submissionCountByYear(filtered);
+  const years = hasYearFilter()
+    ? sortedSelectedYears().map(Number)
+    : [...(state.data?.metadata?.years || [])].map(Number).sort((a, b) => a - b);
+  return years.map((year) => ({
+    year,
+    count: countsMap.get(String(year)) || 0,
+  }));
+}
+
 function renderYearChart() {
   const container = d3.select("#year-chart");
   container.selectAll("*").remove();
 
-  const counts = Object.entries(state.data.stats.counts_by_year)
-    .map(([year, count]) => ({ year: +year, count }))
-    .sort((a, b) => a.year - b.year);
+  const counts = submissionsOverTimeCounts();
+  const selected = new Set(state.selectedYears.map(String));
 
   const width = chartContainerWidth(container);
   const axisFont = isPhoneLayout() ? chartThemePx(PHONE_AXIS_LABEL_SIZE) : themeLabelPx(DESKTOP_CHART_LABEL);
@@ -1785,15 +1883,21 @@ function renderYearChart() {
     .join("circle")
     .attr("cx", (d) => x(d.year))
     .attr("cy", (d) => y(d.count))
-    .attr("r", (d) => (String(d.year) === state.selectedYear ? (isPhoneLayout() ? gs(4.5) : s(7)) : isPhoneLayout() ? gs(3.5) : s(5)))
-    .attr("fill", (d) => (String(d.year) === state.selectedYear ? CCN_COLORS.pink : CCN_COLORS.green))
+    .attr("r", (d) =>
+      selected.has(String(d.year))
+        ? isPhoneLayout()
+          ? gs(4.5)
+          : s(7)
+        : isPhoneLayout()
+          ? gs(3.5)
+          : s(5)
+    )
+    .attr("fill", (d) => (selected.has(String(d.year)) ? CCN_COLORS.pink : CCN_COLORS.green))
     .attr("stroke", CCN_COLORS.navy)
     .attr("stroke-width", isPhoneLayout() ? gs(1.5) : s(2))
     .style("cursor", "pointer")
     .on("click", (event, d) => {
-      state.selectedYear = String(d.year);
-      d3.select("#year-select").property("value", state.selectedYear);
-      renderAll();
+      toggleYearFilter(d.year);
       if (isPhoneLayout()) {
         showTooltip(`<strong>${d.year}</strong><br/>${d.count} submissions`, event, { mode: "tap" });
       }
@@ -1846,7 +1950,10 @@ function renderYearChart() {
 
 function themeShareByYearRows(submissions) {
   const themes = researchThemeNames();
-  const years = [...(state.data?.metadata?.years || [])].sort((a, b) => a - b);
+  const availableYears = [...(state.data?.metadata?.years || [])].sort((a, b) => a - b);
+  const years = hasYearFilter()
+    ? sortedSelectedYears().map(Number)
+    : availableYears;
   const byYear = themeCountsByYear(submissions);
   const yearTotals = submissionCountByYear(submissions);
   const totals = globalThemeTotals();
@@ -1871,7 +1978,7 @@ function renderThemeShareByYear() {
   if (container.empty()) return;
   container.selectAll("*").remove();
 
-  const submissions = state.data?.submissions || [];
+  const submissions = filteredSubmissions();
   const { themes, rows } = themeShareByYearRows(submissions);
 
   if (!themes.length || !rows.length) {
@@ -2065,10 +2172,11 @@ function renderResearchThemeDeltas(submissions) {
   state.deltaToYear = pair.toYear;
   d3.select("#delta-from-year").property("value", pair.fromYear);
   d3.select("#delta-to-year").property("value", pair.toYear);
+  const trendFilterParts = [searchFilterDisplayText(), themeFilterDisplayText()].filter(Boolean);
   sub.text(
-    state.selectedYear === "all"
-      ? `${pair.fromYear} → ${pair.toYear} · change in share of submissions (percentage points)`
-      : `${pair.fromYear} → ${pair.toYear} · filtered to year ${state.selectedYear} · change in theme share (percentage points)`
+    trendFilterParts.length
+      ? `${pair.fromYear} → ${pair.toYear} · ${trendFilterParts.join(" · ")} · change in theme share (percentage points)`
+      : `${pair.fromYear} → ${pair.toYear} · change in share of submissions (percentage points)`
   );
 
   const deltaTooltip = (d) =>
@@ -2436,8 +2544,9 @@ function renderEmbeddingCluster() {
 }
 
 function themeFilterSummaryLabel() {
-  if (!hasThemeFilter()) return "";
-  return themeFilterDisplayText().replace(/^Include papers with /i, "with ").replace(/^Exclude papers with /i, "excluding ");
+  const parts = activeFilterParts();
+  if (!parts.length) return "";
+  return parts.join(" · ");
 }
 
 function renderPaperList() {
@@ -2448,7 +2557,7 @@ function renderPaperList() {
 
   const filterLabel = themeFilterSummaryLabel();
   const countLabel = filterLabel
-    ? `${submissions.length} papers ${filterLabel}`
+    ? `${submissions.length} papers · ${filterLabel}`
     : `${submissions.length} matching submissions`;
   countEl.append("span").text(countLabel);
 
@@ -2513,10 +2622,6 @@ function renderAll() {
     requestAnimationFrame(() => refreshStickyTooltip());
   }
 
-  d3.select("#year-chips")
-    .selectAll(".year-chip")
-    .classed("active", (d) => d === state.selectedYear);
-
   restorePageScroll(scrollSnapshot.x, scrollSnapshot.y);
 }
 
@@ -2535,11 +2640,13 @@ async function init() {
 
   state.datasetFile = FIXED_DATASET;
 
-  d3.select("#year-select").on("change", (event) => {
-    state.selectedYear = event.target.value;
-    state.highlightedSubmissionKey = "";
-    renderAll();
+  d3.select("#year-multi-toggle").on("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    toggleYearMultiSelectMenu();
   });
+
+  d3.select("#clear-all-filters-btn").on("click", () => clearAllFilters());
 
   d3.select("#search-input").on("input", (event) => {
     state.search = event.target.value;
@@ -2559,6 +2666,20 @@ async function init() {
   d3.select("#delta-to-year").on("change", (event) => {
     state.deltaToYear = event.target.value;
     renderResearchThemeDeltas(submissionsForThemeTrends());
+  });
+
+  document.addEventListener(
+    "pointerdown",
+    (event) => {
+      const root = document.getElementById("year-multi-select");
+      if (!root || root.contains(event.target)) return;
+      closeYearMultiSelect();
+    },
+    true
+  );
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeYearMultiSelect();
   });
 
   await waitForChartFonts();

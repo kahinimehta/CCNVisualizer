@@ -9,7 +9,7 @@
   <link rel="icon" href="assets/favicon-32.png?v=2" type="image/png" sizes="32x32" />
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=2" />
   <meta name="theme-color" content="#0f2238" />
-  <link rel="stylesheet" href="css/style.css?v=118" />
+  <link rel="stylesheet" href="css/style.css?v=122" />
   <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 </head>
 <body>
@@ -39,20 +39,37 @@
           <div class="header-divider" aria-hidden="true"></div>
         </div>
         <div class="filter-bar">
-          <label class="filter-field">
+          <div class="filter-field year-filter-field">
             <span>Year</span>
-            <select id="year-select">
-              <option value="all">All years</option>
-            </select>
-          </label>
+            <div class="year-multi-select" id="year-multi-select">
+              <button
+                type="button"
+                class="year-multi-toggle"
+                id="year-multi-toggle"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-controls="year-multi-menu"
+              >
+                All years
+              </button>
+              <div
+                class="year-multi-menu"
+                id="year-multi-menu"
+                role="listbox"
+                aria-multiselectable="true"
+                hidden
+              ></div>
+            </div>
+          </div>
           <label class="filter-field search-field">
             <span>Search</span>
             <input id="search-input" type="search" placeholder="Title, author, keywords..." />
           </label>
+          <button type="button" class="clear-all-filters-btn" id="clear-all-filters-btn" hidden>
+            Clear all filters
+          </button>
         </div>
       </header>
-
-      <section class="year-chips-row" id="year-chips" aria-label="Year filters"></section>
 
       <section class="top-topic-filter" aria-label="Topic filter">
         <div class="theme-filter-bar" aria-label="Research theme filters">
@@ -72,7 +89,7 @@
         <section class="card card-full">
           <div class="card-header">
             <h2>Submissions over time</h2>
-            <p class="card-sub">Poster &amp; paper counts by conference year · click a year to set the year filter</p>
+            <p class="card-sub">Poster &amp; paper counts by conference year · respects year/search/topic filters · click a year to toggle it in the year filter</p>
           </div>
           <div id="year-chart"></div>
         </section>
@@ -80,7 +97,7 @@
         <section class="card card-full">
           <div class="card-header">
             <h2>Theme counts by year</h2>
-            <p class="card-sub">Absolute topic counts by year · all years · not affected by year/topic filters · papers can have multiple topics, so stacked totals can exceed that year’s submission count</p>
+            <p class="card-sub">Absolute topic counts by year · respects year/search/topic filters · papers can have multiple topics, so stacked totals can exceed that year’s submission count</p>
           </div>
           <div id="theme-share-by-year"></div>
         </section>
@@ -90,7 +107,7 @@
             <h2>Abstract embedding map</h2>
             <p class="card-sub">
               UMAP of every submission (2017–2026) · dots colored by year · hover a dot to see its topics · click a dot to pin topics, or click a topic above to filter.<br />
-              The full map always stays visible; search and topic-filter matches are highlighted.
+              The full map always stays visible; year, search, and topic-filter matches are highlighted.
             </p>
           </div>
           <div class="embedding-chart-wrap">
@@ -153,6 +170,6 @@
 
   <div class="tooltip" id="tooltip"></div>
   <script src="js/sidebar.js?v=20"></script>
-  <script src="js/app.js?v=121"></script>
+  <script src="js/app.js?v=122"></script>
 </body>
 </html>

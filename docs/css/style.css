@@ -311,8 +311,8 @@ body:not(.sidebar-collapsed) .main-area {
 
 .filter-bar {
   display: grid;
-  /* Year + search sit side-by-side on desktop; stack on narrow viewports. */
-  grid-template-columns: minmax(7.5rem, 10rem) minmax(0, 1fr);
+  /* Year dropdown + search + clear sit in one row on desktop. */
+  grid-template-columns: minmax(9rem, 12rem) minmax(0, 1fr) auto;
   gap: 0.75rem;
   align-items: end;
   width: 100%;
@@ -322,6 +322,145 @@ body:not(.sidebar-collapsed) .main-area {
 
 .filter-bar .search-field {
   min-width: 0;
+}
+
+.filter-bar .year-filter-field {
+  min-width: 0;
+}
+
+.year-multi-select {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.year-multi-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  min-width: 0;
+  height: 54px;
+  padding: 0.65rem 0.85rem;
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--ccn-navy-card);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.25;
+  text-align: left;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.year-multi-toggle::after {
+  content: "";
+  width: 0.45rem;
+  height: 0.45rem;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg);
+  flex: 0 0 auto;
+  margin-top: -0.2rem;
+}
+
+.year-multi-toggle[aria-expanded="true"]::after {
+  margin-top: 0.15rem;
+  transform: rotate(-135deg);
+}
+
+.year-multi-toggle-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.year-multi-menu {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  right: 0;
+  min-width: 11rem;
+  max-height: min(18rem, 55vh);
+  overflow: auto;
+  padding: 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 0.55rem;
+  background: var(--ccn-navy-card);
+  box-shadow: var(--shadow);
+}
+
+.year-multi-menu[hidden] {
+  display: none;
+}
+
+.year-option {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.45rem 0.55rem;
+  border: 0;
+  border-radius: 0.4rem;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.95rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.year-option:hover,
+.year-option[aria-selected="true"] {
+  background: color-mix(in srgb, var(--year-color, var(--ccn-blue)) 22%, transparent);
+}
+
+.year-option-swatch {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 999px;
+  background: var(--year-color, var(--ccn-blue));
+  box-shadow: inset 0 0 0 1px rgba(15, 34, 56, 0.35);
+  flex: 0 0 auto;
+}
+
+.year-option-check {
+  width: 1rem;
+  text-align: center;
+  color: var(--ccn-pink);
+  flex: 0 0 auto;
+}
+
+.clear-all-filters-btn {
+  appearance: none;
+  height: 54px;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.clear-all-filters-btn:hover {
+  color: var(--ccn-white);
+  border-color: rgba(197, 224, 243, 0.45);
+}
+
+.clear-all-filters-btn[hidden] {
+  display: none;
 }
 
 .filter-field {
@@ -437,16 +576,6 @@ body:not(.sidebar-collapsed) .main-area {
   overflow-wrap: anywhere;
 }
 
-.year-chips-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin: 0 0 0.65rem;
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-}
-
 .top-topic-filter {
   width: 100%;
   max-width: 100%;
@@ -460,25 +589,6 @@ body:not(.sidebar-collapsed) .main-area {
     rgba(244, 199, 195, 0.06) 0%,
     rgba(15, 34, 56, 0.35) 100%
   );
-}
-
-.year-chip {
-  border: 1px solid color-mix(in srgb, var(--year-color, var(--border)) 55%, var(--border));
-  background: color-mix(in srgb, var(--year-color, var(--ccn-navy-card)) 18%, var(--ccn-navy-card));
-  color: var(--text);
-  border-radius: var(--radius-sm);
-  padding: 0.4rem 0.8rem;
-  cursor: pointer;
-  font-size: 0.98rem;
-  font-family: inherit;
-  transition: 0.15s ease;
-}
-
-.year-chip.active,
-.year-chip:hover {
-  background: color-mix(in srgb, var(--year-color, var(--ccn-blue)) 32%, var(--ccn-navy));
-  border-color: var(--year-color, var(--ccn-blue));
-  color: var(--ccn-white);
 }
 
 .dashboard-grid {
@@ -944,10 +1054,17 @@ svg {
   }
 
   .filter-field select,
-  .filter-field input {
+  .filter-field input,
+  .year-multi-toggle,
+  .clear-all-filters-btn {
     font-size: 0.9rem;
     height: 42px;
     padding: 0.45rem 0.7rem;
+  }
+
+  .year-option {
+    font-size: 0.84rem;
+    padding: 0.38rem 0.5rem;
   }
 
   .theme-filter-bar {
@@ -984,11 +1101,6 @@ svg {
 
   .kpi-card .value {
     font-size: 1.25rem;
-  }
-
-  .year-chip {
-    font-size: 0.84rem;
-    padding: 0.3rem 0.65rem;
   }
 
   .card {
