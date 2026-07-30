@@ -505,6 +505,10 @@ body:not(.sidebar-collapsed) .main-area {
   appearance: none;
 }
 
+.filter-field input.search-pending {
+  border-color: rgba(244, 199, 195, 0.55);
+}
+
 .kpi-row {
   display: grid;
   /* px basis — rem would track the fluid html clamp and shift wrap points. */

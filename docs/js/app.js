@@ -1072,6 +1072,7 @@ async function loadDataset(options = {}) {
     state.deltaFromYear = "";
     state.deltaToYear = "";
     d3.select("#search-input").property("value", "");
+    updateSearchInputState();
     closeYearMultiSelect();
   } else if (hasYearFilter()) {
     const available = new Set(state.data.metadata.years.map(String));
@@ -1133,6 +1134,25 @@ function hasThemeFilter() {
 
 function hasSearchFilter() {
   return Boolean(state.search.trim());
+}
+
+function searchInputValue() {
+  const input = d3.select("#search-input");
+  return input.empty() ? "" : String(input.property("value") || "");
+}
+
+function updateSearchInputState() {
+  const input = d3.select("#search-input");
+  if (input.empty()) return;
+  const pending = searchInputValue().trim() !== state.search.trim();
+  input.classed("search-pending", pending);
+}
+
+function applySearchFilter() {
+  state.search = searchInputValue();
+  state.highlightedSubmissionKey = "";
+  updateSearchInputState();
+  renderAll();
 }
 
 function hasYearFilter() {
@@ -1446,6 +1466,7 @@ function clearAllFilters() {
   state.themeFilterMode = "include";
   state.highlightedSubmissionKey = "";
   d3.select("#search-input").property("value", "");
+  updateSearchInputState();
   closeYearMultiSelect();
   renderAll();
 }
@@ -1472,6 +1493,7 @@ function ensureSubmissionVisible(submission) {
   if (search && !submissionMatchesSearch(submission, search)) {
     state.search = "";
     d3.select("#search-input").property("value", "");
+    updateSearchInputState();
   }
 }
 
@@ -2679,11 +2701,15 @@ async function init() {
 
   d3.select("#clear-all-filters-btn").on("click", () => clearAllFilters());
 
-  d3.select("#search-input").on("input", (event) => {
-    state.search = event.target.value;
-    state.highlightedSubmissionKey = "";
-    renderAll();
-  });
+  d3.select("#search-input")
+    .on("input", () => {
+      updateSearchInputState();
+    })
+    .on("keydown", (event) => {
+      if (event.key !== "Enter") return;
+      event.preventDefault();
+      applySearchFilter();
+    });
 
   d3.select("#theme-mode-include").on("click", () => setThemeFilterMode("include"));
   d3.select("#theme-mode-exclude").on("click", () => setThemeFilterMode("exclude"));
