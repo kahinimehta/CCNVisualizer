@@ -34,6 +34,7 @@ from shared import (
     is_gac_update,
     is_metadata_keyword,
     is_plausible_keyword,
+    keywords_are_title_derived,
     normalize_author_names,
     normalize_keyword_phrase,
     repair_mojibake,
@@ -207,9 +208,11 @@ def resolve_keyword_fields(
 
     if author:
         return author, extracted, author
-    if conference_label:
+    if conference_label and not is_metadata_keyword(conference_label):
         return [], extracted, [conference_label]
     extracted = normalize_author_keywords(derive_archive_keywords(title, abstract))
+    if keywords_are_title_derived(extracted, title):
+        extracted = []
     return [], extracted, extracted
 
 

@@ -316,6 +316,7 @@ BAD_KEYWORD_EXACT = frozenset(
         "at the same time",
         "more strongly",
         "even though",
+        "though for practicality purposes",
         "strictly speaking",
         "more likely",
         "more precisely",
@@ -470,6 +471,7 @@ BAD_KEYWORD_EXACT = frozenset(
 )
 
 BAD_KEYWORD_PREFIXES = (
+    "though for ",
     "including ",
     "and ",
     "as well",
@@ -630,8 +632,36 @@ TITLE_KEYWORD_STOPWORDS = frozenset(
 )
 
 _MOJIBAKE_MARKERS = re.compile(
-    r"[ÃÄÅÆÇÐÑØÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ\u0080-\u009f]"
+    r"[ÃÄÅÆÇÐÑØÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ\u0080-\u009f]|"
+    r"â€™|â€˜|â€œ|â€\u009d|â€\u201c|â€\u201d|‚Äô|‚Äì|√.|ï¿½"
 )
+
+_MOJIBAKE_REPLACEMENTS: tuple[tuple[str, str], ...] = (
+    ("\u00e2\u20ac\u2122", "'"),
+    ("\u00e2\u20ac\u02dc", "'"),
+    ("\u00e2\u20ac\u0153", '"'),
+    ("\u00e2\u20ac\u009d", '"'),
+    ("\u00e2\u20ac\u0094", "—"),
+    ("\u00e2\u20ac\u0093", "–"),
+    ("‚Äô", "'"),
+    ("‚Äì", "–"),
+    ("Ã©", "é"),
+    ("Ã¨", "è"),
+    ("Ã«", "ë"),
+    ("Ã¯", "ï"),
+    ("Ã®", "î"),
+    ("Ã¶", "ö"),
+    ("Ã¼", "ü"),
+    ("Ã¤", "ä"),
+    ("Ã ", "à"),
+    ("Ã¡", "á"),
+    ("Ã¢", "â"),
+    ("Ã§", "ç"),
+    ("Ã±", "ñ"),
+    ("ï¿½", ""),
+)
+
+_MOJIBAKE_QUOTED_RE = re.compile(r"â([^â\n]{1,120}?)â")
 
 GAC_UPDATE_TITLE_RE = re.compile(r"^\[\s*GAC\s+update\s*\]", re.I)
 YEAR_ID_CACHE_KEY_RE = re.compile(r"^\d{4}:")
@@ -1306,6 +1336,21 @@ def is_plausible_keyword(keyword: str) -> bool:
     return True
 
 
+def keywords_are_title_derived(keywords: list[str], title: str) -> bool:
+    """True when keywords are just tokenized title words, not author keywords."""
+    if not keywords or not title:
+        return False
+    normalized = [normalize_keyword_phrase(kw) for kw in keywords if kw]
+    if not normalized:
+        return False
+    if normalized == derive_title_keywords(title):
+        return True
+    title_tokens = set(re.findall(r"[a-z][a-z0-9\-]{2,}", title.lower()))
+    if title_tokens and all(" " not in kw and kw in title_tokens for kw in normalized):
+        return True
+    return False
+
+
 def derive_title_keywords(title: str, limit: int = 5) -> list[str]:
     tokens = re.findall(r"[a-z][a-z0-9\-]{2,}", (title or "").lower())
     cleaned: list[str] = []
@@ -1405,12 +1450,13 @@ def conference_topic_keywords(submission: dict) -> list[str]:
 def reconcile_submission_keywords(submission: dict) -> None:
     """Drop scraped prose fragments and keep keywords in sync."""
     sanitize_submission_keywords(submission)
+    title = str(submission.get("title") or "")
 
     author = sanitize_keyword_list(list(submission.get("author_keywords") or []))
     if author:
-        keywords = author[:MAX_KEYWORD_LIST_SIZE]
-        submission["author_keywords"] = keywords
-        submission["keywords"] = keywords
+        submission["author_keywords"] = author[:MAX_KEYWORD_LIST_SIZE]
+        submission["keywords"] = submission["author_keywords"]
+        submission["extracted_keywords"] = []
         return
 
     if submission.get("year") in YEARS_TOPIC_AREA_KEYWORDS:
@@ -1421,39 +1467,41 @@ def reconcile_submission_keywords(submission: dict) -> None:
             return
 
     extracted = sanitize_keyword_list(list(submission.get("extracted_keywords") or []))
-    if extracted:
+    if extracted and not keywords_are_title_derived(extracted, title):
         submission["keywords"] = extracted[:MAX_KEYWORD_LIST_SIZE]
         return
 
-    title_kw = derive_title_keywords(str(submission.get("title") or ""))
-    if title_kw:
-        submission["keywords"] = title_kw
+    keywords = sanitize_keyword_list(list(submission.get("keywords") or []))
+    if keywords and not keywords_are_title_derived(keywords, title):
+        submission["keywords"] = keywords[:MAX_KEYWORD_LIST_SIZE]
         return
 
-    topic_kw = conference_topic_keywords(submission)
-    if topic_kw:
-        submission["keywords"] = topic_kw
+    submission["author_keywords"] = []
+    submission["extracted_keywords"] = []
+    submission["keywords"] = []
 
 
 def dashboard_keywords(submission: dict) -> list[str]:
-    """Keywords for CSV/dashboard display; preserves conference topic-area labels."""
-    reconciled = [str(kw).strip() for kw in (submission.get("keywords") or []) if str(kw).strip()]
-    if reconciled:
+    """Keywords for CSV/dashboard display."""
+    title = str(submission.get("title") or "")
+    reconciled = sanitize_keyword_list(list(submission.get("keywords") or []))
+    if reconciled and not keywords_are_title_derived(reconciled, title):
         return reconciled[:MAX_KEYWORD_LIST_SIZE]
 
     author = sanitize_keyword_list(list(submission.get("author_keywords") or []))
     if author:
         return author[:MAX_KEYWORD_LIST_SIZE]
 
-    topic_kw = conference_topic_keywords(submission)
-    if topic_kw:
-        return topic_kw
+    if submission.get("year") in YEARS_TOPIC_AREA_KEYWORDS:
+        topic_kw = conference_topic_keywords(submission)
+        if topic_kw:
+            return topic_kw
 
     extracted = sanitize_keyword_list(list(submission.get("extracted_keywords") or []))
-    if extracted:
+    if extracted and not keywords_are_title_derived(extracted, title):
         return extracted[:MAX_KEYWORD_LIST_SIZE]
 
-    return derive_title_keywords(str(submission.get("title") or ""))
+    return []
 
 
 def content_keywords(submission: dict) -> list[str]:
@@ -1486,12 +1534,28 @@ def vectorizer_stop_words() -> list[str]:
 
 
 def repair_mojibake(text: str) -> str:
-    if not text or not _MOJIBAKE_MARKERS.search(text):
+    if not text:
         return text
-    try:
-        return text.encode("latin-1").decode("utf-8")
-    except (UnicodeDecodeError, UnicodeEncodeError):
-        return text
+
+    repaired = text
+    for old, new in _MOJIBAKE_REPLACEMENTS:
+        if old in repaired:
+            repaired = repaired.replace(old, new)
+    repaired = _MOJIBAKE_QUOTED_RE.sub(r'"\1"', repaired)
+    repaired = re.sub(r"\sâ\s", " — ", repaired)
+
+    if _MOJIBAKE_MARKERS.search(repaired) or repaired != text:
+        for _ in range(2):
+            for encoding in ("cp1252", "latin-1"):
+                try:
+                    candidate = repaired.encode(encoding).decode("utf-8")
+                except (UnicodeDecodeError, UnicodeEncodeError):
+                    continue
+                if candidate != repaired:
+                    repaired = candidate
+                    break
+
+    return repaired
 
 
 def repair_submission_text(submission: dict) -> None:
