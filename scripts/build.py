@@ -34,7 +34,7 @@ from shared import (
     normalize_author_names,
     normalize_field_text,
     reconcile_submission_keywords,
-    repair_mojibake,
+    repair_embeddings,
     repair_submission_text,
     sanitize_keyword_list,
     sanitize_submission_keywords,
@@ -601,8 +601,8 @@ def build_csv_rows(payload: dict, embeddings: dict) -> list[dict[str, str]]:
                 "year": str(submission.get("year", "")),
                 "title": normalize_field_text(submission.get("title", "")),
                 "author": normalize_field_text(first_author(authors)),
-                "keywords": join_list(dashboard_keywords(submission)),
-                "assigned_topics": join_list(assigned_topics(submission)),
+                "keywords": normalize_field_text(join_list(dashboard_keywords(submission))),
+                "assigned_topics": normalize_field_text(join_list(assigned_topics(submission))),
                 "authors": authors,
                 "abstract": normalize_field_text(submission.get("abstract", "")),
                 "umap_x": "" if not point else str(point.get("x", "")),
@@ -669,6 +669,8 @@ def run_repair_only() -> None:
     if EMBEDDING_PATH.exists():
         with EMBEDDING_PATH.open(encoding="utf-8") as fh:
             embeddings = json.load(fh)
+        embeddings = repair_embeddings(embeddings)
+        write_embedding_outputs(embeddings)
     else:
         embeddings = {"points": []}
 

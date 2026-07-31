@@ -1992,7 +1992,18 @@ def repair_submission_text(submission: dict) -> None:
         values = submission.get(field)
         if not values:
             continue
-        submission[field] = [repair_mojibake(str(value)) for value in values if value]
+        submission[field] = [
+            normalize_field_text(str(value))
+            for value in values
+            if value and normalize_field_text(str(value))
+        ]
 
     if submission.get("primary_theme"):
-        submission["primary_theme"] = repair_mojibake(str(submission["primary_theme"]))
+        submission["primary_theme"] = normalize_field_text(str(submission["primary_theme"]))
+
+
+def repair_embeddings(embeddings: dict) -> dict:
+    for point in embeddings.get("points", []):
+        if point.get("title"):
+            point["title"] = normalize_field_text(str(point["title"]))
+    return embeddings
