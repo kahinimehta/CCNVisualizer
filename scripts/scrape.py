@@ -125,23 +125,92 @@ def clean_text(text: str) -> str:
     return text
 
 
+_KEYWORD_HEADING_RE = re.compile(r"\bKey(?:\s*wo)?(?:\s*rds?)\s*:?\s*", re.I)
+_INTRODUCTION_SPLIT_RE = re.compile(r"(?:\n\s*|\s+)(?:\d+\s+)?Introduction\b", re.I)
+_PROSE_LINE_START_RE = re.compile(
+    r"^(?:The |In |We |Our |This |A |An |Concepts |Learning|Introduction|When |Here |To |Using )",
+    re.I,
+)
+
+
+def extract_keyword_block(text: str) -> str:
+    """Pull the keyword list from a PDF text block, stopping before body prose."""
+    match = _KEYWORD_HEADING_RE.search(text)
+    if not match:
+        return ""
+
+    tail = text[match.end() :]
+    tail = re.split(
+        r"Introduction(?=[A-Z][a-z])|(?:\n\s*|\s+)(?:\d+\s+)?Introduction\b",
+        tail,
+        maxsplit=1,
+        flags=re.I,
+    )[0]
+
+    lines: list[str] = []
+    for line in tail.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            if lines:
+                break
+            continue
+        if _PROSE_LINE_START_RE.match(stripped):
+            break
+        lines.append(stripped)
+
+    if not lines:
+        stripped = re.sub(r"\s+", " ", tail).strip(" .")
+        intro = _INTRODUCTION_SPLIT_RE.search(stripped)
+        if intro:
+            stripped = stripped[: intro.start()].strip(" .")
+        lines = [stripped] if stripped else []
+
+    return re.sub(r"\s+", " ", " ".join(lines)).strip(" .")
+
+
 def parse_keyword_field(raw: str) -> list[str]:
     if not raw:
         return []
 
     raw = strip_citation_fragments(raw)
+    raw = re.sub(r"\s*;\s*", "; ", raw)
+    raw = re.sub(r"([a-z])([A-Z])", r"\1 \2", raw)
     normalized = (
         raw.replace("\u2003", "\u0001")
         .replace("\u00a0", " ")
         .replace("\u2002", "\u0001")
     )
-    parts = re.split(r"[\u0001,;&|]+|\s{2,}", normalized)
+    if (
+        not re.search(r"[;,]", normalized)
+        and len(normalized) < 200
+        and re.search(r"\.\s+(?:[A-Z][A-Za-z\-]*|\d)", normalized)
+    ):
+        parts = re.split(r"\.\s+", normalized)
+    else:
+        parts = re.split(r"[\u0001,;&|]+|\s{2,}", normalized)
     keywords = []
     for part in parts:
         kw = clean_text(part)
+        if re.search(r"\bintroduction\b", kw, flags=re.I):
+            kw = re.split(r"\bintroduction\b", kw, maxsplit=1, flags=re.I)[0].strip(" ,.;")
         kw = normalize_keyword_phrase(kw)
-        if kw and len(kw) > 2:
-            keywords.append(kw)
+        if not kw or len(kw) <= 2:
+            continue
+        if any(
+            marker in kw
+            for marker in (
+                "occurs at",
+                "every synapse",
+                "point in time",
+                "synaptic plasticity occurs",
+                "similar to structured",
+                "connected room",
+            )
+        ):
+            break
+        if re.search(r"[∝≈≤≥±×÷′]|\bpr\(", kw):
+            break
+        keywords.append(kw)
     return keywords
 
 
@@ -152,16 +221,29 @@ def normalize_author_keywords(keywords: list[str]) -> list[str]:
     normalized: list[str] = []
     for kw in keywords:
         cleaned = normalize_keyword_phrase(clean_text(kw))
+        if not cleaned:
+            continue
+        if re.fullmatch(r"[\d\(\)\–\-]+", cleaned):
+            continue
+        if re.search(r"\d+\(\d+\)", cleaned):
+            continue
         if (
             cleaned
             and cleaned not in seen
             and cleaned not in blocked
             and cleaned not in NOISE_KEYWORDS
-            and not is_metadata_keyword(cleaned)
             and is_plausible_keyword(cleaned)
         ):
             seen.add(cleaned)
             normalized.append(cleaned)
+    if len(normalized) > 8:
+        multi_word = [kw for kw in normalized if " " in kw and len(kw.split()) >= 2]
+        if len(multi_word) >= 2:
+            return multi_word[:8]
+        if len(normalized) > 12 or (
+            len(normalized) >= 6 and sum(1 for kw in normalized if " " not in kw) >= len(normalized) - 1
+        ):
+            return []
     return normalized
 
 
@@ -210,10 +292,7 @@ def resolve_keyword_fields(
         return author, extracted, author
     if conference_label and not is_metadata_keyword(conference_label):
         return [], extracted, [conference_label]
-    extracted = normalize_author_keywords(derive_archive_keywords(title, abstract))
-    if keywords_are_title_derived(extracted, title):
-        extracted = []
-    return [], extracted, extracted
+    return [], [], []
 
 
 def backfill_keyword_fields(payload: dict, *, try_pdf: bool = True) -> dict:
@@ -1190,16 +1269,19 @@ def parse_proceedings_keywords(text: str) -> list[str]:
     if not text:
         return []
 
-    normalized = normalize_pdf_text(text)
-    match = re.search(
-        r"\bKeywords?\s*:\s*(.+?)(?:\bIntroduction\b|\b1\s+Introduction\b|\bBackground\b|\bAbstract\b|\Z)",
-        normalized,
-        re.I | re.S,
-    )
-    if not match:
-        return []
+    raw = extract_keyword_block(text)
+    if not raw:
+        normalized = normalize_pdf_text(text)
+        match = re.search(
+            r"\bKey(?:\s*wo)?(?:\s*rds?)\s*:?\s*(.+?)(?:\bIntroduction\b|\b1\s+Introduction\b|\bBackground\b|\Z)",
+            normalized,
+            re.I | re.S,
+        )
+        if not match:
+            return []
+        raw = clean_text(match.group(1))
+        raw = re.split(r"\bintroduction\b", raw, maxsplit=1, flags=re.I)[0].strip(" .")
 
-    raw = clean_text(match.group(1))
     if not raw:
         return []
     return normalize_author_keywords(parse_keyword_field(raw))
@@ -1705,7 +1787,10 @@ def enrich_submission_keywords(
     return submission
 
 
-def needs_pdf_keyword_refresh(submission: dict) -> bool:
+def needs_pdf_keyword_refresh(submission: dict, *, force: bool = False) -> bool:
+    if force:
+        year = submission.get("year")
+        return year in YEARS_WITH_PDF and bool(submission.get("source_url"))
     if submission.get("author_keywords"):
         return False
     year = submission.get("year")
@@ -1714,9 +1799,13 @@ def needs_pdf_keyword_refresh(submission: dict) -> bool:
     return bool(submission.get("source_url"))
 
 
-def _refresh_one(submission: dict) -> tuple[str, bool]:
+def _refresh_one(submission: dict, *, force: bool = False) -> tuple[str, bool]:
     had_author = bool(submission.get("author_keywords"))
-    if needs_pdf_keyword_refresh(submission):
+    if force:
+        submission["author_keywords"] = []
+        submission["extracted_keywords"] = []
+        submission["keywords"] = []
+    if needs_pdf_keyword_refresh(submission, force=force):
         try:
             detail_html = fetch(submission["source_url"])
         except Exception:
@@ -1726,12 +1815,17 @@ def _refresh_one(submission: dict) -> tuple[str, bool]:
         enrich_submission_keywords(submission, try_pdf=False)
     return submission.get("id", ""), bool(submission.get("author_keywords")) and not had_author
 
-def refresh_keywords(payload: dict) -> dict:
+
+def refresh_keywords(payload: dict, *, years: set[int] | None = None, force: bool = False) -> dict:
     submissions = payload.get("submissions", [])
+    if years:
+        submissions = [sub for sub in submissions if sub.get("year") in years]
     print(f"Refreshing keywords for {len(submissions)} submissions")
     updated = 0
     with ThreadPoolExecutor(max_workers=6) as executor:
-        futures = {executor.submit(_refresh_one, sub): sub for sub in submissions}
+        futures = {
+            executor.submit(_refresh_one, sub, force=force): sub for sub in submissions
+        }
         for index, future in enumerate(as_completed(futures), start=1):
             _, gained = future.result()
             if gained:
@@ -1758,6 +1852,11 @@ def main() -> None:
     parser.add_argument("--years", nargs="*", type=int)
     parser.add_argument("--quick", action="store_true")
     parser.add_argument("--refresh-keywords", action="store_true")
+    parser.add_argument(
+        "--force-keywords",
+        action="store_true",
+        help="With --refresh-keywords, re-fetch PDF keywords even when author_keywords exist",
+    )
     parser.add_argument("--add-2017", action="store_true")
     args = parser.parse_args()
     if args.refresh_keywords:
@@ -1766,7 +1865,8 @@ def main() -> None:
             raise SystemExit(f"Missing {path}")
         with path.open(encoding="utf-8") as fh:
             payload = json.load(fh)
-        write_outputs(refresh_keywords(payload))
+        years = set(args.years) if args.years else None
+        write_outputs(refresh_keywords(payload, years=years, force=args.force_keywords))
         return
     if args.add_2017:
         path = DATA_DIR / "submissions.json"
