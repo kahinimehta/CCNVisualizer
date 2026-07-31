@@ -32606,16 +32606,14 @@
       "poster_number": "",
       "source_url": "https://2023.ccneuro.org/view_paper14fe.html?PaperNum=1347",
       "submission_type": "poster",
-      "primary_theme": "Perception",
+      "primary_theme": "Language/auditory neuroscience",
       "secondary_topics": [
         "Vision",
-        "Language/auditory neuroscience",
         "Methods and theory"
       ],
       "assigned_topics": [
-        "Perception",
-        "Vision",
         "Language/auditory neuroscience",
+        "Vision",
         "Methods and theory"
       ]
     },
@@ -35644,15 +35642,15 @@
       "submission_type": "poster",
       "primary_theme": "Memory",
       "secondary_topics": [
-        "Motor control & planning",
         "Decision-making and metacognition",
-        "Reinforcement learning"
+        "Reinforcement learning",
+        "Motor control & planning"
       ],
       "assigned_topics": [
         "Memory",
-        "Motor control & planning",
         "Decision-making and metacognition",
-        "Reinforcement learning"
+        "Reinforcement learning",
+        "Motor control & planning"
       ]
     },
     {
