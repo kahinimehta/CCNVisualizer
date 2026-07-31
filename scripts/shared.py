@@ -808,6 +808,35 @@ _KEYWORD_INVISIBLE_RE = re.compile(
     r"\u0300-\u036f\u20d0-\u20ff\u02d8\u02c6\u02c7\u02d9\u02da\u02dc]"
 )
 
+_CURLY_QUOTE_MAP = str.maketrans(
+    {
+        "\u2018": "'",
+        "\u2019": "'",
+        "\u201a": "'",
+        "\u201b": "'",
+        "\u201c": '"',
+        "\u201d": '"',
+        "\u201e": '"',
+        "\u201f": '"',
+        "\u2032": "'",
+        "\u2033": '"',
+    }
+)
+
+
+def sanitize_display_text(text: str) -> str:
+    """Normalize PDF/encoding artifacts for dashboard and CSV display."""
+    if not text:
+        return text
+    cleaned = normalize_ligatures(str(text))
+    cleaned = _KEYWORD_INVISIBLE_RE.sub("", cleaned)
+    cleaned = cleaned.translate(_CURLY_QUOTE_MAP)
+    cleaned = cleaned.replace("\u00a0", " ")
+    cleaned = re.sub(r"Â+(?=[\s.,;:!?)}\]]|$)", "", cleaned)
+    cleaned = cleaned.replace("Â", "")
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    return cleaned
+
 
 def normalize_ligatures(text: str) -> str:
     if not text:
@@ -1059,7 +1088,7 @@ def is_metadata_keyword(keyword: str) -> bool:
 def normalize_field_text(text: str) -> str:
     if not text:
         return ""
-    cleaned = repair_mojibake(str(text))
+    cleaned = sanitize_display_text(repair_mojibake(str(text)))
     cleaned = cleaned.replace("\r\n", "\n").replace("\r", "\n")
     cleaned = re.sub(r"\s*\n\s*", " ", cleaned)
     return re.sub(r"\s+", " ", cleaned).strip()
@@ -1948,7 +1977,7 @@ def repair_mojibake(text: str) -> str:
         if repaired == previous:
             break
 
-    return repair_accent_marks(repaired)
+    return repair_accent_marks(sanitize_display_text(repaired))
 
 
 def repair_submission_text(submission: dict) -> None:
