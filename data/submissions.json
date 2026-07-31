@@ -45299,14 +45299,14 @@
       "submission_type": "poster",
       "primary_theme": "Vision",
       "secondary_topics": [
-        "AI, LLM, & neural networks",
         "Language/auditory neuroscience",
+        "AI, LLM, & neural networks",
         "Naturalistic encoding/decoding"
       ],
       "assigned_topics": [
         "Vision",
-        "AI, LLM, & neural networks",
         "Language/auditory neuroscience",
+        "AI, LLM, & neural networks",
         "Naturalistic encoding/decoding"
       ]
     },
@@ -48346,16 +48346,14 @@
       "poster_number": "A61",
       "source_url": "https://2024.ccneuro.org/poster/?id=534",
       "submission_type": "poster",
-      "primary_theme": "Naturalistic encoding/decoding",
+      "primary_theme": "Language/auditory neuroscience",
       "secondary_topics": [
         "AI, LLM, & neural networks",
-        "Language/auditory neuroscience",
         "Methods and theory"
       ],
       "assigned_topics": [
-        "Naturalistic encoding/decoding",
-        "AI, LLM, & neural networks",
         "Language/auditory neuroscience",
+        "AI, LLM, & neural networks",
         "Methods and theory"
       ]
     },
@@ -49222,9 +49220,12 @@
       "source_url": "https://2024.ccneuro.org/poster/?id=473",
       "submission_type": "poster",
       "primary_theme": "AI, LLM, & neural networks",
-      "secondary_topics": [],
+      "secondary_topics": [
+        "Methods and theory"
+      ],
       "assigned_topics": [
-        "AI, LLM, & neural networks"
+        "AI, LLM, & neural networks",
+        "Methods and theory"
       ]
     },
     {
@@ -55730,15 +55731,15 @@
       "submission_type": "poster",
       "primary_theme": "Clinical / computational psychiatry",
       "secondary_topics": [
-        "Reinforcement learning",
         "Motor control & planning",
+        "Reinforcement learning",
         "Perception",
         "Methods and theory"
       ],
       "assigned_topics": [
         "Clinical / computational psychiatry",
-        "Reinforcement learning",
         "Motor control & planning",
+        "Reinforcement learning",
         "Perception",
         "Methods and theory"
       ]
