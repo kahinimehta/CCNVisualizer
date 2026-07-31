@@ -85340,10 +85340,13 @@
       "source_url": "https://2026.ccneuro.org/poster/?id=ewXhJ9s9a7",
       "submission_type": "poster",
       "assigned_topics": [
-        "Methods and theory"
+        "Methods and theory",
+        "Attention & cognitive control / executive function"
       ],
       "primary_theme": "Methods and theory",
-      "secondary_topics": [],
+      "secondary_topics": [
+        "Attention & cognitive control / executive function"
+      ],
       "umap_x": 6.698127746582031,
       "umap_y": 6.1773176193237305
     },
