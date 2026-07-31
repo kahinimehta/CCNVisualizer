@@ -12,8 +12,8 @@
       2025,
       2026
     ],
-    "total_count": 2925,
-    "research_themes_assigned_at": "2026-07-23T16:03:46.411695+00:00",
+    "total_count": 2927,
+    "research_themes_assigned_at": "2026-07-31T06:51:57.242724+00:00",
     "research_theme_method": "Skipped classification; reused assigned_topics from submissions.json",
     "keyword_source": "Keywords prefer author-supplied fields from poster HTML or proceedings PDFs. When those are missing, 2025 uses official conference topic areas; 2026 uses conference topic areas (comma-split at scrape time). build.py reconcile_submission_keywords strips citation fragments and false positives.",
     "keyword_years": [
@@ -75838,39 +75838,6 @@
       ]
     },
     {
-      "id": "2026-A-FgSTpNdPb3",
-      "year": 2026,
-      "title": "Reaching for Emotion Regulation with Reachy Mini",
-      "authors": "Aarat Satsangi, Sara Lahourpour, Apurva Narayan",
-      "abstract": "Cognitive neuroscience models often lack ecological validity due to constrained laboratory environments and thus fail to generalize to real-world clinical deployments. To bridge this gap, we propose an extensible bedside companion utilizing the Reachy Mini robot. Our ultimate vision is an embodied system that holistically assesses patient physiological and cognitive-affective states, autonomously alerts medical personnel to anomalies, and improves clinical outcomes while serving as an 'ecological laboratory' for naturalistic data collection. As a foundational step toward this vision, we continuously monitor a user's emotional state in unconstrained settings using Electroencephalography (EEG), video, and speech. Upon detecting negative emotional shifts, a Large Language Model (LLM) triggers targeted cognitive interventions: auditory stimuli (music), semantic information processing (news), a collaborative story-building game, and a targeted cognitive assessment: Montreal Cognitive Assessment-Blind, ultimately demonstrating the viability of embodied AI for emotion regulation and real-world data capture.",
-      "author_keywords": [
-        "development",
-        "individual differences & clinical populations"
-      ],
-      "extracted_keywords": [],
-      "keywords": [
-        "development",
-        "individual differences & clinical populations"
-      ],
-      "topic_area": "development, individual differences & clinical populations",
-      "track": "",
-      "poster_number": "A-FgSTpNdPb3",
-      "source_url": "https://2026.ccneuro.org/poster/?id=FgSTpNdPb3",
-      "submission_type": "poster",
-      "primary_theme": "Clinical / computational psychiatry",
-      "secondary_topics": [
-        "AI, LLM, & neural networks",
-        "Naturalistic encoding/decoding",
-        "Attention & cognitive control / executive function"
-      ],
-      "assigned_topics": [
-        "Clinical / computational psychiatry",
-        "AI, LLM, & neural networks",
-        "Naturalistic encoding/decoding",
-        "Attention & cognitive control / executive function"
-      ]
-    },
-    {
       "id": "2026-A-Gba5a4UkyJ",
       "year": 2026,
       "title": "Variability in Young Children's Everyday Visual Experiences of Object Categories",
@@ -77421,41 +77388,6 @@
         "Vision",
         "AI, LLM, & neural networks",
         "Naturalistic encoding/decoding"
-      ]
-    },
-    {
-      "id": "2026-A-gDeKthBDSr",
-      "year": 2026,
-      "title": "Emergent Functional Circuits in Embodied Foragers",
-      "authors": "Salar Nouri, Harikrishna Satheesh Pillai, Pakhi Banchalia, Naoto Yoshida, Roxana Zeraati, Shervin Safavi",
-      "abstract": "Effective brain-body interactions are crucial for survival, as the brain monitors internal bodily states to regulate homeostasis and balance energy with cognitive and motor functions. However, the neural mechanisms linking physiological states to neural dynamics and behavior remain poorly understood. To explore this connection, we developed an embodied artificial neural network (ANN) agent to adaptively forage in a realistic environment, while maintaining physiological homeostasis. The agent was trained using homeostatic reinforcement learning, which applies a homeostatic objective instead of simply maximizing reward. We found that the agent learns to forage adaptively in the environment, i.e., it adapts its exploration and movement velocity to its satiety state, with broader and faster exploration occurring at higher hunger levels, consistent with recent observations in rodents. Using behaviorally guided analysis of neural dynamics, we identified distinct clusters of neurons encoding movement, internal state, and action inhibition. Our findings offer a novel computational framework to uncover the role of brain-body interactions in adaptive behaviors.",
-      "author_keywords": [
-        "methods",
-        "tools",
-        "theory & neural coding"
-      ],
-      "extracted_keywords": [],
-      "keywords": [
-        "methods",
-        "tools",
-        "theory & neural coding"
-      ],
-      "topic_area": "methods, tools, theory & neural coding",
-      "track": "",
-      "poster_number": "A-gDeKthBDSr",
-      "source_url": "https://2026.ccneuro.org/poster/?id=gDeKthBDSr",
-      "submission_type": "poster",
-      "primary_theme": "Reinforcement learning",
-      "secondary_topics": [
-        "Neural population geometry & dynamics",
-        "AI, LLM, & neural networks",
-        "Methods and theory"
-      ],
-      "assigned_topics": [
-        "Reinforcement learning",
-        "Neural population geometry & dynamics",
-        "AI, LLM, & neural networks",
-        "Methods and theory"
       ]
     },
     {
@@ -84604,37 +84536,6 @@
         "Language/auditory neuroscience",
         "AI, LLM, & neural networks",
         "Perception"
-      ]
-    },
-    {
-      "id": "2026-D-1z0PN9Cqs8",
-      "year": 2026,
-      "title": "From Clicks to Conflict: A Computational Study of Approach-Avoidance Conflict Task Engagement",
-      "authors": "Franziska Usée, Christiane A. Melzig, Dirk Ostwald, Anne Collins",
-      "abstract": "Approach-avoidance conflicts (AAC) arise when the same action carries both appetitive and aversive consequences. Such conflicts are central to anxiety-related maladaptive avoidance; yet, the computational mechanisms underlying avoidance behavior remain poorly understood. To contribute to this research gap, we adapted a foraging-based AAC online task: participants searched visual search fields using mouse clicks for fictive coins (i.e., rewards) while risking aversive screams (i.e., punishments). Each field was associated with an explicitly instructed combination of reward and punishment magnitudes (low/high reward × low/high punishment), and participants decided whether (i.e., commitment to search) and how long to search (i.e., extent of search). Across 46 participants, the observed engagement was maximal under high reward/low punishment and minimal under low reward/high punishment. Overall, both the commitment to search and the extent of search declined over trials. Agent-based behavioral modeling showed that commitment to search was best captured by additive reward and punishment sensitivity, baseline approach bias, and trial-dependent drift, whereas the extent of search additionally benefited from a reward-punishment interaction term. Exploratory individual-difference analyses linked approach-bias estimates to self-reported approach motivation and reward valence. These findings suggest that instructed AAC behavior reflects separable contributions of valuation, motivational bias, and temporal drift.",
-      "author_keywords": [
-        "decision making",
-        "cognitive control & event cognition"
-      ],
-      "extracted_keywords": [],
-      "keywords": [
-        "decision making",
-        "cognitive control & event cognition"
-      ],
-      "topic_area": "decision-making, cognitive control & event cognition",
-      "track": "",
-      "poster_number": "D-1z0PN9Cqs8",
-      "source_url": "https://2026.ccneuro.org/poster/?id=1z0PN9Cqs8",
-      "submission_type": "poster",
-      "primary_theme": "Decision-making and metacognition",
-      "secondary_topics": [
-        "Clinical / computational psychiatry",
-        "Attention & cognitive control / executive function"
-      ],
-      "assigned_topics": [
-        "Decision-making and metacognition",
-        "Clinical / computational psychiatry",
-        "Attention & cognitive control / executive function"
       ]
     },
     {
@@ -93770,6 +93671,155 @@
         "Perception",
         "AI, LLM, & neural networks"
       ]
+    },
+    {
+      "id": "2026-A61-EwfCMsxzUa",
+      "year": 2026,
+      "title": "The Dataset Matters: Linking Image Memorability to Adversarial Robustness",
+      "authors": "Ehsan Ur Rahman Mohammed, Willow Han, Elham Bagheri, Apurva Narayan, Yalda Mohsenzadeh",
+      "abstract": "Adversarial robustness is usually studied as a property of the model or training procedure, but the dataset itself may also shape vulnerability. We investigate whether image memorability, a human-derived intrinsic property of images, predicts adversarial robustness. Using the overlapping classes from MemCat and THINGS, we build a classbalanced dataset with memorability annotations and compare low versus high-memorability images under matched training and test splits. We finetune ViT-B/16, EfficientNet-B0, and ResNet-50, then evaluate robustness under FGSM-L2, PGD-L2, and CW-L2 attacks. Across architectures, high-memorability images are consistently more robust than low-memorability images, with the strongest and most frequent effects appearing for ViT and ResNet-50. Training on low-memorability images also increases overfitting, as captured by a composite overfitting index built from training dynamics. Finally, local geometry analyses show that high-memorability images occupy denser regions of the learned manifold, while low-memorability images lie in sparser, lesssupported regions. Together, the results suggest that memorability is not just a cognitive property of images, but also a useful datacentric predictor of adversarial resilience.",
+      "author_keywords": [
+        "memory",
+        "learning & knowledge structures"
+      ],
+      "extracted_keywords": [],
+      "keywords": [
+        "memory",
+        "learning & knowledge structures"
+      ],
+      "topic_area": "memory, learning & knowledge structures",
+      "track": "Extended_Abstracts",
+      "poster_number": "A61",
+      "source_url": "https://2026.ccneuro.org/poster/?id=EwfCMsxzUa",
+      "submission_type": "poster",
+      "primary_theme": "Vision",
+      "secondary_topics": [
+        "AI, LLM, & neural networks"
+      ],
+      "assigned_topics": [
+        "Vision",
+        "AI, LLM, & neural networks"
+      ]
+    },
+    {
+      "id": "2026-B42-9Fj0iRCCIA",
+      "year": 2026,
+      "title": "Dynamic noise correlations between feature-selective brain regions support efficient learning",
+      "authors": "Joonhwa Kim, Caesar Dai, Apoorva Bhandari, Matthew Nassar",
+      "abstract": "Learning to assign credit to relevant features is a challenging problem. Recent theoretical work has demonstrated that stimulusindependent covariation in trialtotrial neural activity fluctuations may reflect a dimensionality reduction mechanism that facilitates faster and more robust learning, but this proposal has yet to be empirically verified. Here we performed an empirical test of this theory by combining computational modeling, functional magnetic resonance imaging, and behavioral measures. Fortyfive human subjects performed a task requiring discrimination of multidimensional perceptual stimuli while undergoing fMRI. In each block of trials, subjects learned a classification boundary in a twodimensional feature space (color and motion) that was translated occasionally and unpredictably, forcing them to learn continuously on one of two possible joint feature dimensions (color+motion or colormotion, depending on block). A twolayer feedforward neural network performing this task showed that amplifying gain along taskrelevant dimensions produced noise correlations aligned to these dimensions and enhanced learning. Human behavioral data was best fit by models with higher gain on taskrelevant dimensions, suggesting that subjects focused on and updated the jointfeature dimensions that were most important for learning and task performance, and raising the question as to whether humans would show dynamic modulations of noise correlations across blocks to shift learning onto the relevant task dimension akin to gain adjustments in the model. Concurrently collected fMRI data revealed that noise correlations across featuresensitive regions are modulated in a taskdependent manner, in line with this basic model prediction. Specifically, when residual fMRI data were passed through decoders trained on color and motion respectively, noise correlations between the resulting feature noise vectors were more positive during [color+motion] learning blocks and more negative during [colormotion] learning blocks, supporting the idea that the brain dynamically amplifies taskrelevant dimensions to improve learning.",
+      "author_keywords": [
+        "methods",
+        "tools",
+        "theory & neural coding"
+      ],
+      "extracted_keywords": [],
+      "keywords": [
+        "methods",
+        "tools",
+        "theory & neural coding"
+      ],
+      "topic_area": "methods, tools, theory & neural coding",
+      "track": "Extended_Abstracts",
+      "poster_number": "B42",
+      "source_url": "https://2026.ccneuro.org/poster/?id=9Fj0iRCCIA",
+      "submission_type": "poster",
+      "primary_theme": "Methods and theory",
+      "secondary_topics": [
+        "Neural population geometry & dynamics"
+      ],
+      "assigned_topics": [
+        "Methods and theory",
+        "Neural population geometry & dynamics"
+      ]
+    },
+    {
+      "id": "2026-B97-Mehta",
+      "year": 2026,
+      "title": "CCN Over the Years: A Submission Visualizer",
+      "authors": "Kahini Mehta, Nuttida Rungratsameetaweemana",
+      "abstract": "CCN Visualizer (https://ccnvisualizer.vercel.app/) is an interactive webpage for exploring Cognitive Computational Neuroscience (CCN) conference submissions throughout the years. It summarizes 2925 posters from the public CCN archives (2017-2026) into a single searchable interface. The visualization is a static front end served from scraped data that allows fast loading speed despite traffic. Users can filter by year and theme, search across submissions, and inspect individual abstracts. Each submission is assigned research themes drawn from Google Form polls and the manual oversight of an LLM-assisted labelassignment process. Topic areas are assigned to each submission offline via an LLM, using title, abstract, and keywords. These topic areas can be used to filter through the submissions or observe how research at CCN has evolved over the years. Text embeddings generated via TF-IDF are also projected into a twodimensional map via UMAP clustering. On that map, proximity reflects the semantic similarity of different posters, so clusters show posters that are close in content. Using the dashboard, researchers can examine how different topics may cooccur, and understand how their research might fit in with other conference submissions. Thus, the dashboard can also help highlight researchers with similar interests, promoting collaborative science.",
+      "author_keywords": [
+        "methods",
+        "tools",
+        "theory & neural coding"
+      ],
+      "extracted_keywords": [],
+      "keywords": [
+        "methods",
+        "tools",
+        "theory & neural coding"
+      ],
+      "topic_area": "methods, tools, theory & neural coding",
+      "track": "Extended_Abstracts",
+      "poster_number": "B97",
+      "source_url": "https://2026.ccneuro.org/poster/?id=Mehta",
+      "submission_type": "poster",
+      "primary_theme": "Methods and theory",
+      "secondary_topics": [
+        "AI, LLM, & neural networks"
+      ],
+      "assigned_topics": [
+        "Methods and theory",
+        "AI, LLM, & neural networks"
+      ]
+    },
+    {
+      "id": "2026-B98-Klindt",
+      "year": 2026,
+      "title": "Clarifying and reconciling different perspectives on the structure of the neural code",
+      "authors": "Meenakshi Khosla, Marcus Benna, David Klindt, Tatiana Engel, Nikolaus Kriegeskorte, Stefano Fusi, Nancy Kanwisher",
+      "abstract": "The structure of the neural code has been characterized through numerous frameworks, such as category selectivity, mixed selectivity, modularity, disentangled coding or sparse coding, yet these have led to seemingly contradictory findings. We argue this apparent inconsistency stems from four interrelated sources of conceptual fragmentation: (1) frameworks lack consistent operational definitions, allowing different interpretations to proliferate; (2) they privilege different descriptive spaces, with some characterizing singleneuron tuning and others describing populationlevel geometry; (3) many coding properties are basisdependent, shaped by the choice of variables used to describe neural responses; and (4) many frameworks lack empirically testable criteria. We address these issues by proposing precise operational definitions for each framework, explicitly characterizing their analytical scope and basis dependence, and identifying testable empirical signatures with canonical examples. We show how apparently contradictory coding principles can often be reconciled as complementary views emerging from different levels of analysis or coordinate systems, and propose a unified vocabulary bridging neuroncentric and populationcentric perspectives.",
+      "author_keywords": [
+        "methods",
+        "tools",
+        "theory & neural coding"
+      ],
+      "extracted_keywords": [],
+      "keywords": [
+        "methods",
+        "tools",
+        "theory & neural coding"
+      ],
+      "topic_area": "methods, tools, theory & neural coding",
+      "track": "Extended_Abstracts",
+      "poster_number": "B98",
+      "source_url": "https://2026.ccneuro.org/poster/?id=Klindt",
+      "submission_type": "poster",
+      "primary_theme": "Methods and theory",
+      "secondary_topics": [
+        "Neural population geometry & dynamics"
+      ],
+      "assigned_topics": [
+        "Methods and theory",
+        "Neural population geometry & dynamics"
+      ]
+    },
+    {
+      "id": "2026-C97-Upgnd2fRvX",
+      "year": 2026,
+      "title": "Humans Remember People; Models Remember Pixels: Exposing Blind Spots in Visual Memorability Prediction",
+      "authors": "Benjamin TenWolde, Virginia R. de Sa",
+      "abstract": "Memorability is highly consistent across viewers, yet the models that predict it remain poorly understood. We analyze two architectures (ResMem, ViTMem) using attribution analysis, synthetic probes, and counterfactual interventions on THINGS. Both show little sensitivity to person presence (r=0.145 for humans vs. r=-0.068 for ResMem) and instead respond to chromatic and frequency statistics not linked to behavioral evidence. Gradientguided pixel perturbations invisible to humans (L_∞<2/255) shift predictions by ∼0.56, more than eight times the personpresence effect, indicating that these models rely on pixellevel statistics rather than the scenelevel processing that underlies human memorability.",
+      "author_keywords": [
+        "computational models of vision & visual cortex"
+      ],
+      "extracted_keywords": [],
+      "keywords": [
+        "computational models of vision & visual cortex"
+      ],
+      "topic_area": "computational models of vision & visual cortex",
+      "track": "Extended_Abstracts",
+      "poster_number": "C97",
+      "source_url": "https://2026.ccneuro.org/poster/?id=Upgnd2fRvX",
+      "submission_type": "poster",
+      "primary_theme": "Vision",
+      "secondary_topics": [
+        "AI, LLM, & neural networks"
+      ],
+      "assigned_topics": [
+        "Vision",
+        "AI, LLM, & neural networks"
+      ]
     }
   ],
   "stats": {
@@ -96800,11 +96850,11 @@
           ],
           [
             "Decision-making and metacognition",
-            44
+            43
           ],
           [
             "Methods and theory",
-            39
+            40
           ],
           [
             "Memory",
@@ -96936,7 +96986,11 @@
           ],
           [
             "Perception",
-            20
+            19
+          ],
+          [
+            "Language/auditory neuroscience",
+            17
           ],
           [
             "Social cognition & theory of mind",
@@ -96944,10 +96998,6 @@
           ],
           [
             "Clinical / computational psychiatry",
-            16
-          ],
-          [
-            "Language/auditory neuroscience",
             16
           ],
           [
@@ -96982,7 +97032,7 @@
           ],
           [
             "Language/auditory neuroscience",
-            45
+            46
           ],
           [
             "Methods and theory",
@@ -97014,7 +97064,7 @@
           ],
           [
             "Naturalistic encoding/decoding",
-            15
+            14
           ],
           [
             "Clinical / computational psychiatry",
@@ -97086,11 +97136,11 @@
         "2026": [
           [
             "Methods and theory",
-            123
+            126
           ],
           [
             "Vision",
-            110
+            112
           ],
           [
             "Memory",
@@ -97098,7 +97148,7 @@
           ],
           [
             "Decision-making and metacognition",
-            72
+            71
           ],
           [
             "Language/auditory neuroscience",
@@ -97106,7 +97156,7 @@
           ],
           [
             "Clinical / computational psychiatry",
-            27
+            26
           ],
           [
             "Neural population geometry & dynamics",
@@ -97126,7 +97176,7 @@
           ],
           [
             "Reinforcement learning",
-            13
+            12
           ],
           [
             "Attention & cognitive control / executive function",
@@ -97145,15 +97195,15 @@
       "primary_totals": [
         [
           "Vision",
-          563
+          565
         ],
         [
           "Decision-making and metacognition",
-          390
+          388
         ],
         [
           "Methods and theory",
-          373
+          377
         ],
         [
           "Memory",
@@ -97161,11 +97211,11 @@
         ],
         [
           "Language/auditory neuroscience",
-          228
+          230
         ],
         [
           "Reinforcement learning",
-          169
+          168
         ],
         [
           "AI, LLM, & neural networks",
@@ -97173,7 +97223,7 @@
         ],
         [
           "Perception",
-          124
+          123
         ],
         [
           "Attention & cognitive control / executive function",
@@ -97185,7 +97235,7 @@
         ],
         [
           "Clinical / computational psychiatry",
-          98
+          97
         ],
         [
           "Social cognition & theory of mind",
@@ -97193,7 +97243,7 @@
         ],
         [
           "Naturalistic encoding/decoding",
-          81
+          80
         ],
         [
           "Motor control & planning",
@@ -97203,11 +97253,11 @@
       "secondary_totals": [
         [
           "AI, LLM, & neural networks",
-          1258
+          1257
         ],
         [
           "Methods and theory",
-          1212
+          1208
         ],
         [
           "Neural population geometry & dynamics",
@@ -97215,35 +97265,35 @@
         ],
         [
           "Perception",
-          643
+          644
         ],
         [
           "Naturalistic encoding/decoding",
-          537
+          536
         ],
         [
           "Vision",
-          489
+          486
         ],
         [
           "Decision-making and metacognition",
-          423
+          421
         ],
         [
           "Attention & cognitive control / executive function",
-          409
+          406
         ],
         [
           "Reinforcement learning",
-          295
+          294
         ],
         [
           "Memory",
-          257
+          255
         ],
         [
           "Language/auditory neuroscience",
-          159
+          157
         ],
         [
           "Motor control & planning",
@@ -97251,7 +97301,7 @@
         ],
         [
           "Clinical / computational psychiatry",
-          93
+          91
         ],
         [
           "Social cognition & theory of mind",
