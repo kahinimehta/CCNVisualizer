@@ -507,11 +507,15 @@ def build_umap(submissions: list[dict]) -> dict:
 
     points = []
     for idx, submission in enumerate(submissions):
+        x = float(coords[idx, 0])
+        y = float(coords[idx, 1])
+        submission["umap_x"] = x
+        submission["umap_y"] = y
         points.append(
             {
                 "id": submission.get("id", ""),
-                "x": float(coords[idx, 0]),
-                "y": float(coords[idx, 1]),
+                "x": x,
+                "y": y,
                 "year": submission.get("year"),
                 "title": (submission.get("title") or "").strip(),
                 "poster_number": str(submission.get("poster_number") or ""),
@@ -573,6 +577,19 @@ def embedding_index(embeddings: dict) -> dict[str, dict]:
         if point.get("poster_number"):
             lookup[f"2026-{point['poster_number']}"] = point
     return lookup
+
+
+def apply_umap_coords(submissions: list[dict], embeddings: dict) -> None:
+    lookup = embedding_index(embeddings)
+    for submission in submissions:
+        poster = str(submission.get("poster_number") or "")
+        point = lookup.get(submission_row_key(submission)) or lookup.get(f"2026-{poster}")
+        if not point:
+            submission.pop("umap_x", None)
+            submission.pop("umap_y", None)
+            continue
+        submission["umap_x"] = float(point["x"])
+        submission["umap_y"] = float(point["y"])
 
 
 def build_csv_rows(payload: dict, embeddings: dict) -> list[dict[str, str]]:
@@ -669,6 +686,8 @@ def run_repair_only() -> None:
             embeddings = json.load(fh)
         embeddings = repair_embeddings(embeddings)
         write_embedding_outputs(embeddings)
+        apply_umap_coords(payload["submissions"], embeddings)
+        write_payload(payload)
     else:
         embeddings = {"points": []}
 
@@ -700,6 +719,7 @@ def run_build(
     write_payload(payload)
 
     embeddings = build_umap(payload["submissions"])
+    write_payload(payload)
     write_embedding_outputs(embeddings)
     write_csv(build_csv_rows(payload, embeddings))
 
