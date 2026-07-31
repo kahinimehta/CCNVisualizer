@@ -61401,7 +61401,7 @@
       "year": 2025,
       "title": "Unravelling the relationship between location and categorisation improves convolutional neural networks",
       "authors": "Jean-Nicolas Jérémie, Emmanuel Daucé, Laurent U Perrinet",
-      "abstract": "",
+      "abstract": "Many studies have attempted to enhance the performance of convolutional neural networks (CNNs) by increasing model complexity, adding parameters, or adopting alter- native architectures. Our approach differs in that we pri- oritise ecological plausibility in order to achieve high ac- curacy with minimal computational cost. We focus on visual search, which requires the localisation and cate- gorisation of a target object in natural scenes. Due to the inhomogeneity of foveal retinotopy in human visual representations, localisation plays a key role in correctly categorising labels of interest when performing this task. We propose a framework referred to as a 'likelihood map', based on the probability of correctly identifying the target label, which explores prediction by a dedicated network according to the position of the fixation point. Depend- ing on the scenario, it can be guided (or not guided) by the target label in a manner similar to Grad-CAM or DFF. In both scenarios, we demonstrate improved classifica- tion performance when the sensor shifts towards the re- gion of interest. Beyond its computational benefits, this framework can be used as an experimental tool to further investigate the neural mechanisms underlying visual pro- cessing.",
       "author_keywords": [],
       "extracted_keywords": [],
       "keywords": [
@@ -61484,7 +61484,7 @@
       "year": 2025,
       "title": "Brittle Brain Encoding: Poor Out-of-Distribution Generalization Shows the Human Brain is neither a Nintendo Entertainment System nor a Four-Layer Convolutional Neural Network",
       "authors": "Yann Harel, François Paugam, Marie St-Laurent, Lune Bellec",
-      "abstract": "",
+      "abstract": "To explore the correspondence between artificial neural networks and brain function, we tested three models—trained agent, untrained agent, and game RAM—on their capacity to use game data to predict brain activity (fMRI) in humans playing Super Mario Bros. All brain encoding models performed similarly within the training distribution (training levels), but none generalized to out-of-distribution (OOD) levels. The OOD performance drop was generally greater than the difference between models. Our results underscore how current brain encoding approaches may overstate brain-model similarity, and highlight the critical importance of evaluating generalization when using brain scores to compare models.",
       "author_keywords": [],
       "extracted_keywords": [],
       "keywords": [
@@ -63074,17 +63074,11 @@
       "year": 2025,
       "title": "Behavioral Dynamics of Cognitive and Metacognitive Conflict",
       "authors": "Jintao Xing, Kobe Desender",
-      "abstract": "",
-      "author_keywords": [
-        "conflict",
-        "confidence",
-        "decision making"
-      ],
+      "abstract": "Cognitive conflict has been widely used to investigate cognitive control mechanisms. Recent research extended this to the metacognitive level by defining metacognitive conflict as the inconsistency between external feedback and confidence. The current work investigates interaction between both types of conflict using a modified Simon task, tracking how and whether cognitive and metacognitive conflict jointly shape cognitive performance and confidence. The results revealed significant but independent effects of adaptation to cognitive conflict and adaptation to metacognitive conflict. Model-based analysis further revealed opposite effects of post-decision biased accumulation: biased towards high confidence after incongruent trials and biased towards low confidence after metacognitive conflict trials. Together, these results highlight independent yet parallel mechanisms through which different types of conflict shape decision making.",
+      "author_keywords": [],
       "extracted_keywords": [],
       "keywords": [
-        "conflict",
-        "confidence",
-        "decision making"
+        "predictive processing & cognitive control"
       ],
       "topic_area": "Predictive Processing & Cognitive Control",
       "track": "",
@@ -63622,7 +63616,7 @@
       "year": 2025,
       "title": "Temporal dynamics of natural sounds representation in the human brain",
       "authors": "Marie Plegat, Giorgio Marinato, Christian Ferreyra, Michele Esposito, Elia Formisano, Bruno L. Giordano",
-      "abstract": "",
+      "abstract": "Acoustic and semantic representations involved in the temporal dynamics of the cerebral processing of natural sounds are often studied separately. As a consequence, we lack direct knowledge of how the human brain transforms complex acoustic waveforms into semantic representations of the acoustic environment. Here, we aimed to elucidate this process by predicting magnetoencephalographic (MEG) responses to natural sounds using acoustic, and semantic (text-based) models. Critically, we also consider two recently developed sound-processing convolutional neural networks (CNNs) that differ only in their loss function: CatDNN, which learns sound-event categories, and SemDNN, which learns continuous semantic embeddings (Word2Vec). We observe that DNNs better predict the dynamic MEG response, except at a long latency (800–1000 ms) where higher-level acoustics seems to dominate (auditory dimensions). Focusing on DNNs, we observe a potential switch from initial protoacoustic/categorical semantic representations (CatDNN, 250 ms) to more refined continuous semantic representations (SemDNN, 500–800 ms). Overall, our findings suggest limitations in the text-based modeling of the cerebral representations of natural sounds, and give a temporally resolved description of the cerebral dynamics of the acoustic-to-semantic transformation.",
       "author_keywords": [],
       "extracted_keywords": [],
       "keywords": [
@@ -64186,15 +64180,11 @@
       "year": 2025,
       "title": "Prior Scene Context Modulates the Dynamic Interplay Between Bottom-Up and Top-Down Neural Processes in Face Detection",
       "authors": "Sule Tasliyurt Celebi, Daniel Kaiser, Katharina Dobs",
-      "abstract": "",
-      "author_keywords": [
-        "face perception",
-        "top-down processing"
-      ],
+      "abstract": "Within a fraction of a second, we detect faces in our environment. How is this remarkably fast process implemented in the brain, and is it modulated by top-down mechanisms? Here, we used electroencephalography (EEG) to probe how prior scene context shapes temporal dynamics of neural face representations in natural settings. Participants viewed images of natural scenes containing a single face (on the left or right) that followed either a faceless preview (preview condition) or a gray screen (no-preview condition), while performing a face detection task (~10% foils). Using MVPA decoding, we were able to decode the face location (left vs. right) shortly after target onset. Critically, decoding accuracy of face location was initially higher in the preview condition, while the no-preview condition showed increased accuracy at later processing stages. Moreover, time-frequency analyses showed an enhanced decodability of face location in the preview condition in the alpha band (8–13 Hz), consistent with enhanced spatial orienting. Our findings suggest that prior scene context modulates face detection via distinct neural mechanisms that affect both bottom-up sensory integration and top-down spatial attention, thereby highlighting the dynamic interplay between contextual cues and neural processing.",
+      "author_keywords": [],
       "extracted_keywords": [],
       "keywords": [
-        "face perception",
-        "top-down processing"
+        "object recognition & visual attention"
       ],
       "topic_area": "Object Recognition & Visual Attention",
       "track": "",
@@ -64925,7 +64915,7 @@
       "year": 2025,
       "title": "A joint model of risk-taking and learning related to risks based on behavioral and prefrontal oxygenation measures",
       "authors": "Hatice Gonca Bulur, Alaz Aydın, Barbaros Yet, Murat Perit Çakır",
-      "abstract": "",
+      "abstract": "This study examines the neural and cognitive mechanisms of risk-taking by integrating behavioral and fNIRS data through a joint modeling approach. Participants completed a modified Balloon Analogue Risk Task (BART) under conditions varying in uncertainty, while a functional near-infrared spectroscopy (fNIRS) device was used to monitor their prefrontal cortex (PFC) activity. A censored Bayesian model estimated individual risk-taking propensity, which was linked to HbO levels across PFC subregions with a joint model. Traditional analyses revealed condition-specific effects, whereas the joint model identified individual-level correlations between risk propensity and PFC activity. Notably, stronger correlations emerged in the left dorsolateral PFC under structured uncertainty and in the right dorsolateral PFC under random uncertainty— patterns not accounted by classical methods. These findings highlight the value of joint modeling in revealing latent brain–behavior relationships.",
       "author_keywords": [],
       "extracted_keywords": [],
       "keywords": [
@@ -66001,7 +65991,7 @@
       "year": 2025,
       "title": "Disentangling redundant and synergistic interactions in the alignment between auditory brains and machines",
       "authors": "Christian Ferreyra, Marie Plegat, Giorgio Marinato, Michele Esposito, Elia Formisano, Bruno L. Giordano",
-      "abstract": "",
+      "abstract": "Artificial neural networks (ANNs) have become increasingly useful for modeling how the brain builds representations from the natural world, yet the nature of their representational alignment with dynamic brain activity remains underexplored. Here, we introduce an information-theoretic framework to decompose representational geometries into redundant and synergistic components using partial information decomposition (PID). Combining magnetoencephalography (MEG) recordings from participants listening to natural sounds, and two sound-processing ANNs with categorical (CatDNN) and continuous (SemDNN) semantic outputs, we analyze time-varying brain-model alignment for two optimized stimulus sets. For low-agreement stimulus sets, where mutual information between models is minimized, SemDNN reveals higher mutual information with brain activity. PID further shows greater redundancy and synergy for SemDNN, suggesting sustained temporal integration of intermediate semantic features that can potentially afford a more accurate readout of the auditory environment. These results highlight the value of representational decomposition for detailing shared and complementary components of the alignment between brains and ANNs.",
       "author_keywords": [],
       "extracted_keywords": [],
       "keywords": [
@@ -66781,7 +66771,7 @@
       "year": 2025,
       "title": "Classification of Mental Workload Spatial Effects using Riemannian Manifold",
       "authors": "Agathe Choplin, Thomas Rakotomamonjy, Laurent U Perrinet, Nicolas Lantos, Sébastien Angelliaume",
-      "abstract": "",
+      "abstract": "This study investigates the use of Riemannian geometry to classify mental workload from an EEG dataset collected in an aeronautical context. The analysis, based on EEG data recorded from 16 participants performing a Simon task, aimed to differentiate low and high workload conditions. Using covariance matrices and a Minimum Distance to Mean (MDM) classifier, the results demonstrate spatial effects of mental workload irrespective of the investigated spectral domain. This demonstrates that spatial information is distributed evenly across all explored frequency bands.",
       "author_keywords": [],
       "extracted_keywords": [],
       "keywords": [
@@ -67003,7 +66993,7 @@
       "year": 2025,
       "title": "Predictions emerge in neural networks trained to perceive Bach's music",
       "authors": "Akanksha Gupta, Alejandro Tabas",
-      "abstract": "",
+      "abstract": "Predictive processing proposes that the prior knowledge relevant for inference is compressed into a prediction on the immediately future states. Here we inquire whether neural networks trained to infer the current latent state in musical sequences develop a set of internal predictions on what comes next. We used noisy tokenized Bach compositions as sensory inputs and trained RNN as models of neural circuits. We first trained the networks to infer the current latent state (token of the composition without noise) given a stream of observations (tokens of the composition with noise). After the training, we inspected whether the internal states of the network stored predictive information on the next token. To do this, we fitted a linear readout from the hidden states of the network optimized to predict the next latent state. To ensured that the predictions were stored in the network and not computed by the linear readout, we compared the predictive performance of the network with that of a linear network trained to predict the next latent state based on the current latent state. The results confirm that neural circuits optimized to perceive the current state learn to predict future sensory input, suggesting that predictive capabilities emerge as a natural consequence of such optimization. These findings offer computational evidence for predictive processing and provide insights into how biological systems might compress their prior knowledge and use it to navigate in noisy environments.",
       "author_keywords": [],
       "extracted_keywords": [],
       "keywords": [
@@ -67329,23 +67319,11 @@
       "year": 2025,
       "title": "Connectivity Effects of cTBS to the DLPFC: Examining beta phase synchronisation between the left and right DLPFC",
       "authors": "Veronica Forslund, Alexandra Woolgar, Elizabeth Michael",
-      "abstract": "",
-      "author_keywords": [
-        "functional connectivity",
-        "dlpfc",
-        "neurostimulation",
-        "tms",
-        "tbs",
-        "phase synchronization"
-      ],
+      "abstract": "Transcranial magnetic stimulation (TMS) can induce lasting change in neural activity at both the stimulation site and brain-wide circuits. However, the efficacy of repetitive protocols in inducing brain-wide neuromodulation can vary. This pilot study used EEG to explore connectivity effects in the form of phase synchronisation between the left and right DLPFC after administration of continuous theta burst stimulation (cTBS) at the left Dorsal Lateral Prefrontal Cortex (DLPFC). To do this we used single-pulse TMS to probe connectivity effects before and after cTBS or sham cTBS. Unlike other forms of repetitive TMS (rTMS) and intermittent theta burst stimulation (iTBS), we found no change in connectivity following cTBS, highlighting the variability of neural outcomes that can follow apparently similar intervention protocols.",
+      "author_keywords": [],
       "extracted_keywords": [],
       "keywords": [
-        "functional connectivity",
-        "dlpfc",
-        "neurostimulation",
-        "tms",
-        "tbs",
-        "phase synchronization"
+        "brain networks & neural dynamics"
       ],
       "topic_area": "Brain Networks & Neural Dynamics",
       "track": "",
@@ -68213,7 +68191,7 @@
       "year": 2025,
       "title": "Dynamic Norm-Based Coding of Vocal Identity by the Primate Voice Patches Neurons",
       "authors": "Yoan Esposito, Louis-Jean Boe, Regis Trapeau, Luc Renaud, Matthieu Gilson, Margherita Giamundo, Pascal Belin",
-      "abstract": "",
+      "abstract": "The neural representation of conspecific vocal identity remains poorly understood in nonhuman primates. Drawing on norm-based coding theories of face identity, we investigated whether a similar mechanism supports voice identity encoding in the macaque brain. We recorded spiking activity from the fMRI-localized voice sensitive region of two awake macaques while presenting synthetic 'coo' vocalizations morphed along a continuum from antivoice to caricature. Dimensionality reduction techniques revealed distinct neuronal subpopulations: for example, one exhibited a very early V-shaped tuning profile, with increasing firing rates as voices deviated from the average, consistent with a norm-based coding strategy; another showed the exact inverse pattern, but with delayed responses. These temporally and functionally distinct subpopulations suggest complementary encoding strategies for representing vocal identity, potentially reflecting both deviation-from-mean and identity-certainty mechanisms. Our findings mirror encoding patterns observed in face-selective regions and provide novel evidence that norm-based coding may be a general principle of high-level social perception across sensory modalities.",
       "author_keywords": [],
       "extracted_keywords": [],
       "keywords": [
@@ -70891,7 +70869,7 @@
       "year": 2025,
       "title": "Long Range Cortical Interactions During Comparison of Sensory and Cognitive Information",
       "authors": "Camila Losada, Alexis Monnet-Aimard, Guilhem Ibos",
-      "abstract": "",
+      "abstract": "Adapting our behavior to our environment depending on contextual demands involves large, distributed networks of cortical and subcortical areas. Prefrontal (PFC) and lateral intraparietal area (LIP) process both sensory and cognitive factors in very similar manner. However, their respective contributions to visual processing and cognitive control remain largely unclear. In this study, macaque monkeys performed a modified delay-match to sample task while we simultaneously recorded neuronal activity from V4, LIP and PFC. We show differential PFC/LIP dynamics: PFC exhibits successive encoding of different cognitive processes, while LIP shows more stable representations that integrate both sensory and cognitive signals.",
       "author_keywords": [],
       "extracted_keywords": [],
       "keywords": [
@@ -71090,15 +71068,11 @@
       "year": 2025,
       "title": "Rethinking Representational Alignment: Linear Probing Fails to Identify the Ground-Truth Model",
       "authors": "Itamar Avitan, Tal Golan",
-      "abstract": "",
-      "author_keywords": [
-        "model recovery",
-        "deep neural networks"
-      ],
+      "abstract": "Linearly transforming stimulus representations of deep neural networks yields performant models of human similarity judgments. But can the predictive accuracy of such models identify genuine representational alignment? We conducted a model recovery study to test this empirically. We aligned 20 diverse pretrained models to 4.2 million human judgments from the THINGS-odd-one-out dataset, generated synthetic data conforming to the predictions of one of the models, and tested whether this model would re-emerge as the best predictor of the simulated data, as measured by linear probing. We found that even with large datasets, linear probing can systematically fail to recover ground-truth models. Our findings call for a reconsideration of the flexibility of model-human alignment metrics and the design of model comparison studies.",
+      "author_keywords": [],
       "extracted_keywords": [],
       "keywords": [
-        "model recovery",
-        "deep neural networks"
+        "visual processing & computational vision"
       ],
       "topic_area": "Visual Processing & Computational Vision",
       "track": "",
@@ -72189,7 +72163,7 @@
       "year": 2025,
       "title": "CNeuroMod Data Collection Complete: 200h of individual fMRI Across Diverse Naturalistic and Controlled Tasks to build NeuroAI models",
       "authors": "Julie A. Boyle, Basile Pinsard, Lune Bellec",
-      "abstract": "",
+      "abstract": "Dense fMRI datasets are gaining popularity as a powerful resource to build integrative NeuroAI models to understand the brain. The Courtois Project on Neuronal Modelling (CNeuroMod) has now completed a 5-years data collection process resulting in 200 hours of fMRI data per subject using diverse naturalistic and controlled cognitive tasks. CNeuroMod is the largest dense fMRI dataset currently available to support the development of individualized and generalizable AI models of complex brain processes .",
       "author_keywords": [],
       "extracted_keywords": [],
       "keywords": [
@@ -73696,7 +73670,7 @@
       "year": 2025,
       "title": "Spectral Encoding Profile for multilevel linguistic predictions",
       "authors": "Clément Sauvage, Pierre Guilleminot, Benjamin Morillon",
-      "abstract": "",
+      "abstract": "Speech processing is believed to rely on two types of information. First, the predictions, which are endogenous and flowing down the cortical hierarchy in a top-down manner, and second, the prediction errors, computed as the difference between the effective and the predicted inputs at each stage of the said hierarchy, in a bottom-up flow of information. The putative role of neural oscillations to mediate those signals is still a question of debate. Here we recorded intracranial EEG activity of 45 epileptic patients, while they listened to ecological speech. We used a Large Language Model to extract proxies of both prediction uncertainty and prediction errors at three linguistic levels, phonemes, syllables and words. We found that encoding of prediction errors and prediction uncertainty peaks respectively in high-gamma and beta bands, only in Primary Auditory Cortex and Superior Temporal Gyrus.",
       "author_keywords": [],
       "extracted_keywords": [],
       "keywords": [
@@ -74229,7 +74203,7 @@
       "year": 2025,
       "title": "Correspondence between reinforcement learning phenotypes and transdiagnostic clinical symptomatology across development",
       "authors": "Noam Goldway, Nora Harhen, Qingqing Yang, Sophia Nielsen, Levi Solomyak, Sam Zorowitz, Gal Shoval, Eran Eldar, Yael Niv, Catherine Hartley",
-      "abstract": "",
+      "abstract": "Adolescence is marked by neurocognitive changes and heightened vulnerability to psychiatric disorders. Yet, it remains unclear how age-related changes in learning processes known to contribute to adult psychopathology may contribute to the emergence of psychiatric symptoms. In a sample of 889 individuals aged 10–25, we related reinforcement learning computational phenotypes to psychopathology measured along multiple dimensions of dysfunction. Participants completed three learning tasks targeting sensitivity to positive versus negative outcomes, Pavlovian bias (innate versus instrumental behavior), and model-based control (goal-directed planning). Factor analysis of self-report questionnaires identified four symptom dimensions: rumination, physiological anxiety, impulsivity/dysregulation, and anhedonia. Symptom expression varied with age, and each symptom domain demonstrated a distinct computational signature.",
       "author_keywords": [],
       "extracted_keywords": [],
       "keywords": [
