@@ -1843,6 +1843,29 @@ def sanitize_submission_keywords(submission: dict) -> None:
 YEARS_TOPIC_AREA_KEYWORDS = frozenset({2025})
 IGNORED_CONFERENCE_LABELS = frozenset({"view pdf", "view paper pdf", ""})
 
+KEYWORD_SOURCE_NOTE = (
+    "Keywords prefer author-supplied fields from poster HTML or proceedings PDFs. "
+    "When those are missing, 2025 uses official conference topic areas; 2026 uses "
+    "conference topic areas (comma-split at scrape time). "
+    "build.py reconcile_submission_keywords strips citation fragments and false positives."
+)
+
+
+def refresh_payload_metadata(payload: dict) -> None:
+    """Keep submissions.json metadata aligned with the current pipeline."""
+    submissions = payload.get("submissions", [])
+    metadata = payload.setdefault("metadata", {})
+    metadata["source"] = "https://ccneuro.org archives (2017-2026)"
+    metadata["keyword_source"] = KEYWORD_SOURCE_NOTE
+    metadata["keyword_years"] = sorted(
+        {
+            sub["year"]
+            for sub in submissions
+            if sub.get("year") is not None and sub.get("keywords")
+        }
+    )
+    metadata.pop("csv_2026", None)
+
 
 def conference_topic_label(submission: dict) -> str | None:
     for raw in (submission.get("topic_area"), submission.get("track")):

@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Restore author keywords from a historical abstracts_2_topics.csv snapshot."""
+"""Restore author keywords from a historical abstracts_2_topics.csv git snapshot.
+
+One-off maintenance script — not part of the normal scrape/build pipeline.
+Use when keyword reconciliation or sanitization needs to be rolled back from CSV history.
+"""
 
 from __future__ import annotations
 

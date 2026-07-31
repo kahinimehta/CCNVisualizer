@@ -27,6 +27,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from umap.umap_ import UMAP  # avoid umap.__init__ → parametric_umap → tensorflow
 
 from shared import (
+    KEYWORD_SOURCE_NOTE,
     content_keywords,
     dashboard_keywords,
     is_gac_update,
@@ -34,6 +35,7 @@ from shared import (
     normalize_author_names,
     normalize_field_text,
     reconcile_submission_keywords,
+    refresh_payload_metadata,
     repair_embeddings,
     repair_submission_text,
     sanitize_keyword_list,
@@ -472,12 +474,7 @@ def apply_assignments(
     payload["stats"]["research_themes"] = compute_theme_stats(submissions, topics)
     payload["metadata"]["research_themes_assigned_at"] = datetime.now(timezone.utc).isoformat()
     payload["metadata"]["research_theme_method"] = theme_method
-    payload["metadata"]["keyword_source"] = (
-        "author_keywords prefer poster HTML, proceedings/authored PDFs (2017-2025), or 2026 topic areas; "
-        "extracted_keywords only when no author keywords are available; citation fragments and "
-        "metadata area labels stripped before export"
-    )
-    payload["metadata"]["keyword_years"] = sorted({sub["year"] for sub in submissions if sub.get("keywords")})
+    refresh_payload_metadata(payload)
     payload["metadata"]["google_topics_source"] = config.get("source")
     return payload
 
@@ -654,6 +651,7 @@ def repair_payload(payload: dict) -> dict:
     for submission in payload.get("submissions", []):
         repair_submission_text(submission)
         reconcile_submission_keywords(submission)
+    refresh_payload_metadata(payload)
     return payload
 
 

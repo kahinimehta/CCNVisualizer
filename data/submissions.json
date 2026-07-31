@@ -1,7 +1,7 @@
 {
   "metadata": {
     "scraped_at": "2026-07-22T19:39:22.528597+00:00",
-    "source": "https://ccneuro.org archives (2018-2025) + 2026 pending CSV",
+    "source": "https://ccneuro.org archives (2017-2026)",
     "years": [
       2017,
       2018,
@@ -13,14 +13,9 @@
       2026
     ],
     "total_count": 2925,
-    "csv_2026": {
-      "path": "data/ccn-2026-pending-posters.csv",
-      "merged_at": "2026-07-07T14:32:24.252020+00:00",
-      "count": 617
-    },
     "research_themes_assigned_at": "2026-07-23T16:03:46.411695+00:00",
     "research_theme_method": "Skipped classification; reused assigned_topics from submissions.json",
-    "keyword_source": "author_keywords prefer author-provided fields (poster HTML, proceedings PDF, 2026 topic areas); extracted_keywords only when no author keywords or conference label is available",
+    "keyword_source": "Keywords prefer author-supplied fields from poster HTML or proceedings PDFs. When those are missing, 2025 uses official conference topic areas; 2026 uses conference topic areas (comma-split at scrape time). build.py reconcile_submission_keywords strips citation fragments and false positives.",
     "keyword_years": [
       2017,
       2018,

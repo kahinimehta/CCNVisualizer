@@ -31,6 +31,7 @@ from bs4 import BeautifulSoup
 from pypdf import PdfReader
 
 from shared import (
+    KEYWORD_SOURCE_NOTE,
     YEARS_TOPIC_AREA_KEYWORDS,
     is_gac_update,
     is_metadata_keyword,
@@ -62,28 +63,6 @@ NOISE_KEYWORDS = {
     "conference", "neuroscience", "computational", "cognitive", "ccn",
 }
 
-
-STOPWORDS = {
-    "a", "about", "above", "across", "after", "again", "against", "all", "also",
-    "an", "and", "any", "are", "as", "at", "be", "been", "before", "being", "between",
-    "both", "but", "by", "can", "could", "did", "do", "does", "during", "each", "for",
-    "from", "further", "had", "has", "have", "having", "he", "her", "here", "hers",
-    "him", "his", "how", "however", "if", "in", "into", "is", "it", "its", "just",
-    "may", "might", "more", "most", "much", "must", "no", "not", "of", "on", "one",
-    "only", "or", "other", "our", "out", "over", "own", "same", "she", "should", "so",
-    "some", "such", "than", "that", "the", "their", "them", "then", "there", "these",
-    "they", "this", "those", "through", "to", "too", "under", "until", "up", "use",
-    "using", "very", "was", "we", "were", "what", "when", "where", "which", "while",
-    "who", "whom", "why", "will", "with", "within", "without", "would", "you", "your",
-    "abstract", "paper", "study", "studies", "results", "show", "shows", "shown",
-    "find", "found", "used", "using", "based", "approach", "model", "models", "data",
-    "analysis", "method", "methods", "work", "present", "propose", "proposed",
-    "here", "thus", "however", "although", "across", "among", "via", "well", "new",
-    "two", "three", "first", "second", "third", "many", "several", "different",
-    "including", "compared", "compare", "related", "across", "provide", "provides",
-    "demonstrate", "demonstrates", "investigate", "investigates", "examined",
-    "examines", "test", "tests", "tested", "human", "humans", "brain", "neural",
-}
 
 IGNORED_TOPIC_LABELS = {"view pdf", "view paper pdf", ""}
 
@@ -246,23 +225,6 @@ def normalize_author_keywords(keywords: list[str]) -> list[str]:
         ):
             return []
     return normalized
-
-
-def tokenize(text: str) -> list[str]:
-    tokens = re.findall(r"[a-z][a-z0-9\-]{2,}", text.lower())
-    return [t for t in tokens if t not in STOPWORDS and not t.isdigit()]
-
-
-def derive_archive_keywords(title: str, abstract: str, limit: int = 6) -> list[str]:
-    """Last-resort token fallback when author keywords are unavailable in HTML or PDF."""
-    derived: list[str] = []
-    derived.extend(tokenize(title)[:4])
-    if abstract and abstract != title and "@" not in abstract:
-        counts = Counter(tokenize(abstract))
-        for term, _ in counts.most_common(limit):
-            if term not in derived:
-                derived.append(term)
-    return derived[:limit]
 
 
 def resolve_keyword_fields(
@@ -1246,12 +1208,6 @@ CACHE_DIR = ROOT / "data" / "pdf_cache"
 
 # Years where proceedings / authored PDFs may contain keywords or author lines.
 YEARS_WITH_PDF = (2017, 2018, 2019, 2022, 2023, 2024, 2025, 2026)
-
-KEYWORD_SOURCE_NOTE = (
-    "author_keywords prefer author-provided fields (poster HTML, proceedings PDF, 2026 topic areas); "
-    "extracted_keywords only when no author keywords or conference label is available"
-)
-
 
 def parse_pdf_url_from_html(html: str, base_url: str) -> str:
     for match in re.finditer(r'href=["\']([^"\']+\.pdf(?:\?[^"\']*)?)["\']', html, re.I):
