@@ -1675,7 +1675,7 @@ def is_plausible_keyword(keyword: str) -> bool:
         return False
     if any(word in KEYWORD_VERBS for word in words):
         return False
-    if any(len(word) > 18 for word in words):
+    if any(len(word) > (36 if "-" in word else 18) for word in words):
         return False
     if re.search(r"[.!?]", normalized):
         return False
