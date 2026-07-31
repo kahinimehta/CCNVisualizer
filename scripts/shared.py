@@ -36,11 +36,6 @@ METADATA_KEYWORD_PHRASES = frozenset(
 
 METADATA_KEYWORD_TOKENS = frozenset(
     {
-        "fmri",
-        "eeg",
-        "meg",
-        "ecog",
-        "bold",
         "neuroimaging",
         "psychological",
         "behavioral",
@@ -53,6 +48,26 @@ METADATA_KEYWORD_TOKENS = frozenset(
         "poster",
         "paper",
         "proceedings",
+    }
+)
+
+# Valid author-supplied acronyms; not conference metadata when used as keywords.
+_AUTHOR_KEYWORD_ACRONYMS = frozenset(
+    {
+        "fmri",
+        "eeg",
+        "meg",
+        "ecog",
+        "bold",
+        "mri",
+        "pet",
+        "dti",
+        "erp",
+        "lfp",
+        "dnn",
+        "tpj",
+        "dmpfc",
+        "vmpfc",
     }
 )
 
@@ -1053,6 +1068,7 @@ def drop_reference_name_keywords(keywords: list[str]) -> list[str]:
 def normalize_keyword_phrase(keyword: str) -> str:
     cleaned = _KEYWORD_INVISIBLE_RE.sub("", keyword or "")
     cleaned = normalize_ligatures(cleaned)
+    cleaned = re.sub(r"-\s+", "", cleaned)
     cleaned = re.sub(r"\s+", " ", cleaned.strip().lower())
     cleaned = strip_citation_fragments(cleaned)
     cleaned = expand_compound_keyword(cleaned)
@@ -1075,6 +1091,8 @@ def is_metadata_keyword(keyword: str) -> bool:
     normalized = normalize_keyword_phrase(keyword)
     if not normalized:
         return True
+    if normalized in _AUTHOR_KEYWORD_ACRONYMS:
+        return False
     if normalized in METADATA_KEYWORD_PHRASES:
         return True
     if normalized in GENERIC_KEYWORD_LABELS:

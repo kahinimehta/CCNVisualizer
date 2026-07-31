@@ -23528,9 +23528,23 @@
       "title": "A Highly Selective Neural Response to Food in Human Visual Cortex Revealed by Hypothesis-Free Voxel Decomposition",
       "authors": "Meenakshi Khosla, Apurva Ratan Murty, Elizabeth Mieczkowski, Nancy Kanwisher",
       "abstract": "Prior work has identified regions of high-level visual cortex selectively responsive to faces, places, bodies, and words. However, this largely hypothesis-driven work cannot reveal how prominent these category selectivities are in the overall functional organization of the visual cortex, or what other un-hypothesized selectivities exist. Further, standard methods cannot detect selective neural populations that coexist with functionally distinct populations within voxels. To overcome these limitations, we applied a data-driven voxel decomposition analysis to identify a robust set of component response profiles consistent across subjects in a recently released public data set of fMRI responses to thousands of complex photographic stimuli (Allen et al., 2021). Four of the five top components revealed by our analysis were clearly selective for people, faces, scenes, and words. The analysis also revealed a novel component with a distinct anatomy that responded highly selectively to images of food. Alternative accounts based on lower-level visual features like color, shape or texture failed to account for the high-level category selectivity of this component. Analyses of independent data revealed the same top components, replicating these dominant dimensions, including a food-selective component, in new subjects.",
-      "author_keywords": [],
+      "author_keywords": [
+        "functional organization",
+        "category selectivity",
+        "naturalistic",
+        "high-resolution fmri",
+        "hypothesis-free",
+        "food"
+      ],
       "extracted_keywords": [],
-      "keywords": [],
+      "keywords": [
+        "functional organization",
+        "category selectivity",
+        "naturalistic",
+        "high-resolution fmri",
+        "hypothesis-free",
+        "food"
+      ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
       "poster_number": "",
@@ -26867,9 +26881,21 @@
       "title": "Manipulated decoy desirability modulates phantom decoy effect",
       "authors": "Luis Alvarez, Daniel Acosta-Kane, Angela Yu",
       "abstract": "Human decisions are influenced by supposed irrelevant information. For example, decoy effects show that preferences between two options of proportional value shift when a third option is included. Previous work has focused on classic decoy effects (similarity, attraction, and compromise), producing descriptive and normative accounts of decoy effects. Many standard accounts often ignore or fail to explain phantom decoy effects. These are complex effects involving a decoy that asymmetrically dominates one option; when unavailable, the phantom increases the preference for the dominated option, but when available, it reduces it. Considering phantom decoys are frequently encountered in everyday decision-making, a complete model of decoy effects must be able to explain why these effects occur. To broaden our understanding of decoy effects, we investigated a) whether the coupling between trinary choices and b) the desirability of a phantom option influences decoy choices. A group of undergraduate students completed an experiment where they had to select their preferred option from trinary choice sets while we manipulated the desirability of phantom alternatives and coupling of options. Our results demonstrate the desirability of a phantom alternative is a major factor driving phantom decoy effects.",
-      "author_keywords": [],
+      "author_keywords": [
+        "multi-attribute decision making",
+        "preference shifts",
+        "context effects",
+        "decoy effects",
+        "phantom decoy effect"
+      ],
       "extracted_keywords": [],
-      "keywords": [],
+      "keywords": [
+        "multi-attribute decision making",
+        "preference shifts",
+        "context effects",
+        "decoy effects",
+        "phantom decoy effect"
+      ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
       "poster_number": "",
@@ -30043,13 +30069,15 @@
       "author_keywords": [
         "visual streams",
         "dnn",
-        "self-supervision"
+        "self-supervision",
+        "fmri"
       ],
       "extracted_keywords": [],
       "keywords": [
         "visual streams",
         "dnn",
-        "self-supervision"
+        "self-supervision",
+        "fmri"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -30146,6 +30174,7 @@
       "author_keywords": [
         "social decision",
         "neural alignment",
+        "fmri",
         "game theory",
         "novel decision",
         "world knowledge"
@@ -30154,6 +30183,7 @@
       "keywords": [
         "social decision",
         "neural alignment",
+        "fmri",
         "game theory",
         "novel decision",
         "world knowledge"
@@ -30222,19 +30252,15 @@
       "author_keywords": [
         "decision making",
         "perceptual multistability",
-        "binocular rivalry",
-        "wilcoxon rank-sum test",
-        "left stimuli",
-        "perceptual value"
+        "reward",
+        "binocular rivalry"
       ],
       "extracted_keywords": [],
       "keywords": [
         "decision making",
         "perceptual multistability",
-        "binocular rivalry",
-        "wilcoxon rank-sum test",
-        "left stimuli",
-        "perceptual value"
+        "reward",
+        "binocular rivalry"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -30667,20 +30693,18 @@
       "abstract": "Working memory (WM) and decision-making (DM) are two higher cognitive functions for which detailed neural circuit models have been developed. Prominent classes of these models share a reliance on tunable attractor dynamics generated by the same circuit configurations, leading to the suggestion that both maintenance (for WM) and integration (for deliberative DM) of information over time are implemented within shared neural circuits. We present new lines of convergent evidence supporting this idea. Human participants and trained recurrent neural networks showed signatures of the same shared-circuit solution to WM and DM tasks, reflected in generalization of persistent neural codes across task contexts to represent both memoranda during WM and evolving decision variables during DM. While participants adapted across contexts, their behavior in both was also subject to noise and biases that likely arose within the shared circuit. Trial-related changes in pupil size suggested a mechanism – modulation by ascending arousal systems – by which the shared circuit is tuned to produce stable memories vs labile decision states. These findings promote an integrative view of WM and DM that holds promise for understanding brain disorders characterized by deficits in both functions.",
       "author_keywords": [
         "attractor models",
+        "rnns",
         "working memory",
         "decision making",
-        "history bias",
-        "203-10 murphy",
-        "hern and ez-bocanegra"
+        "history bias"
       ],
       "extracted_keywords": [],
       "keywords": [
         "attractor models",
+        "rnns",
         "working memory",
         "decision making",
-        "history bias",
-        "203-10 murphy",
-        "hern and ez-bocanegra"
+        "history bias"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -30747,14 +30771,16 @@
         "population receptive field mapping",
         "visual field representation",
         "perception",
-        "memory"
+        "memory",
+        "fmri"
       ],
       "extracted_keywords": [],
       "keywords": [
         "population receptive field mapping",
         "visual field representation",
         "perception",
-        "memory"
+        "memory",
+        "fmri"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -30852,15 +30878,9 @@
       "title": "Adapting Learning Rates to Multiple Environments",
       "authors": "Jonas Simoens, Senne Braem, Tom Verguts",
       "abstract": "People often have to switch back and forth between different environments that come with different statistics. While some environments require fast learning (i.e., high learning rates), other environments call for lower learning rates. Previous studies have shown that people adapt their learning rates to their environment when differences in reward volatilities are clustered in time (Behrens et al., 2007). However, differences in learning rates observed in these studies could reflect emergent properties of participants' responses to locally experienced prediction errors. As such, it remains unclear whether people can actually learn about environment-specific learning rates, and instantaneously retrieve them when revisiting environments (i.e., meta-learn). Here, using Bayesian hierarchical modelling of participants' behavior in a continuous estimation task while alternating between multiple environments, we show that people can meta-learn. We conclude that humans can learn to associate different learning rates to different environments, offering important insights for developing theories of meta-learning (Silvetti et al., 2018) and context-specific control (Abrahamse et al., 2016).",
-      "author_keywords": [
-        "reinforcement learning",
-        "learning rate"
-      ],
+      "author_keywords": [],
       "extracted_keywords": [],
-      "keywords": [
-        "reinforcement learning",
-        "learning rate"
-      ],
+      "keywords": [],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
       "poster_number": "",
@@ -30887,14 +30907,16 @@
         "concepts",
         "cognitive map",
         "grid-like coding",
-        "adaptation"
+        "adaptation",
+        "fmri"
       ],
       "extracted_keywords": [],
       "keywords": [
         "concepts",
         "cognitive map",
         "grid-like coding",
-        "adaptation"
+        "adaptation",
+        "fmri"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -31068,13 +31090,11 @@
       "authors": "Sanjay Manohar",
       "abstract": "Compared to all other animals, humans exhibit a remarkable ability to respond flexibly. For example, after even brief instructions, we can select appropriate responses despite no previous experience of the task (zero-shot learning). Most existing cognitive models of this are non-neural or non-quantitative. We recently proposed a class of models that simulates one plausible way that neurons might perform this computation. In our untrained, Hopfield-like artificial neural network, fast Hebbian plasticity rapidly creates and destroys new attractor states. This creates associations in a readily accessible buffer, that guide neural activity. Such a mechanism might allow human prefrontal cortex to flexibly switch between response mappings. This small dynamic neural model has high explanatory power. We examine a unique published dataset where humans received instructions to use one of two stimulus dimensions to make decisions. Using fMRI, both dimensions could be decoded. After TMS to frontal lobe, decoding of the relevant dimension was reduced. We simulate a transient perturbation in the network and reproduce this effect. It arises because when features become relevant, they rapidly form stronger synapses to frontal areas, and are thus more corrupted by the brain stimulation. This suggests rapid synaptic changes could explain flexible prefrontal control of action.",
       "author_keywords": [
-        "recurrent artificial neural network (ann)",
-        "theoretical and computational neuroscience"
+        "recurrent artificial neural network (ann)"
       ],
       "extracted_keywords": [],
       "keywords": [
-        "recurrent artificial neural network (ann)",
-        "theoretical and computational neuroscience"
+        "recurrent artificial neural network (ann)"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -31106,14 +31126,16 @@
         "accumbens",
         "insula",
         "choice",
-        "risk"
+        "risk",
+        "fmri"
       ],
       "extracted_keywords": [],
       "keywords": [
         "accumbens",
         "insula",
         "choice",
-        "risk"
+        "risk",
+        "fmri"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -31133,11 +31155,19 @@
       "authors": "Sophia Shatek, Thomas Carlson",
       "abstract": "Recent studies have attempted to distinguish how visual features and semantic knowledge independently contribute to object recognition in the human brain. Here, we use images of real but unfamiliar animals, plants, and minerals to study how the perception of objects occurs in the absence of knowledge about their true category. We recorded brain activity with electroencephalography (EEG) while participants classified ambiguous stimuli as animals, plants and minerals, and during a fixation monitoring task. Results indicate that participants were largely naive of the true classes, and liberally classified objects as minerals but were more conservative for animals and plants. Despite poor classification performance, the true class of stimuli were distinguishable from multivariate patterns of neural activity in both classification and fixation monitoring tasks. Representations in the brain more closely matched behavioural classifications, but like true class, was best accounted for by a combination of mid-level features. Together, the findings suggest that mid-level features are sufficient for the brain to predict the true category of even deliberately confusing objects, and these features also explain behavioural similarity judgements.",
       "author_keywords": [
-        "object recognition"
+        "object recognition",
+        "cichy",
+        "ritchie",
+        "papale",
+        "yue"
       ],
       "extracted_keywords": [],
       "keywords": [
-        "object recognition"
+        "object recognition",
+        "cichy",
+        "ritchie",
+        "papale",
+        "yue"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -31164,12 +31194,14 @@
       "author_keywords": [
         "selective attention",
         "expectation",
+        "fmri",
         "mvpa"
       ],
       "extracted_keywords": [],
       "keywords": [
         "selective attention",
         "expectation",
+        "fmri",
         "mvpa"
       ],
       "topic_area": "Cognitive science",
@@ -31520,23 +31552,19 @@
       "authors": "Alexander Skowron, Douglas D. Garrett",
       "abstract": "Accurate representations of uncertainty facilitate optimal behavior during learning and decision-making. Most previous human neuroimaging studies have attempted to link uncertainty to (average) BOLD signal magnitude. Although untested experimentally, it has also been postulated that a higher, more flexible neural dynamic range may be required whenever the \"correct\" state is unclear, potentially promoting learning. Here, we probed whether state uncertainty may indeed be best reflected in the moment-to-moment instability (variability) of the BOLD response. Participants performed a Bayesian inference task where they estimated the ratio of marble types in an unseen jar following exposure to five sample draws. We found that BOLD signal variability strongly decreased with successive sample exposure. Crucially, more accurate subjects expressed a greater exposure-related collapse of BOLD variability. Our computational model of behavior suggested that the relationship between BOLD variability collapse and accuracy could best be explained by individual differences in their prior belief before sample exposure; participants with a wider prior were more likely to (a) collapse SDBOLD with successive exposure and (b) perform more accurately (i.e., learn better) overall. We provide first evidence that BOLD variability may track the evolution of state uncertainty representations during Bayesian inference.",
       "author_keywords": [
+        "fmri",
         "brain signal variability",
         "bayesian inference",
         "learning",
-        "heekeren",
-        "nassar",
-        "garrett",
-        "orbán"
+        "uncertainty representing uncertainty is crucial to optimally adjust"
       ],
       "extracted_keywords": [],
       "keywords": [
+        "fmri",
         "brain signal variability",
         "bayesian inference",
         "learning",
-        "heekeren",
-        "nassar",
-        "garrett",
-        "orbán"
+        "uncertainty representing uncertainty is crucial to optimally adjust"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -31605,7 +31633,8 @@
         "deep neural network",
         "latent dimension",
         "visual representation",
-        "statistical learning"
+        "statistical learning",
+        "fmri"
       ],
       "extracted_keywords": [],
       "keywords": [
@@ -31614,7 +31643,8 @@
         "deep neural network",
         "latent dimension",
         "visual representation",
-        "statistical learning"
+        "statistical learning",
+        "fmri"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -31672,23 +31702,17 @@
       "authors": "Joseph Pemberton, Paul Chadderton, Rui Ponte Costa",
       "abstract": "During task execution cortical dynamics must bridge sensory cues with future behavioural outcomes. However, how cortical networks acquire such task-specific dynamics remains unclear. Here we propose that the cerebellum drives cortical dynamics to enable rapid task acquisition via cortico-cerebellar loops. We model cerebellar networks that are tuned through timing rules to provide cortical networks with task-outcome predictions. The model readily generalises to cognitive-based tasks and supports experimental evidence for a cerebellar role in working memory. In particular, we show that ablation to the cerebellar network in our model leads to leaky cortical dynamics and a resultant loss of task selectivity in delayed association and evidence accumulation tasks, consistent with recent optogenetic studies. Our results also suggest that local cortical connectivity is relatively stable and that learning occurs primarily in the cerebellum to enable task acquisition. Finally, we use our model to introduce a systems consolidation theory in which task information is gradually transferred from the cerebellum to the cortex. In summary, our results suggest that the cerebellum plays a critical role in enabling cognitive task-specific dynamics in the cortex.",
       "author_keywords": [
+        "cerebellum",
         "cortico-cerebellar loops",
         "recurrent neural networks",
-        "temporal credit assignment",
-        "recurrent and cerebello-cortical weights",
-        "right (+)",
-        "everton agnes",
-        "laureline logiaco"
+        "temporal credit assignment"
       ],
       "extracted_keywords": [],
       "keywords": [
+        "cerebellum",
         "cortico-cerebellar loops",
         "recurrent neural networks",
-        "temporal credit assignment",
-        "recurrent and cerebello-cortical weights",
-        "right (+)",
-        "everton agnes",
-        "laureline logiaco"
+        "temporal credit assignment"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -31909,20 +31933,16 @@
         "cognitive control",
         "deep learning",
         "ponder net",
-        "implemented similarly to ponder net",
-        "trial-level data",
-        "task instructions",
-        "cognitive processes"
+        "schrater",
+        "cardoso-leite"
       ],
       "extracted_keywords": [],
       "keywords": [
         "cognitive control",
         "deep learning",
         "ponder net",
-        "implemented similarly to ponder net",
-        "trial-level data",
-        "task instructions",
-        "cognitive processes"
+        "schrater",
+        "cardoso-leite"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -32159,23 +32179,17 @@
       "author_keywords": [
         "cortical oscillations",
         "traveling waves",
+        "m-eeg",
         "forward model",
-        "encoding model",
-        "17/19 in session 2",
-        "fig 2 a",
-        "fig 2b",
-        "meg gradiometers"
+        "encoding model"
       ],
       "extracted_keywords": [],
       "keywords": [
         "cortical oscillations",
         "traveling waves",
+        "m-eeg",
         "forward model",
-        "encoding model",
-        "17/19 in session 2",
-        "fig 2 a",
-        "fig 2b",
-        "meg gradiometers"
+        "encoding model"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -32205,6 +32219,7 @@
         "kalman filter",
         "successor representation",
         "predictive learning",
+        "fmri",
         "memory"
       ],
       "extracted_keywords": [],
@@ -32212,6 +32227,7 @@
         "kalman filter",
         "successor representation",
         "predictive learning",
+        "fmri",
         "memory"
       ],
       "topic_area": "Cognitive science",
@@ -32241,13 +32257,17 @@
       "author_keywords": [
         "parkinson's disease",
         "markerless motion capture",
-        "real-world neuroscience"
+        "real-world neuroscience",
+        "bradykinesia",
+        "quinn"
       ],
       "extracted_keywords": [],
       "keywords": [
         "parkinson's disease",
         "markerless motion capture",
-        "real-world neuroscience"
+        "real-world neuroscience",
+        "bradykinesia",
+        "quinn"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -32313,13 +32333,13 @@
       "author_keywords": [
         "confidence",
         "decision making",
-        "reinforcement learning"
+        "reinforcement"
       ],
       "extracted_keywords": [],
       "keywords": [
         "confidence",
         "decision making",
-        "reinforcement learning"
+        "reinforcement"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -32383,13 +32403,13 @@
       "author_keywords": [
         "functional magnetic resonance imaging (fmri)",
         "functional connectivity",
-        "body perception"
+        "body perception background"
       ],
       "extracted_keywords": [],
       "keywords": [
         "functional magnetic resonance imaging (fmri)",
         "functional connectivity",
-        "body perception"
+        "body perception background"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -32526,13 +32546,9 @@
       "title": "Controllability Inferences Promote Adaptive Action Selection during Adolescence",
       "authors": "Noam Goldway, Hillary Raab",
       "abstract": "Flexible arbitration between instrumental and Pavlovian learning allows for adaptive behavioral control. In controllable environments, instrumental learning can support the selection of actions that bring about rewards and avoid punishments. In uncontrollable environments, where actions have no causal influence on reward outcomes, individuals may rely on less computationally costly \"default\" Pavlovian reactions. Prior studies suggest that adolescents may demonstrate reduced Pavlovian biases on instrumental learning in controllable environments. Here, we asked whether greater adaptability of action selection to environmental controllability could explain these adolescent-specific effects. Ninety participants, aged 8-27 performed a Go/No-Go task in both controllable and uncontrollable environments. We implemented a Bayesian reinforcement learning model to evaluate controllability inferences and corresponding changes in the engagement of instrumental and Pavlovian learning systems across age. Relative to children and adults, adolescents exhibited greater flexibility in calibrating expression of Pavlovian bias to the controllability of the environment. Such flexibility may be beneficial for discovering rewards in the new environments adolescents encounter during their transition into more independent adults.",
-      "author_keywords": [
-        "reinforcement learning"
-      ],
+      "author_keywords": [],
       "extracted_keywords": [],
-      "keywords": [
-        "reinforcement learning"
-      ],
+      "keywords": [],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
       "poster_number": "",
@@ -32555,15 +32571,9 @@
       "title": "Cortical dopamine enables deep reinforcement learning and leverages dopaminergic heterogeneity",
       "authors": "Jack Lindsey, Ashok Litwin-Kumar",
       "abstract": "Midbrain dopamine (DA) activity is implicated in reinforcement learning (RL). DA activity is observed to signal reward prediction error (RPE), a key quantity in many RL algorithms used to modulate updates to state-reward and state-action associations. How the state representations underlying these associations are themselves learned is typically outside the scope of RL models of the basal ganglia. However, modern RL algorithms in machine learning typically employ deep RL, in which state representations are learned as part of the RL algorithm. In this work, we investigate the requirements for biologically plausible deep RL by studying a model in which DA projections to cortical regions upstream of the striatum drive state representation learning. We show that coarse, global DA projections are sufficient to enable effective representation learning. We next apply our model to an open question in the field: recent experimental evidence suggests DA population activity does not uniformly signal RPE, but rather heterogeneously encodes higher-dimensional information about an animal's state. We show that such heterogeneity can improve learning by effectively providing auxiliary prediction objectives that refine representation learning. Our framework provides a normative prediction of the optimal set of DA signals for a given task.",
-      "author_keywords": [
-        "reinforcement learning",
-        "representation learning"
-      ],
+      "author_keywords": [],
       "extracted_keywords": [],
-      "keywords": [
-        "reinforcement learning",
-        "representation learning"
-      ],
+      "keywords": [],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
       "poster_number": "",
@@ -32592,6 +32602,7 @@
         "mvpa",
         "time-delay embedding",
         "cross-modal generalization",
+        "meg",
         "semantic"
       ],
       "extracted_keywords": [],
@@ -32599,6 +32610,7 @@
         "mvpa",
         "time-delay embedding",
         "cross-modal generalization",
+        "meg",
         "semantic"
       ],
       "topic_area": "Cognitive science",
@@ -32717,6 +32729,7 @@
       "authors": "Benedikt V. Ehinger, Hannes Bonasch",
       "abstract": "Some participants consistently show large, and others small activations in Electroencephalography (EEG) and other neuroimaging studies. Similarly, decoding accuracies in Brain-Computer-Interface (BCI) vary between subjects, in extreme cases labelled \"BCI-Illiteracy\". Here, we investigate whether a switch of task within an event-related design could be sufficient to alleviate low performance. We compare event-related-potentials (ERP) component amplitudes, as well as offline balanced decoding-accuracy based on deep convolutional networks, between seven event-related tasks. ERP effect amplitudes and decoding accuracies were correlated within all tasks, but not between any pairwise tasks. Further, 39/40 subjects had above average performance in at least one task. Two cautious conclusions can be drawn, with the appropriate limitations of power (n=40) and the caveats of interpreting null-findings: 1) The lack of effect amplitude correlations shows that between-subject variability cannot be purely explained by a task-agnostic effects like skull thickness. 2) The lack of decoding accuracy correlations shows promise for ERP-based BCIs: replacing the task could be an effective way to combat \"BCI-Illiteracy\".",
       "author_keywords": [
+        "eeg",
         "between-subject variability",
         "encoding",
         "decoding",
@@ -32725,6 +32738,7 @@
       ],
       "extracted_keywords": [],
       "keywords": [
+        "eeg",
         "between-subject variability",
         "encoding",
         "decoding",
@@ -32757,14 +32771,16 @@
         "deep learning",
         "sequence embedding",
         "brain-tobrain coupling",
-        "hypnosis"
+        "hypnosis",
+        "eeg"
       ],
       "extracted_keywords": [],
       "keywords": [
         "deep learning",
         "sequence embedding",
         "brain-tobrain coupling",
-        "hypnosis"
+        "hypnosis",
+        "eeg"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -33133,6 +33149,7 @@
       "author_keywords": [
         "credit assignment",
         "latent cause inference",
+        "fmri",
         "tms",
         "dorsomedial prefrontal cortex",
         "hippocampus"
@@ -33141,6 +33158,7 @@
       "keywords": [
         "credit assignment",
         "latent cause inference",
+        "fmri",
         "tms",
         "dorsomedial prefrontal cortex",
         "hippocampus"
@@ -33242,6 +33260,7 @@
       "author_keywords": [
         "embeddings",
         "deep cnns",
+        "eeg",
         "spectrograms",
         "attention and expectation cue",
         "posner cue"
@@ -33250,6 +33269,7 @@
       "keywords": [
         "embeddings",
         "deep cnns",
+        "eeg",
         "spectrograms",
         "attention and expectation cue",
         "posner cue"
@@ -33279,12 +33299,14 @@
       "author_keywords": [
         "non-human primates",
         "social influence",
+        "fmri",
         "transcranial focused ultrasound stimulation"
       ],
       "extracted_keywords": [],
       "keywords": [
         "non-human primates",
         "social influence",
+        "fmri",
         "transcranial focused ultrasound stimulation"
       ],
       "topic_area": "Cognitive science",
@@ -33349,12 +33371,14 @@
       "author_keywords": [
         "llms",
         "language",
+        "fmri",
         "encoding models"
       ],
       "extracted_keywords": [],
       "keywords": [
         "llms",
         "language",
+        "fmri",
         "encoding models"
       ],
       "topic_area": "Cognitive science",
@@ -33563,13 +33587,17 @@
       "author_keywords": [
         "laminar fmri",
         "cortical feedback processing",
-        "visual cortex"
+        "navigation",
+        "visual cortex",
+        "predictive coding"
       ],
       "extracted_keywords": [],
       "keywords": [
         "laminar fmri",
         "cortical feedback processing",
-        "visual cortex"
+        "navigation",
+        "visual cortex",
+        "predictive coding"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -33598,6 +33626,7 @@
       "author_keywords": [
         "autism",
         "adaptation",
+        "eeg",
         "auditory",
         "prediction",
         "temporal interval"
@@ -33606,6 +33635,7 @@
       "keywords": [
         "autism",
         "adaptation",
+        "eeg",
         "auditory",
         "prediction",
         "temporal interval"
@@ -33635,6 +33665,8 @@
       "author_keywords": [
         "visual working memory",
         "change detection",
+        "eeg",
+        "fmri",
         "representational similarity analysis",
         "rsa",
         "eeg fmri fusion"
@@ -33643,6 +33675,8 @@
       "keywords": [
         "visual working memory",
         "change detection",
+        "eeg",
+        "fmri",
         "representational similarity analysis",
         "rsa",
         "eeg fmri fusion"
@@ -33858,7 +33892,7 @@
         "learning",
         "multi-task learning",
         "continual learning",
-        "computation through dynamics"
+        "computation through dynamics background"
       ],
       "extracted_keywords": [],
       "keywords": [
@@ -33867,7 +33901,7 @@
         "learning",
         "multi-task learning",
         "continual learning",
-        "computation through dynamics"
+        "computation through dynamics background"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -33965,11 +33999,13 @@
       "abstract": "Humans are constantly processing scene information from their environment to make meaningful decisions. However, it remains unknown which of the emerging neural representations are relevant for decision-making, and how we can model these representations and their link to behaviour in a unified way. Here, we approached these questions empirically and via computational modelling using deep neural networks. First, we correlated electroencephalography (EEG) data and categorization reaction times and observed a brain-behaviour correlation between ~100 ms and ~200 ms after stimulus onset. Second, to provide a model of scene categorization which integrates both neural and behavioural data, we evaluated a recurrent convolutional neural network (RCNN) and observed similarities between humans and the network in terms of neural representations, behaviour, and the brain-behaviour relationship. Altogether, our results provide an empirical and computational account of scene categorization in humans, benefiting both cognitive and computational neuroscience for future exploration and explanation of human decision-making.",
       "author_keywords": [
         "scene perception",
+        "eeg",
         "deep learning"
       ],
       "extracted_keywords": [],
       "keywords": [
         "scene perception",
+        "eeg",
         "deep learning"
       ],
       "topic_area": "Cognitive science",
@@ -34037,16 +34073,14 @@
         "decision making",
         "task design",
         "resource constraint",
-        "strategy space",
-        "task graph"
+        "strategy space"
       ],
       "extracted_keywords": [],
       "keywords": [
         "decision making",
         "task design",
         "resource constraint",
-        "strategy space",
-        "task graph"
+        "strategy space"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -34183,14 +34217,16 @@
         "recurrent neural networks",
         "neuro modulation",
         "reinforcement learning",
-        "meta learning"
+        "meta learning",
+        "evolution overview"
       ],
       "extracted_keywords": [],
       "keywords": [
         "recurrent neural networks",
         "neuro modulation",
         "reinforcement learning",
-        "meta learning"
+        "meta learning",
+        "evolution overview"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -34266,6 +34302,7 @@
         "tremor",
         "deep learning",
         "cnn",
+        "eeg",
         "digital biomarkers"
       ],
       "extracted_keywords": [],
@@ -34274,6 +34311,7 @@
         "tremor",
         "deep learning",
         "cnn",
+        "eeg",
         "digital biomarkers"
       ],
       "topic_area": "Cognitive science",
@@ -34301,17 +34339,23 @@
       "authors": "Alessandro Lopopolo, Milena Rabovsky",
       "abstract": "We predict the amplitude of the N400 during naturalistic sentence processing by using the updates of the internal representations of a Sentence Gestalt Model and a next-word prediction Language Model trained on the same corpus. The findings showed that changes in N400 amplitude correspond to the update in the implicit predictive representation of meaning during sentence comprehension. The comparison between the Sentence Gestalt Model activity and lexical surprisal might indicate two distinct but closely related sub-processes contributing to sentence processing.",
       "author_keywords": [
+        "n400",
         "semantic processing",
         "recurrent neural networks",
         "language models",
-        "sentence gestalt model"
+        "sentence gestalt model",
+        "hansen",
+        "taraban"
       ],
       "extracted_keywords": [],
       "keywords": [
+        "n400",
         "semantic processing",
         "recurrent neural networks",
         "language models",
-        "sentence gestalt model"
+        "sentence gestalt model",
+        "hansen",
+        "taraban"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -34376,22 +34420,14 @@
         "pain",
         "bayesian pain model",
         "placebo",
-        "wager",
-        "bingel",
-        "colloca",
-        "benedetti",
-        "petrovic"
+        "nocebo"
       ],
       "extracted_keywords": [],
       "keywords": [
         "pain",
         "bayesian pain model",
         "placebo",
-        "wager",
-        "bingel",
-        "colloca",
-        "benedetti",
-        "petrovic"
+        "nocebo"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -34456,6 +34492,7 @@
       "abstract": "The superior temporal sulcus (STS) is involved in the processing of changeable aspects of faces as well as in auditive and multimodal processing. We measured fMRI while participants attended to naturalistic, emotional videos of people telling their life-stories in auditive, audiovisual and visual conditions. We used inter-subject correlation and functional connectivity to look how the audiovisual presentation of faces and voices modulates responses in the brain. We found a cluster in the dorsal STS responding more to audiovisual than visual or auditive stimuli. Connectivity between this and lateral occipital areas was heightened when audiovisual stimuli was present, and it seemed to process facial action units of the mouth region. Our results suggest that, specifically when speech is present, dorsal STS connects to the more posterior face processing areas and processes perceived mouth movements. We thus replicate and add up to earlier similar findings in a more naturalistic context with different analysis methods.",
       "author_keywords": [
         "face perception",
+        "fmri",
         "naturalistic stimuli",
         "sts",
         "intersubject correlation",
@@ -34464,6 +34501,7 @@
       "extracted_keywords": [],
       "keywords": [
         "face perception",
+        "fmri",
         "naturalistic stimuli",
         "sts",
         "intersubject correlation",
@@ -34493,15 +34531,9 @@
       "title": "Factorization of graphs in the compositional reuse of experience",
       "authors": "Lennart Luettgau, Rani Moran, Tore Erdmann, Sebastijan Veselic, Kimberly L. Stachenfeld, Zeb Kurth-Nelson, Raymond J. Dolan",
       "abstract": "Real-world experiences are often the product of multiple dynamic sub-processes. Discovering these affords strong generalization in case of partial overlap or abstract resemblance between previous and current experience. Using a sequence learning task and computational modeling, we test whether humans (N=238) factorize experienced state spaces and subsequently reuse these in new contexts. In prior learning, we exposed some participants to sequences of compound images produced by the interaction of a 4-state cyclic graph and a 6-state path-graph, while another group experienced an interaction of a 4-state path-graph and a 6-state cyclic graph. During transfer learning, all participants experienced the product of a 4-state cyclic graph and a 6-state cyclic graph with new stimuli. Participants' predictions about inferred unobserved transitions were used to assess knowledge of graph factors. We found that prediction accuracy in transfer learning for the 4-cycle graph was higher in the 4-cycle prior group and the 6-cycle graph prior group showed improved 6-cycle performance. Successor feature models did not explain this transfer effect. Instead, a Bayesian hypothesis testing model best captured the behavioral data. Our results support the idea that humans discover and decompose the factors generating their experience and reuse these sub-processes to generalize within new contexts.",
-      "author_keywords": [
-        "structure learning",
-        "holistic event"
-      ],
+      "author_keywords": [],
       "extracted_keywords": [],
-      "keywords": [
-        "structure learning",
-        "holistic event"
-      ],
+      "keywords": [],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
       "poster_number": "",
@@ -34635,14 +34667,12 @@
       "abstract": "Contour integration is the process of linking local edge elements to arrive at a unified perceptual representation of a complete contour, and may thus serve as a critical pre-cursor representation needed to extract global shape information supporting object recognition. Many mechanisms have been proposed for such a feature-linking process (Field, Hayes & Hess, 1993; Kellman & Shipley, 1991), including long-range lateral interactions (Bosking et al., 1997), temporally synchronized cortical oscillations (Engel, Konig & Singer, 1991), and top-down feedback connections (Kim et al., 2019). In this study, we test the alternative possibility that feed-forward, nonlinear convolutional neural networks are able to perform contour integration without lateral connections, recurrence, or top-down feedback. We find that such a feedforward system exhibits sensitivities to global and local contour curvatures comparable to humans, but it requires two critical inductive biases to do so - visual experience of relatively straight-looking smooth contours and an architectural constraint of increasing receptive field size. Through this approach, we provide computational support for the hypothesis that a hierarchical feedforward visual processor can develop and leverage Gestalt-like laws of \"good continuation\" to detect extended contours in a manner consistent with human perception.",
       "author_keywords": [
         "perceptual grouping",
-        "gestalt vision",
-        "psychophysics"
+        "gestalt vision"
       ],
       "extracted_keywords": [],
       "keywords": [
         "perceptual grouping",
-        "gestalt vision",
-        "psychophysics"
+        "gestalt vision"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -34757,22 +34787,14 @@
         "episodic memory",
         "ideal observer",
         "bayesian modeling",
-        "causal inference",
-        "ben shakhar",
-        "row 3",
-        "column 2",
-        "row 1"
+        "causal inference"
       ],
       "extracted_keywords": [],
       "keywords": [
         "episodic memory",
         "ideal observer",
         "bayesian modeling",
-        "causal inference",
-        "ben shakhar",
-        "row 3",
-        "column 2",
-        "row 1"
+        "causal inference"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -34988,13 +35010,21 @@
       "author_keywords": [
         "gamma oscillations",
         "episodic memory",
-        "sensory stimulation"
+        "sensory stimulation",
+        "colgin",
+        "herrmann",
+        "perception",
+        "response time"
       ],
       "extracted_keywords": [],
       "keywords": [
         "gamma oscillations",
         "episodic memory",
-        "sensory stimulation"
+        "sensory stimulation",
+        "colgin",
+        "herrmann",
+        "perception",
+        "response time"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -35062,13 +35092,15 @@
       "author_keywords": [
         "decision making",
         "engagement",
-        "motivation"
+        "motivation",
+        "fmri"
       ],
       "extracted_keywords": [],
       "keywords": [
         "decision making",
         "engagement",
-        "motivation"
+        "motivation",
+        "fmri"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -35167,17 +35199,9 @@
       "title": "Generative model for explaining spatial regularity detection behavior of humans while foraging",
       "authors": "Jae Young Jeon, Won Mok Shim, Seng Bum Michael Yoo",
       "abstract": "Understanding the spatial regularity of rewards in a given environment is crucial for efficient foraging within partially observable naturalistic settings. While previous studies on patch leaving have successfully uncovered cognitive principles of successive economic decision-making, abstracting out spatial information into reward quantity and time cost domains may lead to the loss of essential components of the real world, given that foraging is an ecologically relevant behavior. Here we introduce an agent-based model that infers the spatial regularity of the given map through complex sequential Bayesian hypothesis testing. From the modeling exercise, we found that 1) humans are sensitive to the spatial pattern beyond the simple non-spatial information (e.g., reward amount), 2) humans chose upcoming action to maximize the information (i.e., active sampling) that verifies their current belief about the regularity of the map. In subsequent foraging, spatial patterns of rewards were actively exploited to improve foraging outcomes. We claim that spatial information should be seriously considered when studying foraging, as it can bridge neuroscience with ecologically valid behavior.",
-      "author_keywords": [
-        "bayesian inference",
-        "agent-based model",
-        "behavioral neuroscience"
-      ],
+      "author_keywords": [],
       "extracted_keywords": [],
-      "keywords": [
-        "bayesian inference",
-        "agent-based model",
-        "behavioral neuroscience"
-      ],
+      "keywords": [],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
       "poster_number": "",
@@ -35203,12 +35227,14 @@
       "author_keywords": [
         "numerical perception",
         "convex hull",
+        "density",
         "dot radius"
       ],
       "extracted_keywords": [],
       "keywords": [
         "numerical perception",
         "convex hull",
+        "density",
         "dot radius"
       ],
       "topic_area": "Cognitive science",
@@ -35236,13 +35262,17 @@
       "author_keywords": [
         "goal-conditioned world models",
         "scene perception",
-        "task-optimized deep neural networks"
+        "multi-granularity",
+        "attention",
+        "inverse-graphics"
       ],
       "extracted_keywords": [],
       "keywords": [
         "goal-conditioned world models",
         "scene perception",
-        "task-optimized deep neural networks"
+        "multi-granularity",
+        "attention",
+        "inverse-graphics"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -35476,18 +35506,12 @@
       "abstract": "The performance of convolutional neural networks (CNNs) as representational models of visual cortex is thought to be associated with their optimization on ethologically relevant tasks. Contrary to this view, we show that a surprisingly simple statistical principle based on high-dimensional sampling of random features is sufficient to induce brain-like representations in neural network models of visual cortex. Specifically, we constructed CNNs that perform random dimensionality expansion and found that fewer than a thousand features are needed to compete with standard supervised networks at predicting the feature-tuning preferences of primate visual cortex, avoiding the need for massive pre-training or task-specific optimization. Furthermore, we found that when random expansion is followed by dimensionality reduction, the dominant modes of variation correspond to brain-relevant dimensions. In fact, random-expansion CNNs remain competitive with standard pre-trained CNNs even when matching their dimensionalities. Remarkably, this means that brain-relevant dimensions are readily discoverable from the statistics of image activations in random convolutional architectures. These findings reveal the unexpected effectiveness of random expansion in neural network models of vision, and they point toward a simplifying statistical theory of cortical visual representation.",
       "author_keywords": [
         "convolutional neural networks",
-        "deep learning",
-        "encoding models",
-        "bonner",
-        "poggio"
+        "deep"
       ],
       "extracted_keywords": [],
       "keywords": [
         "convolutional neural networks",
-        "deep learning",
-        "encoding models",
-        "bonner",
-        "poggio"
+        "deep"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -35593,14 +35617,16 @@
         "homeostatic synaptic plasticity",
         "neural robustness",
         "spiking neural networks",
-        "neuronal excitability"
+        "membrane conductance",
+        "synaptic scaling"
       ],
       "extracted_keywords": [],
       "keywords": [
         "homeostatic synaptic plasticity",
         "neural robustness",
         "spiking neural networks",
-        "neuronal excitability"
+        "membrane conductance",
+        "synaptic scaling"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -35844,6 +35870,7 @@
       "abstract": "To navigate the immediate visual environment, humans use a variety of locomotive actions, such as walking, swimming or climbing. How does the brain represent such environmental action affordances and which visual features drive these representations? Here, we compared representations of visual properties derived from human annotations, fMRI measurements, and convolutional neural networks (CNNs) on a new set of real-world scenes that afford distinct locomotive actions in a diverse set of indoor and outdoor environments. Representational similarity analysis shows that scene-selective brain regions represent information about action affordances as well as materials and objects. In contrast, CNNs trained on scene classification show comparatively lower correlation with action affordances, instead most strongly representing global scene properties. Together, these results suggest that specialized models that incorporate action affordances may be needed to fully capture representations in scene-selective visual cortex.",
       "author_keywords": [
         "scene perception",
+        "fmri",
         "action affordances",
         "navigation",
         "convolutional neural networks"
@@ -35851,6 +35878,7 @@
       "extracted_keywords": [],
       "keywords": [
         "scene perception",
+        "fmri",
         "action affordances",
         "navigation",
         "convolutional neural networks"
@@ -35951,6 +35979,7 @@
       "abstract": "Naturalistic stimuli evoke complex neural responses that can differ across people in their spatial and temporal properties. Current alignment methods focus on either spatial hyperalignment (assuming exact temporal correspondence) or temporal alignment into corresponding events using a Hidden Markov Model (assuming exact spatial correspondence). Here, we propose a hybrid model, the Hyper-HMM, that simultaneously aligns both temporal and spatial features across brains. The model learns to linearly project from voxels to a reduced-dimension latent space, in which timecourses are segmented into corresponding temporal events. This approach allows tracking of each individual's mental trajectory through an event sequence, and also allows for alignment with other feature spaces such as stimulus content. Using an fMRI dataset of angular gyrus responses to lecture videos, we demonstrate that the Hyper-HMM can be used to map all participants and the semantic content of the videos into a common low-dimensional space, and that these mappings generalize to a held-out video.",
       "author_keywords": [
         "alignment",
+        "fmri",
         "hidden markov models",
         "event segmentation",
         "episodic memory",
@@ -35959,6 +35988,7 @@
       "extracted_keywords": [],
       "keywords": [
         "alignment",
+        "fmri",
         "hidden markov models",
         "event segmentation",
         "episodic memory",
@@ -36228,12 +36258,14 @@
       "authors": "Menghan Yang",
       "abstract": "Considerable individual variability has been observed across participants even when sharing the same experience. However, it remains unclear how stable neural activity is within each individual repeatedly undergoing the same experience. To explore this question, we scanned 20 participants while they watched 24 short videos five times. We observed that unimodal sensory cortex (e.g., V1) exhibited higher similarity within each individual and across subjects compared to heteromodal association cortices (e.g., vmPFC). We also observed consistent changes in session-by-session viewing activity across participants. These findings suggest that individual experiences are unique to each viewing session.",
       "author_keywords": [
+        "fmri",
         "individual differences",
         "naturalistic stimuli",
         "vmpfc"
       ],
       "extracted_keywords": [],
       "keywords": [
+        "fmri",
         "individual differences",
         "naturalistic stimuli",
         "vmpfc"
@@ -36296,13 +36328,15 @@
       "author_keywords": [
         "inter-individual decoding",
         "unpaired stimuli",
-        "functional alignment"
+        "functional alignment",
+        "fmri"
       ],
       "extracted_keywords": [],
       "keywords": [
         "inter-individual decoding",
         "unpaired stimuli",
-        "functional alignment"
+        "functional alignment",
+        "fmri"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -36330,6 +36364,7 @@
         "motor control",
         "decision making",
         "beta oscillations",
+        "eeg",
         "internal model",
         "reaction time"
       ],
@@ -36338,6 +36373,7 @@
         "motor control",
         "decision making",
         "beta oscillations",
+        "eeg",
         "internal model",
         "reaction time"
       ],
@@ -36368,7 +36404,7 @@
         "item-in-context task",
         "bayesian-hebbian plasticity",
         "neural plasticity",
-        "effects of short-term plasticity"
+        "recency motivation"
       ],
       "extracted_keywords": [],
       "keywords": [
@@ -36376,7 +36412,7 @@
         "item-in-context task",
         "bayesian-hebbian plasticity",
         "neural plasticity",
-        "effects of short-term plasticity"
+        "recency motivation"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -36503,6 +36539,7 @@
         "decision making",
         "evidence accumulation",
         "cpp",
+        "eeg",
         "ica"
       ],
       "extracted_keywords": [],
@@ -36510,6 +36547,7 @@
         "decision making",
         "evidence accumulation",
         "cpp",
+        "eeg",
         "ica"
       ],
       "topic_area": "Cognitive science",
@@ -36536,20 +36574,22 @@
       "abstract": "Evidence accumulation models are a remarkably successful framework for modeling decision-making tasks, capturing a range of behavioral phenomena across experimental paradigms. One limitation of these models is that stimulus information is typically reduced to a small number of abstract perceptual features, precluding a detailed investigation of visual processing and making it challenging to model tasks with complex visual stimuli. Here, we integrate neural network models for visual feature extraction with traditional accumulator models of speeded decision-making in a unified variational Bayesian framework that can be fitted to datasets with trial-level response times and raw (pixel-space) visual stimuli. Models fitted to human data from a stylized flanker-like task captured variation in response times, accuracy, and congruency effects due to stimulus layout, spatial position, and individual differences. Decoding analyses applied to activation patterns in each layer demonstrated that spatial invariance and target selectivity were established in tandem in deeper network layers.",
       "author_keywords": [
         "decision making",
+        "vision",
         "flanker task",
         "evidence accumulation models",
         "neural networks",
         "ratcliff and mc koon",
-        "five convolutional layers → two fully connected layers"
+        "choice"
       ],
       "extracted_keywords": [],
       "keywords": [
         "decision making",
+        "vision",
         "flanker task",
         "evidence accumulation models",
         "neural networks",
         "ratcliff and mc koon",
-        "five convolutional layers → two fully connected layers"
+        "choice"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -36575,15 +36615,9 @@
       "title": "Keep moving: sensorimotor integration of fixational eye-movements yields human-like superresolution in recurrent neural networks",
       "authors": "Adrien Doerig",
       "abstract": "Artificial Neural Networks (ANNs) have helped gain important insights into the mechanisms of biological vision, as they provide a powerful language for expressing computational hypotheses of brain computation. Yet, the field is still in its infancy with many central aspects of biology still lacking. One of these aspects is the role of eye movements, as most current ANNs work on static images, contrasting biology's active sampling of the visual world. What's more, even during fixations, the human eye is not at rest, but exhibits minute yet systematic eye-movements. Here we focus on the computational role of such involuntary \"Fixational Eye Movements\" (FEMs) and study their interaction with recurrent processing - a ubiquitous feature of neural computation. We developed a model to test the theory that targeted FEMs endow recurrent systems with computational advantages, e.g. to resolve incoming information at super-resolution that would remain invisible with static input. Our normative model learns human-like FEMs and replicates psychophysical data. Moving towards more natural visual paradigms, we furthermore demonstrate large gains in classification performance on a computer vision task. In summary, we demonstrate that systems allowed to use time as a computational resource benefit from targeted FEMs, in line with theories of human vision.",
-      "author_keywords": [
-        "recurrent neural networks",
-        "fixational eye movement"
-      ],
+      "author_keywords": [],
       "extracted_keywords": [],
-      "keywords": [
-        "recurrent neural networks",
-        "fixational eye movement"
-      ],
+      "keywords": [],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
       "poster_number": "",
@@ -36613,17 +36647,13 @@
       "author_keywords": [
         "category learning",
         "supervised learning",
-        "few-shot learning",
-        "latent space",
-        "soft labels"
+        "few-shot"
       ],
       "extracted_keywords": [],
       "keywords": [
         "category learning",
         "supervised learning",
-        "few-shot learning",
-        "latent space",
-        "soft labels"
+        "few-shot"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -36684,12 +36714,14 @@
       "abstract": "Cognitive maps represent relational structures crucial for generalization and flexible decision-making in both spatial and non-spatial domains. Although their benefits have been explored extensively, the way they are learnt remains less clear. We introduce a graph-structured sequence task to investigate how cognitive maps are learned and adapted for generalization and decision-making. Participants learned about a sequential transition structure that led to one of two fluctuating rewards. The task design enabled generalization of value across three of four possible sequences, and importantly two of these three sequences were also perceptually similar. Behavioral data revealed participants' ability to adapt flexibly to changes in reward and leverage the afforded generalization successfully. These findings provide insights into how cognitive maps are learned and suggest corresponding neural changes.",
       "author_keywords": [
         "representation learning",
-        "hall-mc master"
+        "liu",
+        "house"
       ],
       "extracted_keywords": [],
       "keywords": [
         "representation learning",
-        "hall-mc master"
+        "liu",
+        "house"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -36783,17 +36815,9 @@
       "title": "Learning from Disinformation",
       "authors": "Juan Vidal-Perez, Raymond J. Dolan",
       "abstract": "A pressing question concerns how individuals learn from potentially misleading feedback, which is a common occurrence in social settings. We addressed this question using an online modified version of the two-armed bandit task, that informed participants (n=107) about reward-outcomes of their choices through \"feedback agents\" which varied in how frequently they lied (i.e., in their reliability). Computational modelling of participants' behavior revealed that credit assignment (i.e., the extent of value-update following reward feedback) increased as a function of feedback-reliability. Strikingly, while credit assignment for the always-truthful agent was symmetric (i.e., equal for positive and negative outcomes), unreliable feedback elicited a positivity bias such that credit assignment was greater for positive compared to negative feedback. Critically, this bias could not be accounted for by optimal Bayesian learning models. Finally, exploratory analyses suggest that obsessive-compulsive symptoms, paranoid thoughts and dogmatism are related to distinct biases in learning from disinformation. Our results can help explain how learning from disinformation might contribute to deficits in mental health and social communication (e.g., political radicalization and belief in conspiracy narratives).",
-      "author_keywords": [
-        "reinforcement learning",
-        "expressing enthusiasm regarding your imminent ccn submission when",
-        "behavioral neuroscience"
-      ],
+      "author_keywords": [],
       "extracted_keywords": [],
-      "keywords": [
-        "reinforcement learning",
-        "expressing enthusiasm regarding your imminent ccn submission when",
-        "behavioral neuroscience"
-      ],
+      "keywords": [],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
       "poster_number": "",
@@ -36931,18 +36955,14 @@
         "curiosity",
         "fun",
         "intrinsic motivation",
-        "exploration",
-        "learning progress",
-        "reward"
+        "exploration"
       ],
       "extracted_keywords": [],
       "keywords": [
         "curiosity",
         "fun",
         "intrinsic motivation",
-        "exploration",
-        "learning progress",
-        "reward"
+        "exploration"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -37282,6 +37302,7 @@
       "author_keywords": [
         "vision",
         "mental imagery",
+        "fmri",
         "vox-to-vox models",
         "peer prediction"
       ],
@@ -37289,6 +37310,7 @@
       "keywords": [
         "vision",
         "mental imagery",
+        "fmri",
         "vox-to-vox models",
         "peer prediction"
       ],
@@ -37349,20 +37371,14 @@
         "representation learning",
         "planning",
         "meta cognitive decision making",
-        "reinforcement learning",
-        "osband",
-        "ionescu",
-        "singh"
+        "reinforcement learning"
       ],
       "extracted_keywords": [],
       "keywords": [
         "representation learning",
         "planning",
         "meta cognitive decision making",
-        "reinforcement learning",
-        "osband",
-        "ionescu",
-        "singh"
+        "reinforcement learning"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -37426,11 +37442,13 @@
       "authors": "Tijl Grootswagers",
       "abstract": "Rapid Serial Visual Presentation (RSVP) decoding paradigms allow testing a greater number of conditions than was previously possible within short experimental sessions. However, in these designs individual neural responses may be more susceptible to noise due to responses overlapping with adjacent epochs. This study investigates the minimum number of repetitions required for reliable decoding accuracies in RSVP decoding paradigms. We used previously published EEG data and conducted a standard decoding analysis while varying the number of repetitions used. We found that it is possible to obtain reliable decoding accuracies with only around six repetitions of each condition, which has important implications for research questions that require short experiments, particularly for studying populations who may not be able to tolerate longer or more demanding protocols. These findings highlight the potential benefits of using efficient RSVP decoding designs and conducting short experiments and may have far-reaching impacts in cognitive neuroscience, by providing insights into optimizing data collection methods for diverse populations and experimental protocols.",
       "author_keywords": [
+        "eeg",
         "rsvp",
         "decoding"
       ],
       "extracted_keywords": [],
       "keywords": [
+        "eeg",
         "rsvp",
         "decoding"
       ],
@@ -37494,12 +37512,14 @@
       "author_keywords": [
         "encoding models",
         "multimodal artificial neural networks",
+        "fmri",
         "naturalistic video stimuli"
       ],
       "extracted_keywords": [],
       "keywords": [
         "encoding models",
         "multimodal artificial neural networks",
+        "fmri",
         "naturalistic video stimuli"
       ],
       "topic_area": "Cognitive science",
@@ -37777,14 +37797,16 @@
         "priority maps",
         "visual search",
         "attentional capture",
-        "inverted encoding models"
+        "inverted encoding models",
+        "fmri"
       ],
       "extracted_keywords": [],
       "keywords": [
         "priority maps",
         "visual search",
         "attentional capture",
-        "inverted encoding models"
+        "inverted encoding models",
+        "fmri"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -37809,12 +37831,14 @@
       "authors": "Vivien Chopurian",
       "abstract": "How resources are allocated to accomplish the concurrent storage of multiple items is an open question. Previous research suggests working memory storage relies on distributed representations in sensory and anterior cortices. In this fMRI study, we examined the effect of unisensory load on neuronal information across cortical regions. Participants (N = 81) memorized two items, each either visual or auditory, over an extended delay. Thus, the overall working memory load was kept constant at two items, but unisensory load varied between one and two items. We show that unisensory load selectively reduces information about items present in visual cortex, but not in anterior regions. This drop in representational fidelity was accompanied by a drop in behavioural performance with unisensory load. Conversely, while the two items are represented equally in the visual cortex, anterior regions carry more information about the second item shown. These strengthened anterior representations appear to lead to a more precise recall. Our results provide evidence for a division of labor between the visual cortex and anterior cortices, where multiple items are represented in separate cortical populations to minimize interference.",
       "author_keywords": [
+        "fmri",
         "working memory",
         "capacity",
         "sensory modality"
       ],
       "extracted_keywords": [],
       "keywords": [
+        "fmri",
         "working memory",
         "capacity",
         "sensory modality"
@@ -37930,12 +37954,12 @@
       "abstract": "Computer programming is an increasingly critical skill in modern society. What makes it possible for the human brain to adapt to learn coding? Previous studies suggest that code experts activate fronto-parietal reasoning networks during Python code comprehension. Here we investigated what pre-existing neural representations enable learning to program by scanning programming-naïve students before and after their first programming course. Before the course, participants took part in a functional MRI scan while reading custom-made pseudocode (i.e., plain language descriptions of programming algorithms). After taking the introductory programming course, the same students were scanned again while reading real Python code. SVM classifiers were trained in both sessions to decode FOR and IF algorithms based on the spatial pattern elicited by pseudocode and real code, respectively. We found above-chance decoding accuracy for real Python functions in the logical reasoning network after taking the course. Moreover, we even found above-chance accuracy for pseudocode before participants learned anything about programming. Our findings suggest that learning to program in Python recycles pre-existing representations of logical algorithms in the fronto-parietal network.",
       "author_keywords": [
         "code comprehension",
-        "kästne r"
+        "participants read real python code"
       ],
       "extracted_keywords": [],
       "keywords": [
         "code comprehension",
-        "kästne r"
+        "participants read real python code"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -38104,8 +38128,7 @@
         "attentional capture",
         "visual awareness",
         "event-related potential",
-        "vui lleumier",
-        "abrupt onset"
+        "n2pc instructions"
       ],
       "extracted_keywords": [],
       "keywords": [
@@ -38113,8 +38136,7 @@
         "attentional capture",
         "visual awareness",
         "event-related potential",
-        "vui lleumier",
-        "abrupt onset"
+        "n2pc instructions"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -38179,22 +38201,12 @@
       "abstract": "How do humans explore environments with sparse rewards? Recent studies in computational neuroscience have proposed an answer by integrating intrinsic reward signals into reinforcement learning models of human behavior. However, different choices of intrinsic reward result in different exploration strategies. Here, we focus on three representative intrinsic reward signals (novelty, surprise, and information-gain) and ask which one explains human exploration best. We design an experimental paradigm where participants search for a goal state in a complex environment that includes a large sub-region with highly stochastic transitions but no extrinsic reward. We show via simulations that exploration driven by different reward signals exhibits different levels of attraction to this stochastic sub-region: Agents driven by information-gain eventually lose interest in reward-free stochasticity, agents driven by novelty exhibit a persistent attraction, and the ones driven by surprise a detrimentally increasing attraction. We run the same experiment on human participants and show that human behavior is both qualitatively and quantitatively consistent with that of novelty-driven agents and not with those driven by surprise or information-gain – despite the evident efficiency of information-gain in dealing with stochasticity. Our work suggests that humans use suboptimal but computationally cheap policies (such as novelty-seeking) for exploration in complex environments.",
       "author_keywords": [
         "reinforcement learning",
-        "intrinsic motivation",
-        "exploration",
-        "curiosity",
-        "novelty",
-        "surprise",
-        "information-gain"
+        "intrinsic motivation"
       ],
       "extracted_keywords": [],
       "keywords": [
         "reinforcement learning",
-        "intrinsic motivation",
-        "exploration",
-        "curiosity",
-        "novelty",
-        "surprise",
-        "information-gain"
+        "intrinsic motivation"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -38252,21 +38264,17 @@
       "author_keywords": [
         "real-world size",
         "depth perception",
+        "rsa",
         "artificial neural networks",
-        "object recognition",
-        "visual size",
-        "real-world depth",
-        "unlike the prior studies"
+        "object recognition"
       ],
       "extracted_keywords": [],
       "keywords": [
         "real-world size",
         "depth perception",
+        "rsa",
         "artificial neural networks",
-        "object recognition",
-        "visual size",
-        "real-world depth",
-        "unlike the prior studies"
+        "object recognition"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -38383,23 +38391,9 @@
       "title": "Opening Computational Neuroscience to a Wider Audience: Virtual Escape Room for Kids",
       "authors": "Isabelle Hoxha, Noga Mudrik, Anne E. Urai, Dante Kienigiel, Jeremy Forest, Mohamed Abdelhack, Megan Peters, Nick Halper, Ru-Yuan Zhang, Xinquan Lu, John S Butler",
       "abstract": "As researchers it is vital that we increase the accessibility, transparency, diversity, and inclusivity of our work. One-way Neuromatch has championed this is by having outreach sessions for children (8+) to explain computational-neuroscience concepts. For the 2022 Neuromatch conference we designed an online escape room with the two goals 1) to show who is a neuroscience researcher and what they do and 2) to explain a research topic. To show who/what is a researcher, the escape room began with a video describing the day-to-day life of a researcher. The subsequent videos discussed how mathematics and neuroscience are combined to model decision-making. We framed the videos around the question \"Will I walk or bike to school?\" to describe the concepts of the drift-diffusion equation and how its application. At the end of each video there was a multiple-choice question, a correct response gave clues to the next image and a letter for the keyword needed to complete the escape room. The escape room was translated into six languages: Arabic, Chinese, French, English, Hebrew and Spanish. The materials have been made open access and can be easily adapted to create content to communicate other scientific research questions to a broad audience.",
-      "author_keywords": [
-        "chinese",
-        "french",
-        "english",
-        "science communication",
-        "outreach",
-        "equality"
-      ],
+      "author_keywords": [],
       "extracted_keywords": [],
-      "keywords": [
-        "chinese",
-        "french",
-        "english",
-        "science communication",
-        "outreach",
-        "equality"
-      ],
+      "keywords": [],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
       "poster_number": "",
@@ -38494,8 +38488,7 @@
         "working memory",
         "neural circuits",
         "neural coding",
-        "histogram of neurons' absolute preferred direction changes",
-        "connectivity patterns"
+        "sensory-memory interference"
       ],
       "extracted_keywords": [],
       "keywords": [
@@ -38503,8 +38496,7 @@
         "working memory",
         "neural circuits",
         "neural coding",
-        "histogram of neurons' absolute preferred direction changes",
-        "connectivity patterns"
+        "sensory-memory interference"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -38600,21 +38592,9 @@
       "title": "People who worry more explore more",
       "authors": "Kristin Witte",
       "abstract": "The relationship between anxious and depressive traits and exploration behavior has been examined in several studies with mixed results. Across two studies, our results suggest that worrying may be a causal factor linking anxious and depressive traits to increased exploration behaviour. The first study compared exploration behavior on a risky and a safe version of a multi-armed bandit task. We measured a range of traits implicated in anxiety and depressivity and used computational modeling to assess potential task strategies. We found traits related to worrying to be associated with increased exploration behavior, particularly in the risky version of the task. The second study used only the risky version of the multi-armed bandit task and a psychotherapy-based intervention to reduce worries. This experimental reduction in worries resulted in the expected decrease in exploration behavior. These results suggest that worrying may be a causal mechanism connecting anxious and depressive traits to increased exploration behavior, particularly when there are risks involved.",
-      "author_keywords": [
-        "safe exploration",
-        "anxiety",
-        "depression",
-        "rumination",
-        "worries"
-      ],
+      "author_keywords": [],
       "extracted_keywords": [],
-      "keywords": [
-        "safe exploration",
-        "anxiety",
-        "depression",
-        "rumination",
-        "worries"
-      ],
+      "keywords": [],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
       "poster_number": "",
@@ -38678,14 +38658,14 @@
         "planning",
         "collaboration",
         "collaborative planning",
-        "social planning"
+        "social planning background and"
       ],
       "extracted_keywords": [],
       "keywords": [
         "planning",
         "collaboration",
         "collaborative planning",
-        "social planning"
+        "social planning background and"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -38782,14 +38762,14 @@
         "decision making",
         "choice inconsistency",
         "functional connectivity",
-        "machine learning"
+        "machine learning background"
       ],
       "extracted_keywords": [],
       "keywords": [
         "decision making",
         "choice inconsistency",
         "functional connectivity",
-        "machine learning"
+        "machine learning background"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -38961,6 +38941,7 @@
       "abstract": "Models of visual cognition assume that brain networks predict the feature contents of an upcoming stimulus to facilitate its categorization. To develop these models, we must trace where and when the brain predicts specific visual features and how this influences behavior. Typical studies approach these challenges using supervised learning of multivariate patterns that discriminate pairs of exemplars, or stimulus categories. Their reactivation is interpreted as the prediction of one or the other input. However, such category-contrasts cannot separate the representation of the features specific to each category, restricting the study of prediction mechanisms and their impact on categorization behavior. To address these challenges, our experiment used auditory cues to predict the feature distribution of an upcoming randomly sampled stimulus affording two different perceptions. We trained sensor-level MEG classifiers to discriminate the specific visual features underlying each perception. We then studied the reactivations of the perception-specific information-bearing patterns under the predictive cue. We show that reactivations with our category-feature classifiers are more specific to the cue (than typical category-contrast classifiers), and exert a stronger influence on perceptual decision behavior. Our novel approach can therefore track the prediction and reactivation of category-specific visual contents to better relate mechanisms of prediction to behavior.",
       "author_keywords": [
         "decoding",
+        "meg",
         "ambiguous perception",
         "decision making",
         "top-down prediction",
@@ -38969,6 +38950,7 @@
       "extracted_keywords": [],
       "keywords": [
         "decoding",
+        "meg",
         "ambiguous perception",
         "decision making",
         "top-down prediction",
@@ -39000,24 +38982,14 @@
       "abstract": "Predictive coding proposes that the brain signals information about the future to guide behavior. Due to experience-dependent plasticity and learning, inter-regional spontaneous activity is thought to represent a prediction signal which updates contextual representations across the cortex. However, a model for this function of inter-regional activity is lacking. Here we model predictive coding as a dynamical function of activity carrying out data compression and optimal control atop recurrent structural connectivity. Data compression distills predictive from unpredictive information using limited metabolic resources. Optimal control governs how the brain network should distribute control signals needed to transition to diverse future states according to updated contextual representations. Using neuroimaging data from 1,040 youths (ages 8-24), we test if this model relates to improved predictability of future activity, efficient expenditure of metabolic and control energy, and recurrent connectivity. Consistent with predictive coding, regions that most compress inputs per metabolic resource have more predictive activity. Predictive activity correlates with increased control energy, which can be further increased by incorporating structured contextual representations. Regions with more efficient compression and control have stronger recurrent connectivity. Taken together, predictive coding can be viewed as the inter-regional dynamics of compression and control.",
       "author_keywords": [
         "predictive coding",
-        "dense connectivity",
-        "energy minimization",
-        "sparse connectivity",
-        "homeostatic regulation of metabolic resources",
-        "ross ashby",
-        "containing modular",
-        "tka cik"
+        "compression",
+        "control theory"
       ],
       "extracted_keywords": [],
       "keywords": [
         "predictive coding",
-        "dense connectivity",
-        "energy minimization",
-        "sparse connectivity",
-        "homeostatic regulation of metabolic resources",
-        "ross ashby",
-        "containing modular",
-        "tka cik"
+        "compression",
+        "control theory"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -39178,6 +39150,7 @@
       "authors": "Alexandre Pasquiou",
       "abstract": "Two fundamental questions in neurolinguistics concerns the brain regions that integrate information beyond the lexical level, and the size of their window of integration. To address these questions we introduce a new approach named masked-attention generation. It uses GPT-2 transformers to generate word embeddings that capture a fixed amount of contextual information. We then tested whether these embeddings could predict fMRI brain activity in humans listening to naturalistic text. The results showed that most of the cortex within the language network is sensitive to contextual information, and that the right hemisphere is more sensitive to longer contexts than the left. Masked-attention generation supports previous analyses of context-sensitivity in the brain, and complements them by quantifying the window size of context integration per voxel.",
       "author_keywords": [
+        "fmri",
         "transformers",
         "context",
         "brain",
@@ -39185,6 +39158,7 @@
       ],
       "extracted_keywords": [],
       "keywords": [
+        "fmri",
         "transformers",
         "context",
         "brain",
@@ -39240,19 +39214,13 @@
       "author_keywords": [
         "sequence learning",
         "abstraction",
-        "gerken",
-        "vijayan",
-        "rao",
-        "vishton"
+        "memory"
       ],
       "extracted_keywords": [],
       "keywords": [
         "sequence learning",
         "abstraction",
-        "gerken",
-        "vijayan",
-        "rao",
-        "vishton"
+        "memory"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -39410,14 +39378,16 @@
         "decoding",
         "vision",
         "generative models",
-        "diffusion models"
+        "diffusion models",
+        "fmri"
       ],
       "extracted_keywords": [],
       "keywords": [
         "decoding",
         "vision",
         "generative models",
-        "diffusion models"
+        "diffusion models",
+        "fmri"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -39726,12 +39696,14 @@
       "author_keywords": [
         "visual word recognition",
         "predictive coding",
+        "eeg",
         "behavior"
       ],
       "extracted_keywords": [],
       "keywords": [
         "visual word recognition",
         "predictive coding",
+        "eeg",
         "behavior"
       ],
       "topic_area": "Cognitive science",
@@ -39761,17 +39733,13 @@
       "author_keywords": [
         "semantic dementia",
         "linear neural networks",
-        "relearning",
-        "anterior temporal lobes",
-        "representation learning"
+        "re-"
       ],
       "extracted_keywords": [],
       "keywords": [
         "semantic dementia",
         "linear neural networks",
-        "relearning",
-        "anterior temporal lobes",
-        "representation learning"
+        "re-"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -39992,12 +39960,16 @@
       "authors": "Shaunak Bhandarkar, James McClelland",
       "abstract": "Many memory models rely on a localist framework, using a neuron or slot for each memory. However, neuroscience research suggests that memories depend on sparse, distributed representations over neurons with sparse connectivity. Accordingly, we extend a canonical localist memory model - the modern Hopfield network - to a distributed variant called the K-winner modern Hopfield network, equating the number of synaptic parameters (weights) in the localist and K-winner variants. We study both models' sequential learning, updating the parameters of the best-matching memory neurons as each new memory comes in. We find that K-winner nets that compromise slightly on initial learning and retrieval accuracy exhibit superior retention of older memories.",
       "author_keywords": [
+        "memory",
         "modern hopfield network",
+        "hippocampus",
         "sequential learning"
       ],
       "extracted_keywords": [],
       "keywords": [
+        "memory",
         "modern hopfield network",
+        "hippocampus",
         "sequential learning"
       ],
       "topic_area": "Cognitive science",
@@ -40056,7 +40028,6 @@
       "authors": "Lin Sun",
       "abstract": "Expressing ourselves using grammatical sentences is a uniquely human ability, in which semantic relations are serialized into a sequence of words. We demonstrate that this can be achieved by a relatively simple neural model with rapid plasticity. The model is based on a \"plastic attractor\" model of working memory, where words are bound to their sentence roles by rapid plasticity. We demonstrate the network can order words into a grammatical sequence when semantic information is activated simultaneously, by \"auto-serialization\". Moreover, the network generates errors characteristic of Wernicke's (paragrammatic) aphasia and Broca's (agrammatic) aphasia with damage to appropriate parts of the model. Reducing rapid synaptic plasticity between words and their roles while adding noise to the long-term semantic knowledge yields sentences with normal syntax but meaningless words. In contrast, adding noise to short-term synaptic plasticity led to loss of syntax and closed-class filler words, but with semantic key words intact. This is the first neural model of syntax that can auto-serialize a representation, and it further gives rise to complex aphasic behaviors that are observed biologically.",
       "author_keywords": [
-        "working memory",
         "plasticity",
         "attractors",
         "computational neurolinguistics",
@@ -40065,7 +40036,6 @@
       ],
       "extracted_keywords": [],
       "keywords": [
-        "working memory",
         "plasticity",
         "attractors",
         "computational neurolinguistics",
@@ -40292,14 +40262,16 @@
         "working memory",
         "dynamic perturbation",
         "reactivation",
-        "impulse-response approach"
+        "impulse-response approach",
+        "meg"
       ],
       "extracted_keywords": [],
       "keywords": [
         "working memory",
         "dynamic perturbation",
         "reactivation",
-        "impulse-response approach"
+        "impulse-response approach",
+        "meg"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -40324,21 +40296,19 @@
       "author_keywords": [
         "speech perception",
         "rate distortion theory",
+        "vae",
         "feature weighting",
-        "mse is mean squared error",
-        "bce is binary cross entropy",
-        "models without selective attention",
-        "christopher bates for sharing his model code"
+        "holt",
+        "liu"
       ],
       "extracted_keywords": [],
       "keywords": [
         "speech perception",
         "rate distortion theory",
+        "vae",
         "feature weighting",
-        "mse is mean squared error",
-        "bce is binary cross entropy",
-        "models without selective attention",
-        "christopher bates for sharing his model code"
+        "holt",
+        "liu"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -40466,13 +40436,15 @@
       "author_keywords": [
         "decision making",
         "urgency",
-        "sustained attention"
+        "sustained attention",
+        "eeg"
       ],
       "extracted_keywords": [],
       "keywords": [
         "decision making",
         "urgency",
-        "sustained attention"
+        "sustained attention",
+        "eeg"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -40673,21 +40645,9 @@
       "title": "Studying Continuous Structural Neuroplasticity During Motor Learning Using Diffusion MRI",
       "authors": "Naama Friedman, Inbar Paretz, Ido Tavor",
       "abstract": "Neuroplasticity refers to the capacity of the nervous system to alter its structure and function in response to external or internal stimuli. This phenomenon can manifest as microstructural modifications of brain tissue while learning new information or skills. In recent years, such modifications in brain gray matter were detected after short learning periods using Diffusion Magnetic Resonance Imaging (dMRI). These studies have usually compared 3D structural MRI images between two time-points (i.e., before and after learning). Here, we characterized continuous microstructural changes by adding the time dimension to calculated indices of dMRI scans. We suggest a novel approach to acquire 4D spatio-temporal microstructural data that may provide insights into the dynamic nature of neuroplasticity.",
-      "author_keywords": [
-        "plasticity",
-        "motor",
-        "learning",
-        "diffusion mri",
-        "dti"
-      ],
+      "author_keywords": [],
       "extracted_keywords": [],
-      "keywords": [
-        "plasticity",
-        "motor",
-        "learning",
-        "diffusion mri",
-        "dti"
-      ],
+      "keywords": [],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
       "poster_number": "",
@@ -40739,16 +40699,14 @@
         "spiking neural ne twork",
         "synaptic plasticity",
         "neural plasticity",
-        "lansner",
-        "cued recall"
+        "delay maintenance main objectives"
       ],
       "extracted_keywords": [],
       "keywords": [
         "spiking neural ne twork",
         "synaptic plasticity",
         "neural plasticity",
-        "lansner",
-        "cued recall"
+        "delay maintenance main objectives"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -40851,6 +40809,7 @@
       "author_keywords": [
         "cognitive control",
         "task switching",
+        "eeg",
         "dynamical systems",
         "latent state space modeling"
       ],
@@ -40858,6 +40817,7 @@
       "keywords": [
         "cognitive control",
         "task switching",
+        "eeg",
         "dynamical systems",
         "latent state space modeling"
       ],
@@ -40983,8 +40943,7 @@
         "reinforcement learning",
         "arbitration system",
         "virtual reality",
-        "anterior insula",
-        "shuangyi tong"
+        "functional mri methods"
       ],
       "extracted_keywords": [],
       "keywords": [
@@ -40994,8 +40953,7 @@
         "reinforcement learning",
         "arbitration system",
         "virtual reality",
-        "anterior insula",
-        "shuangyi tong"
+        "functional mri methods"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -41062,16 +41020,14 @@
         "development",
         "planning",
         "model-based decision making",
-        "executive functions",
-        "adolescence"
+        "executive functions"
       ],
       "extracted_keywords": [],
       "keywords": [
         "development",
         "planning",
         "model-based decision making",
-        "executive functions",
-        "adolescence"
+        "executive functions"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -41191,6 +41147,7 @@
       "authors": "René S. Skukies, Benedikt V. Ehinger",
       "abstract": "Regression Event-Related-Potentials (ERPs) with overlap correction (also referred to, as linear deconvolution, or temporal response functions) are becoming more popular for the analysis of Electroencephalography (EEG) data. A common question for the analyst is, how to specify the length of the estimation windows. Long estimation windows might capture all relevant event-related activity, but might introduce artifacts due to overfit, short estimation windows might not overfit, but also might not capture all (overlapping) activity, and thereby introduce bias. Using a systematic simulation approach, we show that longer rather than shorter time windows should be preferred for typical EEG designs. We further provide an interactive app to visualize various design parameters: https://estimationwindow.ccn2023.s-ccs.de",
       "author_keywords": [
+        "eeg",
         "overlap correction",
         "linear deconvolution",
         "temporal response functions",
@@ -41198,6 +41155,7 @@
       ],
       "extracted_keywords": [],
       "keywords": [
+        "eeg",
         "overlap correction",
         "linear deconvolution",
         "temporal response functions",
@@ -41358,9 +41316,15 @@
       "title": "The neural dynamics of auditory word recognition and integration",
       "authors": "Jon Gauthier, Roger Levy",
       "abstract": "Listeners recognize and integrate words in everyday speech by combining expectations about upcoming content with incremental sensory evidence. We present a computational model of word recognition and its downstream neural correlates, and fit this model to explain EEG signals recorded as subjects listened to a fictional story. The model reveals distinct neural processing of words depending on whether or not they can be quickly recognized. While all words trigger a neural response characteristic of probabilistic integration — voltage modulations predicted by a word's surprisal in context — these modulations are amplified for words which require more than roughly 100 ms of input to be recognized. We observe no difference in the latency of these neural responses according to words' recognition times. Our results support a two-part model of speech comprehension, combining an eager and rapid process of word recognition with a temporally independent process of word integration.",
-      "author_keywords": [],
+      "author_keywords": [
+        "word recognition",
+        "speech comprehension"
+      ],
       "extracted_keywords": [],
-      "keywords": [],
+      "keywords": [
+        "word recognition",
+        "speech comprehension"
+      ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
       "poster_number": "",
@@ -41612,7 +41576,8 @@
         "bayesian model",
         "haptic feedback",
         "vision",
-        "estimation"
+        "simoncelli",
+        "stocker"
       ],
       "extracted_keywords": [],
       "keywords": [
@@ -41620,7 +41585,8 @@
         "bayesian model",
         "haptic feedback",
         "vision",
-        "estimation"
+        "simoncelli",
+        "stocker"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -41868,12 +41834,18 @@
       "abstract": "Can humans transfer pure abstract structural knowledge of existing concepts to aid learning new concepts? We tested participants on two concept-learning tasks that either shared (rule-plus-exception structures) or did not share abstract structure (exclusive-or, rule-plus-exception), and the tasks had zero overlap in sensory content (object/room stimuli). The experimental group discovered the abstract structure, speeding up learning in the second task more than controls. We explored if neural networks could provide insight into mechanisms of abstract transfer. We found that three hidden-layer, but not one or two hidden-layer networks, showed transfer by applying representations in the first task to the second task, speeding up learning. Specifically, networks exhibited more similar unit activation patterns (using representational similarity analysis) and greater input-to-hidden-layer node communicability (a graph-theoretic measure) correlation when tasks shared structure, suggesting weight – and therefore knowledge – reuse. Though it is far from obvious that pure structural transfer to new concept learning is possible in neural networks or in humans, our results suggests that this human ability can occur through standard error-driven learning, where neural networks naturally apply previously learned internal representations to aid new learning.",
       "author_keywords": [
         "category learning",
-        "concepts"
+        "concepts",
+        "transfer",
+        "structure learning",
+        "neural networks"
       ],
       "extracted_keywords": [],
       "keywords": [
         "category learning",
-        "concepts"
+        "concepts",
+        "transfer",
+        "structure learning",
+        "neural networks"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -41961,18 +41933,16 @@
       "abstract": "Many real-life decisions involve balancing multiple needs at the same time. To capture such complexity, We can conceptualize reward processing as navigating in an abstract value space. To tap into the individual differences in 'value navigation', we designed a foraging task where participants pick fruits to satisfy one of two needs, hydration and energy. The points they earn map onto how close they are to the goal state in Euclidean distance. In three studies (N = 685), we found that people systematically preferred the reward options that satisfied a single need (unidimensional bias), even when the option that satisfies both needs rendered higher points. Surprisingly, participants who reported a reduced capacity to imagine future pleasure (anticipatory anhedonia) had a smaller unidimensional bias, and therefore had better task performance. This may suggest that participants with anticipatory anhedonia represented values more veridically in a task that requires value representation in Euclidean geometry.",
       "author_keywords": [
         "reward processing",
-        "indicative of higher anticipatory anhedonia",
-        "three way interactions",
-        "reward learning",
-        "anxiety disorders"
+        "anhedonia",
+        "browning",
+        "robinson"
       ],
       "extracted_keywords": [],
       "keywords": [
         "reward processing",
-        "indicative of higher anticipatory anhedonia",
-        "three way interactions",
-        "reward learning",
-        "anxiety disorders"
+        "anhedonia",
+        "browning",
+        "robinson"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -42001,13 +41971,19 @@
       "author_keywords": [
         "reinforcement learning",
         "basal ganglia",
-        "uncertainty representation"
+        "dopamine",
+        "exploration",
+        "uncertainty representation",
+        "decision making"
       ],
       "extracted_keywords": [],
       "keywords": [
         "reinforcement learning",
         "basal ganglia",
-        "uncertainty representation"
+        "dopamine",
+        "exploration",
+        "uncertainty representation",
+        "decision making"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -42072,18 +42048,14 @@
         "spatial neglect",
         "visual neglect",
         "line bisection",
-        "bayes spatial neglect",
-        "right endpoint (r)",
-        "true midpoint (m)"
+        "bayes spatial neglect"
       ],
       "extracted_keywords": [],
       "keywords": [
         "spatial neglect",
         "visual neglect",
         "line bisection",
-        "bayes spatial neglect",
-        "right endpoint (r)",
-        "true midpoint (m)"
+        "bayes spatial neglect"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -42184,6 +42156,7 @@
       "author_keywords": [
         "decision making",
         "confidence",
+        "eeg",
         "erp",
         "cpp"
       ],
@@ -42191,6 +42164,7 @@
       "keywords": [
         "decision making",
         "confidence",
+        "eeg",
         "erp",
         "cpp"
       ],
@@ -42243,12 +42217,14 @@
       "abstract": "Valence biases in learning have been shown to relate to biases in episodic memory. Here, we examined whether valence biases in reinforcement learning (i.e., relative overweighting of positive or negative prediction errors), relate to biases in autobiographical recall of good and bad memories. Participants' learning biases, as well as prediction error magnitude and valence for a given trial, interacted to predict memory for the trial-unique image. Additionally, we found that valence biases in learning may be associated with biases in task-based memory, but do not relate to biases in autobiographical memory. Also, although participants recalled more good days than bad days, they tended to be more elaborative when describing bad days. Together, our results suggest that the relationship between learning and memory valence biases may be task and/or time-dependent.",
       "author_keywords": [
         "reinforcement learning",
-        "valence bias"
+        "valence bias",
+        "memory"
       ],
       "extracted_keywords": [],
       "keywords": [
         "reinforcement learning",
-        "valence bias"
+        "valence bias",
+        "memory"
       ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
@@ -42383,6 +42359,7 @@
         "transformers",
         "language models",
         "speech models",
+        "fmri",
         "reading",
         "listening",
         "encoding models"
@@ -42392,6 +42369,7 @@
         "transformers",
         "language models",
         "speech models",
+        "fmri",
         "reading",
         "listening",
         "encoding models"
@@ -42459,11 +42437,13 @@
       "abstract": "The representational geometry of a brain region can be characterized by the distances among neural activity patterns for a set of experimental conditions. Researchers routinely estimate representational distances from brain-activity measurements that either sparsely sample the underlying neural population (e.g. neural recordings) or pool across the activity of many neurons (e.g. fMRI voxels). Here we use theory and simulations to clarify under what circumstances representational distances estimated from brain-activity measurements reflect the representational geometry of the underlying neural population, and what distortions must be expected under other circumstances. We demonstrate that if single neurons are sampled at random, the estimated representational distances are undistorted. For voxels that take nonnegatively weighted averages, the resulting geometry overemphasizes the population-mean dimension, while accurately capturing orthogonal dimensions. Removing the mean from voxel patterns recovers the underlying representational geometry exactly under idealized conditions. This explains why the correlation distance, the most popular measure of representational dissimilarity, \"works\" so well, yielding geometries that can appear similar between fMRI and neural recordings.",
       "author_keywords": [
         "representational geometry",
+        "fmri",
         "neural recordings"
       ],
       "extracted_keywords": [],
       "keywords": [
         "representational geometry",
+        "fmri",
         "neural recordings"
       ],
       "topic_area": "Cognitive science",
@@ -56037,12 +56017,12 @@
       "abstract": "Abstract reasoning, a key component of human intelligence, seems to have recently emerged in large language models (LLMs). If so, LLMs could help us pro- vide a mechanistic explanation for the brain processes behind the abstract reasoning abilities of humans. In this study, we compared the performance of multiple LLMs to human performance in a visual abstract reasoning task. We found that while most LLMs cannot perform this task as well as human participants, some LLMs are com- petent enough for use as potential descriptive models. We propose that the best-performing LLMs can be used as models to understand human performance, response times, and the timing of Event-Related Potentials (ERPs) as recorded by electroencephalography (EEG) during the task. We show initial behavioral and ERP results, and present our plan to compare LLM embeddings and surprisal measures to cortical activity patterns. This is the first step in a larger project to create neurally-informed artificial networks as tools to understand human neurocognition.",
       "author_keywords": [
         "large language models (llms)",
-        "event- related potentials (erps)"
+        "eventrelated potentials (erps)"
       ],
       "extracted_keywords": [],
       "keywords": [
         "large language models (llms)",
-        "event- related potentials (erps)"
+        "eventrelated potentials (erps)"
       ],
       "topic_area": "View PDF",
       "track": "",
