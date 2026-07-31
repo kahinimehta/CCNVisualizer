@@ -11,6 +11,7 @@ Dependencies:
 
 from __future__ import annotations
 
+import csv
 import difflib
 import hashlib
 import json
@@ -844,6 +845,46 @@ def match_prior_submission(title: str, index: dict[str, dict], *, cutoff: float 
     return None
 
 
+PENDING_CSV_2026 = DATA_DIR / "ccn-2026-pending-posters.csv"
+_PENDING_CSV_2026_CACHE: dict[str, dict] | None = None
+
+
+def load_pending_csv_by_title() -> dict[str, dict]:
+    """Index provisional 2026 rows from ccn-2026-pending-posters.csv by title."""
+    global _PENDING_CSV_2026_CACHE
+    if _PENDING_CSV_2026_CACHE is not None:
+        return _PENDING_CSV_2026_CACHE
+
+    index: dict[str, dict] = {}
+    if not PENDING_CSV_2026.exists():
+        _PENDING_CSV_2026_CACHE = index
+        return index
+
+    with PENDING_CSV_2026.open(encoding="utf-8") as fh:
+        for row in csv.DictReader(fh):
+            title = clean_text(row.get("title", ""))
+            if not title:
+                continue
+            index[normalize_match_title(title)] = row
+    _PENDING_CSV_2026_CACHE = index
+    return index
+
+
+def match_pending_csv_row(title: str, *, cutoff: float = 0.86) -> dict | None:
+    index = load_pending_csv_by_title()
+    if not index:
+        return None
+    return match_prior_submission(title, index, cutoff=cutoff)
+
+
+def provisional_pending_backfill(title: str, *, prior: dict | None = None) -> dict[str, str]:
+    """Carry track/abstract from prior submissions.json or the pending 2026 CSV."""
+    pending = match_pending_csv_row(title)
+    track = clean_text((prior or {}).get("track", "")) or clean_text((pending or {}).get("track", ""))
+    abstract = clean_text((prior or {}).get("abstract", "")) or clean_text((pending or {}).get("abstract", ""))
+    return {"track": track, "abstract": abstract}
+
+
 def unique_2026_poster_number(poster_number: str, poster_id: str) -> str:
     poster_number = poster_number.strip()
     if re.match(r"^[A-Za-z]+\d+$", poster_number):
@@ -940,9 +981,9 @@ def scrape_2026_year() -> list[Submission]:
                 authors = pdf_authors
 
         prior = match_prior_submission(title, prior_by_title)
-        abstract = clean_text(detail.get("abstract", "")) or (
-            clean_text(prior.get("abstract", "")) if prior else ""
-        )
+        backfill = provisional_pending_backfill(title, prior=prior)
+        abstract = clean_text(detail.get("abstract", "")) or backfill["abstract"]
+        track = backfill["track"]
         had_abstract = bool(abstract)
         author_keywords, extracted_keywords, keywords = finalize_submission_keywords(
             year=year,
@@ -964,6 +1005,7 @@ def scrape_2026_year() -> list[Submission]:
             extracted_keywords=extracted_keywords,
             keywords=keywords,
             topic_area=topic_area,
+            track=track,
             poster_number=item.get("poster_number", ""),
             source_url=item["detail_url"],
             submission_type="poster",
@@ -987,7 +1029,9 @@ def scrape_2026_year() -> list[Submission]:
                 topic_label = item.get("topic_area", "")
                 topic_area = topic_label.lower() if topic_label else ""
                 prior = match_prior_submission(title, prior_by_title)
-                abstract = clean_text(prior.get("abstract", "")) if prior else ""
+                backfill = provisional_pending_backfill(title, prior=prior)
+                abstract = backfill["abstract"]
+                track = backfill["track"]
                 if abstract:
                     carried += 1
                 else:
@@ -1009,6 +1053,7 @@ def scrape_2026_year() -> list[Submission]:
                         extracted_keywords=extracted_keywords,
                         keywords=keywords,
                         topic_area=topic_area,
+                        track=track,
                         poster_number=item.get("poster_number", ""),
                         source_url=item.get("detail_url", ""),
                         submission_type="poster",
@@ -1146,6 +1191,7 @@ def merge_scraped_years(existing: dict, scraped: dict, years: Iterable[int]) -> 
         "author_keywords",
         "extracted_keywords",
         "keywords",
+        "track",
     )
     incoming: list[dict] = []
     for sub in scraped.get("submissions", []):
@@ -1160,6 +1206,8 @@ def merge_scraped_years(existing: dict, scraped: dict, years: Iterable[int]) -> 
                     merged[field_name] = prior[field_name]
             if prior.get("abstract") and not merged.get("abstract"):
                 merged["abstract"] = prior["abstract"]
+            if prior.get("track") and not merged.get("track"):
+                merged["track"] = prior["track"]
             # Keep a fuller prior author list when the new scrape only got a presenter.
             prior_authors = prior.get("authors") or ""
             new_authors = merged.get("authors") or ""

@@ -7,7 +7,6 @@ venv/
 data/raw/
 data/backups/
 data/pdf_cache/
-data/ccn-2026-pending-posters.csv
 data/llm_theme_cache.json
 data/abstracts_old.csv
 docs/data/abstracts_old.csv

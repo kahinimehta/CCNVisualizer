@@ -93747,7 +93747,7 @@
       "year": 2026,
       "title": "Evaluating spatial perception in humans and machines",
       "authors": "Nathan Kong, Václav Knapp, Russell A. Epstein, Tyler Bonnen",
-      "abstract": "Humans perceive spatial structure in the environment. This ability supports a range of downstream behaviours—from navigation to memory retrieval—and is thought to rely on a network of 'scene-selective' cortical structures. Feedforward deep learning models are often thought to provide a suitable approximation of this perceptual ability. This human-model correspondence, however, has largely been evaluated in classification settings. Here we develop a novel behavioural assay which reveals a substantial gap between these vision models and human spatial perception. We procedurally generate a large set of scenes and format them into 'oddity' tasks: participants are presented with two viewpoints from one tabletop (A), along with an image from a different tabletop (B), and must identify the odd-one-out (B). Through a series of experiments, we find that humans substantially outperform state-of-the-art vision models on this benchmark, and that human reaction times scale linearly with task difficulty. These data highlight the temporal dynamics of spatial perception, challenging common assumptions about the feedforward underpinnings of this foundational human ability.",
+      "abstract": "Humans perceive spatial structure in the environment. This ability supports a range of downstream behaviours---from navigation to memory retrieval---and is thought to rely on a network of 'scene-selective' cortical structures. Feedforward deep learning models are often thought to provide a suitable approximation of this perceptual ability. This human-model correspondence, however, has largely been evaluated in classification settings. Here we develop a novel behavioural assay which reveals a substantial gap between these vision models and human spatial perception. We procedurally generate a large set of scenes and format them into 'oddity' tasks: participants are presented with two viewpoints from one tabletop ($A$), along with an image from a different tabletop ($B$), and must identify the odd-one-out ($B$). Through a series of experiments, we find that humans substantially outperform state-of-the-art vision models on this benchmark, and that human reaction times scale linearly with task difficulty. These data highlight the temporal dynamics of spatial perception, challenging common assumptions about the feedforward underpinnings of this foundational human ability.",
       "author_keywords": [
         "computational models of vision & visual cortex"
       ],
@@ -93756,7 +93756,7 @@
         "computational models of vision & visual cortex"
       ],
       "topic_area": "computational models of vision & visual cortex",
-      "track": "",
+      "track": "Extended_Abstracts",
       "poster_number": "F-zglFEKvc0A",
       "source_url": "https://2026.ccneuro.org/poster/?id=zglFEKvc0A",
       "submission_type": "poster",
