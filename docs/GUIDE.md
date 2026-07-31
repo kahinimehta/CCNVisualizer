@@ -30,7 +30,9 @@ The dashboard loads only `docs/data/abstracts_2_topics.csv` at runtime.
 | [ccneuro.org](https://ccneuro.org) (2017–2026) | Titles, authors, abstracts, keywords, topic areas |
 | [CCN 2026 Activity Preferences](https://docs.google.com/forms/d/1c-ZR7PkUNDVeRmncAK2nmdKA5ZwuZ8opTr8Brl-WOJI/viewform) form | 14 research theme names (LLM-assigned labels) |
 
-`data/submissions.json` is the build-time source of truth. `data/embeddings_all.json` stores UMAP coordinates for rebuilds; coordinates are also copied into the CSV.
+`data/submissions.json` is the build-time source of truth (including `umap_x` / `umap_y` on each record). `data/embeddings_all.json` mirrors UMAP coordinates for rebuilds; the same coordinates are exported to the CSV.
+
+`data/ccn-2026-pending-posters.csv` supplies track/abstract backfill for 2026 posters that are live on ccneuro.org but not yet in the proceedings export.
 
 ## Scripts
 
@@ -74,6 +76,7 @@ Keywords shown in the dashboard CSV come from `dashboard_keywords()` in `scripts
 **Sanitization** (`reconcile_submission_keywords`):
 
 - Strips mojibake, citation fragments, author-name false positives, and implausible tokens
+- Repairs common PDF Private Use Area glyphs (e.g. PUA corruption of `Δ` in `ΔP`)
 - Conference track names in `METADATA_KEYWORD_PHRASES` are normally blocked as keywords, except for the 2025 topic-area fallback above
 
 Run keyword/text cleanup without re-scraping or re-running UMAP/LLM:

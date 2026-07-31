@@ -838,6 +838,13 @@ _CURLY_QUOTE_MAP = str.maketrans(
     }
 )
 
+# PDFs sometimes map Greek/math glyphs to the Unicode Private Use Area.
+_PDF_PUA_GLYPH_MAP = str.maketrans(
+    {
+        "\uf044": "Δ",  # delta (e.g. ΔP in associative-learning abstracts)
+    }
+)
+
 
 def sanitize_display_text(text: str) -> str:
     """Normalize PDF/encoding artifacts for dashboard and CSV display."""
@@ -845,6 +852,7 @@ def sanitize_display_text(text: str) -> str:
         return text
     cleaned = normalize_ligatures(str(text))
     cleaned = _KEYWORD_INVISIBLE_RE.sub("", cleaned)
+    cleaned = cleaned.translate(_PDF_PUA_GLYPH_MAP)
     cleaned = cleaned.translate(_CURLY_QUOTE_MAP)
     cleaned = cleaned.replace("\u00a0", " ")
     cleaned = re.sub(r"Â+(?=[\s.,;:!?)}\]]|$)", "", cleaned)
