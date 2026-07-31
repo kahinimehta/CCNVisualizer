@@ -317,6 +317,16 @@ BAD_KEYWORD_EXACT = frozenset(
         "more strongly",
         "even though",
         "though for practicality purposes",
+        "at any time",
+        "at any point in time",
+        "right panel",
+        "especially their output layers",
+        "rather than scrambled",
+        "built in python",
+        "impacted by our goals",
+        "connected room",
+        "foreffective learning",
+        "prioruncertainty and change-point probability",
         "strictly speaking",
         "more likely",
         "more precisely",
@@ -472,6 +482,15 @@ BAD_KEYWORD_EXACT = frozenset(
 
 BAD_KEYWORD_PREFIXES = (
     "though for ",
+    "at any ",
+    "especially ",
+    "rather than ",
+    "built in ",
+    "impacted by ",
+    "occurs at ",
+    "every synapse",
+    "their output ",
+    "point in time",
     "including ",
     "and ",
     "as well",
@@ -556,6 +575,7 @@ BAD_KEYWORD_PATTERN_RES = (
     re.compile(r"\b[a-z]+(?:\s+[a-z]+)?\s+[a-z]{1,2}$"),  # "donner th", "silbert lj"
     re.compile(r"[*~`^|\\{}[\]<>#$%@!;:=]"),  # odd symbols (keep + for pv+)
     re.compile(r"[^\w\s\-/&'+]{2,}"),  # runs of odd punctuation/symbols
+    re.compile(r"[\U0001D400-\U0001D7FF]"),  # mathematical alphanumeric symbols
 )
 
 TITLE_KEYWORD_STOPWORDS = frozenset(
@@ -663,6 +683,95 @@ _MOJIBAKE_REPLACEMENTS: tuple[tuple[str, str], ...] = (
 
 _MOJIBAKE_QUOTED_RE = re.compile(r"â([^â\n]{1,120}?)â")
 
+_LIGATURE_MAP = str.maketrans(
+    {
+        "\ufb00": "ff",
+        "\ufb01": "fi",
+        "\ufb02": "fl",
+        "\ufb03": "ffi",
+        "\ufb04": "ffl",
+        "\ufb05": "st",
+        "\ufb06": "st",
+    }
+)
+
+_ACUTE_VOWEL_MAP = {
+    "a": "á",
+    "e": "é",
+    "i": "í",
+    "o": "ó",
+    "u": "ú",
+    "A": "Á",
+    "E": "É",
+    "I": "Í",
+    "O": "Ó",
+    "U": "Ú",
+}
+
+_COMPOUND_SUFFIXES = (
+    "supervised",
+    "learning",
+    "processing",
+    "reasoning",
+    "interactions",
+    "interaction",
+    "networks",
+    "network",
+    "models",
+    "model",
+    "perception",
+    "connectome",
+    "datasets",
+    "dataset",
+    "cognition",
+    "probability",
+    "error",
+    "preference",
+    "stimuli",
+    "stimulus",
+    "differences",
+    "difference",
+    "planning",
+    "making",
+    "directed",
+    "coding",
+    "generalisation",
+    "generalization",
+    "behavior",
+    "behaviour",
+    "hierarchy",
+    "tracking",
+    "control",
+    "representations",
+    "representation",
+    "prediction",
+    "predictions",
+    "fmri",
+    "neuroscience",
+    "deep",
+    "open",
+    "source",
+    "guided",
+    "temporal",
+    "spatial",
+    "visual",
+    "cortex",
+    "reinforcement",
+    "decision",
+    "social",
+    "cognitive",
+    "naturalistic",
+    "generative",
+    "scene",
+    "choice",
+    "recursive",
+    "strategic",
+    "attention",
+    "inference",
+    "plasticity",
+    "modulation",
+)
+
 GAC_UPDATE_TITLE_RE = re.compile(r"^\[\s*GAC\s+update\s*\]", re.I)
 YEAR_ID_CACHE_KEY_RE = re.compile(r"^\d{4}:")
 
@@ -700,10 +809,237 @@ _KEYWORD_INVISIBLE_RE = re.compile(
 )
 
 
+def normalize_ligatures(text: str) -> str:
+    if not text:
+        return text
+    return text.translate(_LIGATURE_MAP)
+
+
+def repair_accent_marks(text: str) -> str:
+    if not text or "\u00b4" not in text:
+        return text
+
+    def repl(match: re.Match[str]) -> str:
+        base, vowel = match.group(1), match.group(2)
+        accented = _ACUTE_VOWEL_MAP.get(vowel)
+        return f"{base}{accented}" if accented else match.group(0)
+
+    return re.sub(r"([A-Za-z])\u00b4([aeiouAEIOU])", repl, text)
+
+
+def expand_compound_token(token: str) -> str:
+    keyword = normalize_ligatures(token.lower().strip())
+    keyword = keyword.replace("‐", "-").replace("–", "-")
+    keyword = re.sub(r"(?<=[a-z])and(?=[a-z])", " and ", keyword)
+    keyword = re.sub(r"\s+", " ", keyword).strip()
+    if not keyword:
+        return keyword
+    if len(keyword) <= 5:
+        return keyword
+    if " " in keyword:
+        return " ".join(expand_compound_token(part) for part in keyword.split())
+
+    changed = True
+    while changed:
+        changed = False
+        for suffix in sorted(_COMPOUND_SUFFIXES, key=len, reverse=True):
+            if len(keyword) <= len(suffix) + 2 or not keyword.endswith(suffix):
+                continue
+            prefix = keyword[: -len(suffix)].rstrip("-")
+            if prefix and prefix.replace("-", "").isalpha() and not prefix.endswith("-"):
+                keyword = f"{prefix} {suffix}"
+                changed = True
+                break
+
+    if " " in keyword:
+        return " ".join(expand_compound_token(part) for part in keyword.split())
+    return keyword
+
+
+def expand_compound_keyword(keyword: str) -> str:
+    if not keyword:
+        return keyword
+    return " ".join(
+        part
+        for token in re.split(r"(\s+)", keyword)
+        for part in ([token] if token.isspace() else [expand_compound_token(token)])
+        if part and not part.isspace()
+    )
+
+
+_KEYWORD_SCIENCE_TERMS = frozenset(
+    {
+        "network",
+        "networks",
+        "learning",
+        "memory",
+        "neural",
+        "model",
+        "models",
+        "brain",
+        "visual",
+        "cortex",
+        "connectome",
+        "reinforcement",
+        "processing",
+        "inference",
+        "coding",
+        "control",
+        "decision",
+        "auditory",
+        "theoretical",
+        "computational",
+        "attention",
+        "prediction",
+        "perception",
+        "behavior",
+        "behaviour",
+        "artificial",
+        "recurrent",
+        "neuroscience",
+        "generalisation",
+        "generalization",
+        "scaffold",
+        "temporal",
+        "spatial",
+        "cooperation",
+        "altruism",
+        "preference",
+        "hippocampus",
+        "plasticity",
+        "navigation",
+        "mentalization",
+        "specialization",
+        "modularity",
+        "effective",
+        "connectivity",
+    }
+)
+
+
+_COMMON_FIRST_NAMES = frozenset(
+    {
+        "aaron",
+        "adam",
+        "alex",
+        "alexander",
+        "alice",
+        "amy",
+        "andrew",
+        "anna",
+        "anthony",
+        "benjamin",
+        "brian",
+        "carla",
+        "charles",
+        "chris",
+        "christopher",
+        "daniel",
+        "david",
+        "elena",
+        "elizabeth",
+        "emma",
+        "eva",
+        "george",
+        "grace",
+        "hannah",
+        "james",
+        "jane",
+        "jennifer",
+        "john",
+        "joseph",
+        "julia",
+        "kate",
+        "katherine",
+        "kevin",
+        "laura",
+        "linda",
+        "lisa",
+        "maria",
+        "mark",
+        "martha",
+        "mary",
+        "michael",
+        "michelle",
+        "nahid",
+        "nancy",
+        "nicholas",
+        "olivia",
+        "paul",
+        "peter",
+        "rachel",
+        "richard",
+        "robert",
+        "sarah",
+        "stephen",
+        "steven",
+        "susan",
+        "thomas",
+        "william",
+    }
+)
+
+
+def keyword_looks_like_name_or_citation(keyword: str) -> bool:
+    normalized = normalize_keyword_phrase(keyword)
+    if not normalized:
+        return False
+    if normalized.startswith("goto") or normalized.startswith("no-goto"):
+        return True
+    if " goto " in f" {normalized} ":
+        return True
+    words = normalized.split()
+    if len(words) == 2 and len(words[0]) <= 2 and words[0].isalpha():
+        return True
+    return keyword_looks_like_person_name(normalized)
+
+
+def keyword_looks_like_person_name(keyword: str) -> bool:
+    normalized = normalize_keyword_phrase(keyword)
+    if not normalized or "(" in normalized or "-" in normalized:
+        return False
+    words = normalized.split()
+    if len(words) != 2:
+        return False
+    if words[0] in {"van", "de", "del", "da", "di", "le", "la", "el", "al", "von", "der"}:
+        return True
+    if not all(2 <= len(word) <= 14 and word.isalpha() for word in words):
+        return False
+    if words[0] in _COMMON_FIRST_NAMES:
+        return True
+    if any(term in normalized for term in _KEYWORD_SCIENCE_TERMS):
+        return False
+    return False
+
+
+def drop_reference_name_keywords(keywords: list[str]) -> list[str]:
+    if len(keywords) < 6:
+        return keywords
+    filtered = [kw for kw in keywords if not keyword_looks_like_person_name(kw)]
+    if len(filtered) >= 2 and len(filtered) < len(keywords):
+        return filtered
+    return keywords
+
+
 def normalize_keyword_phrase(keyword: str) -> str:
     cleaned = _KEYWORD_INVISIBLE_RE.sub("", keyword or "")
+    cleaned = normalize_ligatures(cleaned)
     cleaned = re.sub(r"\s+", " ", cleaned.strip().lower())
-    return strip_citation_fragments(cleaned)
+    cleaned = strip_citation_fragments(cleaned)
+    cleaned = expand_compound_keyword(cleaned)
+    cleaned = re.sub(r"\s+", " ", cleaned).strip(" ,.;")
+    cleaned = re.sub(r"\bf\s+mri\b", "fmri", cleaned)
+    cleaned = re.sub(r"\bopensourcef\s+mri\b", "open source fmri", cleaned)
+    cleaned = re.sub(r"\bdeepf\s+mri\b", "deep fmri", cleaned)
+    cleaned = re.sub(r"\bdenseanddeepf\s+mri\b", "dense and deep fmri", cleaned)
+    acronym_fixes = {
+        "dm pfc": "dmpfc",
+        "dm-pfc": "dmpfc",
+        "vm pfc": "vmpfc",
+        "vm-pfc": "vmpfc",
+    }
+    cleaned = acronym_fixes.get(cleaned, cleaned)
+    return cleaned
 
 
 def is_metadata_keyword(keyword: str) -> bool:
@@ -1292,7 +1628,17 @@ def is_plausible_keyword(keyword: str) -> bool:
         return False
     if any(word in KEYWORD_VERBS for word in words):
         return False
+    if any(len(word) > 18 for word in words):
+        return False
     if re.search(r"[.!?]", normalized):
+        return False
+    if re.search(r"[∝≈≤≥±×÷′]", normalized):
+        return False
+    if re.search(r"^\)|\bpr\(", normalized):
+        return False
+    if len(normalized) > 48 and any(
+        marker in f" {normalized} " for marker in (" similar to ", " compared to ", " rather than ")
+    ):
         return False
     if normalized.count("(") != normalized.count(")"):
         return False
@@ -1334,6 +1680,27 @@ def is_plausible_keyword(keyword: str) -> bool:
         if any(len(w) == 1 for w in words if w.isalpha()):
             return False
     return True
+
+
+def keywords_look_low_quality(keywords: list[str], submission: dict) -> bool:
+    if not keywords:
+        return False
+    title = str(submission.get("title") or "")
+    abstract = str(submission.get("abstract") or "").lower()
+    normalized = [normalize_keyword_phrase(kw) for kw in keywords if kw]
+    if not normalized:
+        return False
+    if keywords_are_title_derived(normalized, title):
+        return True
+    if any(len(kw) > 24 and " " not in kw and kw.isalpha() for kw in normalized):
+        return True
+    if any(re.search(r"[a-z]{14,}", kw) and " " not in kw for kw in normalized):
+        return True
+    singles = [kw for kw in normalized if " " not in kw]
+    if len(normalized) >= 8 and len(singles) / len(normalized) >= 0.75:
+        if sum(1 for kw in singles if kw in abstract) >= max(3, len(singles) - 1):
+            return True
+    return False
 
 
 def keywords_are_title_derived(keywords: list[str], title: str) -> bool:
@@ -1409,12 +1776,15 @@ def sanitize_keyword_list(keywords: list[str]) -> list[str]:
             continue
         if is_metadata_keyword(normalized):
             continue
+        if keyword_looks_like_name_or_citation(normalized):
+            continue
         if not is_plausible_keyword(normalized):
             continue
         if normalized in seen:
             continue
         seen.add(normalized)
         cleaned.append(normalized)
+    cleaned = drop_reference_name_keywords(cleaned)
     return compact_corrupted_keywords(list(keywords or []), cleaned)
 
 
@@ -1453,6 +1823,18 @@ def reconcile_submission_keywords(submission: dict) -> None:
     title = str(submission.get("title") or "")
 
     author = sanitize_keyword_list(list(submission.get("author_keywords") or []))
+    authors_blob = str(submission.get("authors") or "").lower()
+    if authors_blob:
+        author = [
+            kw
+            for kw in author
+            if not (len(kw.split()) >= 2 and kw in authors_blob and "(" not in kw)
+        ]
+    if author and keywords_look_low_quality(author, submission):
+        author = []
+        submission["author_keywords"] = []
+        submission["extracted_keywords"] = []
+        submission["keywords"] = []
     if author:
         submission["author_keywords"] = author[:MAX_KEYWORD_LIST_SIZE]
         submission["keywords"] = submission["author_keywords"]
@@ -1467,11 +1849,22 @@ def reconcile_submission_keywords(submission: dict) -> None:
             return
 
     extracted = sanitize_keyword_list(list(submission.get("extracted_keywords") or []))
+    if extracted and keywords_look_low_quality(extracted, submission):
+        extracted = []
+        submission["extracted_keywords"] = []
     if extracted and not keywords_are_title_derived(extracted, title):
         submission["keywords"] = extracted[:MAX_KEYWORD_LIST_SIZE]
         return
 
     keywords = sanitize_keyword_list(list(submission.get("keywords") or []))
+    if authors_blob:
+        keywords = [
+            kw
+            for kw in keywords
+            if not (len(kw.split()) >= 2 and kw in authors_blob and "(" not in kw)
+        ]
+    if keywords and keywords_look_low_quality(keywords, submission):
+        keywords = []
     if keywords and not keywords_are_title_derived(keywords, title):
         submission["keywords"] = keywords[:MAX_KEYWORD_LIST_SIZE]
         return
@@ -1538,24 +1931,24 @@ def repair_mojibake(text: str) -> str:
         return text
 
     repaired = text
-    for old, new in _MOJIBAKE_REPLACEMENTS:
-        if old in repaired:
-            repaired = repaired.replace(old, new)
-    repaired = _MOJIBAKE_QUOTED_RE.sub(r'"\1"', repaired)
-    repaired = re.sub(r"\sâ\s", " — ", repaired)
+    for _ in range(3):
+        previous = repaired
+        for old, new in _MOJIBAKE_REPLACEMENTS:
+            if old in repaired:
+                repaired = repaired.replace(old, new)
+        repaired = _MOJIBAKE_QUOTED_RE.sub(r'"\1"', repaired)
+        repaired = re.sub(r"\sâ\s", " — ", repaired)
+        for encoding in ("cp1252", "latin-1"):
+            try:
+                candidate = repaired.encode(encoding).decode("utf-8")
+            except (UnicodeDecodeError, UnicodeEncodeError):
+                continue
+            if candidate != repaired:
+                repaired = candidate
+        if repaired == previous:
+            break
 
-    if _MOJIBAKE_MARKERS.search(repaired) or repaired != text:
-        for _ in range(2):
-            for encoding in ("cp1252", "latin-1"):
-                try:
-                    candidate = repaired.encode(encoding).decode("utf-8")
-                except (UnicodeDecodeError, UnicodeEncodeError):
-                    continue
-                if candidate != repaired:
-                    repaired = candidate
-                    break
-
-    return repaired
+    return repair_accent_marks(repaired)
 
 
 def repair_submission_text(submission: dict) -> None:
