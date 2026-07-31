@@ -1006,9 +1006,9 @@ function showTooltip(html, event, options = {}) {
     tooltip.html(html);
   }
 
-  tooltip.classed("tooltip-interactive", interactive);
+  tooltip.classed("tooltip-interactive", interactive && (phone || mode === "tap"));
   tooltipVisible = true;
-  const allowPointer = interactive || phone || mode === "tap";
+  const allowPointer = phone || mode === "tap";
   tooltip.style("opacity", 1).style("pointer-events", allowPointer ? "auto" : "none");
 
   bindTooltipInteractions({
@@ -1713,7 +1713,7 @@ function embeddingPointTooltipHtml(point) {
     : `<span class="tooltip-hint">No topics assigned</span>`;
   const hint = isPhoneLayout()
     ? "Tap a topic to filter · Open paper below"
-    : "Click a topic to filter · × closes pinned popup";
+    : "Click dot to pin · then filter by topic";
   return [
     `<strong>${title}</strong>`,
     yearLabel
@@ -2653,7 +2653,7 @@ function renderEmbeddingCluster() {
       })
       .on("mouseleave", () => {
         if (tooltipSticky) return;
-        scheduleHideTooltip();
+        hideTooltip();
       })
       .on("click", (event, d) => {
         event.stopPropagation();
