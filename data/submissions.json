@@ -45383,21 +45383,19 @@
       "authors": "Yousif Kashef Alghetaa, Simon Kornblith, Kohitij Kar",
       "abstract": "Unraveling human visual strategies during object recognition remains a challenge in vision science. Existing psychophysical methods used to investigate these strategies are limited in accurately interpreting human decisions. Recently, artificial neural network (ANN) models, which show remarkable similarities to human vision, provide a window into human visual strategies. However, inconsistencies among different techniques hinder the use of explainable AI (XAI) methods to interpret ANN decision-making. Here, we first develop and validate a novel surrogate method, in silico, using behavioral probes in ANNs with explanation-masked images to address these challenges. Finally, by identifying the XAI method and ANN with the highest human alignment, we provide a working hypothesis and an effective approach to explain human visual strategies during object recognition -- a framework relevant to many other behaviors.",
       "author_keywords": [
-        "probing",
-        "visual",
-        "strategies",
-        "interpretability",
+        "object recognition",
+        "xai",
         "ann",
-        "object"
+        "explanation",
+        "masked images"
       ],
       "extracted_keywords": [],
       "keywords": [
-        "probing",
-        "visual",
-        "strategies",
-        "interpretability",
+        "object recognition",
+        "xai",
         "ann",
-        "object"
+        "explanation",
+        "masked images"
       ],
       "topic_area": "View PDF",
       "track": "",
@@ -49198,21 +49196,21 @@
       "authors": "Xueqing Liu, Paul Sajda",
       "abstract": "Large Language Models (LLMs) have revolutionized Natural Language Processing (NLP) by generating coherent and fluent text for various tasks. However, hallucination remains a significant challenge where LLMs generate entirely fabricated information. This paper introduces a novel approach, \"Roe\", to counteract hallucination in LLMs. Inspired by psychological studies on promoting honesty in children, we propose a dual-notch objective function guarded by a float loss bar that incentivizes accurate answers and acknowledges uncertainty. This approach improves model honest and enhances accuracy by efficiently fine-tuning the Llama base model, surpassing benchmarks set by models trained on much larger datasets. GPT4All, GPT-3.5, GPT-3, Llama-7B, and Alpaca-7B, exhibit accuracies below 90%, with some even falling below 40%. Our approach achieves comparable accuracy to the state-of-the-art model, GPT4All, while utilizing only a fraction (approximately 1/15) of its training data. When both models are fine-tuned on the same dataset, our method outperforms GPT4All, achieving accuracy rates of nearly or above 95% for all question test sets and 99.32% for the Truthful QA metrics.",
       "author_keywords": [
-        "roe",
-        "reducing",
+        "large language models",
         "hallucination",
-        "large",
-        "llms",
-        "accuracy"
+        "roe",
+        "don't know",
+        "child development",
+        "human learning"
       ],
       "extracted_keywords": [],
       "keywords": [
-        "roe",
-        "reducing",
+        "large language models",
         "hallucination",
-        "large",
-        "llms",
-        "accuracy"
+        "roe",
+        "don't know",
+        "child development",
+        "human learning"
       ],
       "topic_area": "View PDF",
       "track": "",
@@ -51037,19 +51035,19 @@
       "authors": "Xiamin Leng, Alexander Fengler, Amitai Shenhav, Michael Frank",
       "abstract": "Choice deadlines are commonly imposed in decision-making research to incentivize speedy responses and sustained attention. However, computational models of choice and response times routinely overlook this deadline, instead simply omitting trials past the deadline from further analysis. This choice is made under the implicit assumption that parameter estimation is not significantly affected by ignoring these omissions. Using new tools from likelihood-free inference, here we elucidate the degree to which omitting omissions, even in seemingly benign settings, can lead researchers astray. Using a Sequential Sampling Model (SSM) with collapsing boundaries as a test-bed, we explore this phenomenon and show how it can be remedied by modeling omissions expected from the generative process.",
       "author_keywords": [
-        "perils",
-        "omitting",
-        "omissions",
-        "choice",
-        "deadline"
+        "likelihood-free",
+        "ddm",
+        "ssm",
+        "bayesian modeling",
+        "omissions"
       ],
       "extracted_keywords": [],
       "keywords": [
-        "perils",
-        "omitting",
-        "omissions",
-        "choice",
-        "deadline"
+        "likelihood-free",
+        "ddm",
+        "ssm",
+        "bayesian modeling",
+        "omissions"
       ],
       "topic_area": "View PDF",
       "track": "",
@@ -55266,23 +55264,9 @@
       "title": "Constraining vision models to predict image memorability yields significant gains in producing more brain-aligned models of the primate ventral stream",
       "authors": "Ram Ahuja, Soroush Ziaee, Ezgi Fide, Shayna Rosenbaum, Kohitij Kar",
       "abstract": "The primate ventral visual stream that culminates in the inferior temporal (IT) cortex supports critical functions, including object recognition and visual memory. Previous work has demonstrated that artificial neural networks (ANNs) optimized for object categorization exhibit unprecedented but partial alignment with ventral stream representations. However, it remains unknown whether ANNs constrained to predict human image memorability could explain a unique part of the neural variance -- potentially bridging the remaining explanatory gap. We observed that models trained to predict image memorability predict unique variances of the IT neural responses. Interestingly, joint categorization and memorability training yielded networks that captured significantly more variance in neural responses than models trained on either objective alone. Our results suggest that incorporating diverse, functionally relevant objectives leads to ANNs more closely aligned with the primate ventral visual stream's representational geometry and functional properties.",
-      "author_keywords": [
-        "constraining",
-        "vision",
-        "predict",
-        "image",
-        "ventral",
-        "visual"
-      ],
+      "author_keywords": [],
       "extracted_keywords": [],
-      "keywords": [
-        "constraining",
-        "vision",
-        "predict",
-        "image",
-        "ventral",
-        "visual"
-      ],
+      "keywords": [],
       "topic_area": "View PDF",
       "track": "",
       "poster_number": "C11",
