@@ -976,6 +976,70 @@ function bindTooltipInteractions(options = {}) {
     });
 }
 
+function tooltipAnchorRect(event, options = {}) {
+  if (options.anchorRect) return options.anchorRect;
+  if (!options.anchorToTarget) return null;
+  if (options.anchorPoint) {
+    const rect = embeddingGroupRectForPoint(options.anchorPoint);
+    if (rect) return rect;
+  }
+  const target = event?.currentTarget;
+  if (target?.getBoundingClientRect) {
+    const rect = target.getBoundingClientRect();
+    if (Number.isFinite(rect.left) && Number.isFinite(rect.top)) return rect;
+  }
+  return null;
+}
+
+function embeddingGroupRectForPoint(point) {
+  const container = document.getElementById("embedding-chart");
+  const groups = container?.querySelectorAll("g.embedding-point-group");
+  if (!groups?.length) return null;
+  const key = submissionRowKey(point);
+  for (const group of groups) {
+    const data = group.__data__;
+    if (data && submissionRowKey(data) === key) {
+      return group.getBoundingClientRect();
+    }
+  }
+  return null;
+}
+
+function positionTooltipBox(node, event, options = {}) {
+  const padding = Math.max(12, s(12));
+  const gap = Math.max(18, s(20));
+  const width = node?.offsetWidth || 0;
+  const height = node?.offsetHeight || 0;
+  const anchorRect = tooltipAnchorRect(event, options);
+
+  let anchorX;
+  let anchorY;
+  if (anchorRect) {
+    anchorX = anchorRect.left + anchorRect.width / 2;
+    anchorY = anchorRect.top + anchorRect.height / 2;
+  } else {
+    anchorX = event?.clientX ?? window.innerWidth / 2;
+    anchorY = event?.clientY ?? window.innerHeight / 2;
+  }
+
+  let left;
+  let top;
+  if (options.anchorToTarget && anchorRect) {
+    // Anchor above-right of the dot so the popup does not sit on the cursor/dot.
+    left = anchorX + gap;
+    top = anchorY - height - gap;
+    if (top < padding) top = anchorY + gap;
+    if (left + width > window.innerWidth - padding) left = anchorX - width - gap;
+  } else {
+    left = anchorX + gap;
+    top = anchorY + gap;
+  }
+
+  left = Math.max(padding, Math.min(left, window.innerWidth - width - padding));
+  top = Math.max(padding, Math.min(top, window.innerHeight - height - padding));
+  return { left, top };
+}
+
 function showTooltip(html, event, options = {}) {
   if (!tooltip) return;
   const phone = isPhoneLayout();
@@ -987,7 +1051,6 @@ function showTooltip(html, event, options = {}) {
   if (!phone && isTouchLike() && mode === "hover") return;
 
   cancelHideTooltip();
-  const offset = s(12);
   tooltipMode = mode;
   tooltipInteractive = interactive;
   // Click/tap pins the popup so moving across nearby dots won't steal it.
@@ -1023,14 +1086,7 @@ function showTooltip(html, event, options = {}) {
   }
 
   const node = tooltip.node();
-  const width = node?.offsetWidth || 0;
-  const height = node?.offsetHeight || 0;
-  const maxLeft = window.innerWidth - width - offset;
-  const maxTop = window.innerHeight - height - offset;
-  const clientX = event?.clientX ?? window.innerWidth / 2;
-  const clientY = event?.clientY ?? window.innerHeight / 2;
-  const left = Math.max(offset, Math.min(clientX + offset, maxLeft));
-  const top = Math.max(offset, Math.min(clientY + offset, maxTop));
+  const { left, top } = positionTooltipBox(node, event, options);
   tooltip.style("left", `${left}px`).style("top", `${top}px`);
 }
 
@@ -1731,6 +1787,7 @@ function showEmbeddingPointTooltip(event, point, mode = "hover") {
     mode,
     interactive: true,
     anchorPoint: point,
+    anchorToTarget: true,
     onTopicClick: (theme) => {
       toggleThemeFilter(theme);
       // Keep pinned popups open and refresh active topic chips.
