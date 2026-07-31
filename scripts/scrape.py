@@ -125,6 +125,49 @@ def clean_text(text: str) -> str:
     return text
 
 
+_KEYWORD_HEADING_RE = re.compile(r"\bKey(?:\s*wo)?(?:\s*rds?)\s*:?\s*", re.I)
+_INTRODUCTION_SPLIT_RE = re.compile(r"(?:\n\s*|\s+)(?:\d+\s+)?Introduction\b", re.I)
+_PROSE_LINE_START_RE = re.compile(
+    r"^(?:The |In |We |Our |This |A |An |Concepts |Learning|Introduction|When |Here |To |Using )",
+    re.I,
+)
+
+
+def extract_keyword_block(text: str) -> str:
+    """Pull the keyword list from a PDF text block, stopping before body prose."""
+    match = _KEYWORD_HEADING_RE.search(text)
+    if not match:
+        return ""
+
+    tail = text[match.end() :]
+    tail = re.split(
+        r"Introduction(?=[A-Z][a-z])|(?:\n\s*|\s+)(?:\d+\s+)?Introduction\b",
+        tail,
+        maxsplit=1,
+        flags=re.I,
+    )[0]
+
+    lines: list[str] = []
+    for line in tail.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            if lines:
+                break
+            continue
+        if _PROSE_LINE_START_RE.match(stripped):
+            break
+        lines.append(stripped)
+
+    if not lines:
+        stripped = re.sub(r"\s+", " ", tail).strip(" .")
+        intro = _INTRODUCTION_SPLIT_RE.search(stripped)
+        if intro:
+            stripped = stripped[: intro.start()].strip(" .")
+        lines = [stripped] if stripped else []
+
+    return re.sub(r"\s+", " ", " ".join(lines)).strip(" .")
+
+
 def parse_keyword_field(raw: str) -> list[str]:
     if not raw:
         return []
@@ -137,10 +180,19 @@ def parse_keyword_field(raw: str) -> list[str]:
         .replace("\u00a0", " ")
         .replace("\u2002", "\u0001")
     )
-    parts = re.split(r"[\u0001,;&|]+|\s{2,}", normalized)
+    if (
+        not re.search(r"[;,]", normalized)
+        and len(normalized) < 200
+        and re.search(r"\.\s+(?:[A-Z][A-Za-z\-]*|\d)", normalized)
+    ):
+        parts = re.split(r"\.\s+", normalized)
+    else:
+        parts = re.split(r"[\u0001,;&|]+|\s{2,}", normalized)
     keywords = []
     for part in parts:
         kw = clean_text(part)
+        if re.search(r"\bintroduction\b", kw, flags=re.I):
+            kw = re.split(r"\bintroduction\b", kw, maxsplit=1, flags=re.I)[0].strip(" ,.;")
         kw = normalize_keyword_phrase(kw)
         if not kw or len(kw) <= 2:
             continue
@@ -180,7 +232,6 @@ def normalize_author_keywords(keywords: list[str]) -> list[str]:
             and cleaned not in seen
             and cleaned not in blocked
             and cleaned not in NOISE_KEYWORDS
-            and not is_metadata_keyword(cleaned)
             and is_plausible_keyword(cleaned)
         ):
             seen.add(cleaned)
@@ -1218,16 +1269,19 @@ def parse_proceedings_keywords(text: str) -> list[str]:
     if not text:
         return []
 
-    normalized = normalize_pdf_text(text)
-    match = re.search(
-        r"\bKeywords?\s*:?\s*(.+?)(?:\bIntroduction\b|\b1\s+Introduction\b|\bBackground\b|\bAbstract\b|\Z)",
-        normalized,
-        re.I | re.S,
-    )
-    if not match:
-        return []
+    raw = extract_keyword_block(text)
+    if not raw:
+        normalized = normalize_pdf_text(text)
+        match = re.search(
+            r"\bKey(?:\s*wo)?(?:\s*rds?)\s*:?\s*(.+?)(?:\bIntroduction\b|\b1\s+Introduction\b|\bBackground\b|\Z)",
+            normalized,
+            re.I | re.S,
+        )
+        if not match:
+            return []
+        raw = clean_text(match.group(1))
+        raw = re.split(r"\bintroduction\b", raw, maxsplit=1, flags=re.I)[0].strip(" .")
 
-    raw = clean_text(match.group(1))
     if not raw:
         return []
     return normalize_author_keywords(parse_keyword_field(raw))

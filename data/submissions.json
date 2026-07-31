@@ -30040,9 +30040,17 @@
       "title": "3D View Prediction Models of the Dorsal Visual Stream",
       "authors": "Gabriel Sarch",
       "abstract": "Deep neural network representations align well with brain activity in the ventral visual stream. However, the primate visual system has a distinct dorsal processing stream with different functional properties. To test if a model trained to perceive 3D scene geometry aligns better with neural responses in dorsal visual areas, we trained a self-supervised geometry-aware recurrent neural network (GRNN) to predict novel camera views using a 3D feature memory. We compared GRNN to self-supervised baseline models that have been shown to align well with ventral regions using the large-scale fMRI Natural Scenes Dataset (NSD). We found that while the baseline models accounted better for ventral brain regions, GRNN accounted for a greater proportion of variance in dorsal brain regions. Our findings demonstrate the potential for using task-relevant models to probe representational differences across visual streams.",
-      "author_keywords": [],
+      "author_keywords": [
+        "visual streams",
+        "dnn",
+        "self-supervision"
+      ],
       "extracted_keywords": [],
-      "keywords": [],
+      "keywords": [
+        "visual streams",
+        "dnn",
+        "self-supervision"
+      ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
       "poster_number": "",
@@ -32644,9 +32652,15 @@
       "title": "Curriculum Effects on Compositional Generalisation Revisited",
       "authors": "Carla Cremer, Jacques Pesnot Lerousseau, Chris Summerfield",
       "abstract": "Compositional generalisation is the ability to decompose and re-combine predictive factors (or rules) to navigate new contexts. Here, we replicate and extend a recent study of this ability in humans by Dekker et al., (2022). We compare participants’ ability to generalise a mapping of nonspatial features (colour, shape, texture) to new 3D spatial locations using a compositional rule, under training curricula that block or interleave the features. We replicate the advantage of blocked curricula for compositional generalisation, finding that interleaving tends to instead promote exemplar-based strategies.",
-      "author_keywords": [],
+      "author_keywords": [
+        "curriculum",
+        "compositional generalisation"
+      ],
       "extracted_keywords": [],
-      "keywords": [],
+      "keywords": [
+        "curriculum",
+        "compositional generalisation"
+      ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
       "poster_number": "",
@@ -35423,9 +35437,21 @@
       "title": "Hierarchical Predictive Coding across the Auditory Forebrain",
       "authors": "Srihita Rudraraju, Michael Turvey",
       "abstract": "The inferential basis of perception is thought to arise in the sensory cortex through prediction of future events that aid processing efficiency. Predictive coding (PC), a theoretical framework in which the brain compares a generative model to incoming sensory signals, seeks to explain this inferential process. Implementation of PC at a mechanistic level in individual neurons is however not well understood. Here, we examined responses of single neurons in caudomedial nidopallium (NCM), caudal mesopallium (CMM) and Field L, analogs of higher order auditory cortex, in anesthetized European starlings listening to conspecific songs. We trained a temporal convolutional model (TCM) to define predictive features and its corresponding error representing acoustic features. We show that responses across the auditory forebrain are distinctively selective for carrying information about future predictions and errors. This provides strong support for auditory hierarchical organization for predictive code implemented in single neurons in songbirds.",
-      "author_keywords": [],
+      "author_keywords": [
+        "perception",
+        "predictive",
+        "coding",
+        "error",
+        "birdsong"
+      ],
       "extracted_keywords": [],
-      "keywords": [],
+      "keywords": [
+        "perception",
+        "predictive",
+        "coding",
+        "error",
+        "birdsong"
+      ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
       "poster_number": "",
@@ -35598,9 +35624,19 @@
       "title": "How do humans learn concepts and strategies?",
       "authors": "Tsvetomira Dumbalska",
       "abstract": "Concepts and strategies have traditionally been the focus of two separate fields of study: one studying the computations underlying representation learning (Behrens et al., 2018) and the other studying the mechanisms underlying planning (Callaway, Hardy, & Griffiths, 2022). But how does the acquisition of concepts depend on their application in strategies? Here, we investigated this question by comparing two training curricula in a grid world game where, to succeed, human participants had to learn new concepts and apply those concepts in strategies. During training, different groups of players experienced the same game rounds in one of two different orders (training curricula): a curriculum prioritising the application of new concepts at a shallow planning depth (concept-first) and a curriculum prioritising applying a single concept in increasingly complex strategies (strategy-first). We found that learning was promoted by the strategy-first curriculum.",
-      "author_keywords": [],
+      "author_keywords": [
+        "concepts",
+        "strategies",
+        "planning",
+        "curriculum learning"
+      ],
       "extracted_keywords": [],
-      "keywords": [],
+      "keywords": [
+        "concepts",
+        "strategies",
+        "planning",
+        "curriculum learning"
+      ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
       "poster_number": "",
@@ -38888,9 +38924,19 @@
       "title": "Predicting Object Similarity and Grasping Behavior from Deep-CNN Layers: Is One Visual Hierarchy Enough?",
       "authors": "Aida Mirebrahimi Tafreshi",
       "abstract": "Our visual system supports our understanding of both the similarity between objects and actions, such as grasping, towards them. Here, using a large set of 3D-printed objects, we investigated if these two behaviors rely on similar features and if the same visual hierarchy can support both tasks. Behavioral results suggested little overlap between the features relevant to the two behaviors. Predicting the two behaviors using CNN layer activations, showed increasingly better predictions for similarity judgment at higher layers of CNN, while the predictions were best at mid-layers and dropped at higher layers for grasping. These results suggest that to support the two behaviors, the hierarchy may need to be split in the middle.",
-      "author_keywords": [],
+      "author_keywords": [
+        "object similarity judgment",
+        "object grasping",
+        "deep convolutional neural networks",
+        "visual processing pathways"
+      ],
       "extracted_keywords": [],
-      "keywords": [],
+      "keywords": [
+        "object similarity judgment",
+        "object grasping",
+        "deep convolutional neural networks",
+        "visual processing pathways"
+      ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
       "poster_number": "",
@@ -41853,9 +41899,19 @@
       "title": "Two determinants of adaptability in learning magnitudes and probabilities",
       "authors": "Cedric Foucault, Florent Meyniel",
       "abstract": "In our lives, we routinely encounter two kinds of quantities: magnitudes (e.g., reward magnitude, size, orientation or another dimension of the stimulus) and probabilities (e.g., stimulus occurrence). While we learn both through experiences, a fundamental difference is that magnitudes can be learned from one instance, whereas probabilities require repeated exposure. This difference becomes particularly significant for learning in dynamic environments where both magnitudes and probabilities can change. While the dynamics of magnitude learning have been well studied, those of probability learning remain relatively unknown, especially on a moment-to-moment basis. Here, we measure them through a new continuous learning paradigm, where subjects continuously update their estimate of a changing magnitude or probability. We show that in response to a change, subjects adapt their learning rate not only for magnitudes, but also for probabilities, with different dynamics as a normative learner. In both cases, two determinants underlie the adaptation of subjects’ learning rate, change-point probability and prior uncertainty, but in markedly different proportions in the two cases, again as predicted by normative theory. Those different determinants may correspond to different neural mechanisms.",
-      "author_keywords": [],
+      "author_keywords": [
+        "learning",
+        "probability",
+        "uncertainty",
+        "continuous behavior"
+      ],
       "extracted_keywords": [],
-      "keywords": [],
+      "keywords": [
+        "learning",
+        "probability",
+        "uncertainty",
+        "continuous behavior"
+      ],
       "topic_area": "Cognitive science",
       "track": "Cognitive science",
       "poster_number": "",
