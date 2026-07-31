@@ -22,7 +22,7 @@ python scripts/build.py --repair-only
 
 ## Docs
 
-**[docs/GUIDE.md](docs/GUIDE.md)** — pipeline, themes, keywords, UMAP, deploy, CI (also linked from the live site footer).
+**[docs/GUIDE.md](docs/GUIDE.md)** — pipeline and maintenance (linked from the live site footer).
 
 **[THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md)** · [licenses on site](https://ccn-visualizer.vercel.app/licenses.html)
 
