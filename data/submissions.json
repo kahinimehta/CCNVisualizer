@@ -79342,12 +79342,20 @@
     {
       "id": "2026-B-ewXhJ9s9a7",
       "year": 2026,
-      "title": "B³ net: Brain-Body-Behavior model of attention fluctuations in humans",
+      "title": "B3 net: Brain-Body-Behavior model of attention fluctuations in humans",
       "authors": "Zinong Yang, Laura D. Lewis",
       "abstract": "Attentional lapses arise from spontaneous fluctuations in brain state, but tracking these fluctuations from noninvasive signals remains challenging. To bridge this gap, we developed a deep latent dynamical model that infers attentional state from peripheral physiology. The model decodes lapse versus attend trials from autonomic signals and reconstructs trial-level whole-brain blood oxygen level dependent (BOLD) dynamics from the learned latent representation, outperforming single-channel linear baselines. These results suggest that attentional fluctuations are expressed in coordinated, low-dimensional brain-body dynamics.",
-      "author_keywords": [],
+      "author_keywords": [
+        "methods",
+        "tools",
+        "theory & neural coding"
+      ],
       "extracted_keywords": [],
-      "keywords": [],
+      "keywords": [
+        "methods",
+        "tools",
+        "theory & neural coding"
+      ],
       "topic_area": "methods, tools, theory & neural coding",
       "track": "",
       "poster_number": "B-ewXhJ9s9a7",
