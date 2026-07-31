@@ -1877,11 +1877,6 @@ def reconcile_submission_keywords(submission: dict) -> None:
             for kw in author
             if not (len(kw.split()) >= 2 and kw in authors_blob and "(" not in kw)
         ]
-    if author and keywords_look_low_quality(author, submission):
-        author = []
-        submission["author_keywords"] = []
-        submission["extracted_keywords"] = []
-        submission["keywords"] = []
     if author:
         submission["author_keywords"] = author[:MAX_KEYWORD_LIST_SIZE]
         submission["keywords"] = submission["author_keywords"]
