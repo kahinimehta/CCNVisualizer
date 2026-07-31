@@ -1856,10 +1856,9 @@ def conference_topic_label(submission: dict) -> str | None:
 
 
 def conference_topic_keywords(submission: dict) -> list[str]:
+    """Return official conference track/topic labels as keywords when author keywords are absent."""
     label = conference_topic_label(submission)
-    if not label or is_metadata_keyword(label):
-        return []
-    if not is_plausible_keyword(label):
+    if not label:
         return []
     return [label]
 

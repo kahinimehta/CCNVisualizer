@@ -1115,17 +1115,40 @@ function primaryTheme(submission) {
   return assignedTopics(submission)[0] || null;
 }
 
+function normalizeSearchText(text) {
+  return String(text ?? "")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[\u00b0-\u00b9\u2070-\u2079\u2080-\u2089]/g, (char) => {
+      const code = char.charCodeAt(0);
+      if (code >= 0x2070 && code <= 0x2079) return String(code - 0x2070);
+      if (code >= 0x2080 && code <= 0x2089) return String(code - 0x2080);
+      if (code >= 0x00b0 && code <= 0x00b9) return String(code - 0x00b0);
+      return char;
+    })
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function compactSearchText(text) {
+  return normalizeSearchText(text).replace(/\s+/g, "");
+}
+
 function submissionMatchesSearch(item, search) {
-  const haystack = [
+  const fields = [
     item.title,
     item.authors,
     item.abstract,
     ...assignedTopics(item),
     ...(item.keywords || []),
-  ]
-    .join(" ")
-    .toLowerCase();
-  return haystack.includes(search);
+  ];
+  const haystack = normalizeSearchText(fields.join(" "));
+  const query = normalizeSearchText(search);
+  if (!query) return true;
+  if (haystack.includes(query)) return true;
+  return compactSearchText(fields.join(" ")).includes(compactSearchText(search));
 }
 
 function hasThemeFilter() {

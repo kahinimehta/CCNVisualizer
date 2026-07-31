@@ -31,6 +31,7 @@ from bs4 import BeautifulSoup
 from pypdf import PdfReader
 
 from shared import (
+    YEARS_TOPIC_AREA_KEYWORDS,
     is_gac_update,
     is_metadata_keyword,
     is_plausible_keyword,
@@ -271,6 +272,7 @@ def resolve_keyword_fields(
     track: str = "",
     title: str = "",
     abstract: str = "",
+    year: int = 0,
 ) -> tuple[list[str], list[str], list[str]]:
     """Return author keywords, extracted keywords, and combined keywords.
 
@@ -290,7 +292,8 @@ def resolve_keyword_fields(
 
     if author:
         return author, extracted, author
-    if conference_label and not is_metadata_keyword(conference_label):
+    allow_conference_label = year in YEARS_TOPIC_AREA_KEYWORDS
+    if conference_label and (allow_conference_label or not is_metadata_keyword(conference_label)):
         return [], extracted, [conference_label]
     return [], [], []
 
@@ -631,6 +634,7 @@ def scrape_meetingtrakr_year(year: int) -> list[Submission]:
                     author_keywords=[],
                     topic_area=item.get("topic_area", ""),
                     title=title,
+                    year=year,
                 )
                 submissions.append(
                     Submission(
@@ -711,6 +715,7 @@ def scrape_legacy_year(year: int, listing_path: str, link_pattern: str) -> list[
                     author_keywords=[],
                     topic_area=item.get("topic_area", ""),
                     title=item.get("title", ""),
+                    year=year,
                 )
                 submissions.append(
                     Submission(
@@ -814,6 +819,7 @@ def scrape_2017_year() -> list[Submission]:
                     author_keywords=[],
                     topic_area="",
                     title=item.get("title", ""),
+                    year=2017,
                 )
                 submissions.append(
                     Submission(
@@ -1028,6 +1034,7 @@ def scrape_2026_year() -> list[Submission]:
                     author_keywords=[topic_label] if topic_label else [],
                     topic_area=topic_area,
                     title=title,
+                    year=year,
                 )
                 submissions.append(
                     Submission(
@@ -1755,6 +1762,7 @@ def finalize_submission_keywords(
         track=track,
         title=title,
         abstract=abstract,
+        year=year,
     )
 
 
