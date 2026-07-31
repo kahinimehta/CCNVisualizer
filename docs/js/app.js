@@ -788,6 +788,32 @@ let tooltipInteractive = false;
 let tooltipSticky = false; // tap/click popups stay until X (phone + desktop)
 let tooltipHideTimer = null;
 let tooltipAnchorPoint = null;
+let searchDebounceTimer = null;
+
+const SEARCH_CHAR_FOLDS = new Map([
+  ["\u00b0", "0"],
+  ["\u00b9", "1"],
+  ["\u00b2", "2"],
+  ["\u00b3", "3"],
+  ["\u2070", "0"],
+  ["\u2071", "1"],
+  ["\u2074", "4"],
+  ["\u2075", "5"],
+  ["\u2076", "6"],
+  ["\u2077", "7"],
+  ["\u2078", "8"],
+  ["\u2079", "9"],
+  ["\u2080", "0"],
+  ["\u2081", "1"],
+  ["\u2082", "2"],
+  ["\u2083", "3"],
+  ["\u2084", "4"],
+  ["\u2085", "5"],
+  ["\u2086", "6"],
+  ["\u2087", "7"],
+  ["\u2088", "8"],
+  ["\u2089", "9"],
+]);
 
 function ensureD3() {
   if (typeof d3 === "undefined") {
@@ -1115,17 +1141,27 @@ function primaryTheme(submission) {
   return assignedTopics(submission)[0] || null;
 }
 
-function normalizeSearchText(text) {
-  return String(text ?? "")
+function foldSearchCharacters(text) {
+  let folded = String(text ?? "");
+  for (const [char, replacement] of SEARCH_CHAR_FOLDS) {
+    folded = folded.split(char).join(replacement);
+  }
+  return folded
     .normalize("NFKD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[\u00b0-\u00b9\u2070-\u2079\u2080-\u2089]/g, (char) => {
+      const mapped = SEARCH_CHAR_FOLDS.get(char);
+      if (mapped) return mapped;
       const code = char.charCodeAt(0);
       if (code >= 0x2070 && code <= 0x2079) return String(code - 0x2070);
       if (code >= 0x2080 && code <= 0x2089) return String(code - 0x2080);
       if (code >= 0x00b0 && code <= 0x00b9) return String(code - 0x00b0);
       return char;
-    })
+    });
+}
+
+function normalizeSearchText(text) {
+  return foldSearchCharacters(text)
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, " ")
     .replace(/\s+/g, " ")
@@ -1176,6 +1212,16 @@ function applySearchFilter() {
   state.highlightedSubmissionKey = "";
   updateSearchInputState();
   renderAll();
+}
+
+function scheduleSearchFilter() {
+  updateSearchInputState();
+  clearTimeout(searchDebounceTimer);
+  searchDebounceTimer = setTimeout(() => {
+    const nextSearch = searchInputValue();
+    if (nextSearch.trim() === state.search.trim()) return;
+    applySearchFilter();
+  }, 250);
 }
 
 function hasYearFilter() {
@@ -2726,11 +2772,12 @@ async function init() {
 
   d3.select("#search-input")
     .on("input", () => {
-      updateSearchInputState();
+      scheduleSearchFilter();
     })
     .on("keydown", (event) => {
       if (event.key !== "Enter") return;
       event.preventDefault();
+      clearTimeout(searchDebounceTimer);
       applySearchFilter();
     });
 
