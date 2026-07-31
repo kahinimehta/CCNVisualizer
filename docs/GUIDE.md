@@ -93,7 +93,9 @@ python scripts/build.py --repair-only
 
 ## Search
 
-The dashboard search box (`docs/js/app.js`) matches across title, authors, abstract, assigned topics, and keywords. Matching is case- and formatting-insensitive:
+The dashboard search box (`docs/js/app.js`) matches across title, authors, abstract, assigned topics, and keywords. Type a query and **press Enter** to apply the filter (the field border highlights while a query is pending). Clearing the field with the search clear control applies immediately.
+
+Matching is case- and formatting-insensitive:
 
 - Diacritics and superscripts normalized (`B³` matches `b3`)
 - Punctuation and hyphens ignored (`Brain-Body` matches `brain body`)

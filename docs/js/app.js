@@ -788,7 +788,6 @@ let tooltipInteractive = false;
 let tooltipSticky = false; // tap/click popups stay until X (phone + desktop)
 let tooltipHideTimer = null;
 let tooltipAnchorPoint = null;
-let searchDebounceTimer = null;
 
 const SEARCH_CHAR_FOLDS = new Map([
   ["\u00b0", "0"],
@@ -1228,16 +1227,6 @@ function applySearchFilter() {
   state.highlightedSubmissionKey = "";
   updateSearchInputState();
   renderAll();
-}
-
-function scheduleSearchFilter() {
-  updateSearchInputState();
-  clearTimeout(searchDebounceTimer);
-  searchDebounceTimer = setTimeout(() => {
-    const nextSearch = searchInputValue();
-    if (nextSearch.trim() === state.search.trim()) return;
-    applySearchFilter();
-  }, 250);
 }
 
 function hasYearFilter() {
@@ -2788,15 +2777,14 @@ async function init() {
 
   d3.select("#search-input")
     .on("input", () => {
-      scheduleSearchFilter();
+      updateSearchInputState();
     })
     .on("search", () => {
-      scheduleSearchFilter();
+      applySearchFilter();
     })
     .on("keydown", (event) => {
       if (event.key !== "Enter") return;
       event.preventDefault();
-      clearTimeout(searchDebounceTimer);
       applySearchFilter();
     });
 

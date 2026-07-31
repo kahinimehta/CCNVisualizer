@@ -9,7 +9,7 @@
   <link rel="icon" href="assets/favicon-32.png?v=2" type="image/png" sizes="32x32" />
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=2" />
   <meta name="theme-color" content="#0f2238" />
-  <link rel="stylesheet" href="css/style.css?v=125" />
+  <link rel="stylesheet" href="css/style.css?v=126" />
   <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 </head>
 <body>
@@ -69,7 +69,9 @@
               placeholder="Title, author, keywords…"
               enterkeyhint="search"
               autocomplete="off"
+              aria-describedby="search-field-hint"
             />
+            <span class="search-field-hint" id="search-field-hint">Press Enter to apply filter</span>
           </label>
           <button type="button" class="clear-all-filters-btn" id="clear-all-filters-btn" hidden>
             Clear all filters
