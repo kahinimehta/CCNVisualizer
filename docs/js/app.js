@@ -815,6 +815,51 @@ const SEARCH_CHAR_FOLDS = new Map([
   ["\u2089", "9"],
 ]);
 
+function foldSearchCharacters(text) {
+  let folded = String(text ?? "");
+  for (const [char, replacement] of SEARCH_CHAR_FOLDS) {
+    folded = folded.split(char).join(replacement);
+  }
+  return folded
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[\u00b0-\u00b9\u2070-\u2079\u2080-\u2089]/g, (char) => {
+      const mapped = SEARCH_CHAR_FOLDS.get(char);
+      if (mapped) return mapped;
+      const code = char.charCodeAt(0);
+      if (code >= 0x2070 && code <= 0x2079) return String(code - 0x2070);
+      if (code >= 0x2080 && code <= 0x2089) return String(code - 0x2080);
+      if (code >= 0x00b0 && code <= 0x00b9) return String(code - 0x00b0);
+      return char;
+    });
+}
+
+function normalizeSearchText(text) {
+  return foldSearchCharacters(text)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function compactSearchText(text) {
+  return normalizeSearchText(text).replace(/\s+/g, "");
+}
+
+function attachSubmissionSearchIndex(submission) {
+  const fields = [
+    submission.title,
+    submission.authors,
+    submission.abstract,
+    ...(submission.assigned_topics || []),
+    ...(submission.keywords || []),
+  ];
+  const joined = fields.join(" ");
+  submission._searchHaystack = normalizeSearchText(joined);
+  submission._searchCompact = submission._searchHaystack.replace(/\s+/g, "");
+  return submission;
+}
+
 function ensureD3() {
   if (typeof d3 === "undefined") {
     throw new Error("D3.js failed to load. Check your network connection or ad blocker.");
@@ -1065,7 +1110,7 @@ function buildStatsFromSubmissions(submissions) {
 }
 
 function buildStateFromCsv(rows, source = FIXED_DATASET) {
-  const submissions = rows.map(csvRowToSubmission);
+  const submissions = rows.map(csvRowToSubmission).map(attachSubmissionSearchIndex);
   const years = [...new Set(submissions.map((item) => item.year))].sort((a, b) => a - b);
   return {
     submissions,
@@ -1081,7 +1126,7 @@ function buildStateFromCsv(rows, source = FIXED_DATASET) {
 async function loadDataset(options = {}) {
   const { resetFilters = false } = options;
   const datasetFile = FIXED_DATASET;
-  const csvRows = await d3.csv(`data/${datasetFile}?v=120`);
+  const csvRows = await d3.csv(`data/${datasetFile}?v=137`);
   if (!csvRows?.length) {
     throw new Error(`Could not load data/${datasetFile}`);
   }
@@ -1141,50 +1186,21 @@ function primaryTheme(submission) {
   return assignedTopics(submission)[0] || null;
 }
 
-function foldSearchCharacters(text) {
-  let folded = String(text ?? "");
-  for (const [char, replacement] of SEARCH_CHAR_FOLDS) {
-    folded = folded.split(char).join(replacement);
-  }
-  return folded
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[\u00b0-\u00b9\u2070-\u2079\u2080-\u2089]/g, (char) => {
-      const mapped = SEARCH_CHAR_FOLDS.get(char);
-      if (mapped) return mapped;
-      const code = char.charCodeAt(0);
-      if (code >= 0x2070 && code <= 0x2079) return String(code - 0x2070);
-      if (code >= 0x2080 && code <= 0x2089) return String(code - 0x2080);
-      if (code >= 0x00b0 && code <= 0x00b9) return String(code - 0x00b0);
-      return char;
-    });
-}
-
-function normalizeSearchText(text) {
-  return foldSearchCharacters(text)
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function compactSearchText(text) {
-  return normalizeSearchText(text).replace(/\s+/g, "");
-}
-
 function submissionMatchesSearch(item, search) {
-  const fields = [
-    item.title,
-    item.authors,
-    item.abstract,
-    ...assignedTopics(item),
-    ...(item.keywords || []),
-  ];
-  const haystack = normalizeSearchText(fields.join(" "));
   const query = normalizeSearchText(search);
   if (!query) return true;
+  const haystack = item._searchHaystack || normalizeSearchText(
+    [
+      item.title,
+      item.authors,
+      item.abstract,
+      ...assignedTopics(item),
+      ...(item.keywords || []),
+    ].join(" ")
+  );
+  const compactHaystack = item._searchCompact || haystack.replace(/\s+/g, "");
   if (haystack.includes(query)) return true;
-  return compactSearchText(fields.join(" ")).includes(compactSearchText(search));
+  return compactHaystack.includes(compactSearchText(search));
 }
 
 function hasThemeFilter() {
@@ -2772,6 +2788,9 @@ async function init() {
 
   d3.select("#search-input")
     .on("input", () => {
+      scheduleSearchFilter();
+    })
+    .on("search", () => {
       scheduleSearchFilter();
     })
     .on("keydown", (event) => {
