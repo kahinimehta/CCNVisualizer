@@ -80445,17 +80445,13 @@
       "poster_number": "A-9piRFx4lH6",
       "source_url": "https://2026.ccneuro.org/poster/?id=9piRFx4lH6",
       "submission_type": "poster",
-      "primary_theme": "Memory",
+      "primary_theme": "AI, LLM, & neural networks",
       "secondary_topics": [
-        "Decision-making and metacognition",
-        "Vision",
-        "AI, LLM, & neural networks"
+        "Methods and theory"
       ],
       "assigned_topics": [
-        "Memory",
-        "Decision-making and metacognition",
-        "Vision",
-        "AI, LLM, & neural networks"
+        "AI, LLM, & neural networks",
+        "Methods and theory"
       ],
       "umap_x": 5.059560298919678,
       "umap_y": 8.785472869873047
@@ -82337,15 +82333,11 @@
       "poster_number": "A-iengNs0w2G",
       "source_url": "https://2026.ccneuro.org/poster/?id=iengNs0w2G",
       "submission_type": "poster",
-      "primary_theme": "Memory",
+      "primary_theme": "AI, LLM, & neural networks",
       "secondary_topics": [
-        "Reinforcement learning",
-        "AI, LLM, & neural networks",
         "Decision-making and metacognition"
       ],
       "assigned_topics": [
-        "Memory",
-        "Reinforcement learning",
         "AI, LLM, & neural networks",
         "Decision-making and metacognition"
       ],
@@ -83942,17 +83934,13 @@
       "poster_number": "B-8tWPdzbJ3R",
       "source_url": "https://2026.ccneuro.org/poster/?id=8tWPdzbJ3R",
       "submission_type": "poster",
-      "primary_theme": "Methods and theory",
+      "primary_theme": "Clinical / computational psychiatry",
       "secondary_topics": [
-        "Neural population geometry & dynamics",
-        "Clinical / computational psychiatry",
-        "AI, LLM, & neural networks"
+        "Neural population geometry & dynamics"
       ],
       "assigned_topics": [
-        "Methods and theory",
-        "Neural population geometry & dynamics",
         "Clinical / computational psychiatry",
-        "AI, LLM, & neural networks"
+        "Neural population geometry & dynamics"
       ],
       "umap_x": 7.150536060333252,
       "umap_y": 6.860301971435547
@@ -86600,16 +86588,10 @@
       "submission_type": "poster",
       "primary_theme": "Neural population geometry & dynamics",
       "secondary_topics": [
-        "Decision-making and metacognition",
-        "Attention & cognitive control / executive function",
-        "AI, LLM, & neural networks",
         "Naturalistic encoding/decoding"
       ],
       "assigned_topics": [
         "Neural population geometry & dynamics",
-        "Decision-making and metacognition",
-        "Attention & cognitive control / executive function",
-        "AI, LLM, & neural networks",
         "Naturalistic encoding/decoding"
       ],
       "umap_x": 6.427299499511719,
@@ -87408,17 +87390,13 @@
       "poster_number": "C-J6Bk7CBhOj",
       "source_url": "https://2026.ccneuro.org/poster/?id=J6Bk7CBhOj",
       "submission_type": "poster",
-      "primary_theme": "Attention & cognitive control / executive function",
+      "primary_theme": "AI, LLM, & neural networks",
       "secondary_topics": [
-        "Decision-making and metacognition",
-        "AI, LLM, & neural networks",
-        "Neural population geometry & dynamics"
+        "Attention & cognitive control / executive function"
       ],
       "assigned_topics": [
-        "Attention & cognitive control / executive function",
-        "Decision-making and metacognition",
         "AI, LLM, & neural networks",
-        "Neural population geometry & dynamics"
+        "Attention & cognitive control / executive function"
       ],
       "umap_x": 5.045450687408447,
       "umap_y": 8.366530418395996
@@ -88136,15 +88114,11 @@
       "submission_type": "poster",
       "primary_theme": "Attention & cognitive control / executive function",
       "secondary_topics": [
-        "Decision-making and metacognition",
-        "Naturalistic encoding/decoding",
-        "Memory"
+        "Naturalistic encoding/decoding"
       ],
       "assigned_topics": [
         "Attention & cognitive control / executive function",
-        "Decision-making and metacognition",
-        "Naturalistic encoding/decoding",
-        "Memory"
+        "Naturalistic encoding/decoding"
       ],
       "umap_x": 6.344898223876953,
       "umap_y": 5.768886089324951
@@ -89260,17 +89234,13 @@
       "poster_number": "C-q4f5Ilsmev",
       "source_url": "https://2026.ccneuro.org/poster/?id=q4f5Ilsmev",
       "submission_type": "poster",
-      "primary_theme": "Memory",
+      "primary_theme": "Decision-making and metacognition",
       "secondary_topics": [
-        "Methods and theory",
-        "Decision-making and metacognition",
-        "AI, LLM, & neural networks"
+        "Methods and theory"
       ],
       "assigned_topics": [
-        "Memory",
-        "Methods and theory",
         "Decision-making and metacognition",
-        "AI, LLM, & neural networks"
+        "Methods and theory"
       ],
       "umap_x": 5.078332901000977,
       "umap_y": 6.172902584075928
@@ -91296,17 +91266,13 @@
       "poster_number": "D-SnQU9T3gEI",
       "source_url": "https://2026.ccneuro.org/poster/?id=SnQU9T3gEI",
       "submission_type": "poster",
-      "primary_theme": "Methods and theory",
+      "primary_theme": "AI, LLM, & neural networks",
       "secondary_topics": [
-        "Language/auditory neuroscience",
-        "AI, LLM, & neural networks",
-        "Naturalistic encoding/decoding"
+        "Language/auditory neuroscience"
       ],
       "assigned_topics": [
-        "Methods and theory",
-        "Language/auditory neuroscience",
         "AI, LLM, & neural networks",
-        "Naturalistic encoding/decoding"
+        "Language/auditory neuroscience"
       ],
       "umap_x": 8.867597579956055,
       "umap_y": 5.418803691864014
@@ -92361,17 +92327,13 @@
       "poster_number": "D-i5qXvBW0Ht",
       "source_url": "https://2026.ccneuro.org/poster/?id=i5qXvBW0Ht",
       "submission_type": "poster",
-      "primary_theme": "Memory",
+      "primary_theme": "Social cognition & theory of mind",
       "secondary_topics": [
-        "Decision-making and metacognition",
-        "Social cognition & theory of mind",
-        "Methods and theory"
+        "Decision-making and metacognition"
       ],
       "assigned_topics": [
-        "Memory",
-        "Decision-making and metacognition",
         "Social cognition & theory of mind",
-        "Methods and theory"
+        "Decision-making and metacognition"
       ],
       "umap_x": 4.383291721343994,
       "umap_y": 6.089774131774902
@@ -92808,13 +92770,11 @@
       "submission_type": "poster",
       "primary_theme": "Decision-making and metacognition",
       "secondary_topics": [
-        "Attention & cognitive control / executive function",
-        "Naturalistic encoding/decoding"
+        "Reinforcement learning"
       ],
       "assigned_topics": [
         "Decision-making and metacognition",
-        "Attention & cognitive control / executive function",
-        "Naturalistic encoding/decoding"
+        "Reinforcement learning"
       ],
       "umap_x": 3.566013813018799,
       "umap_y": 7.830867767333984
@@ -93920,17 +93880,13 @@
       "poster_number": "E-J4KmhjmznJ",
       "source_url": "https://2026.ccneuro.org/poster/?id=J4KmhjmznJ",
       "submission_type": "poster",
-      "primary_theme": "Memory",
+      "primary_theme": "Methods and theory",
       "secondary_topics": [
-        "AI, LLM, & neural networks",
-        "Neural population geometry & dynamics",
-        "Methods and theory"
+        "AI, LLM, & neural networks"
       ],
       "assigned_topics": [
-        "Memory",
-        "AI, LLM, & neural networks",
-        "Neural population geometry & dynamics",
-        "Methods and theory"
+        "Methods and theory",
+        "AI, LLM, & neural networks"
       ],
       "umap_x": 5.6169610023498535,
       "umap_y": 8.81033992767334
@@ -98246,15 +98202,11 @@
       "submission_type": "poster",
       "primary_theme": "Methods and theory",
       "secondary_topics": [
-        "Neural population geometry & dynamics",
-        "Memory",
-        "AI, LLM, & neural networks"
+        "Naturalistic encoding/decoding"
       ],
       "assigned_topics": [
         "Methods and theory",
-        "Neural population geometry & dynamics",
-        "Memory",
-        "AI, LLM, & neural networks"
+        "Naturalistic encoding/decoding"
       ],
       "umap_x": 8.385522842407227,
       "umap_y": 5.632786273956299
