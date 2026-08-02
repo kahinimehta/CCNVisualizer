@@ -845,6 +845,26 @@ function compactSearchText(text) {
   return normalizeSearchText(text).replace(/\s+/g, "");
 }
 
+// Extra tokens for punctuation compounds ("brain-body" → brainbody) and
+// digit-adjacent joins ("B³ net" → b3net). Do NOT compact across ordinary
+// word spaces — that made "how do global" match "dog".
+function searchVariantTokens(joinedText) {
+  const folded = foldSearchCharacters(joinedText).toLowerCase();
+  const variants = [];
+  const compoundPattern = /[a-z0-9]+(?:[^a-z0-9\s]+[a-z0-9]+)+/g;
+  let match;
+  while ((match = compoundPattern.exec(folded)) !== null) {
+    variants.push(match[0].replace(/[^a-z0-9]+/g, ""));
+  }
+  const words = normalizeSearchText(joinedText).split(" ").filter(Boolean);
+  for (let i = 0; i < words.length - 1; i += 1) {
+    if (/\d$/.test(words[i]) || /^\d/.test(words[i + 1])) {
+      variants.push(words[i] + words[i + 1]);
+    }
+  }
+  return variants;
+}
+
 function attachSubmissionSearchIndex(submission) {
   const fields = [
     submission.title,
@@ -854,8 +874,11 @@ function attachSubmissionSearchIndex(submission) {
     ...(submission.keywords || []),
   ];
   const joined = fields.join(" ");
-  submission._searchHaystack = normalizeSearchText(joined);
-  submission._searchCompact = submission._searchHaystack.replace(/\s+/g, "");
+  const haystack = normalizeSearchText(joined);
+  const variants = searchVariantTokens(joined);
+  submission._searchHaystack = variants.length
+    ? `${haystack} ${variants.join(" ")}`
+    : haystack;
   return submission;
 }
 
@@ -1244,18 +1267,18 @@ function primaryTheme(submission) {
 function submissionMatchesSearch(item, search) {
   const query = normalizeSearchText(search);
   if (!query) return true;
-  const haystack = item._searchHaystack || normalizeSearchText(
-    [
-      item.title,
-      item.authors,
-      item.abstract,
-      ...assignedTopics(item),
-      ...(item.keywords || []),
-    ].join(" ")
-  );
-  const compactHaystack = item._searchCompact || haystack.replace(/\s+/g, "");
+  const haystack = item._searchHaystack || attachSubmissionSearchIndex({
+    title: item.title,
+    authors: item.authors,
+    abstract: item.abstract,
+    assigned_topics: assignedTopics(item),
+    keywords: item.keywords || [],
+  })._searchHaystack;
   if (haystack.includes(query)) return true;
-  return compactHaystack.includes(compactSearchText(search));
+  // Queries typed without spaces/hyphens ("b3net", "brainbody") still match
+  // via indexed variants; do not join arbitrary adjacent abstract words.
+  const compactQuery = compactSearchText(search);
+  return compactQuery !== query && haystack.includes(compactQuery);
 }
 
 function hasThemeFilter() {
