@@ -2800,7 +2800,7 @@ function csvEscape(value) {
 }
 
 function matchingSubmissionsCsv(submissions) {
-  const header = ["topic_area", "title", "abstract", "keywords", "author"];
+  const header = ["year", "topic_area", "title", "abstract", "keywords", "author"];
   const lines = [header.join(",")];
   submissions.forEach((item) => {
     const topicArea = assignedTopics(item).join(" | ");
@@ -2808,6 +2808,7 @@ function matchingSubmissionsCsv(submissions) {
     const author = item.authors || item.author || "";
     lines.push(
       [
+        csvEscape(item.year ?? ""),
         csvEscape(topicArea),
         csvEscape(item.title || ""),
         csvEscape(item.abstract || ""),
