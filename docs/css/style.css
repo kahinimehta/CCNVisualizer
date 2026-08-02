@@ -311,13 +311,47 @@ body:not(.sidebar-collapsed) .main-area {
 
 .filter-bar {
   display: grid;
-  /* Year dropdown + search + clear sit in one row on desktop. */
+  /* Year dropdown + search + export/clear actions sit in one row on desktop. */
   grid-template-columns: minmax(9rem, 12rem) minmax(0, 1fr) auto;
   gap: 0.75rem;
   align-items: end;
   width: 100%;
   max-width: 100%;
   min-width: 0;
+}
+
+.filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.export-btn {
+  appearance: none;
+  height: 54px;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid rgba(197, 224, 243, 0.35);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--ccn-blue) 16%, transparent);
+  color: var(--ccn-white);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.export-btn:hover {
+  border-color: rgba(197, 224, 243, 0.55);
+  background: color-mix(in srgb, var(--ccn-blue) 28%, transparent);
+}
+
+.export-btn:disabled {
+  opacity: 0.55;
+  cursor: wait;
 }
 
 .filter-bar .search-field {
@@ -1080,10 +1114,20 @@ svg {
   .filter-field select,
   .filter-field input,
   .year-multi-toggle,
-  .clear-all-filters-btn {
+  .clear-all-filters-btn,
+  .export-btn {
     font-size: 0.9rem;
     height: 42px;
     padding: 0.45rem 0.7rem;
+  }
+
+  .filter-actions {
+    width: 100%;
+  }
+
+  .filter-actions .export-btn,
+  .filter-actions .clear-all-filters-btn {
+    flex: 1 1 auto;
   }
 
   .year-option {

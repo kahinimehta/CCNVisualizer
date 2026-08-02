@@ -9,6 +9,11 @@ This project uses the following open-source libraries and services.
 - **Source:** https://github.com/d3/d3
 - **Usage:** Line charts, bar charts, UMAP scatter plot, tooltips, and chart interactions in the dashboard
 
+### jsPDF v2.5.2
+- **License:** MIT License
+- **Source:** https://github.com/parallax/jsPDF
+- **Usage:** Lazy-loaded when exporting the current filter’s chart plots as a downloadable PDF
+
 ### Open Sans (Google Fonts)
 - **License:** SIL Open Font License 1.1
 - **Source:** https://fonts.google.com/specimen/Open+Sans

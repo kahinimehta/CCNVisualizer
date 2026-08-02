@@ -2756,6 +2756,245 @@ function themeFilterSummaryLabel() {
   return parts.join(" · ");
 }
 
+const CHART_EXPORT_SPECS = [
+  { selector: "#year-chart svg", title: "Submissions over time" },
+  { selector: "#theme-share-by-year svg", title: "Theme counts by year" },
+  { selector: "#embedding-chart svg", title: "Abstract embedding map" },
+  { selector: "#theme-bars svg", title: "Research theme ranking" },
+  { selector: "#theme-delta-chart svg", title: "Year-over-year change" },
+];
+
+const JSPDF_CDN = "https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js";
+let jsPdfLoader = null;
+
+function exportFileSlug() {
+  const parts = activeFilterParts().join("-") || "all-submissions";
+  const slug = normalizeSearchText(parts).replace(/\s+/g, "-").slice(0, 60);
+  return slug || "all-submissions";
+}
+
+function exportTimestamp() {
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
+}
+
+function downloadBlob(filename, blob) {
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.rel = "noopener";
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function csvEscape(value) {
+  const text = String(value ?? "");
+  if (/[",\n\r]/.test(text)) {
+    return `"${text.replace(/"/g, '""')}"`;
+  }
+  return text;
+}
+
+function matchingSubmissionsCsv(submissions) {
+  const header = ["topic_area", "title", "abstract", "keywords", "author"];
+  const lines = [header.join(",")];
+  submissions.forEach((item) => {
+    const topicArea = assignedTopics(item).join(" | ");
+    const keywords = (item.keywords || []).join(" | ");
+    const author = item.authors || item.author || "";
+    lines.push(
+      [
+        csvEscape(topicArea),
+        csvEscape(item.title || ""),
+        csvEscape(item.abstract || ""),
+        csvEscape(keywords),
+        csvEscape(author),
+      ].join(",")
+    );
+  });
+  return `${lines.join("\n")}\n`;
+}
+
+function downloadMatchingCsv() {
+  const submissions = filteredSubmissions();
+  const csv = matchingSubmissionsCsv(submissions);
+  const filename = `ccn-submissions-${exportFileSlug()}-${exportTimestamp()}.csv`;
+  downloadBlob(filename, new Blob([csv], { type: "text/csv;charset=utf-8" }));
+}
+
+function loadScriptOnce(src) {
+  const existing = document.querySelector(`script[data-export-src="${src}"]`);
+  if (existing) {
+    return existing.dataset.loaded === "1"
+      ? Promise.resolve()
+      : new Promise((resolve, reject) => {
+          existing.addEventListener("load", () => resolve(), { once: true });
+          existing.addEventListener("error", () => reject(new Error(`Failed to load ${src}`)), {
+            once: true,
+          });
+        });
+  }
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = src;
+    script.async = true;
+    script.dataset.exportSrc = src;
+    script.addEventListener(
+      "load",
+      () => {
+        script.dataset.loaded = "1";
+        resolve();
+      },
+      { once: true }
+    );
+    script.addEventListener("error", () => reject(new Error(`Failed to load ${src}`)), {
+      once: true,
+    });
+    document.head.appendChild(script);
+  });
+}
+
+async function ensureJsPdf() {
+  if (window.jspdf?.jsPDF) return window.jspdf.jsPDF;
+  if (!jsPdfLoader) {
+    jsPdfLoader = loadScriptOnce(JSPDF_CDN).then(() => {
+      if (!window.jspdf?.jsPDF) throw new Error("jsPDF failed to initialize");
+      return window.jspdf.jsPDF;
+    });
+  }
+  return jsPdfLoader;
+}
+
+function loadImageElement(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error("Failed to rasterize chart SVG"));
+    img.src = url;
+  });
+}
+
+function svgExportSize(svgNode) {
+  const viewBox = svgNode.viewBox?.baseVal;
+  if (viewBox && viewBox.width > 0 && viewBox.height > 0) {
+    return { width: viewBox.width, height: viewBox.height };
+  }
+  const width = Number.parseFloat(svgNode.getAttribute("width")) || svgNode.clientWidth || 1200;
+  const height = Number.parseFloat(svgNode.getAttribute("height")) || svgNode.clientHeight || 700;
+  return { width, height };
+}
+
+async function chartSvgToPngDataUrl(svgNode, background = "#0f2238") {
+  const { width, height } = svgExportSize(svgNode);
+  const clone = svgNode.cloneNode(true);
+  clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+  clone.setAttribute("width", String(width));
+  clone.setAttribute("height", String(height));
+  clone.style.fontFamily = CHART_FONT;
+  clone.querySelectorAll("text").forEach((node) => {
+    if (!node.getAttribute("font-family") && !node.style.fontFamily) {
+      node.setAttribute("font-family", CHART_FONT);
+    }
+  });
+
+  const bg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+  bg.setAttribute("x", "0");
+  bg.setAttribute("y", "0");
+  bg.setAttribute("width", String(width));
+  bg.setAttribute("height", String(height));
+  bg.setAttribute("fill", background);
+  clone.insertBefore(bg, clone.firstChild);
+
+  const xml = new XMLSerializer().serializeToString(clone);
+  const url = URL.createObjectURL(new Blob([xml], { type: "image/svg+xml;charset=utf-8" }));
+  try {
+    const img = await loadImageElement(url);
+    const scale = 2;
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(width * scale));
+    canvas.height = Math.max(1, Math.round(height * scale));
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = background;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    return {
+      dataUrl: canvas.toDataURL("image/png"),
+      width: canvas.width,
+      height: canvas.height,
+    };
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+async function collectChartExportImages() {
+  const images = [];
+  for (const spec of CHART_EXPORT_SPECS) {
+    const svgNode = document.querySelector(spec.selector);
+    if (!svgNode) continue;
+    const png = await chartSvgToPngDataUrl(svgNode);
+    images.push({ title: spec.title, ...png });
+  }
+  if (!images.length) {
+    throw new Error("No charts are available to export yet.");
+  }
+  return images;
+}
+
+async function downloadMatchingPdf() {
+  const jsPDF = await ensureJsPdf();
+  const images = await collectChartExportImages();
+  const filterLabel = themeFilterSummaryLabel() || "All submissions";
+  const matchCount = filteredSubmissions().length;
+  const pdf = new jsPDF({ orientation: "landscape", unit: "pt", format: "letter" });
+  const pageW = pdf.internal.pageSize.getWidth();
+  const pageH = pdf.internal.pageSize.getHeight();
+  const margin = 36;
+
+  images.forEach((image, index) => {
+    if (index > 0) pdf.addPage();
+    pdf.setFillColor(15, 34, 56);
+    pdf.rect(0, 0, pageW, pageH, "F");
+    pdf.setTextColor(247, 250, 252);
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(14);
+    pdf.text(image.title, margin, margin + 4);
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(10);
+    pdf.setTextColor(143, 168, 196);
+    pdf.text(`${matchCount} matching submissions · ${filterLabel}`, margin, margin + 20);
+
+    const top = margin + 32;
+    const maxW = pageW - margin * 2;
+    const maxH = pageH - top - margin;
+    const scale = Math.min(maxW / image.width, maxH / image.height);
+    const drawW = image.width * scale;
+    const drawH = image.height * scale;
+    const x = margin + (maxW - drawW) / 2;
+    const y = top + (maxH - drawH) / 2;
+    pdf.addImage(image.dataUrl, "PNG", x, y, drawW, drawH, undefined, "FAST");
+  });
+
+  pdf.save(`ccn-plots-${exportFileSlug()}-${exportTimestamp()}.pdf`);
+}
+
+async function handleExportPdfClick() {
+  const button = document.getElementById("export-pdf-btn");
+  if (button) button.disabled = true;
+  try {
+    await downloadMatchingPdf();
+  } catch (error) {
+    console.error(error);
+    window.alert(error?.message || "Could not export PDF.");
+  } finally {
+    if (button) button.disabled = false;
+  }
+}
+
 function renderPaperList() {
   const submissions = filteredSubmissions();
   const list = d3.select("#paper-list");
@@ -2854,6 +3093,10 @@ async function init() {
   });
 
   d3.select("#clear-all-filters-btn").on("click", () => clearAllFilters());
+  d3.select("#export-csv-btn").on("click", () => downloadMatchingCsv());
+  d3.select("#export-pdf-btn").on("click", () => {
+    handleExportPdfClick();
+  });
 
   d3.select("#search-input")
     .on("input", () => {

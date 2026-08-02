@@ -9,7 +9,7 @@
   <link rel="icon" href="assets/favicon-32.png?v=2" type="image/png" sizes="32x32" />
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=2" />
   <meta name="theme-color" content="#0f2238" />
-  <link rel="stylesheet" href="css/style.css?v=127" />
+  <link rel="stylesheet" href="css/style.css?v=128" />
   <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 </head>
 <body>
@@ -71,9 +71,17 @@
               autocomplete="off"
             />
           </label>
-          <button type="button" class="clear-all-filters-btn" id="clear-all-filters-btn" hidden>
-            Clear all filters
-          </button>
+          <div class="filter-actions" role="group" aria-label="Export and clear filters">
+            <button type="button" class="export-btn" id="export-csv-btn" title="Download matching submissions as CSV">
+              Download CSV
+            </button>
+            <button type="button" class="export-btn" id="export-pdf-btn" title="Download current plots as PDF">
+              Download PDF
+            </button>
+            <button type="button" class="clear-all-filters-btn" id="clear-all-filters-btn" hidden>
+              Clear all filters
+            </button>
+          </div>
         </div>
       </header>
 
@@ -176,6 +184,6 @@
 
   <div class="tooltip" id="tooltip"></div>
   <script src="js/sidebar.js?v=20"></script>
-  <script src="js/app.js?v=140"></script>
+  <script src="js/app.js?v=141"></script>
 </body>
 </html>
